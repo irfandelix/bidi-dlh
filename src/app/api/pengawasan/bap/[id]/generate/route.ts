@@ -42,7 +42,7 @@ export async function GET(
 
     // 1. Fetch Agenda Data
     const { data: agenda, error: agendaError } = await supabase
-      .from('pengawasan_lapangans')
+      .from('agenda')
       .select('*')
       .eq('id', id)
       .single();
@@ -52,18 +52,12 @@ export async function GET(
     }
 
     // 2. Fetch BAP Data
-    const { data: bapRec, error: bapError } = await supabase
-      .from('bap_pengawasans')
-      .select('*')
-      .eq('pengawasan_id', id)
-      .single();
-
-    if (bapError || !bapRec) {
+    let bapData: any = {};
+    if (agenda.bap_data) {
+      bapData = typeof agenda.bap_data === 'string' ? JSON.parse(agenda.bap_data) : agenda.bap_data;
+    } else {
       return NextResponse.json({ error: 'Data BAP belum diisi. Harap isi form BAP Lapangan terlebih dahulu.' }, { status: 400 });
     }
-
-    // 3. Prepare Data
-    const bapData = typeof bapRec.data_matriks_c === 'string' ? JSON.parse(bapRec.data_matriks_c) : bapRec.data_matriks_c;
     const identitas = bapData.identitas || {};
     const checklist = bapData.checklist || [];
     const dokumentasi = bapData.dokumentasi || [];
