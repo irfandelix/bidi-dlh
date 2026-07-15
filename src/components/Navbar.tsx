@@ -1,8 +1,17 @@
+'use client';
+
 import Link from 'next/link'
 import { LayoutDashboard, ShieldCheck, Map, Settings, LogOut } from 'lucide-react'
 import { handleLogout } from '@/app/login/actions'
+import { usePathname } from 'next/navigation'
 
 export default function Navbar() {
+  const pathname = usePathname();
+
+  if (pathname === '/login') {
+    return null;
+  }
+
   return (
     <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] rounded-2xl px-6 py-3 flex items-center gap-8 w-max max-w-[90vw] overflow-x-auto">
       <Link href="/" className="font-black text-xl text-slate-900 tracking-tight flex items-center gap-2">
