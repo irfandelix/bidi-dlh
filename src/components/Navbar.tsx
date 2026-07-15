@@ -13,7 +13,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] rounded-2xl px-6 py-3 flex items-center gap-8 w-max max-w-[90vw] overflow-x-auto">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] rounded-2xl px-4 sm:px-6 py-3 flex items-center gap-4 sm:gap-6 w-max max-w-[95vw] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <Link href="/" className="font-black text-xl text-slate-900 tracking-tight flex items-center gap-2">
         <span className="bg-emerald-400 text-slate-900 px-2 py-0.5 border-2 border-slate-900 rounded-lg shadow-[2px_2px_0_0_#0f172a]">BIDI</span> 
         DLH
