@@ -19,7 +19,7 @@ export async function handleLogin(formData: FormData) {
     const { data: user, error } = await supabase
       .from('users')
       .select('*')
-      .eq('name', name)
+      .or(`name.ilike.${name},username.ilike.${name}`)
       .single();
 
     if (error || !user) {
