@@ -51,10 +51,12 @@ export async function GET(
       return NextResponse.json({ error: 'Agenda tidak ditemukan' }, { status: 404 });
     }
 
+    const agendaRecord = agenda as any;
+
     // 2. Fetch BAP Data
     let bapData: any = {};
-    if (agenda.bap_data) {
-      bapData = typeof agenda.bap_data === 'string' ? JSON.parse(agenda.bap_data) : agenda.bap_data;
+    if (agendaRecord.bap_data) {
+      bapData = typeof agendaRecord.bap_data === 'string' ? JSON.parse(agendaRecord.bap_data) : agendaRecord.bap_data;
     } else {
       return NextResponse.json({ error: 'Data BAP belum diisi. Harap isi form BAP Lapangan terlebih dahulu.' }, { status: 400 });
     }
