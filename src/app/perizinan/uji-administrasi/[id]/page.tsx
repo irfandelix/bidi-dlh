@@ -19,19 +19,21 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
     "Surat Permohonan Pemeriksaan Dokumen UKL-UPL / SPPL*", 
     "Pernyataan Pengelolaan dan Pemantauan Lingkungan (Bermaterai)*",
     "Dokumen Lingkungan*", 
-    "Peta Tapak Proyek", "Peta Pengelolaan Lingkungan", "Peta Pemantauan Lingkungan",
-    "PKKPR", "NIB", "Fotocopy Status Lahan (Sertifikat)", 
+    "Peta (Peta Tapak, Peta Pengelolaan, Peta Pemantauan, dll) - Siteplan di Kertas A3", 
+    "PKKPR",
+    "NIB (Untuk Swasta atau Perorangan)", 
+    "Fotocopy Status Lahan (Sertifikat)", 
     "Fotocopy KTP Penanggungjawab Kegiatan",
-    "Foto Eksisting Lokasi Rencana Kegiatan Disertai Titik Koordinat", 
-    "Lembar Penapisan dari AMDALNET / Arahan ILH",
-    "Surat Kuasa Pekerjaan dari Pemrakarsa ke Konsultan", 
-    "Perizinan yang Sudah Dimiliki (Jika Ada)",
+    "Foto Eksisting Lokasi Rencana Kegiatan Disertai dengan Titik Koordinat", 
+    "Lembar Penapisan dari AMDALNET / Arahan dari Instansi Lingkungan Hidup",
+    "Surat Kuasa Pekerjaan dari Pemrakarsa ke Konsultan (Bermaterai)", 
+    "Perizinan yang Sudah Dimiliki atau Izin yang Lama (Jika Ada)",
     "Pemenuhan Persetujuan Teknis Air Limbah", 
-    "Pemenuhan Rincian Teknis Limbah B3", 
-    "Pemenuhan Persetujuan Teknis Emisi",
-    "Pemenuhan Persetujuan Teknis Andalalin",
-    "Hasil Penapisan Persetujuan Teknis",
-    "Bukti Upload Permohonan AMDALNET / SIDARLING"
+    "Pemenuhan Rincian Teknis Limbah B3 Sementara", 
+    "Pemenuhan Persetujuan Teknis Emisi", 
+    "Pemenuhan Persetujuan Teknis Andalalin", 
+    "Hasil Penapisan Kewajiban Pemenuhan Persetujuan Teknis", 
+    "Bukti Upload Permohonan pada AMDALNET dan/atau SIDARLING"
   ];
 
   useEffect(() => {

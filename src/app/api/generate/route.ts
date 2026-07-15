@@ -139,21 +139,24 @@ export async function POST(request: Request) {
 
     // Parse Checklist items for "persyaratan" table loop
     const defaultChecklistItems = [
-      "Surat Permohonan",
-      "NIB (Nomor Induk Berusaha)",
-      "KTP Pemrakarsa",
-      "Sertifikat Tanah / Bukti Penguasaan Lahan",
-      "Kesimpulan / Persetujuan Tata Ruang (DTR/KKPR)",
-      "Persetujuan Lingkungan Lama (Jika Ada)",
-      "Profil Perusahaan / Kegiatan",
-      "Peta Lokasi Kegiatan",
-      "Desain / Siteplan",
-      "SOP Kegiatan / Proses Produksi",
-      "Dokumen Rencana Pengelolaan Lingkungan (RKL)",
-      "Dokumen Rencana Pemantauan Lingkungan (RPL)",
-      "Persetujuan Teknis (Jika Ada)",
-      "Surat Pernyataan Komitmen",
-      "Softcopy Dokumen"
+      "Surat Permohonan Pemeriksaan Dokumen UKL-UPL / SPPL*", 
+      "Pernyataan Pengelolaan dan Pemantauan Lingkungan (Bermaterai)*",
+      "Dokumen Lingkungan*", 
+      "Peta (Peta Tapak, Peta Pengelolaan, Peta Pemantauan, dll) - Siteplan di Kertas A3", 
+      "PKKPR",
+      "NIB (Untuk Swasta atau Perorangan)", 
+      "Fotocopy Status Lahan (Sertifikat)", 
+      "Fotocopy KTP Penanggungjawab Kegiatan",
+      "Foto Eksisting Lokasi Rencana Kegiatan Disertai dengan Titik Koordinat", 
+      "Lembar Penapisan dari AMDALNET / Arahan dari Instansi Lingkungan Hidup",
+      "Surat Kuasa Pekerjaan dari Pemrakarsa ke Konsultan (Bermaterai)", 
+      "Perizinan yang Sudah Dimiliki atau Izin yang Lama (Jika Ada)",
+      "Pemenuhan Persetujuan Teknis Air Limbah", 
+      "Pemenuhan Rincian Teknis Limbah B3 Sementara", 
+      "Pemenuhan Persetujuan Teknis Emisi", 
+      "Pemenuhan Persetujuan Teknis Andalalin", 
+      "Hasil Penapisan Kewajiban Pemenuhan Persetujuan Teknis", 
+      "Bukti Upload Permohonan pada AMDALNET dan/atau SIDARLING"
     ];
     
     let chkStatus = [];
