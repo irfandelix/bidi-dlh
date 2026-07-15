@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description: "Aplikasi Perizinan dan Pengawasan Lingkungan Hidup",
 };
 
-import Navbar from "@/components/Navbar";
+import MainWrapper from "@/components/MainWrapper";
 
 export default function RootLayout({
   children,
@@ -27,10 +27,9 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-gray-50">
-        <Navbar />
-        <main className="flex-1 pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <MainWrapper>
           {children}
-        </main>
+        </MainWrapper>
       </body>
     </html>
   );
