@@ -44,9 +44,9 @@ function getBulan(date: Date) {
   return bulan[date.getMonth()];
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const { data: agenda, error } = await supabase
       .from('agenda')
