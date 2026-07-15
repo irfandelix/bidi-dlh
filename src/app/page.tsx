@@ -156,7 +156,7 @@ export default function Home() {
                     <div key={i} className="group p-4 bg-slate-50 hover:bg-emerald-50 rounded-xl transition-colors flex items-center justify-between gap-4 border-2 border-slate-200 hover:border-slate-900 cursor-pointer shadow-sm">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-white border-2 border-slate-900 flex items-center justify-center text-slate-900 font-black text-sm shadow-[2px_2px_0_0_#0f172a]">
-                          #{String(doc.id).padStart(3, '0')}
+                          #{doc.no_urut || doc.id}
                         </div>
                         <div>
                           <h4 className="text-base font-black text-slate-900 line-clamp-1">{doc.nama_kegiatan}</h4>
