@@ -22,7 +22,7 @@ export default function LoginPage() {
         setError(res.error);
         setLoading(false);
       } else {
-        router.push('/perizinan');
+        router.push('/');
       }
     } catch (err) {
       setError('Terjadi kesalahan yang tidak terduga.');

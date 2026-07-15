@@ -13,10 +13,6 @@ export async function updateSession(request: NextRequest) {
   const isApiRoute = request.nextUrl.pathname.startsWith('/api')
   const isRootPath = request.nextUrl.pathname === '/'
 
-  if (isRootPath) {
-    return NextResponse.redirect(new URL('/perizinan', request.url))
-  }
-
   // Jika belum login dan mencoba mengakses halaman selain login atau api
   if (!bidiSession && !isLoginPage && !isApiRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -24,7 +20,7 @@ export async function updateSession(request: NextRequest) {
 
   // Jika sudah login dan mencoba mengakses halaman login
   if (bidiSession && isLoginPage) {
-    return NextResponse.redirect(new URL('/perizinan', request.url))
+    return NextResponse.redirect(new URL('/', request.url))
   }
 
   return response
