@@ -309,7 +309,8 @@ export async function POST(request: Request) {
       if (columnToUpdate) {
         await supabase
           .from('dokumens')
-          .update({ [columnToUpdate]: fileUrl } as any)
+          // @ts-ignore
+          .update({ [columnToUpdate]: fileUrl })
           .eq('id', id);
       }
     } catch (uploadError) {
