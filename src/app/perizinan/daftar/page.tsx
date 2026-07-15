@@ -203,7 +203,7 @@ export default function DaftarPerizinanPage() {
                   <tr key={d.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4 border-r-2 border-slate-900">
                       <span className="bg-slate-200 text-slate-900 font-black px-2 py-1 rounded border-2 border-slate-900 text-xs shadow-[2px_2px_0_0_#0f172a]">
-                        #{String(d.no_urut || d.id).padStart(3, '0')}/{d.tahun}
+                        #{d.no_urut || d.id}
                       </span>
                     </td>
                     <td className="px-6 py-4 border-r-2 border-slate-900">
