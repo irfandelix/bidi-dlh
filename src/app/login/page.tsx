@@ -62,9 +62,8 @@ export default function LoginPage() {
                 name="name"
                 type="text"
                 required
-                defaultValue="Admin Bidi"
                 className="appearance-none block w-full px-4 py-3 bg-amber-50 border-2 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] text-slate-900 font-bold placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/50 transition-all"
-                placeholder="Masukkan nama pengguna"
+                placeholder="Admin Bidi"
               />
             </div>
 
