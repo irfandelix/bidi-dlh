@@ -32,6 +32,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('tim_penilais')
+      // @ts-ignore
       .insert([
         {
           nama: body.nama,

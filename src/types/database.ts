@@ -11,19 +11,20 @@ export interface Database {
     Tables: {
       // Catatan: Nama tabel sementara diset "permohonan", 
       // bisa disesuaikan dengan nama asli di Supabase Anda jika berbeda.
-      tim_penilai: {
+      tim_penilais: {
         Row: {
           id: number
           nama: string
           nip: string | null
-          jabatan: string | null
-          instansi: string | null
-          aktif: boolean
+          pangkat_golongan: string | null
+          jabatan_dinas: string | null
+          kategori: string | null
+          urutan_hierarki: number
           created_at: string | null
           updated_at: string | null
         }
-        Insert: Partial<Database['public']['Tables']['tim_penilai']['Row']>
-        Update: Partial<Database['public']['Tables']['tim_penilai']['Row']>
+        Insert: Partial<Database['public']['Tables']['tim_penilais']['Row']>
+        Update: Partial<Database['public']['Tables']['tim_penilais']['Row']>
       }
       permohonan: {
         Row: {
