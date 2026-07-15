@@ -13,7 +13,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] rounded-2xl px-4 sm:px-6 py-3 flex items-center gap-4 sm:gap-6 w-max max-w-[95vw] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] rounded-2xl px-4 sm:px-6 py-3 flex items-center gap-4 sm:gap-6 w-max max-w-[95vw] overflow-x-auto sm:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <Link href="/" className="font-black text-xl text-slate-900 tracking-tight flex items-center gap-2">
         <span className="bg-emerald-400 text-slate-900 px-2 py-0.5 border-2 border-slate-900 rounded-lg shadow-[2px_2px_0_0_#0f172a]">BIDI</span> 
         DLH
@@ -40,9 +40,21 @@ export default function Navbar() {
         </li>
       </ul>
       <div className="h-6 w-1 bg-slate-900 rounded-full hidden sm:block"></div>
-      <Link href="/pengaturan/tim-penilai" className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] transition-all" title="Pengaturan Tim Penilai">
-        <Settings size={18} className="text-slate-900" />
-      </Link>
+      <div className="relative group hidden sm:block">
+        <button className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] transition-all" title="Pengaturan">
+          <Settings size={18} className="text-slate-900" />
+        </button>
+        <div className="absolute right-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+          <div className="bg-white border-4 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] flex flex-col overflow-hidden">
+            <Link href="/pengaturan/tim-penilai" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
+              Tim Penilai
+            </Link>
+            <Link href="/pengaturan/tim-pengawas" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100">
+              Tim Pengawas
+            </Link>
+          </div>
+        </div>
+      </div>
       
       <form action={handleLogout} className="hidden sm:block">
         <button type="submit" className="flex items-center justify-center w-10 h-10 rounded-xl bg-rose-300 hover:bg-rose-400 border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] transition-all" title="Keluar (Logout)">
