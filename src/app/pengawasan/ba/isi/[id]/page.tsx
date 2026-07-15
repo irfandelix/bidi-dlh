@@ -46,6 +46,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     shift_kerja: '', hari_kerja_minggu: '',
     teknologi_air_limbah: '', volume_air_limbah: '', pemanfaatan_air_tanah: '',
     penggunaan_air_liter: '', penggunaan_energi: '',
+    debit_inlet: '', debit_outlet: '',
     // Industri Operational
     kapasitas_produksi: '', jenis_produk: '', bahan_baku_utama: '', bahan_penolong: '',
     proses_produksi: '', energi: '', pembuangan_air: '', pengelolaan_sampah_umum: '',

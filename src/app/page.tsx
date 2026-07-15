@@ -33,12 +33,12 @@ export default function Home() {
           supabase.from('pengawasan_lapangans').select('*').order('created_at', { ascending: false })
         ]);
 
-        const pData = perizinanRes.data || [];
+        const pData: any[] = perizinanRes.data || [];
         const pSelesai = pData.filter(d => ['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan'].includes(d.status_tahapan)).length;
         const pDitolak = pData.filter(d => ['Dikembalikan / Ditolak'].includes(d.status_tahapan)).length;
         const pProses = pData.length - pSelesai - pDitolak;
 
-        const gData = pengawasanRes.data || [];
+        const gData: any[] = pengawasanRes.data || [];
         const gTaat = gData.filter(d => d.status_ketaatan === 'Taat').length;
         const gKurang = gData.filter(d => ['Kurang Taat', 'Taat Bersyarat'].includes(d.status_ketaatan)).length;
         const gTidak = gData.filter(d => d.status_ketaatan === 'Tidak Taat').length;

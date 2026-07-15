@@ -41,22 +41,22 @@ export async function GET(
     const supabase = await createClient();
 
     // 1. Fetch Agenda Data
-    const { data: agenda, error: agendaError } = await supabase
+    const { data: agendaRaw, error: agendaError } = await supabase
       .from('agenda')
       .select('*')
       .eq('id', id)
       .single();
 
-    if (agendaError || !agenda) {
+    if (agendaError || !agendaRaw) {
       return NextResponse.json({ error: 'Agenda tidak ditemukan' }, { status: 404 });
     }
 
-    const agendaRecord = agenda as any;
+    const agenda = agendaRaw as any;
 
     // 2. Fetch BAP Data
     let bapData: any = {};
-    if (agendaRecord.bap_data) {
-      bapData = typeof agendaRecord.bap_data === 'string' ? JSON.parse(agendaRecord.bap_data) : agendaRecord.bap_data;
+    if (agenda.bap_data) {
+      bapData = typeof agenda.bap_data === 'string' ? JSON.parse(agenda.bap_data) : agenda.bap_data;
     } else {
       return NextResponse.json({ error: 'Data BAP belum diisi. Harap isi form BAP Lapangan terlebih dahulu.' }, { status: 400 });
     }
@@ -181,8 +181,8 @@ export async function GET(
       foto_baris,
       saran,
       skoring,
-      status_ketaatan: bapRec.status_ketaatan || '',
-      total_skor: bapRec.total_skor || ''
+      status_ketaatan: agenda.status_ketaatan || '',
+      total_skor: agenda.total_skor || ''
     };
 
     // 4. Determine Template
@@ -241,7 +241,7 @@ export async function GET(
 
     const safeName = (agenda.nama_pemrakarsa || 'Usaha').replace(/[^a-zA-Z0-9]/g, '_');
 
-    return new NextResponse(buf, {
+    return new NextResponse(buf as any, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'Content-Disposition': `attachment; filename="BAP_${safeName}.docx"`,
