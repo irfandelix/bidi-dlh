@@ -8,8 +8,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
     const supabase = await createClient();
     const body = await request.json();
 
-    const { data, error } = await supabase
-      .from('tim_penilais')
+    const { data, error } = await (supabase.from('tim_penilais') as any)
       .update({
         nama: body.nama,
         nip: body.nip || null,
@@ -18,7 +17,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
         kategori: body.kategori || null,
         urutan_hierarki: body.urutan_hierarki || 99,
         updated_at: new Date().toISOString()
-      } as any)
+      })
       .eq('id', id)
       .select()
       .single();

@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase: any = await createClient();
     
     const { searchParams } = new URL(request.url);
     const tahun = searchParams.get('tahun');

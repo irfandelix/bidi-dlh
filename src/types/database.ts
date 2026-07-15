@@ -23,10 +23,10 @@ export interface Database {
           created_at: string | null
           updated_at: string | null
         }
-        Insert: Partial<Database['public']['Tables']['tim_penilais']['Row']>
-        Update: Partial<Database['public']['Tables']['tim_penilais']['Row']>
+        Insert: { [key: string]: any }
+        Update: { [key: string]: any }
       }
-      permohonan: {
+      dokumens: {
         Row: {
           id: number
           no_urut: number | null
@@ -119,9 +119,21 @@ export interface Database {
           revisi_ke: string | null
           status_verifikasi: string | null
         }
-        Insert: Partial<Database['public']['Tables']['permohonan']['Row']>
-        Update: Partial<Database['public']['Tables']['permohonan']['Row']>
+        Insert: { [key: string]: any }
+        Update: { [key: string]: any }
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

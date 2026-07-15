@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
+    const supabase: any = await createClient();
     const body = await request.json();
 
     const tahun = new Date().getFullYear().toString();
