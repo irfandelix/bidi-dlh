@@ -32,7 +32,6 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('tim_penilais')
-      // @ts-ignore
       .insert([
         {
           nama: body.nama,
@@ -43,7 +42,7 @@ export async function POST(request: Request) {
           urutan_hierarki: body.urutan_hierarki || 99,
           updated_at: new Date().toISOString()
         }
-      ])
+      ] as any)
       .select()
       .single();
 
