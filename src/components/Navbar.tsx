@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { LayoutDashboard, ShieldCheck, Map, Settings } from 'lucide-react'
+import { LayoutDashboard, ShieldCheck, Map, Settings, LogOut } from 'lucide-react'
+import { handleLogout } from '@/app/login/actions'
 
 export default function Navbar() {
   return (
@@ -33,6 +34,12 @@ export default function Navbar() {
       <Link href="/pengaturan/tim-penilai" className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] transition-all" title="Pengaturan Tim Penilai">
         <Settings size={18} className="text-slate-900" />
       </Link>
+      
+      <form action={handleLogout} className="hidden sm:block">
+        <button type="submit" className="flex items-center justify-center w-10 h-10 rounded-xl bg-rose-300 hover:bg-rose-400 border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] transition-all" title="Keluar (Logout)">
+          <LogOut size={18} className="text-slate-900" />
+        </button>
+      </form>
     </nav>
   )
 }

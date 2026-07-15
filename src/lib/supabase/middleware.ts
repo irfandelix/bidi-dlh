@@ -2,39 +2,30 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
+  let response = NextResponse.next({
     request,
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
+  // Cek cookie custom login
+  const bidiSession = request.cookies.get('bidi_session')?.value
 
-  // refresh session if expired - required for Server Components
-  // https://supabase.com/docs/guides/auth/server-side/nextjs
-  const { data: { user } } = await supabase.auth.getUser()
+  const isLoginPage = request.nextUrl.pathname.startsWith('/login')
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api')
+  const isRootPath = request.nextUrl.pathname === '/'
 
-  // protected routes logic here, for example:
-  // if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
-  //   return NextResponse.redirect(new URL('/login', request.url))
-  // }
+  if (isRootPath) {
+    return NextResponse.redirect(new URL('/perizinan', request.url))
+  }
 
-  return supabaseResponse
+  // Jika belum login dan mencoba mengakses halaman selain login atau api
+  if (!bidiSession && !isLoginPage && !isApiRoute) {
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Jika sudah login dan mencoba mengakses halaman login
+  if (bidiSession && isLoginPage) {
+    return NextResponse.redirect(new URL('/perizinan', request.url))
+  }
+
+  return response
 }
