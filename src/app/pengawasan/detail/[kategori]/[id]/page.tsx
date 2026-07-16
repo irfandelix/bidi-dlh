@@ -174,38 +174,38 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
         <IdentitasTable identitas={identitas} />
 
         {/* Info Tambahan */}
-        <div className="bg-slate-900 text-white rounded-[2rem] p-6 md:p-8 shadow-[8px_8px_0_0_#cbd5e1] relative overflow-hidden">
-          <div className="absolute -right-10 -bottom-10 opacity-10">
+        <div className="bg-white border-4 border-slate-900 rounded-[2rem] p-6 md:p-8 shadow-[8px_8px_0_0_#0f172a] relative overflow-hidden">
+          <div className="absolute -right-10 -bottom-10 opacity-5 text-slate-900">
             <Building2 size={200} />
           </div>
           
-          <h2 className="text-xl font-black mb-6 flex items-center gap-3 relative z-10 text-amber-400">
+          <h2 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3 relative z-10">
             Status Data
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
-            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Token Verifikasi</div>
-              <div className="font-mono text-base font-bold text-white">{agenda.token || '-'}</div>
+              <div className="font-mono text-base font-bold text-slate-900">{agenda.token || '-'}</div>
             </div>
             
-            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Dibuat Pada</div>
-              <div className="text-sm font-bold text-white">
+              <div className="text-sm font-bold text-slate-900">
                 {agenda.created_at ? new Date(agenda.created_at).toLocaleString('id-ID') : '-'}
               </div>
             </div>
 
-            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+            <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-200">
               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Diperbarui Pada</div>
-              <div className="text-sm font-bold text-white">
+              <div className="text-sm font-bold text-slate-900">
                 {agenda.updated_at ? new Date(agenda.updated_at).toLocaleString('id-ID') : '-'}
               </div>
             </div>
 
-            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col justify-center">
+            <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 flex flex-col justify-center">
               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nilai Pengawasan</div>
-              <div className="text-xl md:text-2xl font-black text-amber-400">
+              <div className="text-xl md:text-2xl font-black text-amber-500">
                 {agenda.total_skor !== null && agenda.total_skor !== undefined ? agenda.total_skor : '-'}
               </div>
             </div>
