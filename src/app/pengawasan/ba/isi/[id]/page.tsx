@@ -96,7 +96,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       const template = getTemplate(agendaData.kategori);
       setChecklist(template.map(cat => ({
         bab: cat.bab,
-        items: cat.items.map(item => ({ point: item.point, no: item.no, kondisi: '', keterangan: '' }))
+        items: cat.items.map(item => ({ key: item.key || item.point, point: item.point, no: item.no, kondisi: '', keterangan: '' }))
       })));
       
       if (agendaData.tim_tugas) {

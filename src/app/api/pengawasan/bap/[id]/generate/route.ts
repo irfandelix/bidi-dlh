@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getTemplate } from '@/app/pengawasan/ba/isi/[id]/templates';
 import fs from 'fs';
 import path from 'path';
 import PizZip from 'pizzip';
@@ -93,11 +94,24 @@ export async function GET(
 
     // Convert Checklist Array into Key-Value Object based on point or key
     const checklistFlat: Record<string, string> = {};
+    const templateDef = getTemplate(agenda.kategori);
     checklist.forEach((bab: any) => {
       if (bab && bab.items) {
         bab.items.forEach((item: any) => {
           if (item.point) {
-            const key = item.key || item.point;
+            // Find key from template definition if missing
+            let key = item.key;
+            if (!key) {
+              for (const tBab of templateDef) {
+                const found = tBab.items.find(i => i.point === item.point);
+                if (found) {
+                  key = found.key;
+                  break;
+                }
+              }
+            }
+            key = key || item.point; // fallback
+            
             checklistFlat[key] = item.kondisi || '';
             checklistFlat[`ket_${key}`] = item.keterangan || '';
           }
@@ -145,8 +159,8 @@ export async function GET(
       foto_baris.push({
         foto_1: dokumentasi[i]?.file || '',
         ket_1: dokumentasi[i]?.keterangan || '',
-        foto_2: dokumentasi[i+1]?.file || '',
-        ket_2: dokumentasi[i+1]?.keterangan || ''
+        foto_2: dokumentasi[i + 1]?.file || '',
+        ket_2: dokumentasi[i + 1]?.keterangan || ''
       });
     }
 
@@ -184,6 +198,7 @@ export async function GET(
       nilai_komponen: val.nilai || ''
     }));
 
+    // Prepare data payload for docxtemplater
     const data = {
       ...identitas, // contains kbli, alamat, pj_nama, telepon dll.
       ...checklistFlat, // contains air_fisik, ket_air_fisik dll.
@@ -215,7 +230,7 @@ export async function GET(
       dokumen_izin,
       foto_baris,
       saran,
-      skoring,
+      rincian_skoring: skoring,
       status_ketaatan: agenda.status_ketaatan || '',
       total_skor: agenda.total_skor || ''
     };
@@ -260,10 +275,10 @@ export async function GET(
         }
       },
       getSize: function(img: any, tagValue: string, tagName: string) {
-        if (tagName.includes('foto_')) return [250, 250]; 
-        if (tagName.includes('ttd_')) return [150, 75]; 
-        if (tagName.includes('paraf_')) return [50, 30]; 
-        return [150, 150];
+        if (tagName.includes('foto_')) return [300, 225]; // 4:3 ratio for field photos
+        if (tagName.includes('ttd_')) return [200, 60]; // Wider aspect ratio for signatures
+        if (tagName.includes('paraf_')) return [60, 40]; 
+        return [200, 150];
       }
     };
 
