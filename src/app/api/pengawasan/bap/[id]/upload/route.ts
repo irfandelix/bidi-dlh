@@ -206,10 +206,21 @@ export async function POST(
     if (/^\d{4}$/.test(formatted_waktu)) formatted_waktu = formatted_waktu.substring(0, 2) + '.' + formatted_waktu.substring(2) + ' WIB';
     else if (formatted_waktu.includes(':')) formatted_waktu = formatted_waktu.replace(':', '.') + ' WIB';
 
+    // Construct combined fields for specific templates
+    const jumlah_pekerja_penghuni = `Pekerja: ${identitas.jumlah_pekerja || '-'}, Penghuni: ${identitas.jumlah_penghuni || '-'}`;
+    const jumlah_pasien_pekerja = `Pasien: ${identitas.jumlah_pasien || '-'}, Pekerja: ${identitas.jumlah_pekerja || '-'}`;
+
     // Prepare data payload for docxtemplater
     const data = {
       ...identitas, // contains kbli, alamat, pj_nama, telepon dll.
       ...checklistFlat, // contains air_fisik, ket_air_fisik dll.
+      // Template specific fallbacks mapping
+      jumlah_pekerja_penghuni, // For perumahan
+      jumlah_karyawan_pengunjung: identitas.jumlah_karyawan_pengunjung || jumlah_pasien_pekerja, // For fasyankes/sppg
+      jam_operasional: identitas.jam_operasional || identitas.jam_kerja_hari || identitas.jam_produksi || '',
+      shift_kerja_konstruksi: identitas.shift_kerja_konstruksi || '',
+      shift_kerja: identitas.shift_kerja || identitas.shift_kerja_konstruksi || '',
+
       nama_badan_usaha_kegiatan: agenda.nama_pemrakarsa,
       alamat_lokasi: agenda.alamat_lokasi,
       hari_ini_nama,
@@ -239,6 +250,7 @@ export async function POST(
       dokumen_izin,
       foto_baris,
       saran,
+      saran_list_text: (bapData.saran || []).map((val: string, idx: number) => `${String.fromCharCode(97 + idx)}. ${val}`).join('\n'),
       rincian_skoring: skoring,
       status_ketaatan: agenda.status_ketaatan || '',
       total_skor: agenda.total_skor || ''
