@@ -20,8 +20,7 @@ export async function PUT(
       .from('pengawasan_lapangans')
       // @ts-ignore
       .update({
-        status_ketaatan: body.status_ketaatan,
-        total_skor: body.total_skor
+        status_ketaatan: body.status_ketaatan
       } as any)
       .eq('id', id);
 
