@@ -9,11 +9,13 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
   const supabase = await createClient();
 
   // Fetch data
-  const { data: agenda, error } = await supabase
+  const { data, error } = await supabase
     .from('pengawasan_lapangans')
     .select('*, bap_pengawasans(*)')
     .eq('id', id)
     .single();
+
+  const agenda = data as any;
 
   if (error || !agenda) {
     console.error('Error fetching detail:', error);
