@@ -147,11 +147,13 @@ export async function GET(
       ttd_saksi: bapData.ttd_saksi && bapData.ttd_saksi[idx] ? bapData.ttd_saksi[idx] : ''
     }));
 
-    // Formatting Dokumen Izin
-    const dokumen_izin = dokumenIzin.map((val: string, idx: number) => ({
-      nomor_urut: idx + 1,
-      nama: val
-    }));
+    // Formatting Dokumen Izin (Templates use {#dokumen_izin}{.}{/dokumen_izin})
+    const dokumen_izin = (dokumenIzin || []).map((val: any) => {
+      if (typeof val === 'string') return val;
+      if (val && typeof val === 'object' && val.value) return val.value;
+      if (val && typeof val === 'object' && val.nama) return val.nama;
+      return String(val);
+    }).filter((val: string) => val.trim() !== '');
 
     // Formatting Foto (2 per row for table)
     const foto_baris = [];
@@ -198,6 +200,10 @@ export async function GET(
       nilai_komponen: val.nilai || ''
     }));
 
+    let formatted_waktu = identitas.waktu_pengawasan || '........';
+    if (/^\d{4}$/.test(formatted_waktu)) formatted_waktu = formatted_waktu.substring(0, 2) + '.' + formatted_waktu.substring(2) + ' WIB';
+    else if (formatted_waktu.includes(':')) formatted_waktu = formatted_waktu.replace(':', '.') + ' WIB';
+
     // Prepare data payload for docxtemplater
     const data = {
       ...identitas, // contains kbli, alamat, pj_nama, telepon dll.
@@ -209,10 +215,11 @@ export async function GET(
       hari_ini_bulan,
       hari_ini_tahun_terbilang: hari_ini_tahun_terbilang.replace('  ', ' ').trim(),
       tahun_ini: hari_ini_tahun,
-      waktu_pengawasan: identitas.waktu_pengawasan || '........',
+      waktu_pengawasan: formatted_waktu,
       
       ttd_pemrakarsa: ttd_pemrakarsa_final,
       paraf_pemrakarsa: bapData.paraf_pemrakarsa || '',
+      paraf_pengawas: (bapData.paraf_tim && bapData.paraf_tim[0]) ? bapData.paraf_tim[0] : '',
       // Footer text tags (converted from image tags to avoid VML textbox parsing issues)
       paraf_pengawas_text: '',
       paraf_pemrakarsa_text: '',
@@ -276,8 +283,8 @@ export async function GET(
       },
       getSize: function(img: any, tagValue: string, tagName: string) {
         if (tagName.includes('foto_')) return [300, 225]; // 4:3 ratio for field photos
-        if (tagName.includes('ttd_')) return [200, 60]; // Wider aspect ratio for signatures
-        if (tagName.includes('paraf_')) return [60, 40]; 
+        if (tagName.includes('ttd_')) return [240, 80]; // 3:1 aspect ratio
+        if (tagName.includes('paraf_')) return [120, 60]; 
         return [200, 150];
       }
     };
