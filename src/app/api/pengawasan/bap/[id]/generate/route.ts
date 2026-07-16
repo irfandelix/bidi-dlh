@@ -167,6 +167,16 @@ export async function GET(
       paraf_perwakilan: val.paraf || ''
     }));
 
+    // Extract first perwakilan for root-level tags (used by fasyankes/industri) and fallback for pemrakarsa
+    const firstPerwakilan = perwakilan.length > 0 ? perwakilan[0] : null;
+    const nama_perwakilan = firstPerwakilan?.nama_perwakilan || identitas.pendamping_nama || '';
+    const jabatan_perwakilan = firstPerwakilan?.jabatan_perwakilan || identitas.pendamping_jabatan || '';
+    const telepon_perwakilan = firstPerwakilan?.telepon_perwakilan || identitas.telepon || '';
+    
+    // Use the first perwakilan's signature as ttd_pemrakarsa if the dedicated ttd_pemrakarsa is missing
+    const ttd_pemrakarsa_final = bapData.ttd_pemrakarsa || (firstPerwakilan?.ttd_perwakilan || '');
+    const ttd_perwakilan_final = firstPerwakilan?.ttd_perwakilan || '';
+
     // Formatting Rincian Skoring
     const skoring = (bapData.rincian_skoring || []).map((val: any, idx: number) => ({
       no: idx + 1,
@@ -186,11 +196,17 @@ export async function GET(
       tahun_ini: hari_ini_tahun,
       waktu_pengawasan: identitas.waktu_pengawasan || '........',
       
-      ttd_pemrakarsa: bapData.ttd_pemrakarsa || '',
+      ttd_pemrakarsa: ttd_pemrakarsa_final,
       paraf_pemrakarsa: bapData.paraf_pemrakarsa || '',
       // Footer text tags (converted from image tags to avoid VML textbox parsing issues)
       paraf_pengawas_text: '',
       paraf_pemrakarsa_text: '',
+      
+      // Root-level perwakilan tags
+      nama_perwakilan,
+      jabatan_perwakilan,
+      telepon_perwakilan,
+      ttd_perwakilan: ttd_perwakilan_final,
       
       tim_penilai_lengkap,
       tim_pengawas,
