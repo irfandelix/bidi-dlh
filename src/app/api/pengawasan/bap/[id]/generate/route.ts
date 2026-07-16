@@ -213,12 +213,18 @@ export async function GET(
 
     const imageOptions = {
       getImage: function(tagValue: string, tagName: string) {
-        if (!tagValue) return false;
-        const base64Regex = /^data:image\/(png|jpeg|jpg);base64,/;
-        if (!base64Regex.test(tagValue)) return false;
+        const emptyImageBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+        if (!tagValue || typeof tagValue !== 'string') return emptyImageBuffer;
         
-        const base64Data = tagValue.replace(base64Regex, '');
-        return Buffer.from(base64Data, 'base64');
+        const base64Regex = /^data:image\/(png|jpeg|jpg);base64,/;
+        if (!base64Regex.test(tagValue)) return emptyImageBuffer;
+        
+        try {
+          const base64Data = tagValue.replace(base64Regex, '');
+          return Buffer.from(base64Data, 'base64');
+        } catch (e) {
+          return emptyImageBuffer;
+        }
       },
       getSize: function(img: any, tagValue: string, tagName: string) {
         if (tagName.includes('foto_')) return [250, 250]; 
