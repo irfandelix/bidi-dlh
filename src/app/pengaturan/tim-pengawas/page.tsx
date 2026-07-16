@@ -130,8 +130,11 @@ export default function TimPengawasPage() {
           </button>
         </div>
 
-        {/* List Data */}
+        {/* List Data Pengawas */}
         <div className="bg-white rounded-3xl border-4 border-slate-900 overflow-hidden shadow-[12px_12px_0_0_#0f172a]">
+          <div className="bg-teal-400 p-4 border-b-4 border-slate-900 font-black text-slate-900 uppercase tracking-widest text-center">
+            Daftar Tim Pengawas
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-100 text-slate-900 font-black border-b-4 border-slate-900">
@@ -147,10 +150,61 @@ export default function TimPengawasPage() {
               <tbody className="divide-y-4 divide-slate-900">
                 {loading ? (
                   <tr><td colSpan={6} className="p-10 text-center font-black text-slate-900 uppercase">Memuat...</td></tr>
-                ) : personil.length === 0 ? (
+                ) : personil.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').length === 0 ? (
                   <tr><td colSpan={6} className="p-10 text-center text-slate-500 font-bold uppercase tracking-widest">Belum ada data tim pengawas.</td></tr>
                 ) : (
-                  personil.map((item, index) => (
+                  personil.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').map((item, index) => (
+                    <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="p-5 text-center font-black text-slate-400 text-base">{index + 1}</td>
+                      <td className="p-5">
+                        <div className="font-black text-slate-900">{item.nama}</div>
+                        <div className="text-xs font-bold text-slate-500 mt-1">{item.nip || '-'}</div>
+                      </td>
+                      <td className="p-5 font-bold text-slate-700">{item.pangkat_golongan || '-'}</td>
+                      <td className="p-5 font-bold text-slate-700">{item.jabatan_dinas || '-'}</td>
+                      <td className="p-5 text-center font-black text-slate-900">{item.urutan_hierarki || '-'}</td>
+                      <td className="p-5 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button onClick={() => handleOpenModal(item)} className="p-2 bg-indigo-200 text-indigo-900 border-2 border-indigo-900 rounded-xl hover:bg-indigo-400 transition-all">
+                            <Edit2 size={16} />
+                          </button>
+                          <button onClick={() => handleDelete(item.id)} className="p-2 bg-rose-200 text-rose-900 border-2 border-rose-900 rounded-xl hover:bg-rose-400 transition-all">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* List Data Saksi */}
+        <div className="bg-white rounded-3xl border-4 border-slate-900 overflow-hidden shadow-[12px_12px_0_0_#0f172a]">
+          <div className="bg-indigo-300 p-4 border-b-4 border-slate-900 font-black text-slate-900 uppercase tracking-widest text-center">
+            Daftar Saksi
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-100 text-slate-900 font-black border-b-4 border-slate-900">
+                <tr>
+                  <th className="p-5 uppercase text-xs tracking-widest w-12 text-center whitespace-nowrap">No</th>
+                  <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap">Nama & NIP</th>
+                  <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap">Pangkat / Golongan</th>
+                  <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap">Jabatan</th>
+                  <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap text-center">Hierarki</th>
+                  <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y-4 divide-slate-900">
+                {loading ? (
+                  <tr><td colSpan={6} className="p-10 text-center font-black text-slate-900 uppercase">Memuat...</td></tr>
+                ) : personil.filter(p => p.kategori === 'Saksi').length === 0 ? (
+                  <tr><td colSpan={6} className="p-10 text-center text-slate-500 font-bold uppercase tracking-widest">Belum ada data saksi.</td></tr>
+                ) : (
+                  personil.filter(p => p.kategori === 'Saksi').map((item, index) => (
                     <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-5 text-center font-black text-slate-400 text-base">{index + 1}</td>
                       <td className="p-5">
@@ -193,7 +247,15 @@ export default function TimPengawasPage() {
             
             <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-4">
               <div>
-                <label className="block text-xs font-black text-slate-900 uppercase mb-2">Nama Lengkap (beserta gelar)</label>
+                <label className="block text-xs font-black text-slate-900 uppercase mb-2">Kategori <span className="text-rose-500">*</span></label>
+                <select required value={formData.kategori || 'Tim Pengawas'} onChange={e => setFormData({...formData, kategori: e.target.value})} className="w-full bg-white border-4 border-slate-900 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-teal-300">
+                  <option value="Tim Pengawas">Tim Pengawas</option>
+                  <option value="Saksi">Saksi</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-900 uppercase mb-2">Nama Lengkap (beserta gelar) <span className="text-rose-500">*</span></label>
                 <input type="text" required value={formData.nama} onChange={e => setFormData({...formData, nama: e.target.value})} className="w-full bg-white border-4 border-slate-900 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-teal-300" placeholder="Contoh: Dr. Agus, S.T., M.T." />
               </div>
               

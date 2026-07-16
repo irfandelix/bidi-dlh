@@ -44,13 +44,6 @@ export default function PengawasanHub() {
       link: "/pengawasan/token",
       iconBg: "bg-rose-100",
       iconText: "text-rose-700",
-    },
-    {
-      title: "MANAJEMEN TIM",
-      icon: <User size={20} strokeWidth={2.5} />,
-      link: "/pengawasan/tim",
-      iconBg: "bg-sky-100",
-      iconText: "text-sky-700",
     }
   ];
 
