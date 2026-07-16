@@ -250,7 +250,6 @@ export async function POST(
       dokumen_izin,
       foto_baris,
       saran,
-      saran_list_text: (bapData.saran || []).map((val: string, idx: number) => `${String.fromCharCode(97 + idx)}. ${val}`).join('\n'),
       rincian_skoring: skoring,
       status_ketaatan: agenda.status_ketaatan || '',
       total_skor: agenda.total_skor || ''
