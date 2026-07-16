@@ -206,7 +206,7 @@ export async function GET(
 
     // Construct combined fields for specific templates
     const jumlah_pekerja_penghuni = `Pekerja: ${identitas.jumlah_pekerja || '-'}, Penghuni: ${identitas.jumlah_penghuni || '-'}`;
-    const jumlah_pasien_pekerja = `Pasien: ${identitas.jumlah_pasien || '-'}, Pekerja: ${identitas.jumlah_pekerja || '-'}`;
+    const jumlah_pasien_pekerja = `Pasien: ${identitas.jumlah_pasien || '-'}, Pekerja: ${identitas.jumlah_karyawan || identitas.jumlah_pekerja || '-'}`;
 
     // Prepare data payload for docxtemplater
     const data = {
