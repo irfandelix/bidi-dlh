@@ -861,10 +861,10 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                       const k = [...komponenPenilaian]; k[idx].nama = e.target.value; setKomponenPenilaian(k);
                     }} className="w-full bg-transparent border-0 border-b-4 border-dashed border-slate-900 focus:outline-none px-0 py-2 text-sm font-bold text-slate-900 placeholder-slate-400" placeholder="Rincian penilaian (misal: Pengelolaan Limbah)..." />
                   </div>
-                  <div className="w-full md:w-32 flex items-center gap-2">
+                  <div className="w-full md:w-40 flex items-center gap-2 shrink-0">
                     <input type="number" min="0" value={komp.nilai} onChange={(e) => {
                       const k = [...komponenPenilaian]; k[idx].nilai = e.target.value; setKomponenPenilaian(k);
-                    }} className="w-full px-4 py-2 border-4 border-slate-900 rounded-xl text-center font-black text-rose-600 focus:bg-rose-50 focus:outline-none text-xl" placeholder="0" />
+                    }} className="w-full min-w-0 px-2 py-2 border-4 border-slate-900 rounded-xl text-center font-black text-rose-600 focus:bg-rose-50 focus:outline-none text-xl" placeholder="0" />
                     {komponenPenilaian.length > 1 && (
                       <button type="button" onClick={() => setKomponenPenilaian(komponenPenilaian.filter(x => x.id !== komp.id))} className="text-rose-500 hover:text-rose-700 p-2 border-4 border-transparent hover:border-slate-900 rounded-xl hover:bg-rose-50">
                         <Trash2 size={20} />
