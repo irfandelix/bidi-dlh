@@ -198,7 +198,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     if (skor === 0 || isNaN(skor)) return 'Belum Ada Nilai';
     if (skor > 100) return 'CEK INPUT';
     if (skor >= 70) return 'Taat';
-    if (skor >= 50) return 'Taat dengan Catatan';
+    if (skor >= 50) return 'Kurang Taat';
     return 'Tidak Taat';
   };
 
