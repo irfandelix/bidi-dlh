@@ -1,97 +1,92 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import path from 'path';
+import { createClient } from '@/lib/supabase/server';
+import { getTemplate } from '@/app/pengawasan/ba/isi/[id]/templates';
 import fs from 'fs';
+import path from 'path';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 // @ts-ignore
 import ImageModule from 'docxtemplater-image-module-free';
+
+// Helper to translate number to words
+function terbilang(angka: number): string {
+  const words = [
+    '', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'
+  ];
+  if (angka < 12) return words[angka];
+  if (angka < 20) return words[angka - 10] + ' belas';
+  if (angka < 100) return words[Math.floor(angka / 10)] + ' puluh ' + words[angka % 10];
+  if (angka < 200) return 'seratus ' + terbilang(angka - 100);
+  if (angka < 1000) return words[Math.floor(angka / 100)] + ' ratus ' + terbilang(angka % 100);
+  if (angka < 2000) return 'seribu ' + terbilang(angka - 1000);
+  if (angka < 10000) return words[Math.floor(angka / 1000)] + ' ribu ' + terbilang(angka % 1000);
+  return angka.toString(); // Fallback for larger numbers not typically needed for dates
+}
+
+function getHari(date: Date): string {
+  const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+  return days[date.getDay()];
+}
+
+function getBulan(date: Date): string {
+  const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+  return months[date.getMonth()];
+}
+
 import { getOrCreateFolder, uploadFileToDrive } from '@/lib/gdrive_pengawasan';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-function terbilang(angka: number): string {
-  const huruf = ["", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas"];
-  let hasil = "";
-  if (angka < 12) {
-    hasil = huruf[angka];
-  } else if (angka < 20) {
-    hasil = terbilang(angka - 10) + " belas";
-  } else if (angka < 100) {
-    hasil = terbilang(Math.floor(angka / 10)) + " puluh " + terbilang(angka % 10);
-  } else if (angka < 200) {
-    hasil = "seratus " + terbilang(angka - 100);
-  } else if (angka < 1000) {
-    hasil = terbilang(Math.floor(angka / 100)) + " ratus " + terbilang(angka % 100);
-  } else if (angka < 2000) {
-    hasil = "seribu " + terbilang(angka - 1000);
-  } else if (angka < 1000000) {
-    hasil = terbilang(Math.floor(angka / 1000)) + " ribu " + terbilang(angka % 1000);
-  }
-  return hasil;
-}
-
-function getHari(date: Date) {
-  const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-  return hari[date.getDay()];
-}
-
-function getBulan(date: Date) {
-  const bulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-  return bulan[date.getMonth()];
-}
-
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    const { id } = await params;
+    const { id } = await context.params;
+    const supabase = await createClient();
 
-    const { data: agenda, error } = await supabase
-      .from('agenda')
-      .select('*')
+    // 1. Fetch Agenda Data
+    const { data: agendaRaw, error: agendaError } = await supabase
+      .from('pengawasan_lapangans')
+      .select('*, bap_pengawasans(*)')
       .eq('id', id)
       .single();
 
-    if (error || !agenda) {
+    if (agendaError || !agendaRaw) {
       return NextResponse.json({ error: 'Agenda tidak ditemukan' }, { status: 404 });
     }
 
-    let bapData: any = {};
-    if (agenda.bap_data) {
-      bapData = typeof agenda.bap_data === 'string' ? JSON.parse(agenda.bap_data) : agenda.bap_data;
-    } else {
-      return NextResponse.json({ error: 'Data BAP belum diisi. Silakan isi form BAP terlebih dahulu.' }, { status: 400 });
+    const agenda = agendaRaw as any;
+    const bapRow = agenda.bap_pengawasans && agenda.bap_pengawasans.length > 0 ? agenda.bap_pengawasans[0] : null;
+
+    // 2. Fetch BAP Data
+    if (!bapRow || !bapRow.data_matriks_c) {
+      return NextResponse.json({ error: 'Data BAP belum diisi. Harap isi form BAP Lapangan terlebih dahulu.' }, { status: 400 });
+    }
+    
+    let bapData: any = bapRow.data_matriks_c;
+    if (typeof bapData === 'string') {
+      try { bapData = JSON.parse(bapData); } catch (e) {}
     }
 
-    const {
-      identitas = {},
-      dokumen_izin = [],
-      checklist = [],
-      dokumentasi = [],
-      saran = [],
-      rincian_skoring = [],
-      tim_pengawas = [],
-      ttd_pemrakarsa = '',
-      paraf_pemrakarsa = '',
-      ttd_tim = [],
-      paraf_tim = [],
-      perwakilan = []
-    } = bapData;
+    const identitas = bapData.formData || bapData.identitas || {};
+    const checklist = bapData.checklist || [];
+    const dokumentasi = bapData.file_dokumentasi || bapData.dokumentasi || [];
+    const dokumenIzin = bapData.dokumenPerizinan || bapData.dokumen_izin || [];
 
+    // Parse Tim Tugas
     let timPengawasArr: string[] = [];
-    if (agenda.tim_pengawas) {
-      try { timPengawasArr = JSON.parse(agenda.tim_pengawas); } 
-      catch { timPengawasArr = agenda.tim_pengawas.split('|').map((t: string) => t.trim()).filter((t: string) => t !== ''); }
+    if (agenda.tim_tugas) {
+      try { timPengawasArr = JSON.parse(agenda.tim_tugas); } 
+      catch { timPengawasArr = agenda.tim_tugas.split('|').map((t: string) => t.trim()).filter((t: string) => t !== ''); }
     }
 
+    // Parse Saksi (Mobile might not have saksi, but web app might)
     let saksiArr: string[] = [];
     if (agenda.saksi) {
       try { saksiArr = JSON.parse(agenda.saksi); } 
       catch { saksiArr = agenda.saksi.split('|').map((t: string) => t.trim()).filter((t: string) => t !== ''); }
     }
 
+    // Date calculations
     const today = new Date();
     const hari_ini_nama = getHari(today);
     const hari_ini_tanggal_terbilang = terbilang(today.getDate()).trim();
@@ -99,12 +94,26 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const hari_ini_tahun_terbilang = terbilang(Math.floor(today.getFullYear() / 1000) * 1000) + ' ' + terbilang(today.getFullYear() % 1000); 
     const hari_ini_tahun = today.getFullYear().toString();
 
+    // Convert Checklist Array into Key-Value Object based on point or key
     const checklistFlat: Record<string, string> = {};
+    const templateDef = getTemplate(agenda.kategori);
     checklist.forEach((bab: any) => {
       if (bab && bab.items) {
         bab.items.forEach((item: any) => {
           if (item.point) {
-            const key = item.key || item.point;
+            // Find key from template definition if missing
+            let key = item.key;
+            if (!key) {
+              for (const tBab of templateDef) {
+                const found = tBab.items.find(i => i.point === item.point);
+                if (found) {
+                  key = found.key;
+                  break;
+                }
+              }
+            }
+            key = key || item.point; // fallback
+            
             checklistFlat[key] = item.kondisi || '';
             checklistFlat[`ket_${key}`] = item.keterangan || '';
           }
@@ -112,58 +121,44 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       }
     });
 
-    const tim_pengawas_formatted = timPengawasArr.map((nama: string, idx: number) => ({
+    // Formatting Tim Pengawas (used by toko/sppg/industri/fasyankes templates)
+    const tim_pengawas = timPengawasArr.map((nama: string, idx: number) => ({
       no: idx + 1,
       nama_pengawas: nama,
-      ttd_pengawas: ttd_tim[idx] || '',
-      paraf_pengawas: paraf_tim[idx] || ''
+      ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
+      paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
     }));
 
-    const tim_penilai_lengkap = [
-      ...tim_pengawas_formatted,
-      ...perwakilan.map((val: any, idx: number) => ({
-        no: tim_pengawas_formatted.length + idx + 1,
-        nama_pengawas: val.nama || '',
-        ttd_pengawas: val.ttd || '',
-        paraf_pengawas: val.paraf || ''
-      }))
-    ];
+    // Formatting Tim Penilai Lengkap (used by perumahan template - same data, different field names)
+    const tim_penilai_lengkap = timPengawasArr.map((nama: string, idx: number) => ({
+      nomor_urut: idx + 1,
+      nama: nama,
+      nip: identitas.tim_nip?.[idx] || '-',
+      pangkat_golongan: identitas.tim_pangkat?.[idx] || '-',
+      jabatan: identitas.tim_jabatan?.[idx] || 'Pengawas Lingkungan Hidup',
+      ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
+      paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
+    }));
 
+    // Formatting Saksi
     const saksi = saksiArr.map((nama: string, idx: number) => ({
       no: idx + 1,
       nama_saksi: nama,
-      jabatan_saksi: bapData.saksi_details && bapData.saksi_details[idx]?.jabatan ? bapData.saksi_details[idx].jabatan : '',
-      telepon_saksi: bapData.saksi_details && bapData.saksi_details[idx]?.telepon ? bapData.saksi_details[idx].telepon : '',
+      jabatan_saksi: bapData.saksi_details && bapData.saksi_details[idx]?.jabatan ? bapData.saksi_details[idx].jabatan : '-',
+      telepon_saksi: bapData.saksi_details && bapData.saksi_details[idx]?.telepon ? bapData.saksi_details[idx].telepon : '-',
       ttd_saksi: bapData.ttd_saksi && bapData.ttd_saksi[idx] ? bapData.ttd_saksi[idx] : ''
     }));
 
-    const dokumen_izin_formatted = dokumen_izin.map((val: string, idx: number) => ({
-      no: idx + 1,
-      abjad: String.fromCharCode(97 + idx), 
-      nama_dokumen: val
-    }));
+    // Formatting Dokumen Izin (Templates use {#dokumen_izin}{.}{/dokumen_izin})
+    const dokumen_izin = (dokumenIzin || []).map((val: any) => {
+      if (typeof val === 'string') return val;
+      if (val && typeof val === 'object' && val.value) return val.value;
+      if (val && typeof val === 'object' && val.nama) return val.nama;
+      return String(val);
+    }).filter((val: string) => val.trim() !== '');
 
-    const saran_formatted = saran.map((val: string, idx: number) => ({
-      no: idx + 1,
-      isi_saran: val
-    }));
-
-    const perwakilan_formatted = perwakilan.map((val: any, idx: number) => ({
-      no: idx + 1,
-      nama_perwakilan: val.nama || '',
-      jabatan_perwakilan: val.jabatan || '',
-      telepon_perwakilan: val.telepon || '',
-      ttd_perwakilan: val.ttd || '',
-      paraf_perwakilan: val.paraf || ''
-    }));
-
-    const rincian_skoring_formatted = rincian_skoring.map((val: any, idx: number) => ({
-      no: idx + 1,
-      komponen: val.komponen || '',
-      nilai: val.nilai || ''
-    }));
-
-    const foto_baris: any[] = [];
+    // Formatting Foto (2 per row for table)
+    const foto_baris = [];
     for (let i = 0; i < dokumentasi.length; i += 2) {
       foto_baris.push({
         foto_1: dokumentasi[i]?.file || '',
@@ -173,41 +168,94 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       });
     }
 
+    // Formatting Saran
+    const saran = (bapData.saran || []).map((val: string, idx: number) => ({
+      no: idx + 1,
+      abjad: String.fromCharCode(97 + idx), // a, b, c, ...
+      saran_text: val
+    }));
+
+    // Formatting Perwakilan / Pendamping Lapangan
+    const perwakilan = (bapData.perwakilan || []).map((val: any, idx: number) => ({
+      no: idx + 1,
+      nama_perwakilan: val.nama || '',
+      jabatan_perwakilan: val.jabatan || '',
+      telepon_perwakilan: val.telepon || '',
+      ttd_perwakilan: val.ttd || '',
+      paraf_perwakilan: val.paraf || ''
+    }));
+
+    // Extract first perwakilan for root-level tags (used by fasyankes/industri) and fallback for pemrakarsa
+    const firstPerwakilan = perwakilan.length > 0 ? perwakilan[0] : null;
+    const nama_perwakilan = firstPerwakilan?.nama_perwakilan || identitas.pendamping_nama || '';
+    const jabatan_perwakilan = firstPerwakilan?.jabatan_perwakilan || identitas.pendamping_jabatan || '';
+    const telepon_perwakilan = firstPerwakilan?.telepon_perwakilan || identitas.telepon || '';
+    
+    // Use the first perwakilan's signature as ttd_pemrakarsa if the dedicated ttd_pemrakarsa is missing
+    const ttd_pemrakarsa_final = bapData.ttd_pemrakarsa || (firstPerwakilan?.ttd_perwakilan || '');
+    const ttd_perwakilan_final = firstPerwakilan?.ttd_perwakilan || '';
+
+    // Formatting Rincian Skoring
+    const skoring = (bapData.rincian_skoring || []).map((val: any, idx: number) => ({
+      no: idx + 1,
+      nama_komponen: val.nama || '',
+      nilai_komponen: val.nilai || ''
+    }));
+
+    let formatted_waktu = identitas.waktu_pengawasan || '........';
+    if (/^\d{4}$/.test(formatted_waktu)) formatted_waktu = formatted_waktu.substring(0, 2) + '.' + formatted_waktu.substring(2) + ' WIB';
+    else if (formatted_waktu.includes(':')) formatted_waktu = formatted_waktu.replace(':', '.') + ' WIB';
+
+    // Prepare data payload for docxtemplater
     const data = {
-      ...identitas,
-      ...checklistFlat,
+      ...identitas, // contains kbli, alamat, pj_nama, telepon dll.
+      ...checklistFlat, // contains air_fisik, ket_air_fisik dll.
+      nama_badan_usaha_kegiatan: agenda.nama_pemrakarsa,
+      alamat_lokasi: agenda.alamat_lokasi,
       hari_ini_nama,
       hari_ini_tanggal_terbilang,
       hari_ini_bulan,
-      hari_ini_tahun_terbilang,
-      hari_ini_tahun,
-      nama_usaha: agenda.nama_pemrakarsa,
-      alamat_usaha: agenda.alamat_lokasi,
-      tim_pengawas: tim_pengawas_formatted,
-      tim_penilai_lengkap: tim_penilai_lengkap,
-      saksi: saksi,
-      dokumen_izin: dokumen_izin_formatted,
-      saran: saran_formatted,
-      rincian_skoring: rincian_skoring_formatted,
-      perwakilan: perwakilan_formatted,
-      ttd_pemrakarsa,
-      paraf_pemrakarsa,
+      hari_ini_tahun_terbilang: hari_ini_tahun_terbilang.replace('  ', ' ').trim(),
+      tahun_ini: hari_ini_tahun,
+      waktu_pengawasan: formatted_waktu,
+      
+      ttd_pemrakarsa: ttd_pemrakarsa_final,
+      paraf_pemrakarsa: bapData.paraf_pemrakarsa || '',
+      paraf_pengawas: (bapData.paraf_tim && bapData.paraf_tim[0]) ? bapData.paraf_tim[0] : '',
+      // Footer text tags (converted from image tags to avoid VML textbox parsing issues)
+      paraf_pengawas_text: '',
+      paraf_pemrakarsa_text: '',
+      
+      // Root-level perwakilan tags
+      nama_perwakilan,
+      jabatan_perwakilan,
+      telepon_perwakilan,
+      ttd_perwakilan: ttd_perwakilan_final,
+      
+      tim_penilai_lengkap,
+      tim_pengawas,
+      saksi,
+      perwakilan,
+      dokumen_izin,
       foto_baris,
-      total_skor: agenda.total_skor || '',
+      saran,
+      rincian_skoring: skoring,
       status_ketaatan: agenda.status_ketaatan || '',
+      total_skor: agenda.total_skor || ''
     };
 
+    // 4. Determine Template
+    let templateName = 'bap-toko.docx';
     const kategori = (agenda.kategori || '').toLowerCase();
-    let templateName = 'bap-industri.docx';
     
-    if (kategori.includes('fasyankes') && fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', 'bap-fasyankes.docx'))) {
+    if (kategori.includes('industri') && fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', 'bap-industri.docx'))) {
+      templateName = 'bap-industri.docx';
+    } else if ((kategori.includes('fasyankes') || kategori.includes('kesehatan')) && fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', 'bap-fasyankes.docx'))) {
       templateName = 'bap-fasyankes.docx';
-    } else if (kategori.includes('toko') && fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', 'bap-toko.docx'))) {
-      templateName = 'bap-toko.docx';
-    } else if (kategori.includes('sppg') && fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', 'bap-sppg.docx'))) {
-      templateName = 'bap-sppg.docx';
     } else if (kategori.includes('perumahan') && fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', 'bap-perumahan.docx'))) {
       templateName = 'bap-perumahan.docx';
+    } else if (kategori.includes('sppg') && fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', 'bap-sppg.docx'))) {
+      templateName = 'bap-sppg.docx';
     } else if (!fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', templateName))) {
       const files = fs.readdirSync(path.join(process.cwd(), 'public', 'templates-bap'));
       const docxFiles = files.filter(f => f.endsWith('.docx'));
@@ -222,18 +270,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const imageOptions = {
       getImage: function(tagValue: string, tagName: string) {
-        if (!tagValue) return false;
-        const base64Regex = /^data:image\/(png|jpeg|jpg);base64,/;
-        if (!base64Regex.test(tagValue)) return false;
+        const emptyImageBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+        if (!tagValue || typeof tagValue !== 'string') return emptyImageBuffer;
         
-        const base64Data = tagValue.replace(base64Regex, '');
-        return Buffer.from(base64Data, 'base64');
+        const base64Regex = /^data:image\/(png|jpeg|jpg);base64,/;
+        if (!base64Regex.test(tagValue)) return emptyImageBuffer;
+        
+        try {
+          const base64Data = tagValue.replace(base64Regex, '');
+          return Buffer.from(base64Data, 'base64');
+        } catch (e) {
+          return emptyImageBuffer;
+        }
       },
       getSize: function(img: any, tagValue: string, tagName: string) {
-        if (tagName.includes('foto_')) return [250, 250]; 
-        if (tagName.includes('ttd_')) return [150, 75]; 
-        if (tagName.includes('paraf_')) return [50, 30]; 
-        return [150, 150];
+        if (tagName.includes('foto_')) return [300, 225]; // 4:3 ratio for field photos
+        if (tagName.includes('ttd_')) return [240, 80]; // 3:1 aspect ratio
+        if (tagName.includes('paraf_')) return [120, 60]; 
+        return [200, 150];
       }
     };
 
