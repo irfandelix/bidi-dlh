@@ -215,6 +215,7 @@ export async function GET(
       // Template specific fallbacks mapping
       jumlah_pekerja_penghuni, // For perumahan
       jumlah_karyawan_pengunjung: identitas.jumlah_karyawan_pengunjung || jumlah_pasien_pekerja, // For fasyankes/sppg
+      kapasitas_kegiatan: identitas.kapasitas_kegiatan || (identitas.kapasitas_izin ? `Izin: ${identitas.kapasitas_izin}, Riil: ${identitas.kapasitas_riil || '-'}` : ''),
       jam_operasional: identitas.jam_operasional || identitas.jam_kerja_hari || identitas.jam_produksi || '',
       shift_kerja_konstruksi: identitas.shift_kerja_konstruksi || '',
       shift_kerja: identitas.shift_kerja || identitas.shift_kerja_konstruksi || '',
