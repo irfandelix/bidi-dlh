@@ -144,7 +144,8 @@ export async function GET(
       nama_saksi: nama,
       jabatan_saksi: bapData.saksi_details && bapData.saksi_details[idx]?.jabatan ? bapData.saksi_details[idx].jabatan : '-',
       telepon_saksi: bapData.saksi_details && bapData.saksi_details[idx]?.telepon ? bapData.saksi_details[idx].telepon : '-',
-      ttd_saksi: bapData.ttd_saksi && bapData.ttd_saksi[idx] ? bapData.ttd_saksi[idx] : ''
+      ttd_saksi: bapData.ttd_saksi && bapData.ttd_saksi[idx] ? bapData.ttd_saksi[idx] : '',
+      paraf_saksi: bapData.paraf_saksi && bapData.paraf_saksi[idx] ? bapData.paraf_saksi[idx] : ''
     }));
 
     // Formatting Dokumen Izin (Templates use {#dokumen_izin}{.}{/dokumen_izin})
@@ -278,6 +279,16 @@ export async function GET(
 
     const zip = new PizZip(content);
 
+    function getPngDimensions(buffer: Buffer) {
+      if (buffer.length > 24 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
+        return {
+          width: buffer.readUInt32BE(16),
+          height: buffer.readUInt32BE(20)
+        };
+      }
+      return null;
+    }
+
     const imageOptions = {
       getImage: function(tagValue: string, tagName: string) {
         const emptyImageBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
@@ -295,9 +306,24 @@ export async function GET(
       },
       getSize: function(img: any, tagValue: string, tagName: string) {
         if (tagName.includes('foto_')) return [300, 225]; // 4:3 ratio for field photos
-        if (tagName.includes('ttd_')) return [240, 80]; // 3:1 aspect ratio
-        if (tagName.includes('paraf_')) return [120, 60]; 
-        return [200, 150];
+        
+        let maxWidth = 240;
+        let maxHeight = 80;
+        
+        if (tagName.includes('paraf_')) {
+          maxWidth = 120;
+          maxHeight = 60;
+        }
+
+        if (img instanceof Buffer) {
+          const dims = getPngDimensions(img);
+          if (dims && dims.width > 0 && dims.height > 0) {
+            const ratio = Math.min(maxWidth / dims.width, maxHeight / dims.height);
+            return [Math.round(dims.width * ratio), Math.round(dims.height * ratio)];
+          }
+        }
+        
+        return [maxWidth, maxHeight];
       }
     };
 
