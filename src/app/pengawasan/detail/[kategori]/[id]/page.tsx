@@ -183,7 +183,7 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
             Status Data
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
             <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Token Verifikasi</div>
               <div className="font-mono text-base font-bold text-white">{agenda.token || '-'}</div>
@@ -200,6 +200,13 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
               <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Diperbarui Pada</div>
               <div className="text-sm font-bold text-white">
                 {agenda.updated_at ? new Date(agenda.updated_at).toLocaleString('id-ID') : '-'}
+              </div>
+            </div>
+
+            <div className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex flex-col justify-center">
+              <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Nilai Pengawasan</div>
+              <div className="text-xl md:text-2xl font-black text-amber-400">
+                {agenda.total_skor !== null && agenda.total_skor !== undefined ? agenda.total_skor : '-'}
               </div>
             </div>
           </div>
