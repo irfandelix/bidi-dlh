@@ -209,10 +209,10 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       setSaving(true);
       setSavingText('Menyimpan ke Database...');
       try {
-        const ttdPemrakarsa = sigPemrakarsaRef.current && !sigPemrakarsaRef.current.isEmpty() ? sigPemrakarsaRef.current.toDataURL() : null;
-        const prfPemrakarsa = parafPemrakarsaRef.current && !parafPemrakarsaRef.current.isEmpty() ? parafPemrakarsaRef.current.toDataURL() : null;
-        const ttdTim = sigTimRefs.current.map(ref => ref && !ref.isEmpty() ? ref.toDataURL() : null);
-        const prfTim = parafTimRefs.current.map(ref => ref && !ref.isEmpty() ? ref.toDataURL() : null);
+        const ttdPemrakarsa = sigPemrakarsaRef.current && !sigPemrakarsaRef.current.isEmpty() ? sigPemrakarsaRef.current.getTrimmedCanvas().toDataURL('image/png') : null;
+        const prfPemrakarsa = parafPemrakarsaRef.current && !parafPemrakarsaRef.current.isEmpty() ? parafPemrakarsaRef.current.getTrimmedCanvas().toDataURL('image/png') : null;
+        const ttdTim = sigTimRefs.current.map(ref => ref && !ref.isEmpty() ? ref.getTrimmedCanvas().toDataURL('image/png') : null);
+        const prfTim = parafTimRefs.current.map(ref => ref && !ref.isEmpty() ? ref.getTrimmedCanvas().toDataURL('image/png') : null);
   
         const payload = {
           bap: {
@@ -226,15 +226,15 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
               nama: p.nama,
               jabatan: p.jabatan,
               telepon: p.telepon,
-              ttd: sigPerwakilanRefs.current[p.id] && !sigPerwakilanRefs.current[p.id].isEmpty() ? sigPerwakilanRefs.current[p.id].toDataURL() : null,
-              paraf: parafPerwakilanRefs.current[p.id] && !parafPerwakilanRefs.current[p.id].isEmpty() ? parafPerwakilanRefs.current[p.id].toDataURL() : null
+              ttd: sigPerwakilanRefs.current[p.id] && !sigPerwakilanRefs.current[p.id].isEmpty() ? sigPerwakilanRefs.current[p.id].getTrimmedCanvas().toDataURL('image/png') : null,
+              paraf: parafPerwakilanRefs.current[p.id] && !parafPerwakilanRefs.current[p.id].isEmpty() ? parafPerwakilanRefs.current[p.id].getTrimmedCanvas().toDataURL('image/png') : null
             })),
             ttd_pemrakarsa: ttdPemrakarsa,
             paraf_pemrakarsa: prfPemrakarsa,
             ttd_tim: ttdTim,
             paraf_tim: prfTim,
             saksi_details: saksiDetails,
-            ttd_saksi: sigSaksiRefs.current.map(ref => ref && !ref.isEmpty() ? ref.toDataURL() : null)
+            ttd_saksi: sigSaksiRefs.current.map(ref => ref && !ref.isEmpty() ? ref.getTrimmedCanvas().toDataURL('image/png') : null)
           },
           status_ketaatan: finalStatus(),
           total_skor: totalSkor()
