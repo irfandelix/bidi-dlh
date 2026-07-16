@@ -62,10 +62,12 @@ export default function ManajemenTim() {
     try {
       if (formData.id) {
         // Update
-        await supabase.from('tim_pengawas').update(formData as any).eq('id', formData.id);
+        // @ts-ignore
+        await supabase.from('tim_pengawas').update(formData).eq('id', formData.id);
       } else {
         // Insert
-        await supabase.from('tim_pengawas').insert([formData as any]);
+        // @ts-ignore
+        await supabase.from('tim_pengawas').insert([formData]);
       }
       await fetchPegawai();
       setIsModalOpen(false);
