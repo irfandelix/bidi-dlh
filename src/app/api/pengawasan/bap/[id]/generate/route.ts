@@ -105,10 +105,21 @@ export async function GET(
       }
     });
 
-    // Formatting Tim Pengawas
+    // Formatting Tim Pengawas (used by toko/sppg/industri/fasyankes templates)
     const tim_pengawas = timPengawasArr.map((nama: string, idx: number) => ({
       no: idx + 1,
       nama_pengawas: nama,
+      ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
+      paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
+    }));
+
+    // Formatting Tim Penilai Lengkap (used by perumahan template - same data, different field names)
+    const tim_penilai_lengkap = timPengawasArr.map((nama: string, idx: number) => ({
+      nomor_urut: idx + 1,
+      nama: nama,
+      nip: identitas.tim_nip?.[idx] || '-',
+      pangkat_golongan: identitas.tim_pangkat?.[idx] || '-',
+      jabatan: identitas.tim_jabatan?.[idx] || 'Pengawas Lingkungan Hidup',
       ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
       paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
     }));
@@ -177,7 +188,11 @@ export async function GET(
       
       ttd_pemrakarsa: bapData.ttd_pemrakarsa || '',
       paraf_pemrakarsa: bapData.paraf_pemrakarsa || '',
+      // Footer text tags (converted from image tags to avoid VML textbox parsing issues)
+      paraf_pengawas_text: '',
+      paraf_pemrakarsa_text: '',
       
+      tim_penilai_lengkap,
       tim_pengawas,
       saksi,
       perwakilan,
@@ -199,6 +214,8 @@ export async function GET(
       templateName = 'bap-fasyankes.docx';
     } else if (kategori.includes('perumahan') && fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', 'bap-perumahan.docx'))) {
       templateName = 'bap-perumahan.docx';
+    } else if (kategori.includes('sppg') && fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', 'bap-sppg.docx'))) {
+      templateName = 'bap-sppg.docx';
     } else if (!fs.existsSync(path.join(process.cwd(), 'public', 'templates-bap', templateName))) {
       const files = fs.readdirSync(path.join(process.cwd(), 'public', 'templates-bap'));
       const docxFiles = files.filter(f => f.endsWith('.docx'));
