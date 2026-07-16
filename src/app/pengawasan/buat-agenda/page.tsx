@@ -246,9 +246,9 @@ export default function BuatAgenda() {
                 <User size={18} className="text-teal-600" /> Pilih Tim Bertugas (Pengawas)
               </label>
               
-              {pegawai.length > 0 ? (
+              {pegawai.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {pegawai.map(p => (
+                  {pegawai.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').map(p => (
                     <label key={`tim-${p.nama}`} className={`flex items-center gap-3 p-4 rounded-xl border-4 cursor-pointer transition-all ${formData.tim_tugas.includes(p.nama) ? 'bg-teal-300 border-slate-900 shadow-[4px_4px_0_0_#0f172a]' : 'bg-slate-50 border-slate-900 hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0f172a]'}`}>
                       <input 
                         type="checkbox" 
@@ -258,7 +258,7 @@ export default function BuatAgenda() {
                       />
                       <div className="flex flex-col">
                         <span className="block font-black text-sm text-slate-900 leading-tight line-clamp-1 uppercase">{p.nama}</span>
-                        <span className="block text-[10px] uppercase font-black text-slate-500 mt-0.5">{p.kategori}</span>
+                        <span className="block text-[10px] uppercase font-black text-slate-500 mt-0.5">{p.jabatan_dinas || p.kategori || 'Pengawas'}</span>
                       </div>
                     </label>
                   ))}
@@ -276,9 +276,9 @@ export default function BuatAgenda() {
               </label>
               <p className="text-xs text-slate-500 mb-4 font-bold">*Opsional. Anda bisa memilih staf dari daftar di bawah ini untuk bertugas sebagai Saksi.</p>
               
-              {pegawai.length > 0 ? (
+              {pegawai.filter(p => p.kategori === 'Saksi').length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {pegawai.map(p => (
+                  {pegawai.filter(p => p.kategori === 'Saksi').map(p => (
                     <label key={`saksi-${p.nama}`} className={`flex items-center gap-3 p-4 rounded-xl border-4 cursor-pointer transition-all ${formData.saksi.includes(p.nama) ? 'bg-indigo-300 border-slate-900 shadow-[4px_4px_0_0_#0f172a]' : 'bg-slate-50 border-slate-900 hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0f172a]'}`}>
                       <input 
                         type="checkbox" 
@@ -288,12 +288,16 @@ export default function BuatAgenda() {
                       />
                       <div className="flex flex-col">
                         <span className="block font-black text-sm text-slate-900 leading-tight line-clamp-1 uppercase">{p.nama}</span>
-                        <span className="block text-[10px] uppercase font-black text-slate-500 mt-0.5">{p.kategori}</span>
+                        <span className="block text-[10px] uppercase font-black text-slate-500 mt-0.5">{p.jabatan_dinas || p.kategori}</span>
                       </div>
                     </label>
                   ))}
                 </div>
-              ) : null}
+              ) : (
+                <div className="p-4 bg-amber-200 rounded-xl border-4 border-slate-900 text-slate-900 font-black flex items-center gap-2 uppercase tracking-wide text-xs">
+                  Belum ada data saksi terdaftar. Tambahkan di menu Manajemen Tim.
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end pt-6 border-t-4 border-slate-900">
