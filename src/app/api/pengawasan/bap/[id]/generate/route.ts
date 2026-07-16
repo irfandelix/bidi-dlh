@@ -42,8 +42,8 @@ export async function GET(
 
     // 1. Fetch Agenda Data
     const { data: agendaRaw, error: agendaError } = await supabase
-      .from('agenda')
-      .select('*')
+      .from('pengawasan_lapangans')
+      .select('*, bap_pengawasans(*)')
       .eq('id', id)
       .single();
 
@@ -52,18 +52,22 @@ export async function GET(
     }
 
     const agenda = agendaRaw as any;
+    const bapRow = agenda.bap_pengawasans && agenda.bap_pengawasans.length > 0 ? agenda.bap_pengawasans[0] : null;
 
     // 2. Fetch BAP Data
-    let bapData: any = {};
-    if (agenda.bap_data) {
-      bapData = typeof agenda.bap_data === 'string' ? JSON.parse(agenda.bap_data) : agenda.bap_data;
-    } else {
+    if (!bapRow || !bapRow.data_matriks_c) {
       return NextResponse.json({ error: 'Data BAP belum diisi. Harap isi form BAP Lapangan terlebih dahulu.' }, { status: 400 });
     }
-    const identitas = bapData.identitas || {};
+    
+    let bapData: any = bapRow.data_matriks_c;
+    if (typeof bapData === 'string') {
+      try { bapData = JSON.parse(bapData); } catch (e) {}
+    }
+
+    const identitas = bapData.formData || bapData.identitas || {};
     const checklist = bapData.checklist || [];
-    const dokumentasi = bapData.dokumentasi || [];
-    const dokumenIzin = bapData.dokumen_izin || [];
+    const dokumentasi = bapData.file_dokumentasi || bapData.dokumentasi || [];
+    const dokumenIzin = bapData.dokumenPerizinan || bapData.dokumen_izin || [];
 
     // Parse Tim Tugas
     let timPengawasArr: string[] = [];
@@ -72,7 +76,7 @@ export async function GET(
       catch { timPengawasArr = agenda.tim_tugas.split('|').map((t: string) => t.trim()).filter((t: string) => t !== ''); }
     }
 
-    // Parse Saksi
+    // Parse Saksi (Mobile might not have saksi, but web app might)
     let saksiArr: string[] = [];
     if (agenda.saksi) {
       try { saksiArr = JSON.parse(agenda.saksi); } 
