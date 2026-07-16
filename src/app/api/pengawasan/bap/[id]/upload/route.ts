@@ -208,7 +208,7 @@ export async function POST(
 
     // Construct combined fields for specific templates
     const jumlah_pekerja_penghuni = `Pekerja: ${identitas.jumlah_pekerja || '-'}, Penghuni: ${identitas.jumlah_penghuni || '-'}`;
-    const jumlah_pasien_pekerja = `Pasien: ${identitas.jumlah_pasien || '-'}, Pekerja: ${identitas.jumlah_pekerja || '-'}`;
+    const jumlah_pasien_pekerja = `Pasien: ${identitas.jumlah_pasien || '-'}, Pekerja: ${identitas.jumlah_karyawan || identitas.jumlah_pekerja || '-'}`;
 
     // Prepare data payload for docxtemplater
     const data = {
@@ -217,6 +217,7 @@ export async function POST(
       // Template specific fallbacks mapping
       jumlah_pekerja_penghuni, // For perumahan
       jumlah_karyawan_pengunjung: identitas.jumlah_karyawan_pengunjung || jumlah_pasien_pekerja, // For fasyankes/sppg
+      kapasitas_kegiatan: identitas.kapasitas_kegiatan || (identitas.kapasitas_izin ? `Izin: ${identitas.kapasitas_izin}, Riil: ${identitas.kapasitas_riil || '-'}` : ''),
       jam_operasional: identitas.jam_operasional || identitas.jam_kerja_hari || identitas.jam_produksi || '',
       shift_kerja_konstruksi: identitas.shift_kerja_konstruksi || '',
       shift_kerja: identitas.shift_kerja || identitas.shift_kerja_konstruksi || '',
