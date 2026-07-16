@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Calendar, MapPin, Building2, User, FileText, ArrowLeft, Printer, CheckCircle, Database } from 'lucide-react';
+import IdentitasTable from './IdentitasTable';
 
 export default async function DetailArsipPage({ params }: { params: Promise<{ kategori: string, id: string }> }) {
   const { id, kategori } = await params;
@@ -170,39 +171,7 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
         </div>
 
         {/* TABEL IDENTITAS */}
-        {Object.keys(identitas).length > 0 && (
-          <div className="bg-white border-4 border-slate-900 rounded-[2rem] p-6 md:p-8 shadow-[8px_8px_0_0_#0f172a]">
-            <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-100 border-[3px] border-slate-900 flex items-center justify-center shadow-[2px_2px_0_0_#0f172a]">
-                <Database size={24} className="text-amber-700" />
-              </div>
-              Detail Data Identitas
-            </h2>
-            
-            <div className="overflow-x-auto border-4 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a]">
-              <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-900 uppercase bg-amber-300 border-b-4 border-slate-900 font-black tracking-widest">
-                  <tr>
-                    <th className="px-6 py-4 border-r-4 border-slate-900 w-1/3">Variabel</th>
-                    <th className="px-6 py-4">Nilai Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(identitas).map(([key, value], idx) => (
-                    <tr key={key} className={`border-b-2 border-slate-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50'} last:border-b-0`}>
-                      <td className="px-6 py-4 font-bold text-slate-700 border-r-4 border-slate-900 bg-slate-100">
-                        {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </td>
-                      <td className="px-6 py-4 text-slate-900 font-medium">
-                        {value ? String(value) : <span className="text-slate-400 italic">Kosong</span>}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        <IdentitasTable identitas={identitas} />
 
         {/* Info Tambahan */}
         <div className="bg-slate-900 text-white rounded-[2rem] p-6 md:p-8 shadow-[8px_8px_0_0_#cbd5e1] relative overflow-hidden">
