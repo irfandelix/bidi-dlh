@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { LayoutDashboard, ShieldCheck, Map, Settings, LogOut } from 'lucide-react'
 import { handleLogout } from '@/app/login/actions'
 import { usePathname } from 'next/navigation'
+import BidiLogo from './BidiLogo'
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -14,16 +15,7 @@ export default function Navbar() {
 
   return (
     <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] rounded-2xl px-4 sm:px-6 py-3 flex items-center gap-4 sm:gap-6 w-max max-w-[95vw] overflow-x-auto sm:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-      <div className="relative group/cat flex items-center justify-center p-3 -ml-3 cursor-default">
-        <Link href="/" className="peer relative z-10 font-black text-xl text-slate-900 tracking-tight flex items-center gap-2 bg-white px-1 rounded">
-          <span className="bg-emerald-400 text-slate-900 px-2 py-0.5 border-2 border-slate-900 rounded-lg shadow-[2px_2px_0_0_#0f172a]">BIDI</span> 
-          DLH
-        </Link>
-        {/* Easter Egg: Tangan Kucing */}
-        <div className="absolute top-[-15px] right-2 text-3xl transition-all duration-500 ease-in-out translate-y-8 opacity-0 group-hover/cat:-translate-y-2 group-hover/cat:opacity-100 peer-hover:translate-y-8 peer-hover:opacity-0 pointer-events-none z-0 -rotate-12">
-          🐾
-        </div>
-      </div>
+      <BidiLogo />
       <div className="h-6 w-1 bg-slate-900 rounded-full"></div>
       <ul className="flex items-center gap-2 sm:gap-6 text-xs sm:text-sm font-black text-slate-700 uppercase tracking-widest">
         <li>
