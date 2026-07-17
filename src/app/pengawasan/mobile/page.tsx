@@ -17,6 +17,18 @@ export default function MobileApp() {
   const [screen, setScreen] = useState<'splash' | 'home' | 'login' | 'info' | 'form'>('splash');
 
   useEffect(() => {
+    // Prevent iOS rubber banding white space issue
+    document.body.style.backgroundColor = '#0f172a'; // slate-900
+    document.body.style.overscrollBehavior = 'none';
+    document.documentElement.style.overscrollBehavior = 'none';
+    return () => {
+      document.body.style.backgroundColor = '';
+      document.body.style.overscrollBehavior = '';
+      document.documentElement.style.overscrollBehavior = '';
+    };
+  }, []);
+
+  useEffect(() => {
     const initApp = async () => {
       await loadSavedAgendas();
       setTimeout(() => {
