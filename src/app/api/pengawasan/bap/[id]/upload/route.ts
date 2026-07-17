@@ -375,9 +375,10 @@ export async function POST(
     // 5. Save docxFileId to database
     if (bapRow && bapRow.id) {
       bapData.docxFileId = docxFileId;
+      // @ts-ignore
       await supabase.from('bap_pengawasans').update({
         data_matriks_c: bapData
-      }).eq('id', bapRow.id);
+      } as any).eq('id', bapRow.id);
     }
 
     return NextResponse.json({ 
