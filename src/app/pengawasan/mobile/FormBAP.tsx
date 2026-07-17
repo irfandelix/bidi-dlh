@@ -465,7 +465,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
           <div className="bg-emerald-400 h-full w-[${(step/totalSteps)*100}%] border-r-2 border-slate-900" />
         </div>
 
-        <div className="flex-1 flex flex-col overflow-y-auto">
+        <div className="flex-1 flex flex-col overflow-y-auto pb-64">
           {step === 1 && (
             <div className="bg-white p-6 border-4 border-slate-900 rounded-2xl shadow-[6px_6px_0_0_#0f172a] mb-6">
               <span className="text-2xl font-black text-slate-900 mb-6 uppercase">A. Identitas Lokasi</span>
