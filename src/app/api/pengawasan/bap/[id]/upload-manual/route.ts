@@ -60,7 +60,7 @@ export async function POST(
     // 3. Update database
     const { error: updateError } = await supabase
       .from('bap_pengawasans')
-      .update({ data_matriks_c: matriks_c })
+      .update({ data_matriks_c: matriks_c } as any)
       .eq('pengawasan_id', id);
 
     if (updateError) {
