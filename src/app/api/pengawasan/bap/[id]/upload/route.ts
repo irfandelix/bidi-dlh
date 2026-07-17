@@ -328,7 +328,7 @@ export async function POST(
 
     // 2. Upload DOCX file to Main Folder
     const docxName = `BAP_${safeUsahaName}_${hari_ini_tanggal_terbilang}_${hari_ini_bulan}_${hari_ini_tahun}.docx`;
-    await uploadFileToDrive(buf, docxName, enterpriseFolderId, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    const docxFileId = await uploadFileToDrive(buf, docxName, enterpriseFolderId, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 
     // 3. Create/Get "Dokumentasi" subfolder
     const dokumentasiFolderId = await getOrCreateFolder('Dokumentasi', enterpriseFolderId);
@@ -356,6 +356,7 @@ export async function POST(
     return NextResponse.json({ 
       success: true, 
       folderId: enterpriseFolderId,
+      docxFileId: docxFileId,
       message: 'Upload ke Google Drive berhasil!' 
     });
 
@@ -363,4 +364,3 @@ export async function POST(
     console.error('API Error:', error);
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
-}

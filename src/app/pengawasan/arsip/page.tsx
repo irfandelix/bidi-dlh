@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 import Link from 'next/link';
-import { ArrowLeft, Clock, Search, ExternalLink, Calendar, MapPin, Building2, CheckCircle, Printer, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Clock, Search, ExternalLink, Calendar, MapPin, Building2, CheckCircle, Printer, ChevronLeft, ChevronRight, Upload, FileCheck } from 'lucide-react';
 
 export default function ArsipPengawasan() {
   const [arsip, setArsip] = useState<any[]>([]);
@@ -27,6 +27,33 @@ export default function ArsipPengawasan() {
         setLoading(false);
       });
   }, []);
+
+  const handleUploadManual = async (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const res = await fetch(`/api/pengawasan/bap/${id}/upload-manual`, {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        alert('Berhasil mengunggah BAP manual!');
+        window.location.reload();
+      } else {
+        const err = await res.json();
+        alert('Gagal: ' + (err.error || 'Unknown error'));
+      }
+    } catch(err) {
+      alert('Error saat mengunggah file.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filtered = arsip.filter(a => 
     (a.nama_kegiatan || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -141,13 +168,43 @@ export default function ArsipPengawasan() {
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mt-2">
                     <Link href={`/pengawasan/detail/${encodeURIComponent(agenda.kategori)}/${agenda.id}`} className="flex-1 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 font-black uppercase tracking-widest p-3 rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-[2px] transition-all">
                       Detail
                     </Link>
-                    <a href={`/api/pengawasan/bap/${agenda.id}/generate`} target="_blank" rel="noreferrer" title="Cetak BAP (Word)" className="flex items-center justify-center gap-2 bg-indigo-400 hover:bg-indigo-500 text-slate-900 font-black uppercase tracking-widest p-3 rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-[2px] transition-all">
+                    <a href={`/api/pengawasan/bap/${agenda.id}/generate`} target="_blank" rel="noreferrer" title="Cetak BAP (Word)" className="flex items-center justify-center bg-indigo-400 hover:bg-indigo-500 text-slate-900 p-3 rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-[2px] transition-all">
                       <Printer size={20} />
                     </a>
+                  </div>
+                  
+                  {/* Manual Upload Section */}
+                  <div className="mt-4 pt-4 border-t-2 border-slate-200">
+                    {(() => {
+                      let manualUrl = null;
+                      if (agenda.bap_pengawasans && agenda.bap_pengawasans[0]) {
+                        const matriks = agenda.bap_pengawasans[0].data_matriks_c;
+                        if (typeof matriks === 'string') {
+                          try { manualUrl = JSON.parse(matriks).file_bap_manual; } catch(e){}
+                        } else if (matriks) {
+                          manualUrl = matriks.file_bap_manual;
+                        }
+                      }
+                      
+                      if (manualUrl) {
+                        return (
+                          <a href={manualUrl} target="_blank" rel="noreferrer" className="w-full flex items-center justify-center gap-2 bg-emerald-400 hover:bg-emerald-500 text-slate-900 font-black uppercase tracking-widest p-3 rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-[2px] transition-all">
+                            <FileCheck size={20} /> Lihat BAP Final
+                          </a>
+                        );
+                      } else {
+                        return (
+                          <label className="w-full flex items-center justify-center gap-2 bg-amber-300 hover:bg-amber-400 text-slate-900 font-black uppercase tracking-widest p-3 rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-[2px] transition-all cursor-pointer">
+                            <Upload size={20} /> Unggah BAP Manual
+                            <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => handleUploadManual(e, agenda.id)} />
+                          </label>
+                        );
+                      }
+                    })()}
                   </div>
 
                 </div>
