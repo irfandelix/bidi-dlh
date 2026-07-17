@@ -28,7 +28,7 @@ export default function BuatAgenda() {
     supabase.from('dokumens').select('id, nama_pemrakarsa, nama_kegiatan, lokasi_kegiatan')
       .then(({ data }) => setDokumens(data || []));
 
-    supabase.from('tim_pengawas').select('nama, kategori').order('nama')
+    supabase.from('tim_pengawas').select('nama, kategori, urutan_hierarki').order('urutan_hierarki', { ascending: true })
       .then(({ data }) => setPegawai(data || []));
   }, []);
 
@@ -51,10 +51,23 @@ export default function BuatAgenda() {
     setLoading(true);
 
     try {
+      // Sort based on urutan_hierarki before saving
+      const sortedTim = [...formData.tim_tugas].sort((a, b) => {
+        const pA = pegawai.find(p => p.nama === a);
+        const pB = pegawai.find(p => p.nama === b);
+        return (pA?.urutan_hierarki || 99) - (pB?.urutan_hierarki || 99);
+      });
+      
+      const sortedSaksi = [...formData.saksi].sort((a, b) => {
+        const pA = pegawai.find(p => p.nama === a);
+        const pB = pegawai.find(p => p.nama === b);
+        return (pA?.urutan_hierarki || 99) - (pB?.urutan_hierarki || 99);
+      });
+
       const payload = {
         ...formData,
-        tim_tugas: formData.tim_tugas.join('|'),
-        saksi: formData.saksi.join('|')
+        tim_tugas: sortedTim.join('|'),
+        saksi: sortedSaksi.join('|')
       };
 
       const res = await fetch('/api/pengawasan', {
