@@ -193,7 +193,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     return Math.round((sum / validScores.length) * 100) / 100;
   };
 
-  const finalStatus = () => {
+  const finalStatus = (): string => {
     const skor = totalSkor();
     if (skor === 0 || isNaN(skor)) return 'Belum Ada Nilai';
     if (skor > 100) return 'CEK INPUT';
