@@ -119,24 +119,41 @@ export async function GET(
       }
     });
 
+    // Fetch Tim Pengawas Details from the DB
+    const { data: listPengawas } = await supabase.from('tim_pengawas').select('*');
+    const pengawasMap = new Map();
+    if (listPengawas) {
+      listPengawas.forEach((p: any) => pengawasMap.set(p.nama, p));
+    }
+
     // Formatting Tim Pengawas (used by toko/sppg/industri/fasyankes templates)
-    const tim_pengawas = timPengawasArr.map((nama: string, idx: number) => ({
-      no: idx + 1,
-      nama_pengawas: nama,
-      ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
-      paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
-    }));
+    const tim_pengawas = timPengawasArr.map((nama: string, idx: number) => {
+      const p = pengawasMap.get(nama) || {};
+      return {
+        no: idx + 1,
+        nama_pengawas: nama,
+        nip_pengawas: p.nip || '-',
+        pangkat_pengawas: p.pangkat_golongan || '-',
+        jabatan_pengawas: p.jabatan_dinas || 'Pengawas Lingkungan Hidup',
+        instansi_pengawas: 'Dinas Lingkungan Hidup Kabupaten Sragen',
+        ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
+        paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
+      };
+    });
 
     // Formatting Tim Penilai Lengkap (used by perumahan template - same data, different field names)
-    const tim_penilai_lengkap = timPengawasArr.map((nama: string, idx: number) => ({
-      nomor_urut: idx + 1,
-      nama: nama,
-      nip: identitas.tim_nip?.[idx] || '-',
-      pangkat_golongan: identitas.tim_pangkat?.[idx] || '-',
-      jabatan: identitas.tim_jabatan?.[idx] || 'Pengawas Lingkungan Hidup',
-      ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
-      paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
-    }));
+    const tim_penilai_lengkap = timPengawasArr.map((nama: string, idx: number) => {
+      const p = pengawasMap.get(nama) || {};
+      return {
+        nomor_urut: idx + 1,
+        nama: nama,
+        nip: p.nip || '-',
+        pangkat_golongan: p.pangkat_golongan || '-',
+        jabatan: p.jabatan_dinas || 'Pengawas Lingkungan Hidup',
+        ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
+        paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
+      };
+    });
 
     // Formatting Saksi
     const saksi = saksiArr.map((nama: string, idx: number) => ({
