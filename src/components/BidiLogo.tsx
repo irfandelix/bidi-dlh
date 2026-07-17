@@ -23,24 +23,17 @@ export default function BidiLogo() {
     const deltaX = e.clientX - centerX;
     const deltaY = e.clientY - centerY;
     
-    // Calculate angle in degrees
-    const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
-    
     // Calculate distance
     const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     
-    // The paw should point towards the mouse.
-    // If the SVG points UP by default (0 degrees), then we need to rotate it by angle + 90
-    const rotation = angle + 90;
-    
-    // How far out the paw should reach (cap it so it doesn't go too far)
-    // The base distance to peek out of the button is around 30-40px
-    const reach = Math.min(75, Math.max(15, distance * 0.6));
+    // The closer the mouse, the taller the sprout (up to 80px)
+    // Max track distance is around 150px
+    const reach = Math.max(0, 80 - (distance * 0.5));
 
-    // Show sprout
+    // Show sprout, pointing straight up, shifting slightly right to be over "DLH"
     setPawStyle({
-      opacity: 1,
-      transform: `translate(-50%, -50%) rotate(${rotation}deg) translateY(-${reach}px) scale(1)`,
+      opacity: reach > 5 ? 1 : 0,
+      transform: `translate(-50%, -50%) translateY(-${reach}px) scale(1)`,
     });
   };
 
@@ -63,7 +56,7 @@ export default function BidiLogo() {
       <div className="absolute -inset-20 z-0"></div>
       {/* Sprout SVG */}
       <div 
-        className="absolute top-1/2 left-1/2 pointer-events-none transition-all duration-300 ease-out z-0"
+        className="absolute top-1/2 left-[75%] pointer-events-none transition-all duration-300 ease-out z-0"
         style={{
           ...pawStyle,
           transformOrigin: '50% 100%' // Anchor at the bottom of the stem
