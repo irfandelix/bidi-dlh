@@ -31,8 +31,8 @@ export default function EasterEggPlant({ logoRef }: { logoRef: React.RefObject<H
       
       const distance = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
       
-      // Start growing when mouse is within 800px. Fully grown at 0px.
-      const p = Math.max(0, Math.min(1, 1 - (distance / 800)));
+      // Start growing when mouse is within 300px. Fully grown at 0px.
+      const p = Math.max(0, Math.min(1, 1 - (distance / 300)));
       setProgress(p);
     };
 
@@ -62,7 +62,7 @@ export default function EasterEggPlant({ logoRef }: { logoRef: React.RefObject<H
   const currentRadius = progress * maxRadius;
 
   return createPortal(
-    <div className="fixed inset-0 pointer-events-none z-[60] hidden sm:block overflow-hidden">
+    <div className="fixed inset-0 pointer-events-none z-[60] hidden xl:block overflow-hidden">
       <svg width={windowSize.w} height={windowSize.h} className="absolute inset-0">
         <defs>
           <clipPath id="vine-clip">
