@@ -6,8 +6,9 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function GET(request: Request, { params }: { params: { token: string } }) {
-  const token = params.token.toUpperCase();
+export async function GET(request: Request, { params }: { params: Promise<{ token: string }> }) {
+  const resolvedParams = await params;
+  const token = resolvedParams.token.toUpperCase();
   
   const { data, error } = await supabase
     .from('pengawasan_lapangans')
