@@ -318,7 +318,7 @@ export async function POST(
       modules: [imageModule]
     });
 
-    doc.render(data);
+    await doc.renderAsync(data);
 
     const buf = doc.getZip().generate({
       type: 'nodebuffer',

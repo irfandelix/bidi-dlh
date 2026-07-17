@@ -342,7 +342,7 @@ export async function GET(
       modules: [imageModule]
     });
 
-    doc.render(data);
+    await doc.renderAsync(data);
 
     const buf = doc.getZip().generate({
       type: 'nodebuffer',
