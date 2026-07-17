@@ -56,7 +56,7 @@ export default function EasterEggPlant({ logoRef }: { logoRef: React.RefObject<H
 
   if (!mounted) return null;
 
-  const size = 400; // 2x the original size
+  const size = 600; // 3x the original size
 
   return createPortal(
     <div className="fixed inset-0 pointer-events-none z-[60] hidden xl:block">
@@ -66,8 +66,8 @@ export default function EasterEggPlant({ logoRef }: { logoRef: React.RefObject<H
         style={{ 
           width: size, 
           height: size,
-          left: -100, // Push left to eliminate padding gap
-          bottom: -100 // Push down to hide the dirt
+          left: -150, // Push left to eliminate padding gap
+          bottom: -150 // Push down to hide the dirt
         }}
       >
         <Lottie 
@@ -85,8 +85,8 @@ export default function EasterEggPlant({ logoRef }: { logoRef: React.RefObject<H
         style={{ 
           width: size, 
           height: size, 
-          right: -100, // Push right to eliminate padding gap
-          bottom: -100, // Push down to hide the dirt
+          right: -150, // Push right to eliminate padding gap
+          bottom: -150, // Push down to hide the dirt
           transform: 'scaleX(-1)' 
         }}
       >
