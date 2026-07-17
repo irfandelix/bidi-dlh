@@ -36,8 +36,8 @@ export default function BidiLogo() {
     const rotation = angle + 90;
     
     // How far out the paw should reach (cap it so it doesn't go too far)
-    // The base distance to peek out of the button is around 25-30px
-    const reach = Math.min(35, distance * 0.5);
+    // The base distance to peek out of the button is around 30-40px
+    const reach = Math.min(45, Math.max(10, distance * 0.4));
 
     if (isHoveringText) {
       // Hide if directly over text
@@ -67,8 +67,10 @@ export default function BidiLogo() {
       ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="relative flex items-center justify-center p-4 -ml-4 cursor-default"
+      className="relative flex items-center justify-center cursor-default group"
     >
+      {/* Big invisible hover zone */}
+      <div className="absolute -inset-10 z-0"></div>
       {/* Cat Paw SVG */}
       <div 
         className="absolute top-1/2 left-1/2 pointer-events-none transition-all duration-200 ease-out z-0"
