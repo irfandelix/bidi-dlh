@@ -7,17 +7,20 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const isLogin = pathname === '/login';
   const isPeta = pathname === '/peta';
+  const isMobileApp = pathname === '/pengawasan/mobile';
 
   let mainClass = "flex-1 pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full";
   if (isLogin) {
     mainClass = "flex-1 flex w-full";
   } else if (isPeta) {
     mainClass = "flex flex-col w-full h-[100dvh] pt-[76px] overflow-hidden"; // Full width & locked height for map
+  } else if (isMobileApp) {
+    mainClass = "flex flex-col w-full h-[100dvh] p-0 m-0 overflow-hidden";
   }
 
   return (
     <>
-      {!isLogin && <Navbar />}
+      {(!isLogin && !isMobileApp) && <Navbar />}
       <main className={mainClass}>
         {children}
       </main>
