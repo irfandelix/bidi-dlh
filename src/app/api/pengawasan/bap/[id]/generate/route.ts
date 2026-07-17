@@ -157,12 +157,28 @@ export async function GET(
     }).filter((val: string) => val.trim() !== '');
 
     // Formatting Foto (2 per row for table)
+    const resolveImage = async (docObj: any) => {
+       if (!docObj) return '';
+       if (docObj.file) return docObj.file;
+       if (docObj.path) {
+          const url = `https://zorjwjatbfxzmalpemqa.supabase.co/storage/v1/object/public/dokumentasi/${docObj.path}`;
+          try {
+             const res = await fetch(url);
+             const arrayBuffer = await res.arrayBuffer();
+             return `data:image/jpeg;base64,${Buffer.from(arrayBuffer).toString('base64')}`;
+          } catch (e) {
+             return '';
+          }
+       }
+       return '';
+    };
+
     const foto_baris = [];
     for (let i = 0; i < dokumentasi.length; i += 2) {
       foto_baris.push({
-        foto_1: dokumentasi[i]?.file || dokumentasi[i]?.path || '',
+        foto_1: await resolveImage(dokumentasi[i]),
         ket_1: dokumentasi[i]?.keterangan || '',
-        foto_2: dokumentasi[i + 1]?.file || dokumentasi[i + 1]?.path || '',
+        foto_2: await resolveImage(dokumentasi[i + 1]),
         ket_2: dokumentasi[i + 1]?.keterangan || ''
       });
     }
@@ -294,16 +310,9 @@ export async function GET(
         const emptyImageBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
         if (!tagValue || typeof tagValue !== 'string') return emptyImageBuffer;
         
-        if (tagValue.startsWith('http')) {
-           return fetch(tagValue).then(res => res.arrayBuffer()).then(ab => Buffer.from(ab)).catch(() => emptyImageBuffer);
-        }
-
-        if (!tagValue.startsWith('data:image')) {
-           const url = `https://zorjwjatbfxzmalpemqa.supabase.co/storage/v1/object/public/dokumentasi/${tagValue}`;
-           return fetch(url).then(res => res.arrayBuffer()).then(ab => Buffer.from(ab)).catch(() => emptyImageBuffer);
-        }
-        
         const base64Regex = /^data:image\/(png|jpeg|jpg);base64,/;
+        if (!base64Regex.test(tagValue)) return emptyImageBuffer;
+        
         try {
           const base64Data = tagValue.replace(base64Regex, '');
           return Buffer.from(base64Data, 'base64');
@@ -342,8 +351,7 @@ export async function GET(
       modules: [imageModule]
     });
 
-    await doc.resolveData(data);
-    doc.render();
+    doc.render(data);
 
     const buf = doc.getZip().generate({
       type: 'nodebuffer',
