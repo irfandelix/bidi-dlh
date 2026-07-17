@@ -448,9 +448,9 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
   };
 
   return (
-    <div className="flex-1 bg-emerald-50">
-      <div className="p-6 pt-12 flex-1">
-        <div className="flex-row justify-between items-center mb-6">
+    <div className="flex flex-col h-screen bg-emerald-50">
+      <div className="p-6 pt-12 flex-1 flex flex-col">
+        <div className="flex flex-row justify-between items-center mb-6">
           <button 
             onClick={() => step === 1 ? setScreen('info') : prevStep()} 
             className="bg-white border-2 border-slate-900 px-4 py-2 rounded-lg shadow-[2px_2px_0_0_#0f172a]"
@@ -465,14 +465,14 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
           <div className="bg-emerald-400 h-full w-[${(step/totalSteps)*100}%] border-r-2 border-slate-900" />
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 flex flex-col overflow-y-auto">
           {step === 1 && (
             <div className="bg-white p-6 border-4 border-slate-900 rounded-2xl shadow-[6px_6px_0_0_#0f172a] mb-6">
               <span className="text-2xl font-black text-slate-900 mb-6 uppercase">A. Identitas Lokasi</span>
               
               <div className="mb-4">
                 <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">Waktu Pengawasan (Misal: 09.00)</span>
-                <div className="flex-row gap-2">
+                <div className="flex flex-row gap-2">
                   <input
                     className="flex-1 bg-white border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold shadow-[4px_4px_0_0_#0f172a]"
                     placeholder="Isi Waktu..."
@@ -514,7 +514,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
 
               <div className="mb-4">
                 <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">Koordinat Lokasi (Lat, Long)</span>
-                <div className="flex-row gap-2">
+                <div className="flex flex-row gap-2">
                   <input
                     className="flex-1 bg-white border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold shadow-[4px_4px_0_0_#0f172a]"
                     placeholder="Isi Koordinat..."
@@ -668,7 +668,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   <span className="font-black text-slate-900 uppercase text-sm">1. Dokumen Perizinan</span>
                 </div>
                 {listDokumen.map((dok, i) => (
-                  <div key={dok.id} className="flex-row gap-2 mb-3 items-center">
+                  <div key={dok.id} className="flex flex-row gap-2 mb-3 items-center">
                     <span className="font-black text-slate-400">{i + 1}.</span>
                     <input
                       className="flex-1 bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-2 text-slate-900 font-bold"
@@ -758,7 +758,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
               <div className="mb-8">
                 <span className="text-lg font-black text-slate-900 mb-4 uppercase">Saran / Masukan</span>
                 {listSaran.map((saran, i) => (
-                  <div key={saran.id} className="flex-row gap-2 mb-3 items-center">
+                  <div key={saran.id} className="flex flex-row gap-2 mb-3 items-center">
                     <span className="font-black text-slate-400">{i + 1}.</span>
                     <input
                       className="flex-1 bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-2 text-slate-900 font-bold"
@@ -785,11 +785,11 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                 <span className="text-lg font-black text-slate-900 mb-4 uppercase">Penilaian & Kesimpulan</span>
                 {komponenPenilaian.map((komp, idx) => (
                   <div key={komp.id} className="bg-slate-50 border-2 border-slate-900 rounded-xl p-4 mb-3 shadow-[2px_2px_0_0_#0f172a]">
-                    <div className="flex-row justify-between items-center mb-2">
+                    <div className="flex flex-row justify-between items-center mb-2">
                       <span className="bg-slate-900 text-white font-black px-2 py-1 rounded-md text-xs">C.{idx + 1}</span>
                     </div>
                     <span className="text-slate-900 font-black mb-3 uppercase">{komp.nama}</span>
-                    <div className="flex-row items-center gap-2">
+                    <div className="flex flex-row items-center gap-2">
                       <span className="text-xs font-black text-slate-500 uppercase">Skor (0-100):</span>
                       <input
                         className="flex-1 bg-white border-2 border-slate-900 rounded-lg px-3 py-2 text-rose-600 font-black text-center text-lg"
@@ -805,9 +805,9 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                 ))}
 
                 <div className="bg-slate-900 p-4 rounded-xl border-2 border-slate-900">
-                  <div className="flex-row justify-between items-center mb-4 border-b-2 border-slate-700 pb-4">
+                  <div className="flex flex-row justify-between items-center mb-4 border-b-2 border-slate-700 pb-4">
                     <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Nilai Rata-Rata</span>
-                    <div className="flex-row items-end gap-1">
+                    <div className="flex flex-row items-end gap-1">
                       <span className="text-3xl font-black ${totalSkor() > 100 ? 'text-rose-500' : 'text-teal-400'}">{totalSkor()}</span>
                       <span className="text-sm font-bold text-slate-500 mb-1">/ 100</span>
                     </div>
@@ -831,7 +831,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                 <span className="text-lg font-black text-slate-900 mb-4 uppercase">Pihak Fasyankes / Pemrakarsa</span>
                 {listPerwakilan.map((perw, idx) => (
                   <div key={perw.id} className="bg-slate-50 border-2 border-slate-900 rounded-xl p-4 mb-4 shadow-[2px_2px_0_0_#0f172a]">
-                    <div className="flex-row justify-between mb-2">
+                    <div className="flex flex-row justify-between mb-2">
                       <span className="font-black text-slate-400">Perwakilan {idx + 1}</span>
                       {listPerwakilan.length > 1 && (
                         <button onClick={() => setListPerwakilan(listPerwakilan.filter(x => x.id !== perw.id))}>
