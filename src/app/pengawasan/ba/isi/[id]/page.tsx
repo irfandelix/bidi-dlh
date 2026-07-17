@@ -447,19 +447,52 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                   <textarea name="jenis_produk" value={formData.jenis_produk} onChange={handleChange} rows={2} placeholder="Jenis Produk..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none"></textarea>
                 </div>
               ) : isPerumahan ? (
-                <div>
-                  <label className="block text-[10px] font-black text-slate-900 uppercase mb-1 tracking-widest">Kapasitas (Jumlah & Tipe Rumah)</label>
-                  <div className="grid grid-cols-1 gap-3">
+                <div className="space-y-4">
                     <div>
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Sesuai Izin</label>
-                      <textarea name="kapasitas_izin" value={formData.kapasitas_izin} onChange={handleChange} rows={2} placeholder="Misal: 100 Unit Tipe 36..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none"></textarea>
+                      <label className="block text-[10px] font-black text-slate-900 uppercase mb-1 tracking-widest">Kapasitas (Jumlah & Tipe Rumah)</label>
+                      <div className="grid grid-cols-1 gap-3">
+                        <div>
+                          <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Sesuai Izin</label>
+                          <textarea name="kapasitas_izin" value={formData.kapasitas_izin} onChange={handleChange} rows={2} placeholder="Misal: 100 Unit Tipe 36..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none"></textarea>
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Kondisi Riil Terbangun</label>
+                          <textarea name="kapasitas_riil" value={formData.kapasitas_riil} onChange={handleChange} rows={2} placeholder="Kondisi Riil Terbangun..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none"></textarea>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Kondisi Riil Terbangun</label>
-                      <textarea name="kapasitas_riil" value={formData.kapasitas_riil} onChange={handleChange} rows={2} placeholder="Kondisi Riil Terbangun..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none"></textarea>
+                    
+                    <div className="pt-4 mt-4 border-t-4 border-slate-900 space-y-3">
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Jumlah Pekerja / Penghuni</label>
+                        <textarea name="jumlah_pekerja" value={formData.jumlah_pekerja} onChange={handleChange} rows={2} placeholder="Jumlah Pekerja Konstruksi / Penghuni..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none"></textarea>
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Jam Shift Kerja Konstruksi</label>
+                        <textarea name="shift_kerja_konstruksi" value={formData.shift_kerja_konstruksi} onChange={handleChange} rows={2} placeholder="Shift Kerja Konstruksi..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none"></textarea>
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Hari Kerja per Minggu</label>
+                        <input type="text" name="hari_kerja_minggu" value={formData.hari_kerja_minggu} onChange={handleChange} placeholder="Hari Kerja per Minggu..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Teknologi IPAL/Septictank</label>
+                        <textarea name="teknologi_air_limbah" value={formData.teknologi_air_limbah} onChange={handleChange} rows={2} placeholder="Teknologi IPAL/Septictank..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none"></textarea>
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Volume Air Limbah</label>
+                        <input type="text" name="volume_air_limbah" value={formData.volume_air_limbah} onChange={handleChange} placeholder="Volume Air Limbah (m3/hari)..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Pemanfaatan Air Tanah</label>
+                        <textarea name="pemanfaatan_air_tanah" value={formData.pemanfaatan_air_tanah} onChange={handleChange} rows={2} placeholder="Pemanfaatan Air Tanah (Sumur dll)..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none"></textarea>
+                      </div>
+                      <div>
+                        <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Penggunaan Air (m3/hari)</label>
+                        <input type="text" name="penggunaan_air_liter" value={formData.penggunaan_air_liter} onChange={handleChange} placeholder="Penggunaan Air..." className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none" />
+                      </div>
                     </div>
                   </div>
-                </div>
               ) : (isTokoModern || isSPPG) ? (
                 <div>
                   <label className="block text-[10px] font-black text-slate-900 uppercase mb-1 tracking-widest">Kapasitas Kegiatan</label>
