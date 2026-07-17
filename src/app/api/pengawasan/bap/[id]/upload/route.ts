@@ -231,12 +231,15 @@ export async function POST(
       ...identitas, // contains kbli, alamat, pj_nama, telepon dll.
       ...checklistFlat, // contains air_fisik, ket_air_fisik dll.
       // Template specific fallbacks mapping
+      luas_lahan: identitas.luas_lahan || identitas.luas_total || '',
+      hari_kerja: identitas.hari_kerja || identitas.hari_kerja_minggu || '',
+      hari_kerja_minggu: identitas.hari_kerja_minggu || identitas.hari_kerja || '',
       jumlah_pekerja_penghuni, // For perumahan
-      jumlah_karyawan_pengunjung: identitas.jumlah_karyawan_pengunjung || jumlah_pasien_pekerja, // For fasyankes/sppg
+      jumlah_karyawan_pengunjung: identitas.jumlah_karyawan_pengunjung || (identitas.jumlah_penghuni ? `Pengunjung: ${identitas.jumlah_penghuni}, Pekerja: ${identitas.jumlah_pekerja || '-'}` : jumlah_pasien_pekerja), // For fasyankes/sppg
       kapasitas_kegiatan: identitas.kapasitas_kegiatan || (identitas.kapasitas_izin ? `Izin: ${identitas.kapasitas_izin}, Riil: ${identitas.kapasitas_riil || '-'}` : ''),
       jam_operasional: identitas.jam_operasional || identitas.jam_kerja_hari || identitas.jam_produksi || '',
       shift_kerja_konstruksi: identitas.shift_kerja_konstruksi || '',
-      shift_kerja: identitas.shift_kerja || identitas.shift_kerja_konstruksi || '',
+      shift_kerja: identitas.shift_kerja || identitas.jam_kerja_hari || identitas.shift_kerja_konstruksi || '',
 
       nama_badan_usaha_kegiatan: agenda.nama_pemrakarsa,
       alamat_lokasi: agenda.alamat_lokasi,
