@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link'
-import { LayoutDashboard, ShieldCheck, Map, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, ShieldCheck, Map, Settings, LogOut, MessageSquareWarning, Archive } from 'lucide-react'
 import { handleLogout } from '@/app/login/actions'
 import { usePathname } from 'next/navigation'
 import BidiLogo from './BidiLogo'
@@ -34,6 +34,18 @@ export default function Navbar() {
           <Link href="/peta" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-blue-100 hover:text-slate-900 hover:shadow-[2px_2px_0_0_#0f172a] hover:border-slate-900 border-2 border-transparent transition-all">
             <Map size={18} />
             <span className="hidden md:inline">Peta Lokasi</span>
+          </Link>
+        </li>
+        <li>
+          <Link href="/pengaduan" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-fuchsia-100 hover:text-slate-900 hover:shadow-[2px_2px_0_0_#0f172a] hover:border-slate-900 border-2 border-transparent transition-all">
+            <MessageSquareWarning size={18} />
+            <span className="hidden sm:inline">Pengaduan</span>
+          </Link>
+        </li>
+        <li>
+          <Link href="/arsip" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-200 hover:text-slate-900 hover:shadow-[2px_2px_0_0_#0f172a] hover:border-slate-900 border-2 border-transparent transition-all">
+            <Archive size={18} />
+            <span className="hidden sm:inline">Arsip</span>
           </Link>
         </li>
       </ul>
