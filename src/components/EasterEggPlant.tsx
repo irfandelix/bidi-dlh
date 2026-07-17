@@ -62,8 +62,13 @@ export default function EasterEggPlant({ logoRef }: { logoRef: React.RefObject<H
     <div className="fixed inset-0 pointer-events-none z-[60] hidden xl:block">
       {/* Left Plant */}
       <div 
-        className="absolute bottom-0 left-0"
-        style={{ width: size, height: size }}
+        className="absolute"
+        style={{ 
+          width: size, 
+          height: size,
+          left: -100, // Push left to eliminate padding gap
+          bottom: -100 // Push down to hide the dirt
+        }}
       >
         <Lottie 
           lottieRef={lottieLeftRef}
@@ -76,8 +81,14 @@ export default function EasterEggPlant({ logoRef }: { logoRef: React.RefObject<H
 
       {/* Right Plant (Mirrored) */}
       <div 
-        className="absolute bottom-0 right-0"
-        style={{ width: size, height: size, transform: 'scaleX(-1)' }}
+        className="absolute"
+        style={{ 
+          width: size, 
+          height: size, 
+          right: -100, // Push right to eliminate padding gap
+          bottom: -100, // Push down to hide the dirt
+          transform: 'scaleX(-1)' 
+        }}
       >
         <Lottie 
           lottieRef={lottieRightRef}
