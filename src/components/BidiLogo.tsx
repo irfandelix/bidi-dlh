@@ -35,7 +35,7 @@ export default function BidiLogo() {
     
     // How far out the paw should reach (cap it so it doesn't go too far)
     // The base distance to peek out of the button is around 30-40px
-    const reach = Math.min(45, Math.max(10, distance * 0.4));
+    const reach = Math.min(75, Math.max(15, distance * 0.6));
 
     // Show sprout
     setPawStyle({
@@ -63,19 +63,24 @@ export default function BidiLogo() {
       <div className="absolute -inset-20 z-0"></div>
       {/* Sprout SVG */}
       <div 
-        className="absolute top-1/2 left-1/2 pointer-events-none transition-all duration-200 ease-out z-0"
+        className="absolute top-1/2 left-1/2 pointer-events-none transition-all duration-300 ease-out z-0"
         style={{
           ...pawStyle,
           transformOrigin: '50% 100%' // Anchor at the bottom of the stem
         }}
       >
-        <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          {/* Stem */}
-          <path d="M 50,90 Q 50,50 50,20" fill="none" stroke="#22c55e" strokeWidth="6" strokeLinecap="round" />
-          {/* Left leaf */}
-          <path d="M 50,70 Q 20,70 20,40 Q 40,30 50,70" fill="#22c55e" />
-          {/* Right leaf */}
-          <path d="M 50,50 Q 80,50 80,20 Q 60,10 50,50" fill="#22c55e" />
+        <svg width="40" height="80" viewBox="0 0 100 200" xmlns="http://www.w3.org/2000/svg">
+          {/* Stem (S-curve) */}
+          <path d="M 50,200 C 60,150 30,100 50,20" fill="none" stroke="#22c55e" strokeWidth="8" strokeLinecap="round" />
+          
+          {/* Bottom Right Leaf */}
+          <path d="M 52,160 Q 90,150 90,110 Q 60,110 52,160" fill="#22c55e" />
+          
+          {/* Middle Left Leaf */}
+          <path d="M 42,100 Q 10,90 10,50 Q 40,50 42,100" fill="#22c55e" />
+          
+          {/* Top Right Leaf */}
+          <path d="M 48,50 Q 80,40 80,10 Q 55,10 48,50" fill="#22c55e" />
         </svg>
       </div>
 
