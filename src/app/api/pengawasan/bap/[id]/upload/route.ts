@@ -371,6 +371,14 @@ export async function POST(
         await uploadFileToDrive(imageBuffer, fileName, dokumentasiFolderId, `image/${ext}`);
       }
     }
+    
+    // 5. Save docxFileId to database
+    if (bapRow && bapRow.id) {
+      bapData.docxFileId = docxFileId;
+      await supabase.from('bap_pengawasans').update({
+        data_matriks_c: bapData
+      }).eq('id', bapRow.id);
+    }
 
     return NextResponse.json({ 
       success: true, 
