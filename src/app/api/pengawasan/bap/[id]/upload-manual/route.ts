@@ -47,7 +47,7 @@ export async function POST(
       return NextResponse.json({ error: 'Data BAP tidak ditemukan' }, { status: 404 });
     }
 
-    let matriks_c = bapData.data_matriks_c;
+    let matriks_c = (bapData as any).data_matriks_c;
     if (typeof matriks_c === 'string') {
       try { matriks_c = JSON.parse(matriks_c); } catch (e) { matriks_c = {}; }
     }
