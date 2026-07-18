@@ -33,7 +33,7 @@ export default function TimPengaduanPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/pengaturan/tim-Pengaduan');
+      const res = await fetch('/api/pengaturan/tim-pengaduan');
       const json = await res.json();
       setPersonil(json.data || []);
     } catch (err) {
@@ -76,13 +76,13 @@ export default function TimPengaduanPage() {
     e.preventDefault();
     try {
       if (editId) {
-        await fetch(`/api/pengaturan/tim-Pengaduan/${editId}`, {
+        await fetch(`/api/pengaturan/tim-pengaduan/${editId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
       } else {
-        await fetch('/api/pengaturan/tim-Pengaduan', {
+        await fetch('/api/pengaturan/tim-pengaduan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
@@ -99,7 +99,7 @@ export default function TimPengaduanPage() {
   const handleDelete = async (id: number) => {
     if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
     try {
-      await fetch(`/api/pengaturan/tim-Pengaduan/${id}`, {
+      await fetch(`/api/pengaturan/tim-pengaduan/${id}`, {
         method: 'DELETE'
       });
       fetchData();
