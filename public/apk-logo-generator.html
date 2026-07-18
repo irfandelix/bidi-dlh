@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Generator Logo APK BIDI DLH</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+        }
+        
+        /* APK Icon Container (512x512) */
+        .apk-icon {
+            width: 512px;
+            height: 512px;
+            background-color: #ffffff;
+            border-radius: 112px; /* Smooth rounded corners for app icon */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        /* "BIDI" box */
+        .bidi-box {
+            background-color: #34d399; /* emerald-400 */
+            color: #0f172a; /* slate-900 */
+            border: 12px solid #0f172a;
+            border-radius: 40px;
+            padding: 16px 40px;
+            font-size: 112px;
+            font-weight: 900;
+            line-height: 1;
+            box-shadow: 12px 12px 0 0 #0f172a;
+            margin-bottom: 24px;
+            letter-spacing: 2px;
+        }
+
+        /* "DLH" text */
+        .dlh-text {
+            color: #0f172a;
+            font-size: 152px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -4px;
+            margin-top: 12px;
+        }
+
+        button {
+            margin-top: 40px;
+            padding: 16px 32px;
+            font-size: 20px;
+            font-weight: bold;
+            background-color: #0f172a;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            background-color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="logo-container" class="apk-icon">
+        <div class="bidi-box">BIDI</div>
+        <div class="dlh-text">DLH</div>
+    </div>
+
+    <button onclick="downloadLogo()">⬇️ Download Logo APK (512x512)</button>
+
+    <script>
+        function downloadLogo() {
+            const container = document.getElementById('logo-container');
+            // Menghilangkan bayangan luar sementara saat di-render agar hasil PNG bersih (transparent background)
+            const originalShadow = container.style.boxShadow;
+            container.style.boxShadow = 'none';
+            // Agar sisi luar lengkungan transparan
+            container.style.backgroundColor = 'transparent'; 
+            // Tunggu, kalau background transparent, kotak putihnya hilang. Kita ingin kotak putih tetap ada sebagai background icon!
+            container.style.backgroundColor = '#ffffff';
+
+            html2canvas(container, {
+                backgroundColor: null, // Transparent background outside the rounded corners
+                scale: 1 // 512x512
+            }).then(canvas => {
+                // Restore shadow
+                container.style.boxShadow = originalShadow;
+
+                // Create link and download
+                const link = document.createElement('a');
+                link.download = 'logo-apk-bidi-dlh.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
