@@ -44,6 +44,8 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
 
     const payload = {
       lokasi_arsip: formData.get('lokasi_arsip'),
+      latitude: formData.get('latitude') || null,
+      longitude: formData.get('longitude') || null,
       status_tahapan,
       arsip_fisik: JSON.stringify(fisik),
     };
@@ -285,10 +287,31 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
           </div>
 
           {/* LOKASI ARSIP */}
-          <div className="mt-8 p-6 bg-slate-100 border-4 border-slate-900 rounded-2xl shadow-[4px_4px_0_0_#0f172a]">
-            <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">Lokasi Arsip / Lemari</label>
-            <input type="text" name="lokasi_arsip" defaultValue={doc.lokasi_arsip || ''} placeholder="Contoh: Lemari A, Rak 3"
-              className="w-full bg-white border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl p-3 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div className="p-6 bg-slate-100 border-4 border-slate-900 rounded-2xl shadow-[4px_4px_0_0_#0f172a]">
+              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">Lokasi Arsip / Lemari</label>
+              <p className="text-xs font-bold text-slate-600 mb-4 uppercase">Letak fisik dokumen disimpan.</p>
+              <input type="text" name="lokasi_arsip" defaultValue={doc.lokasi_arsip || ''} placeholder="Contoh: Lemari A, Rak 3"
+                className="w-full bg-white border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl p-3 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
+            </div>
+
+            {/* KOORDINAT PETA */}
+            <div className="p-6 bg-amber-100 border-4 border-slate-900 rounded-2xl shadow-[4px_4px_0_0_#0f172a]">
+              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">Titik Koordinat (Peta)</label>
+              <p className="text-xs font-bold text-slate-700 mb-4 uppercase">Untuk kemudahan tim pengawasan.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-black text-slate-900 uppercase">Latitude</label>
+                  <input type="text" name="latitude" defaultValue={doc.latitude || ''} placeholder="-7.4245"
+                    className="w-full bg-white border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl p-3 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none mt-1" />
+                </div>
+                <div>
+                  <label className="text-xs font-black text-slate-900 uppercase">Longitude</label>
+                  <input type="text" name="longitude" defaultValue={doc.longitude || ''} placeholder="111.0234"
+                    className="w-full bg-white border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl p-3 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none mt-1" />
+                </div>
+              </div>
+            </div>
           </div>
   
           {/* TOMBOL AKSI */}

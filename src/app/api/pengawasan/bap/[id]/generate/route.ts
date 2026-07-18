@@ -239,7 +239,7 @@ export async function GET(
     else if (formatted_waktu.includes(':')) formatted_waktu = formatted_waktu.replace(':', '.') + ' WIB';
 
     // Construct combined fields for specific templates
-    const jumlah_pekerja_penghuni = identitas.jumlah_pekerja_penghuni || identitas.jumlah_pekerja || '';
+    const jumlah_pekerja_penghuni = identitas.jumlah_pekerja_penghuni || (identitas.jumlah_pekerja || identitas.jumlah_penghuni ? `Pekerja: ${identitas.jumlah_pekerja || '-'}, Penghuni: ${identitas.jumlah_penghuni || '-'}` : '');
     const jumlah_pasien_pekerja = `Pasien: ${identitas.jumlah_pasien || '-'}, Pekerja: ${identitas.jumlah_karyawan || identitas.jumlah_pekerja || '-'}`;
 
     // Prepare data payload for docxtemplater
@@ -253,7 +253,7 @@ export async function GET(
       jumlah_pekerja_penghuni, // For perumahan
       jumlah_karyawan_pengunjung: identitas.jumlah_karyawan_pengunjung || (identitas.jumlah_penghuni ? `Pengunjung: ${identitas.jumlah_penghuni}, Pekerja: ${identitas.jumlah_pekerja || '-'}` : jumlah_pasien_pekerja), // For fasyankes/sppg
       kapasitas_kegiatan: identitas.kapasitas_kegiatan || (identitas.kapasitas_izin ? `Izin: ${identitas.kapasitas_izin}, Riil: ${identitas.kapasitas_riil || '-'}` : ''),
-      jam_operasional: identitas.jam_operasional || identitas.jam_kerja_hari || identitas.jam_produksi || '',
+      jam_operasional: identitas.jam_operasional || identitas.shift_kerja || identitas.jam_kerja_hari || identitas.jam_produksi || '',
       shift_kerja_konstruksi: identitas.shift_kerja_konstruksi || '',
       shift_kerja: identitas.shift_kerja || identitas.jam_kerja_hari || identitas.shift_kerja_konstruksi || '',
 

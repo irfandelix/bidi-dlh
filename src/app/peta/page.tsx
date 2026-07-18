@@ -14,18 +14,36 @@ export default function PetaPengawasan() {
   const mapInstance = useRef<any>(null);
   const markersRef = useRef<any>({});
 
-  useEffect(() => {
-    // Fetch data yang punya koordinat (latitude & longitude tidak null/kosong)
     const fetchLokasi = async () => {
       try {
-        const { data, error } = await supabase.from('pengawasan_lapangans')
+        // Fetch pengawasan_lapangans
+        const { data: pengawasanData, error: pengawasanError } = await supabase.from('pengawasan_lapangans')
           .select('*')
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)
           .neq('latitude', '')
           .neq('longitude', '');
-        if (error) throw error;
-        setLokasi(data || []);
+        
+        if (pengawasanError) throw pengawasanError;
+
+        // Fetch dokumens (Perizinan)
+        const { data: dokumensData, error: dokumensError } = await supabase.from('dokumens')
+          .select('*')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .neq('latitude', '')
+          .neq('longitude', '');
+        
+        if (dokumensError) {
+          // If column doesn't exist yet, this will fail. We catch and ignore it for now.
+          console.warn('Dokumens error (maybe latitude column missing):', dokumensError);
+        }
+
+        // Add a flag to differentiate them
+        const pengawasanList = (pengawasanData || []).map(item => ({ ...item, isPengawasan: true }));
+        const perizinanList = (dokumensData || []).map(item => ({ ...item, isPengawasan: false }));
+
+        setLokasi([...pengawasanList, ...perizinanList]);
       } catch (err) {
         console.error(err);
       } finally {
@@ -55,14 +73,18 @@ export default function PetaPengawasan() {
   const renderMarkers = (L: any) => {
     if (!mapInstance.current || lokasi.length === 0) return;
 
-    lokasi.forEach(item => {
-      let markerColor = '#10b981'; // Emerald (Taat)
-      if (item.status_ketaatan === 'Kurang Taat' || item.status_ketaatan === 'Taat Bersyarat') {
-        markerColor = '#f59e0b'; // Amber
-      } else if (item.status_ketaatan === 'Tidak Taat') {
-        markerColor = '#ef4444'; // Rose
-      } else if (!item.status_ketaatan) {
-        markerColor = '#64748b'; // Slate (Belum Dinilai)
+      let markerColor = '#10b981'; // Emerald (Taat - default pengawasan)
+      if (item.isPengawasan) {
+        if (item.status_ketaatan === 'Kurang Taat' || item.status_ketaatan === 'Taat Bersyarat') {
+          markerColor = '#f59e0b'; // Amber
+        } else if (item.status_ketaatan === 'Tidak Taat') {
+          markerColor = '#ef4444'; // Rose
+        } else if (!item.status_ketaatan) {
+          markerColor = '#64748b'; // Slate (Belum Dinilai)
+        }
+      } else {
+        // Perizinan marker
+        markerColor = '#3b82f6'; // Blue for Perizinan
       }
 
       const customIcon = L.divIcon({
@@ -74,9 +96,9 @@ export default function PetaPengawasan() {
 
       const bapLink = item.file_bap ? `<a href="${item.file_bap}" target="_blank" style="display:inline-block; margin-top:12px; padding:6px 12px; background:#14b8a6; color:#0f172a; font-weight:900; text-decoration:none; border:2px solid #0f172a; border-radius:8px; text-transform:uppercase; font-size:10px; box-shadow: 2px 2px 0 0 #0f172a;">Lihat File BAP &rarr;</a>` : '';
 
-      const popupContent = `
+      const popupContent = item.isPengawasan ? `
         <div style="font-family: inherit; max-width: 200px; padding: 4px;">
-          <div style="font-size: 10px; font-weight: 900; background: #f1f5f9; padding: 2px 6px; border: 2px solid #0f172a; border-radius: 4px; display: inline-block; margin-bottom: 8px;">${item.token || '-'}</div>
+          <div style="font-size: 10px; font-weight: 900; background: #f1f5f9; padding: 2px 6px; border: 2px solid #0f172a; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PENGAWASAN • ${item.token || '-'}</div>
           <h4 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan}</h4>
           <p style="font-size: 10px; font-weight: 800; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.kategori || 'Umum'}</p>
           <div style="background: #f8fafc; border: 2px solid #0f172a; padding: 8px; border-radius: 8px;">
@@ -84,6 +106,17 @@ export default function PetaPengawasan() {
             <div style="font-size: 10px;"><strong>STATUS:</strong><br/><span style="color:${markerColor}; font-weight:900;">${(item.status_ketaatan || 'BELUM DINILAI').toUpperCase()}</span></div>
           </div>
           ${bapLink}
+        </div>
+      ` : `
+        <div style="font-family: inherit; max-width: 200px; padding: 4px;">
+          <div style="font-size: 10px; font-weight: 900; background: #dbeafe; color: #1e3a8a; padding: 2px 6px; border: 2px solid #1e3a8a; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PERIZINAN</div>
+          <h4 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan}</h4>
+          <p style="font-size: 10px; font-weight: 800; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.jenis_dokumen || 'UMUM'}</p>
+          <div style="background: #f8fafc; border: 2px solid #0f172a; padding: 8px; border-radius: 8px;">
+            <div style="font-size: 10px; margin-bottom: 4px;"><strong>PEMRAKARSA:</strong><br/>${item.nama_pemrakarsa}</div>
+            <div style="font-size: 10px;"><strong>STATUS:</strong><br/><span style="color:${markerColor}; font-weight:900;">DIARSIPKAN</span></div>
+          </div>
+          <a href="/perizinan/arsip/${item.id}" target="_blank" style="display:inline-block; margin-top:12px; padding:6px 12px; background:#3b82f6; color:#ffffff; font-weight:900; text-decoration:none; border:2px solid #0f172a; border-radius:8px; text-transform:uppercase; font-size:10px; box-shadow: 2px 2px 0 0 #0f172a;">Lihat Detail Arsip &rarr;</a>
         </div>
       `;
 
@@ -150,7 +183,7 @@ export default function PetaPengawasan() {
             </div>
             <div>
               <h2 className="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 uppercase">Peta Sebaran Ketaatan</h2>
-              <p className="text-sm font-bold text-slate-600 mt-1">Visualisasi spasial titik lokasi pengawasan industri dan fasyankes.</p>
+              <p className="text-sm font-bold text-slate-600 mt-1">Visualisasi spasial titik lokasi pengawasan dan perizinan.</p>
             </div>
           </div>
         </div>
@@ -178,6 +211,10 @@ export default function PetaPengawasan() {
                   <span className="w-5 h-5 rounded-full bg-slate-400 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
                   <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Belum Dinilai</div>
                 </div>
+                <div className="flex items-center gap-3 mt-4 pt-4 border-t-4 border-slate-900">
+                  <span className="w-5 h-5 rounded-full bg-blue-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
+                  <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Arsip Perizinan</div>
+                </div>
               </div>
             </div>
             
@@ -195,10 +232,12 @@ export default function PetaPengawasan() {
                   </div>
                 ) : (
                   lokasi.map(lok => {
-                    let warnaTitik = 'bg-slate-400';
-                    if (lok.status_ketaatan === 'Taat') warnaTitik = 'bg-emerald-500';
-                    else if (lok.status_ketaatan === 'Kurang Taat' || lok.status_ketaatan === 'Taat Bersyarat') warnaTitik = 'bg-amber-500';
-                    else if (lok.status_ketaatan === 'Tidak Taat') warnaTitik = 'bg-rose-500';
+                    let warnaTitik = lok.isPengawasan ? 'bg-slate-400' : 'bg-blue-500';
+                    if (lok.isPengawasan) {
+                      if (lok.status_ketaatan === 'Taat') warnaTitik = 'bg-emerald-500';
+                      else if (lok.status_ketaatan === 'Kurang Taat' || lok.status_ketaatan === 'Taat Bersyarat') warnaTitik = 'bg-amber-500';
+                      else if (lok.status_ketaatan === 'Tidak Taat') warnaTitik = 'bg-rose-500';
+                    }
 
                     return (
                       <div 
@@ -209,14 +248,18 @@ export default function PetaPengawasan() {
                             markersRef.current[lok.id].openPopup();
                           }
                         }}
-                        className="flex items-start gap-3 p-3 bg-slate-50 border-2 border-slate-900 rounded-xl hover:bg-sky-100 hover:shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 transition-all cursor-pointer"
+                        className={`flex items-start gap-3 p-3 bg-slate-50 border-2 ${lok.isPengawasan ? 'border-slate-900' : 'border-blue-800 bg-blue-50'} rounded-xl hover:bg-sky-100 hover:shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 transition-all cursor-pointer`}
                       >
                         <span className={`w-4 h-4 mt-0.5 shrink-0 rounded-full border-2 border-slate-900 ${warnaTitik} inline-block`}></span>
                         <div className="flex-1">
                           <p className="text-xs font-black text-slate-900 uppercase leading-tight mb-1">{lok.nama_kegiatan}</p>
                           <div className="flex justify-between items-center gap-2">
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lok.kategori || 'Umum'}</p>
-                            <p className="text-[10px] font-black text-slate-900 uppercase">{lok.status_ketaatan || 'Belum Dinilai'} {lok.total_skor ? `(${lok.total_skor})` : ''}</p>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lok.isPengawasan ? lok.kategori || 'Umum' : lok.jenis_dokumen || 'PERIZINAN'}</p>
+                            {lok.isPengawasan ? (
+                              <p className="text-[10px] font-black text-slate-900 uppercase">{lok.status_ketaatan || 'Belum Dinilai'} {lok.total_skor ? `(${lok.total_skor})` : ''}</p>
+                            ) : (
+                              <p className="text-[10px] font-black text-blue-800 uppercase">DIARSIPKAN</p>
+                            )}
                           </div>
                         </div>
                       </div>
