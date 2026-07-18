@@ -14,6 +14,7 @@ export default function PetaPengawasan() {
   const mapInstance = useRef<any>(null);
   const markersRef = useRef<any>({});
 
+  useEffect(() => {
     const fetchLokasi = async () => {
       try {
         // Fetch pengawasan_lapangans
@@ -73,6 +74,7 @@ export default function PetaPengawasan() {
   const renderMarkers = (L: any) => {
     if (!mapInstance.current || lokasi.length === 0) return;
 
+    lokasi.forEach(item => {
       let markerColor = '#10b981'; // Emerald (Taat - default pengawasan)
       if (item.isPengawasan) {
         if (item.status_ketaatan === 'Kurang Taat' || item.status_ketaatan === 'Taat Bersyarat') {
