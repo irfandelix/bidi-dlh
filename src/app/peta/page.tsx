@@ -41,8 +41,10 @@ export default function PetaPengawasan() {
         }
 
         // Add a flag to differentiate them
-        const pengawasanList = ((pengawasanData as any[]) || []).map((item: any) => ({ ...item, isPengawasan: true }));
-        const perizinanList = ((dokumensData as any[]) || []).map((item: any) => ({ ...item, isPengawasan: false }));
+        // @ts-ignore
+        const pengawasanList = (pengawasanData || []).map((item: any) => ({ ...item, isPengawasan: true }));
+        // @ts-ignore
+        const perizinanList = (dokumensData || []).map((item: any) => ({ ...item, isPengawasan: false }));
 
         setLokasi([...pengawasanList, ...perizinanList]);
       } catch (err) {
