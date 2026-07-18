@@ -33,7 +33,7 @@ export default function TimPengaduanPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/pengaturan/tim-pengaduan');
+      const res = await fetch('/api/pengaturan/tim-pengaduan', { cache: 'no-store' });
       const json = await res.json();
       setPersonil(json.data || []);
     } catch (err) {
