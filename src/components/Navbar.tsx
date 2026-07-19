@@ -22,7 +22,7 @@ export default function Navbar() {
         <li className="relative group block lg:hidden">
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-200 hover:text-slate-900 hover:shadow-[2px_2px_0_0_#0f172a] hover:border-slate-900 border-2 border-transparent transition-all">
             <LayoutDashboard size={18} />
-            <span className="hidden sm:inline">Kegiatan</span>
+            <span className="hidden sm:inline">KEGIATAN</span>
           </button>
           <div className="absolute left-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
             <div className="bg-white border-4 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] flex flex-col overflow-hidden">
