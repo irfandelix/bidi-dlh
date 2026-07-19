@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
-  Send, FileText, ArrowLeft, Plus, Search, Loader2 
+  Send, FileText, ArrowLeft, Plus, Search, Loader2, Download 
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 type ArsipKeluar = {
   id: number;
@@ -43,6 +44,23 @@ export default function DaftarArsipKeluarPage() {
   const totalPages = Math.ceil(filteredDocs.length / itemsPerPage);
   const paginatedDocs = filteredDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+  const handleExportExcel = () => {
+    const dataToExport = filteredDocs.map((d, index) => ({
+      "No": index + 1,
+      "Nomor Surat Keluar": d.nomor_surat_keluar,
+      "Tanggal Surat": d.tanggal_surat,
+      "Tujuan Surat": d.tujuan,
+      "Perihal": d.perihal,
+      "Kode Klasifikasi": d.kode_klasifikasi || '-',
+      "Link File": d.file_url || '-'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Surat Keluar");
+    XLSX.writeFile(workbook, "Buku_Agenda_Surat_Keluar.xlsx");
+  };
+
   if (loading) {
     return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="animate-spin text-emerald-600" size={40} /></div>;
   }
@@ -67,6 +85,9 @@ export default function DaftarArsipKeluarPage() {
         </div>
         
         <div className="flex items-center flex-wrap gap-3 relative z-10">
+          <button onClick={handleExportExcel} className="bg-white hover:bg-slate-100 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest">
+            <Download size={18} /> Export Excel
+          </button>
           <div className="bg-blue-50 px-5 py-3 rounded-xl border-2 border-slate-900 flex items-center gap-3 text-sm font-black text-slate-900 shadow-[4px_4px_0_0_#0f172a] uppercase">
             <FileText size={18} className="text-blue-500 fill-blue-500" />
             Total {docs.length} Surat

@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
-  Inbox, FileText, ArrowLeft, Plus, Search, Loader2 
+  Inbox, FileText, ArrowLeft, Plus, Search, Loader2, Download 
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 type ArsipMasuk = {
   id: number;
@@ -44,6 +45,24 @@ export default function DaftarArsipMasukPage() {
   const totalPages = Math.ceil(filteredDocs.length / itemsPerPage);
   const paginatedDocs = filteredDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+  const handleExportExcel = () => {
+    const dataToExport = filteredDocs.map((d, index) => ({
+      "No": index + 1,
+      "Nomor Surat Masuk": d.nomor_surat_masuk,
+      "Tanggal Surat": d.tanggal_surat,
+      "Tanggal Diterima": d.tanggal_terima,
+      "Asal Surat": d.asal_surat,
+      "Perihal": d.perihal,
+      "Kode Klasifikasi": d.kode_klasifikasi || '-',
+      "Link File": d.file_url || '-'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Surat Masuk");
+    XLSX.writeFile(workbook, "Buku_Agenda_Surat_Masuk.xlsx");
+  };
+
   if (loading) {
     return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
   }
@@ -68,6 +87,9 @@ export default function DaftarArsipMasukPage() {
         </div>
         
         <div className="flex items-center flex-wrap gap-3 relative z-10">
+          <button onClick={handleExportExcel} className="bg-white hover:bg-slate-100 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest">
+            <Download size={18} /> Export Excel
+          </button>
           <div className="bg-emerald-50 px-5 py-3 rounded-xl border-2 border-slate-900 flex items-center gap-3 text-sm font-black text-slate-900 shadow-[4px_4px_0_0_#0f172a] uppercase">
             <FileText size={18} className="text-emerald-500 fill-emerald-500" />
             Total {docs.length} Surat

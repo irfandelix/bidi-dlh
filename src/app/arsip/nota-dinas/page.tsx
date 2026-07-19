@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
-  Archive, FileText, ArrowLeft, Plus, Search, Loader2 
+  Archive, FileText, ArrowLeft, Plus, Search, Loader2, Download 
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 
 type NotaDinas = {
   id: number;
@@ -44,6 +45,22 @@ export default function DaftarArsipNotaDinasPage() {
   const totalPages = Math.ceil(filteredDocs.length / itemsPerPage);
   const paginatedDocs = filteredDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+  const handleExportExcel = () => {
+    const dataToExport = filteredDocs.map((d, index) => ({
+      "No": index + 1,
+      "Nomor Urut": d.no_urut,
+      "Nomor Nota Dinas": d.nomor_otomatis,
+      "Nama Nota Dinas": d.nama_nota,
+      "Tanggal": d.tanggal_nota,
+      "Dari Bagian": d.dari_bagian
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Nota Dinas");
+    XLSX.writeFile(workbook, "Buku_Register_Nota_Dinas.xlsx");
+  };
+
   if (loading) {
     return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="animate-spin text-fuchsia-600" size={40} /></div>;
   }
@@ -68,6 +85,9 @@ export default function DaftarArsipNotaDinasPage() {
         </div>
         
         <div className="flex items-center flex-wrap gap-3 relative z-10">
+          <button onClick={handleExportExcel} className="bg-white hover:bg-slate-100 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest">
+            <Download size={18} /> Export Excel
+          </button>
           <div className="bg-emerald-50 px-5 py-3 rounded-xl border-2 border-slate-900 flex items-center gap-3 text-sm font-black text-slate-900 shadow-[4px_4px_0_0_#0f172a] uppercase">
             <FileText size={18} className="text-emerald-500 fill-emerald-500" />
             Total {docs.length} Surat
