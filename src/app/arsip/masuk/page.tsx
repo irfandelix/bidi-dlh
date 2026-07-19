@@ -69,7 +69,7 @@ export default function DaftarArsipMasukPage() {
     });
 
     // 2. Siapkan array untuk header
-    const ws_data = [
+    const ws_data: any[][] = [
       ["DAFTAR BERKAS DAN DAFTAR ISI BERKAS ARSIP DINAMIS AKTIF TAHUN " + new Date().getFullYear()], // Row 1
       [], // Row 2
       ["Unit Pengolah : Bidang Perencanaan, Pengaduan dan Peningkatan Kapasitas Lingkungan Hidup"], // Row 3
