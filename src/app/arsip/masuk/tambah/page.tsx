@@ -59,6 +59,8 @@ export default function TambahArsipMasukPage() {
         tanggal_terima: formData.get('tanggal_terima'),
         asal_surat: formData.get('asal_surat'),
         perihal: formData.get('perihal'),
+        jumlah: parseInt(formData.get('jumlah') as string || '1'),
+        status_surat: formData.get('status_surat'),
         file_url: fileUrl
       };
 
@@ -224,10 +226,34 @@ export default function TambahArsipMasukPage() {
                 className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none resize-none"></textarea>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
+                  7. Jumlah Lembar / Berkas
+                </label>
+                <input type="number" name="jumlah" defaultValue={1} min={1}
+                  className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
+                  8. Status Surat
+                </label>
+                <select name="status_surat" defaultValue="Biasa"
+                  className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none cursor-pointer">
+                  <option value="Biasa">Biasa</option>
+                  <option value="Terbatas">Terbatas</option>
+                  <option value="Rahasia">Rahasia</option>
+                  <option value="Segera">Segera</option>
+                  <option value="Penting">Penting</option>
+                </select>
+              </div>
+            </div>
+
             {/* UPLOAD FILE */}
             <div>
               <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                7. Lampiran File (Opsional)
+                9. Lampiran File (Opsional)
               </label>
               <div className="relative overflow-hidden w-full bg-slate-50 border-2 border-dashed border-slate-900 rounded-xl p-6 text-center hover:bg-slate-100 transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
                 <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 cursor-pointer z-10" />

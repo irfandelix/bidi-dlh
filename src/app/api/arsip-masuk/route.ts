@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { kode_klasifikasi, nomor_surat_masuk, tanggal_surat, tanggal_terima, asal_surat, perihal, file_url } = body;
+    const { kode_klasifikasi, nomor_surat_masuk, tanggal_surat, tanggal_terima, asal_surat, perihal, file_url, jumlah, status_surat } = body;
     
     if (!nomor_surat_masuk || !tanggal_surat || !asal_surat || !perihal) {
       return NextResponse.json({ error: 'Data wajib belum lengkap diisi' }, { status: 400 });
@@ -40,7 +40,9 @@ export async function POST(request: Request) {
       tanggal_terima,
       asal_surat,
       perihal,
-      file_url
+      file_url,
+      jumlah: jumlah || 1,
+      status_surat: status_surat || 'Biasa'
     };
 
     const { data, error } = await supabase
