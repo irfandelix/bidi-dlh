@@ -14,6 +14,8 @@ type ArsipKeluar = {
   tanggal_surat: string;
   tujuan: string;
   perihal: string;
+  jumlah?: number;
+  status_surat?: string;
   file_url?: string;
   created_at: string;
 };
