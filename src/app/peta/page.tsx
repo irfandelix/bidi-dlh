@@ -113,11 +113,12 @@ export default function PetaPengawasan() {
         </div>
       ` : `
         <div style="font-family: inherit; max-width: 200px; padding: 4px;">
-          <div style="font-size: 10px; font-weight: 900; background: #dbeafe; color: #1e3a8a; padding: 2px 6px; border: 2px solid #1e3a8a; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PERIZINAN</div>
-          <h4 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan}</h4>
-          <p style="font-size: 10px; font-weight: 800; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.jenis_dokumen || 'UMUM'}</p>
+          <div style="font-size: 10px; font-weight: 900; background: #dbeafe; color: #1e3a8a; padding: 2px 6px; border: 2px solid #1e3a8a; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PERIZINAN TERBIT</div>
+          <h4 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan || '-'}</h4>
+          <p style="font-size: 10px; font-weight: 800; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.lokasi_kegiatan || 'LOKASI BELUM DIISI'}</p>
           <div style="background: #f8fafc; border: 2px solid #0f172a; padding: 8px; border-radius: 8px;">
-            <div style="font-size: 10px; margin-bottom: 4px;"><strong>PEMRAKARSA:</strong><br/>${item.nama_pemrakarsa}</div>
+            <div style="font-size: 10px; margin-bottom: 4px;"><strong>SK / PKPLH:</strong><br/>${item.nomor_sk || 'BELUM TERBIT'}</div>
+            <div style="font-size: 10px; margin-bottom: 4px;"><strong>TAHUN TERBIT:</strong><br/>${item.tahun || '-'}</div>
             <div style="font-size: 10px;"><strong>STATUS:</strong><br/><span style="color:${markerColor}; font-weight:900;">DIARSIPKAN</span></div>
           </div>
           <a href="/perizinan/arsip/${item.id}" target="_blank" style="display:inline-block; margin-top:12px; padding:6px 12px; background:#3b82f6; color:#ffffff; font-weight:900; text-decoration:none; border:2px solid #0f172a; border-radius:8px; text-transform:uppercase; font-size:10px; box-shadow: 2px 2px 0 0 #0f172a;">Lihat Detail Arsip &rarr;</a>
@@ -199,6 +200,10 @@ export default function PetaPengawasan() {
             <div className="shrink-0">
               <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest border-b-4 border-slate-900 pb-2 mb-4">Indikator Ketaatan</h4>
               <div className="space-y-4">
+                <div className="flex items-center gap-3 pb-4 mb-4 border-b-4 border-slate-900">
+                  <span className="w-5 h-5 rounded-full bg-blue-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
+                  <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Perizinan Terbit</div>
+                </div>
                 <div className="flex items-center gap-3">
                   <span className="w-5 h-5 rounded-full bg-emerald-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
                   <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Taat</div>
@@ -214,10 +219,6 @@ export default function PetaPengawasan() {
                 <div className="flex items-center gap-3">
                   <span className="w-5 h-5 rounded-full bg-slate-400 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
                   <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Belum Dinilai</div>
-                </div>
-                <div className="flex items-center gap-3 mt-4 pt-4 border-t-4 border-slate-900">
-                  <span className="w-5 h-5 rounded-full bg-blue-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
-                  <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Arsip Perizinan</div>
                 </div>
               </div>
             </div>
