@@ -22,7 +22,7 @@ export default function ArsipHub() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Arsip Perizinan */}
-          <Link href="/perizinan/daftar" className="group bg-white border-4 border-slate-900 rounded-3xl p-8 shadow-[8px_8px_0_0_#0f172a] hover:shadow-[4px_4px_0_0_#0f172a] hover:translate-y-2 transition-all flex flex-col items-center text-center">
+          <Link href="/perizinan/arsip" className="group bg-white border-4 border-slate-900 rounded-3xl p-8 shadow-[8px_8px_0_0_#0f172a] hover:shadow-[4px_4px_0_0_#0f172a] hover:translate-y-2 transition-all flex flex-col items-center text-center">
             <div className="w-20 h-20 bg-blue-100 border-4 border-slate-900 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform shadow-[4px_4px_0_0_#0f172a]">
               <LayoutDashboard size={40} className="text-blue-600" />
             </div>
