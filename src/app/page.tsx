@@ -8,11 +8,13 @@ import { createClient } from '@/lib/supabase/client';
 export default function Home() {
   const [stats, setStats] = useState({
     perizinan: { total: 0, selesai: 0, proses: 0, ditolak: 0 },
-    pengawasan: { total: 0, taat: 0, kurang: 0, tidak: 0 }
+    pengawasan: { total: 0, taat: 0, kurang: 0, tidak: 0 },
+    pengaduan: { total: 0, belum: 0, proses: 0, selesai: 0 }
   });
   
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
   const [recentPengawasan, setRecentPengawasan] = useState<any[]>([]);
+  const [recentAduan, setRecentAduan] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Simple calendar logic
@@ -45,11 +47,13 @@ export default function Home() {
 
         setStats({
           perizinan: { total: pData.length, selesai: pSelesai, proses: pProses, ditolak: pDitolak },
-          pengawasan: { total: gData.length, taat: gTaat, kurang: gKurang, tidak: gTidak }
+          pengawasan: { total: gData.length, taat: gTaat, kurang: gKurang, tidak: gTidak },
+          pengaduan: { total: 0, belum: 0, proses: 0, selesai: 0 } // Mocked until API is ready
         });
 
         setRecentDocs(pData.slice(0, 4));
         setRecentPengawasan(gData.slice(0, 4));
+        setRecentAduan([]); // Mocked until API is ready
         setLoading(false);
       } catch (err) {
         console.error("Failed to load dashboard data", err);
@@ -161,6 +165,46 @@ export default function Home() {
         </div>
       </div>
 
+      {/* STATISTIC CARDS: ADUAN */}
+      <div>
+        <div className="flex items-center gap-3 mb-4 px-2 mt-8">
+          <div className="w-8 h-8 rounded-lg bg-amber-100 border-2 border-slate-900 flex items-center justify-center text-amber-600 shadow-[2px_2px_0_0_#0f172a]">
+            <AlertTriangle size={18} />
+          </div>
+          <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest">Data Aduan</h2>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white border-2 border-slate-900 p-6 rounded-2xl shadow-[4px_4px_0_0_#0f172a] relative overflow-hidden group hover:-translate-y-1 transition-transform">
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Aduan</p>
+            <div className="flex items-end gap-2">
+              <h3 className="text-4xl font-black text-slate-900">{loading ? '...' : stats.pengaduan.total}</h3>
+              <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
+            </div>
+          </div>
+          <div className="bg-white border-2 border-slate-900 p-6 rounded-2xl shadow-[4px_4px_0_0_#0f172a] relative overflow-hidden group hover:-translate-y-1 transition-transform">
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Belum Diproses</p>
+            <div className="flex items-end gap-2">
+              <h3 className="text-4xl font-black text-rose-600">{loading ? '...' : stats.pengaduan.belum}</h3>
+              <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
+            </div>
+          </div>
+          <div className="bg-white border-2 border-slate-900 p-6 rounded-2xl shadow-[4px_4px_0_0_#0f172a] relative overflow-hidden group hover:-translate-y-1 transition-transform">
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Sedang Proses</p>
+            <div className="flex items-end gap-2">
+              <h3 className="text-4xl font-black text-amber-600">{loading ? '...' : stats.pengaduan.proses}</h3>
+              <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
+            </div>
+          </div>
+          <div className="bg-white border-2 border-slate-900 p-6 rounded-2xl shadow-[4px_4px_0_0_#0f172a] relative overflow-hidden group hover:-translate-y-1 transition-transform">
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Selesai</p>
+            <div className="flex items-end gap-2">
+              <h3 className="text-4xl font-black text-emerald-600">{loading ? '...' : stats.pengaduan.selesai}</h3>
+              <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-col gap-12 mt-12">
         
         {/* RECENT ACTIVITIES (Split) */}
@@ -172,7 +216,7 @@ export default function Home() {
             <h2 className="text-2xl font-black text-slate-900 uppercase tracking-widest">Aktivitas Terbaru</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Recent Perizinan */}
             <div className="bg-white border-2 border-slate-900 rounded-2xl shadow-[6px_6px_0_0_#0f172a] overflow-hidden flex flex-col h-full">
@@ -248,6 +292,42 @@ export default function Home() {
                         </div>
                       )
                     })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Recent Pengaduan */}
+            <div className="bg-white border-2 border-slate-900 rounded-2xl shadow-[6px_6px_0_0_#0f172a] overflow-hidden flex flex-col h-full">
+              <div className="p-4 border-b-2 border-slate-900 flex justify-between items-center bg-amber-50">
+                <h3 className="font-black text-slate-900 flex items-center gap-2 uppercase tracking-wide text-xs">
+                  <AlertTriangle size={16} className="text-amber-600" /> Pengaduan
+                </h3>
+                <Link href="/pengaduan" className="text-[10px] font-black text-amber-600 hover:text-amber-800 flex items-center">
+                  LIHAT SEMUA <ChevronRight size={14} />
+                </Link>
+              </div>
+              <div className="p-4 flex-1 bg-slate-50">
+                {loading ? (
+                  <div className="flex items-center justify-center h-48 text-slate-500 font-bold text-sm">Memuat data...</div>
+                ) : recentAduan.length === 0 ? (
+                  <div className="flex items-center justify-center h-48 text-slate-500 font-black uppercase tracking-widest text-[10px] border-2 border-dashed border-slate-200 rounded-xl m-2">Belum ada data pengaduan</div>
+                ) : (
+                  <div className="space-y-3">
+                    {recentAduan.map((doc, i) => (
+                      <div key={i} className="group p-3 bg-white hover:bg-amber-50 rounded-xl transition-colors flex flex-col gap-2 border-2 border-slate-200 hover:border-slate-900 cursor-pointer shadow-sm">
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="text-sm font-black text-slate-900 line-clamp-1 flex-1">{doc.judul_aduan || 'Aduan Baru'}</h4>
+                          <span className="shrink-0 text-[9px] font-black uppercase text-white bg-slate-800 px-2 py-0.5 rounded-md tracking-wider">#{doc.id}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-bold text-slate-600 tracking-wide line-clamp-1 flex-1">{doc.nama_pelapor || 'Anonim'}</span>
+                          <span className="shrink-0 inline-block px-2 py-1 bg-white text-slate-900 rounded-lg text-[9px] font-black uppercase tracking-widest border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a]">
+                            {doc.status || 'Baru'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
