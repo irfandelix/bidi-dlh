@@ -60,8 +60,22 @@ export async function POST(request: Request) {
     const urutStr = String(nextUrut).padStart(3, '0');
     const bagianUpper = dari_bagian.toUpperCase();
     
-    // Contoh format: 001/ND/UMUM/2026
-    const nomor_otomatis = `${urutStr}/ND/${bagianUpper}/${tahun}`;
+    // Ambil bulan dari tanggal nota (1-12)
+    const tglObj = new Date(tanggal_nota);
+    const bulan = tglObj.getMonth() + 1;
+    
+    let nomor_otomatis = '';
+
+    if (dari_bagian === 'Pengaduan' || dari_bagian === 'Aduan') {
+      nomor_otomatis = `600.4.17.2/${urutStr}.${bulan}/17/PG/${tahun}`;
+    } else if (dari_bagian === 'Pengawasan') {
+      nomor_otomatis = `600.4.6/${urutStr}.${bulan}/17/PW/${tahun}`;
+    } else if (dari_bagian === 'Perizinan') {
+      nomor_otomatis = `600.4.1/${urutStr}.${bulan}/17/PL/${tahun}`;
+    } else {
+      // Default (misal: Umum)
+      nomor_otomatis = `${urutStr}/ND/${bagianUpper}/${tahun}`;
+    }
 
     const payload = {
       no_urut: nextUrut,
