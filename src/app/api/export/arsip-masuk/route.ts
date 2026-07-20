@@ -9,15 +9,27 @@ export async function GET(request: Request) {
     const supabase = await createClient();
 
     // 1. Ambil Data dari Database (Diurutkan berdasarkan Kode Klasifikasi, lalu Tanggal)
+    // 1. Ambil Data dari Database
     const { data: arsip, error } = await supabase
       .from('arsip_masuk')
-      .select('*')
-      .order('kode_klasifikasi', { ascending: true })
-      .order('tanggal_surat', { ascending: true });
+      .select('*');
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    // Lakukan Natural Sort di JavaScript agar 600.10 muncul setelah 600.4
+    arsip.sort((a, b) => {
+      const kodeA = a.kode_klasifikasi || '';
+      const kodeB = b.kode_klasifikasi || '';
+      const cmp = kodeA.localeCompare(kodeB, undefined, { numeric: true, sensitivity: 'base' });
+      
+      // Jika kode sama, urutkan berdasarkan tanggal
+      if (cmp === 0) {
+        return new Date(a.tanggal_surat).getTime() - new Date(b.tanggal_surat).getTime();
+      }
+      return cmp;
+    });
 
     // 2. Siapkan path template Excel
     const templatePath = path.join(process.cwd(), 'public', 'templates', 'template_arsip_masuk.xlsx');
