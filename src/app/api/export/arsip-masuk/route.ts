@@ -8,11 +8,12 @@ export async function GET(request: Request) {
   try {
     const supabase = await createClient();
 
-    // 1. Ambil Data dari Database
+    // 1. Ambil Data dari Database (Diurutkan berdasarkan Kode Klasifikasi, lalu Tanggal)
     const { data: arsip, error } = await supabase
       .from('arsip_masuk')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('kode_klasifikasi', { ascending: true })
+      .order('tanggal_surat', { ascending: true });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
