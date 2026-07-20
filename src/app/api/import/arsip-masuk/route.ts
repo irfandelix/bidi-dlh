@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     
     // Kita anggap user mengunggah .xlsx asli sesuai format template mereka (bukan CSV).
     // Karena CSV tadi hanya dari trik google sheets export url saya.
-    await workbook.xlsx.load(buffer);
+    await workbook.xlsx.load(buffer as any);
 
     const worksheet = workbook.worksheets[0]; // Ambil sheet pertama
 
