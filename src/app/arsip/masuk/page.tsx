@@ -48,74 +48,8 @@ export default function DaftarArsipMasukPage() {
   const paginatedDocs = filteredDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleExportExcel = () => {
-    // 1. Siapkan data baris (Mulai dari baris ke-7 karena baris 1-6 untuk Header)
-    const rowData = filteredDocs.map((d, index) => {
-      // Logic Keterangan (Checkmark 'v' pada kolom yang sesuai status)
-      const st = d.status_surat || 'Biasa';
-      return [
-        index + 1, // Nomor Berkas (sementara pakai index)
-        '-',       // Nomor Isi Berkas
-        '-',       // Nomor Item
-        d.kode_klasifikasi || '-', 
-        d.perihal, // Uraian Informasi Berkas
-        d.tanggal_surat, // Tanggal
-        d.jumlah || 1,   // Jumlah
-        st === 'Biasa' ? 'v' : '',
-        st === 'Terbatas' ? 'v' : '',
-        st === 'Rahasia' ? 'v' : '',
-        st === 'Segera' ? 'v' : '',
-        st === 'Penting' ? 'v' : ''
-      ];
-    });
-
-    // 2. Siapkan array untuk header
-    const ws_data: any[][] = [
-      ["DAFTAR BERKAS DAN DAFTAR ISI BERKAS ARSIP DINAMIS AKTIF TAHUN " + new Date().getFullYear()], // Row 1
-      [], // Row 2
-      ["Unit Pengolah : Bidang Perencanaan, Pengaduan dan Peningkatan Kapasitas Lingkungan Hidup"], // Row 3
-      [], // Row 4
-      [
-        "Nomor Berkas", 
-        "Nomor Isi Berkas", 
-        "Nomor Item", 
-        "Kode Klasifikasi", 
-        "Uraian Informasi Berkas", 
-        "Tanggal", 
-        "Jumlah", 
-        "Keterangan", "", "", "", "" // 5 columns for Keterangan
-      ], // Row 5
-      [
-        "", "", "", "", "", "", "", 
-        "Biasa", "Terbatas", "Rahasia", "Segera", "Penting"
-      ] // Row 6
-    ];
-
-    // Gabungkan Header dengan Data
-    const finalData = ws_data.concat(rowData);
-
-    const worksheet = XLSX.utils.aoa_to_sheet(finalData);
-
-    // Merge Cells
-    worksheet['!merges'] = [
-      // Merge Title: A1 to L1 (12 columns)
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 11 } },
-      // Merge Subtitle: A3 to L3
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 11 } },
-      // Merge vertical headers (Row 5 to 6)
-      { s: { r: 4, c: 0 }, e: { r: 5, c: 0 } }, // Nomor Berkas
-      { s: { r: 4, c: 1 }, e: { r: 5, c: 1 } }, // Nomor Isi Berkas
-      { s: { r: 4, c: 2 }, e: { r: 5, c: 2 } }, // Nomor Item
-      { s: { r: 4, c: 3 }, e: { r: 5, c: 3 } }, // Kode Klasifikasi
-      { s: { r: 4, c: 4 }, e: { r: 5, c: 4 } }, // Uraian Informasi
-      { s: { r: 4, c: 5 }, e: { r: 5, c: 5 } }, // Tanggal
-      { s: { r: 4, c: 6 }, e: { r: 5, c: 6 } }, // Jumlah
-      // Merge horizontal Keterangan header
-      { s: { r: 4, c: 7 }, e: { r: 4, c: 11 } } // Keterangan (H5 to L5)
-    ];
-
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Surat Masuk");
-    XLSX.writeFile(workbook, "Buku_Agenda_Surat_Masuk.xlsx");
+    // Arahkan browser ke endpoint API export
+    window.location.href = '/api/export/arsip-masuk';
   };
 
   if (loading) {
