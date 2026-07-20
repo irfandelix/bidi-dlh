@@ -57,19 +57,24 @@ export async function GET(request: Request) {
 
         const st = d.status_surat || 'Biasa';
 
-        // Ini mapping kolom sesuai susunan standar (A=1, B=2, dst)
-        row.getCell(1).value = index + 1; // A: No
+        // Menyesuaikan mapping kolom dari template (berdasarkan screenshot)
+        // A=1(No), B=2(Isi), C=3(Item), D=4(Kode), H=8(Uraian), I=9(Tanggal), J=10(Jumlah)
+        // K=11(Biasa), L=12(Terbatas), M=13(Rahasia), N=14(Segera), O=15(Penting)
+        row.getCell(1).value = index + 1; // A: Nomor Berkas
         row.getCell(2).value = '-';       // B: Nomor Isi Berkas
         row.getCell(3).value = '-';       // C: Nomor Item
-        row.getCell(4).value = d.kode_klasifikasi || '-'; // D: Kode Klasifikasi
-        row.getCell(5).value = d.perihal; // E: Uraian
-        row.getCell(6).value = d.tanggal_surat; // F: Tanggal
-        row.getCell(7).value = d.jumlah || 1; // G: Jumlah
-        row.getCell(8).value = st === 'Biasa' ? 'Biasa' : ''; // H: Biasa
-        row.getCell(9).value = st === 'Terbatas' ? 'Terbatas' : ''; // I: Terbatas
-        row.getCell(10).value = st === 'Rahasia' ? 'Rahasia' : ''; // J: Rahasia
-        row.getCell(11).value = st === 'Segera' ? 'Segera' : ''; // K: Segera
-        row.getCell(12).value = st === 'Penting' ? 'Penting' : ''; // L: Penting
+        // Kode Klasifikasi ditaruh di D (kolom 4) 
+        row.getCell(4).value = d.kode_klasifikasi || '-'; 
+        
+        row.getCell(8).value = d.perihal; // H: Uraian Informasi Berkas
+        row.getCell(9).value = d.tanggal_surat; // I: Tanggal
+        row.getCell(10).value = d.jumlah || 1; // J: Jumlah
+        
+        row.getCell(11).value = st === 'Biasa' ? 'Biasa' : ''; // K: Biasa
+        row.getCell(12).value = st === 'Terbatas' ? 'Terbatas' : ''; // L: Terbatas
+        row.getCell(13).value = st === 'Rahasia' ? 'Rahasia' : ''; // M: Rahasia
+        row.getCell(14).value = st === 'Segera' ? 'Segera' : ''; // N: Segera
+        row.getCell(15).value = st === 'Penting' ? 'Penting' : ''; // O: Penting
 
         row.commit();
       });
@@ -77,27 +82,26 @@ export async function GET(request: Request) {
       // Menambahkan Blok Tanda Tangan secara Dinamis di akhir tabel
       const lastRow = startRow + dataArsip.length + 2; 
       
-      // Gabungkan kolom H sampai L untuk area tanda tangan agar teksnya rapi di tengah
-      worksheet.mergeCells(`H${lastRow}:L${lastRow}`);
-      worksheet.getCell(`H${lastRow}`).value = 'Mengetahui';
-      worksheet.getCell(`H${lastRow}`).alignment = { horizontal: 'center' };
+      // Tanda tangan diletakkan di sebelah kanan (Kolom K sampai O / Keterangan)
+      worksheet.mergeCells(`K${lastRow}:O${lastRow}`);
+      worksheet.getCell(`K${lastRow}`).value = 'Mengetahui,';
+      worksheet.getCell(`K${lastRow}`).alignment = { horizontal: 'center' };
 
-      worksheet.mergeCells(`H${lastRow + 1}:L${lastRow + 1}`);
-      worksheet.getCell(`H${lastRow + 1}`).value = 'Kepala Bidang Perencanaan, Pengaduan Dan Peningkatan Kapasitas Lingkungan Hidup';
-      worksheet.getCell(`H${lastRow + 1}`).alignment = { horizontal: 'center', wrapText: true };
-      // Atur tinggi baris agar teks jabatan yang panjang bisa terlihat utuh (wrap text)
+      worksheet.mergeCells(`K${lastRow + 1}:O${lastRow + 1}`);
+      worksheet.getCell(`K${lastRow + 1}`).value = 'Kepala Bidang Perencanaan, Pengaduan Dan Peningkatan Kapasitas Lingkungan Hidup';
+      worksheet.getCell(`K${lastRow + 1}`).alignment = { horizontal: 'center', wrapText: true };
       worksheet.getRow(lastRow + 1).height = 30; 
 
-      // Baris kosong untuk ruang tanda tangan asli (lastRow + 2, 3, 4)
+      // Baris kosong untuk tanda tangan
       
-      worksheet.mergeCells(`H${lastRow + 5}:L${lastRow + 5}`);
-      worksheet.getCell(`H${lastRow + 5}`).value = 'LUKMAN FARID, S.HUT., M.T';
-      worksheet.getCell(`H${lastRow + 5}`).font = { bold: true };
-      worksheet.getCell(`H${lastRow + 5}`).alignment = { horizontal: 'center' };
+      worksheet.mergeCells(`K${lastRow + 5}:O${lastRow + 5}`);
+      worksheet.getCell(`K${lastRow + 5}`).value = 'LUKMAN FARID, S.HUT., M.T';
+      worksheet.getCell(`K${lastRow + 5}`).font = { bold: true };
+      worksheet.getCell(`K${lastRow + 5}`).alignment = { horizontal: 'center' };
 
-      worksheet.mergeCells(`H${lastRow + 6}:L${lastRow + 6}`);
-      worksheet.getCell(`H${lastRow + 6}`).value = 'NIP. 19710426 199903 008';
-      worksheet.getCell(`H${lastRow + 6}`).alignment = { horizontal: 'center' };
+      worksheet.mergeCells(`K${lastRow + 6}:O${lastRow + 6}`);
+      worksheet.getCell(`K${lastRow + 6}`).value = 'NIP. 19710426 199903 008';
+      worksheet.getCell(`K${lastRow + 6}`).alignment = { horizontal: 'center' };
 
     } else {
       // Jika template tidak ada, return error informatif
