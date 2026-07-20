@@ -82,29 +82,30 @@ export async function GET(request: Request) {
       // Menambahkan Blok Tanda Tangan secara Dinamis di akhir tabel
       const lastRow = startRow + dataArsip.length + 4; 
       
-      // Helper aman untuk merge (mengabaikan error jika di template sudah dimerge)
-      const safeMerge = (range: string) => {
+      // Helper untuk merge: lepas merge bawaan template dulu (jika ada yang menabrak) agar lebarnya seragam
+      const forceMerge = (range: string) => {
+        try { worksheet.unMergeCells(range); } catch (e) {}
         try { worksheet.mergeCells(range); } catch (e) {}
       };
 
       // Tanda tangan diletakkan di sebelah kanan (Kolom K sampai O / Keterangan)
-      safeMerge(`K${lastRow}:O${lastRow}`);
+      forceMerge(`K${lastRow}:O${lastRow}`);
       worksheet.getCell(`K${lastRow}`).value = 'Mengetahui,';
       worksheet.getCell(`K${lastRow}`).alignment = { horizontal: 'center' };
 
-      safeMerge(`K${lastRow + 1}:O${lastRow + 1}`);
+      forceMerge(`K${lastRow + 1}:O${lastRow + 1}`);
       worksheet.getCell(`K${lastRow + 1}`).value = 'Kepala Bidang Perencanaan, Pengaduan Dan Peningkatan Kapasitas Lingkungan Hidup';
       worksheet.getCell(`K${lastRow + 1}`).alignment = { horizontal: 'center', wrapText: true };
       worksheet.getRow(lastRow + 1).height = 30; 
 
       // Baris kosong untuk tanda tangan
       
-      safeMerge(`K${lastRow + 5}:O${lastRow + 5}`);
+      forceMerge(`K${lastRow + 5}:O${lastRow + 5}`);
       worksheet.getCell(`K${lastRow + 5}`).value = 'LUKMAN FARID, S.HUT., M.T';
       worksheet.getCell(`K${lastRow + 5}`).font = { bold: true };
       worksheet.getCell(`K${lastRow + 5}`).alignment = { horizontal: 'center' };
 
-      safeMerge(`K${lastRow + 6}:O${lastRow + 6}`);
+      forceMerge(`K${lastRow + 6}:O${lastRow + 6}`);
       worksheet.getCell(`K${lastRow + 6}`).value = 'NIP. 19710426 199903 008';
       worksheet.getCell(`K${lastRow + 6}`).alignment = { horizontal: 'center' };
 
