@@ -167,7 +167,7 @@ export default function DaftarArsipMasukPage() {
                 <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[100px] text-center">No. Berkas</th>
                 <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[100px] text-center">No. Isi</th>
                 <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[100px] text-center">No. Item</th>
-                <th colSpan={4} className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 text-center min-w-[200px]">Kode Klasifikasi</th>
+                <th colSpan={4} className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 text-center min-w-[320px]">Kode Klasifikasi</th>
                 <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[400px]">Uraian & Asal Surat</th>
                 <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[150px]">Tanggal</th>
                 <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] min-w-[100px]">File</th>
@@ -180,10 +180,10 @@ export default function DaftarArsipMasukPage() {
                     <td className="px-6 py-4 border-r-2 border-slate-900 text-center font-black text-slate-900">{d.nomor_berkas || '-'}</td>
                     <td className="px-6 py-4 border-r-2 border-slate-900 text-center font-black text-slate-900">{d.nomor_isi_berkas || '-'}</td>
                     <td className="px-6 py-4 border-r-2 border-slate-900 text-center font-black text-slate-900">{d.nomor_item || '-'}</td>
-                    <td className="px-2 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-xs">{d.kode_klasifikasi_1 || '-'}</td>
-                    <td className="px-2 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-xs">{d.kode_klasifikasi_2 || '-'}</td>
-                    <td className="px-2 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-xs">{d.kode_klasifikasi_3 || '-'}</td>
-                    <td className="px-2 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-xs">{d.kode_klasifikasi_4 || '-'}</td>
+                    <td className="px-4 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-sm min-w-[80px]">{d.kode_klasifikasi_1 || '-'}</td>
+                    <td className="px-4 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-sm min-w-[80px]">{d.kode_klasifikasi_2 || '-'}</td>
+                    <td className="px-4 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-sm min-w-[80px]">{d.kode_klasifikasi_3 || '-'}</td>
+                    <td className="px-4 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-sm min-w-[80px]">{d.kode_klasifikasi_4 || '-'}</td>
                     <td className="px-6 py-4 border-r-2 border-slate-900">
                       <p className="font-bold text-slate-700 text-[10px] uppercase mb-1">Dari: {d.asal_surat}</p>
                       <p className="font-black text-slate-900 text-sm uppercase">{d.perihal}</p>
