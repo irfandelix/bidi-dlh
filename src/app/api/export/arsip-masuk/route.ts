@@ -73,6 +73,31 @@ export async function GET(request: Request) {
         row.commit();
       });
 
+      // Menambahkan Blok Tanda Tangan secara Dinamis di akhir tabel
+      const lastRow = startRow + arsip.length + 2; 
+      
+      // Gabungkan kolom H sampai L untuk area tanda tangan agar teksnya rapi di tengah
+      worksheet.mergeCells(`H${lastRow}:L${lastRow}`);
+      worksheet.getCell(`H${lastRow}`).value = 'Mengetahui';
+      worksheet.getCell(`H${lastRow}`).alignment = { horizontal: 'center' };
+
+      worksheet.mergeCells(`H${lastRow + 1}:L${lastRow + 1}`);
+      worksheet.getCell(`H${lastRow + 1}`).value = 'Kepala Bidang Perencanaan, Pengaduan Dan Peningkatan Kapasitas Lingkungan Hidup';
+      worksheet.getCell(`H${lastRow + 1}`).alignment = { horizontal: 'center', wrapText: true };
+      // Atur tinggi baris agar teks jabatan yang panjang bisa terlihat utuh (wrap text)
+      worksheet.getRow(lastRow + 1).height = 30; 
+
+      // Baris kosong untuk ruang tanda tangan asli (lastRow + 2, 3, 4)
+      
+      worksheet.mergeCells(`H${lastRow + 5}:L${lastRow + 5}`);
+      worksheet.getCell(`H${lastRow + 5}`).value = 'LUKMAN FARID, S.HUT., M.T';
+      worksheet.getCell(`H${lastRow + 5}`).font = { bold: true };
+      worksheet.getCell(`H${lastRow + 5}`).alignment = { horizontal: 'center' };
+
+      worksheet.mergeCells(`H${lastRow + 6}:L${lastRow + 6}`);
+      worksheet.getCell(`H${lastRow + 6}`).value = 'NIP. 19710426 199903 008';
+      worksheet.getCell(`H${lastRow + 6}`).alignment = { horizontal: 'center' };
+
     } else {
       // Jika template tidak ada, return error informatif
       return NextResponse.json(
