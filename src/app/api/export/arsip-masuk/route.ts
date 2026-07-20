@@ -60,12 +60,15 @@ export async function GET(request: Request) {
         // Menyesuaikan mapping kolom dari template (berdasarkan screenshot)
         // A=1(No), B=2(Isi), C=3(Item), D=4(Kode), H=8(Uraian), I=9(Tanggal), J=10(Jumlah)
         // K=11(Biasa), L=12(Terbatas), M=13(Rahasia), N=14(Segera), O=15(Penting)
-        row.getCell(1).value = index + 1; // A: Nomor Berkas
-        row.getCell(2).value = '-';       // B: Nomor Isi Berkas
-        row.getCell(3).value = '-';       // C: Nomor Item
-        // Kode Klasifikasi ditaruh di D (kolom 4) 
-        row.getCell(4).value = d.kode_klasifikasi || '-'; 
+        row.getCell(1).value = d.nomor_berkas || (index + 1); // A: Nomor Berkas
+        row.getCell(2).value = d.nomor_isi_berkas || '-';     // B: Nomor Isi Berkas
+        row.getCell(3).value = d.nomor_item || '-';           // C: Nomor Item
         
+        row.getCell(4).value = d.kode_klasifikasi_1 || ''; // D
+        row.getCell(5).value = d.kode_klasifikasi_2 || ''; // E
+        row.getCell(6).value = d.kode_klasifikasi_3 || ''; // F
+        row.getCell(7).value = d.kode_klasifikasi_4 || ''; // G
+
         row.getCell(8).value = d.perihal; // H: Uraian Informasi Berkas
         row.getCell(9).value = d.tanggal_surat; // I: Tanggal
         row.getCell(10).value = d.jumlah || 1; // J: Jumlah

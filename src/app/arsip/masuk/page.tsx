@@ -10,6 +10,13 @@ import * as XLSX from 'xlsx';
 type ArsipMasuk = {
   id: number;
   kode_klasifikasi: string;
+  nomor_berkas: string;
+  nomor_isi_berkas: string;
+  nomor_item: string;
+  kode_klasifikasi_1: string;
+  kode_klasifikasi_2: string;
+  kode_klasifikasi_3: string;
+  kode_klasifikasi_4: string;
   nomor_surat_masuk: string;
   tanggal_surat: string;
   tanggal_terima: string;
@@ -40,7 +47,9 @@ export default function DaftarArsipMasukPage() {
 
   const filteredDocs = docs.filter(d => {
     return (d.perihal || '').toLowerCase().includes(search.toLowerCase()) || 
-           (d.nomor_surat_masuk || '').toLowerCase().includes(search.toLowerCase()) ||
+           (d.nomor_berkas || '').toLowerCase().includes(search.toLowerCase()) ||
+           (d.nomor_isi_berkas || '').toLowerCase().includes(search.toLowerCase()) ||
+           (d.nomor_item || '').toLowerCase().includes(search.toLowerCase()) ||
            (d.asal_surat || '').toLowerCase().includes(search.toLowerCase());
   });
 
@@ -155,32 +164,29 @@ export default function DaftarArsipMasukPage() {
           <table className="w-full text-left">
             <thead className="bg-slate-100 border-b-4 border-slate-900">
               <tr>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900 min-w-[150px]">Nomor Surat</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900 min-w-[200px]">Asal Surat</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900 min-w-[250px]">Perihal & Klasifikasi</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Tanggal</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs">File</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 w-16">No. Berkas</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 w-16">No. Isi</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 w-16">No. Item</th>
+                <th colSpan={4} className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 text-center">Kode Klasifikasi</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[200px]">Uraian & Asal Surat</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900">Tanggal</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px]">File</th>
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-900">
               {filteredDocs.length > 0 ? (
                 paginatedDocs.map((d) => (
                   <tr key={d.id} className="hover:bg-blue-50 transition-colors">
+                    <td className="px-6 py-4 border-r-2 border-slate-900 text-center font-black text-slate-900">{d.nomor_berkas || '-'}</td>
+                    <td className="px-6 py-4 border-r-2 border-slate-900 text-center font-black text-slate-900">{d.nomor_isi_berkas || '-'}</td>
+                    <td className="px-6 py-4 border-r-2 border-slate-900 text-center font-black text-slate-900">{d.nomor_item || '-'}</td>
+                    <td className="px-2 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-xs">{d.kode_klasifikasi_1 || '-'}</td>
+                    <td className="px-2 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-xs">{d.kode_klasifikasi_2 || '-'}</td>
+                    <td className="px-2 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-xs">{d.kode_klasifikasi_3 || '-'}</td>
+                    <td className="px-2 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-xs">{d.kode_klasifikasi_4 || '-'}</td>
                     <td className="px-6 py-4 border-r-2 border-slate-900">
-                      <span className="text-slate-900 font-black text-sm uppercase">
-                        {d.nomor_surat_masuk}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 border-r-2 border-slate-900">
-                      <p className="font-bold text-slate-700 text-sm uppercase">{d.asal_surat}</p>
-                    </td>
-                    <td className="px-6 py-4 border-r-2 border-slate-900">
-                      <p className="font-black text-slate-900 text-sm uppercase mb-1">{d.perihal}</p>
-                      {d.kode_klasifikasi && (
-                         <span className="inline-block bg-slate-200 text-slate-800 text-[10px] font-bold px-2 py-1 rounded border border-slate-900">
-                           {d.kode_klasifikasi}
-                         </span>
-                      )}
+                      <p className="font-bold text-slate-700 text-[10px] uppercase mb-1">Dari: {d.asal_surat}</p>
+                      <p className="font-black text-slate-900 text-sm uppercase">{d.perihal}</p>
                     </td>
                     <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-900">
                       <div>Surat: {d.tanggal_surat}</div>
@@ -199,7 +205,7 @@ export default function DaftarArsipMasukPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">
+                  <td colSpan={10} className="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <Inbox size={32} className="text-slate-300" />
                       <p className="uppercase tracking-widest">TIDAK ADA DATA SURAT MASUK.</p>

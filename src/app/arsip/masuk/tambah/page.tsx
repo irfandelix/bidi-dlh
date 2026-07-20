@@ -54,14 +54,16 @@ export default function TambahArsipMasukPage() {
       // 2. Submit Data
       const payload = {
         kode_klasifikasi: selectedKlasifikasi,
-        nomor_surat_masuk: formData.get('nomor_surat_masuk'),
+        nomor_berkas: formData.get('nomor_berkas'),
+        nomor_isi_berkas: formData.get('nomor_isi_berkas'),
+        nomor_item: formData.get('nomor_item'),
         tanggal_surat: formData.get('tanggal_surat'),
         tanggal_terima: formData.get('tanggal_terima'),
         asal_surat: formData.get('asal_surat'),
         perihal: formData.get('perihal'),
         jumlah: parseInt(formData.get('jumlah') as string || '1'),
-        status_surat: formData.get('status_surat'),
-        file_url: fileUrl
+        status_surat: formData.get('status_surat') || 'Biasa',
+        file_url: fileUrl,
       };
 
       const res = await fetch('/api/arsip-masuk', {
@@ -185,12 +187,33 @@ export default function TambahArsipMasukPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                  2. Nomor Surat Masuk <span className="text-rose-500">*</span>
-                </label>
-                <input type="text" name="nomor_surat_masuk" required placeholder="Contoh: 005/123/DLH/2026" 
-                  className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
+              <div className="md:col-span-2">
+                <div className="bg-blue-50 border-4 border-slate-900 rounded-2xl p-6 shadow-[4px_4px_0_0_#0f172a]">
+                  <div className="flex items-center gap-3 mb-6 border-b-4 border-slate-900 pb-4">
+                    <div className="w-10 h-10 bg-white rounded-xl border-4 border-slate-900 flex items-center justify-center font-black text-slate-900 shadow-[2px_2px_0_0_#0f172a]">
+                      2
+                    </div>
+                    <h3 className="font-black text-xl text-slate-900 uppercase tracking-widest">Detail Nomor</h3>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Nomor Berkas</label>
+                      <input type="text" name="nomor_berkas" placeholder="Contoh: 74" 
+                        className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none focus:-translate-y-1 focus:shadow-[4px_4px_0_0_#0f172a] transition-all bg-white" />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Nomor Isi Berkas</label>
+                      <input type="text" name="nomor_isi_berkas" placeholder="Contoh: 1" 
+                        className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none focus:-translate-y-1 focus:shadow-[4px_4px_0_0_#0f172a] transition-all bg-white" />
+                    </div>
+                    <div>
+                      <label className="block text-[9px] font-bold text-slate-500 uppercase mb-1">Nomor Item</label>
+                      <input type="text" name="nomor_item" placeholder="Contoh: 1" 
+                        className="w-full px-4 py-3 rounded-xl border-4 border-slate-900 text-sm font-bold focus:bg-indigo-50 focus:outline-none focus:-translate-y-1 focus:shadow-[4px_4px_0_0_#0f172a] transition-all bg-white" />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div>

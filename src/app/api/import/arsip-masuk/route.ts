@@ -145,6 +145,13 @@ export async function POST(request: Request) {
         payloads.push({
           kode_klasifikasi: kodeStr || '-',
           nomor_surat_masuk: nomorSurat, // Otomatis gabungan dari Kolom A, B, C
+          nomor_berkas: colA,
+          nomor_isi_berkas: colB,
+          nomor_item: colC,
+          kode_klasifikasi_1: d,
+          kode_klasifikasi_2: e,
+          kode_klasifikasi_3: f,
+          kode_klasifikasi_4: g,
           tanggal_surat: tglStr,
           tanggal_terima: tglStr, // Default ke tgl surat
           asal_surat: asalSurat, // Otomatis diekstrak dari kata pertama Uraian
