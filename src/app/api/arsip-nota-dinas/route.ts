@@ -73,8 +73,8 @@ export async function POST(request: Request) {
     } else if (dari_bagian === 'Perizinan') {
       nomor_otomatis = `600.4.1/${urutStr}.${bulan}/17/PL/${tahun}`;
     } else {
-      // Default (misal: Umum)
-      nomor_otomatis = `${urutStr}/ND/${bagianUpper}/${tahun}`;
+      // Default (Umum)
+      nomor_otomatis = `600.4/${urutStr}.${bulan}/17/${tahun}`;
     }
 
     const payload = {
