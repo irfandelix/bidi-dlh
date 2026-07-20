@@ -51,7 +51,7 @@ export async function GET(request: Request) {
       // - Baris 7 dan seterusnya adalah tempat injeksi data
       const startRow = 7; 
 
-      arsip.forEach((d, index) => {
+      dataArsip.forEach((d: any, index: number) => {
         const rowNum = startRow + index;
         const row = worksheet.getRow(rowNum);
 
