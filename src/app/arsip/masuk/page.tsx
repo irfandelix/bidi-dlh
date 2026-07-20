@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
-  Inbox, FileText, ArrowLeft, Plus, Search, Loader2, Download 
+  Inbox, FileText, ArrowLeft, Plus, Search, Loader2, Download, Upload
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -25,6 +25,9 @@ export default function DaftarArsipMasukPage() {
   const [docs, setDocs] = useState<ArsipMasuk[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch('/api/arsip-masuk')
@@ -52,6 +55,37 @@ export default function DaftarArsipMasukPage() {
     window.location.href = '/api/export/arsip-masuk';
   };
 
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/import/arsip-masuk', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await res.json();
+      if (!res.ok) {
+        alert(result.error || 'Gagal mengimpor file');
+      } else {
+        alert(`Berhasil mengimpor ${result.count} baris data!`);
+        // Refresh data
+        window.location.reload();
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan jaringan saat impor');
+    } finally {
+      setIsImporting(false);
+      // Reset input agar bisa upload file yang sama lagi jika perlu
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   if (loading) {
     return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
   }
@@ -76,8 +110,18 @@ export default function DaftarArsipMasukPage() {
         </div>
         
         <div className="flex items-center flex-wrap gap-3 relative z-10">
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleImportExcel} 
+            accept=".xlsx,.csv" 
+            className="hidden" 
+          />
+          <button onClick={() => fileInputRef.current?.click()} disabled={isImporting} className="bg-amber-300 hover:bg-amber-200 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest disabled:opacity-50">
+            {isImporting ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />} Import
+          </button>
           <button onClick={handleExportExcel} className="bg-white hover:bg-slate-100 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest">
-            <Download size={18} /> Export Excel
+            <Download size={18} /> Export
           </button>
           <div className="bg-emerald-50 px-5 py-3 rounded-xl border-2 border-slate-900 flex items-center gap-3 text-sm font-black text-slate-900 shadow-[4px_4px_0_0_#0f172a] uppercase">
             <FileText size={18} className="text-emerald-500 fill-emerald-500" />
