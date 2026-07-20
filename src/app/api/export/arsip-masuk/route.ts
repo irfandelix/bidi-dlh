@@ -46,10 +46,10 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Sheet pertama tidak ditemukan di dalam template.' }, { status: 500 });
       }
 
-      // ASUMSI SEMENTARA (Sambil Menunggu Template Asli):
-      // - Baris 1 sampai 6 adalah Header
-      // - Baris 7 dan seterusnya adalah tempat injeksi data
-      const startRow = 7; 
+      // Template Asli:
+      // - Baris 1 sampai 8 adalah Header dan Judul
+      // - Baris 9 dan seterusnya adalah tempat injeksi data
+      const startRow = 9; 
 
       dataArsip.forEach((d: any, index: number) => {
         const rowNum = startRow + index;
