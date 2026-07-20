@@ -80,7 +80,7 @@ export async function GET(request: Request) {
       });
 
       // Menambahkan Blok Tanda Tangan secara Dinamis di akhir tabel
-      const lastRow = startRow + dataArsip.length + 2; 
+      const lastRow = startRow + dataArsip.length + 4; 
       
       // Tanda tangan diletakkan di sebelah kanan (Kolom K sampai O / Keterangan)
       worksheet.mergeCells(`K${lastRow}:O${lastRow}`);
