@@ -18,8 +18,9 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    const dataArsip = (arsip as any[]) || [];
     // Lakukan Natural Sort di JavaScript agar 600.10 muncul setelah 600.4
-    arsip.sort((a, b) => {
+    dataArsip.sort((a, b) => {
       const kodeA = a.kode_klasifikasi || '';
       const kodeB = b.kode_klasifikasi || '';
       const cmp = kodeA.localeCompare(kodeB, undefined, { numeric: true, sensitivity: 'base' });
@@ -74,7 +75,7 @@ export async function GET(request: Request) {
       });
 
       // Menambahkan Blok Tanda Tangan secara Dinamis di akhir tabel
-      const lastRow = startRow + arsip.length + 2; 
+      const lastRow = startRow + dataArsip.length + 2; 
       
       // Gabungkan kolom H sampai L untuk area tanda tangan agar teksnya rapi di tengah
       worksheet.mergeCells(`H${lastRow}:L${lastRow}`);
