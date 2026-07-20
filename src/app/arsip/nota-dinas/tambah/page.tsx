@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, Save, PenTool } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, PenTool, Upload } from 'lucide-react';
 
 export default function TambahNotaDinasPage() {
   const router = useRouter();
@@ -11,6 +11,7 @@ export default function TambahNotaDinasPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [generatedNo, setGeneratedNo] = useState('');
+  const [file, setFile] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,13 +20,30 @@ export default function TambahNotaDinasPage() {
     setSuccessMsg('');
 
     const formData = new FormData(e.currentTarget);
-    const payload = {
-      nama_nota: formData.get('nama_nota'),
-      tanggal_nota: formData.get('tanggal_nota'),
-      dari_bagian: formData.get('dari_bagian'),
-    };
+    
+    let fileUrl = '';
 
     try {
+      if (file) {
+        const uploadData = new FormData();
+        uploadData.append('file', file);
+        
+        const uploadRes = await fetch('/api/arsip-nota-dinas/upload', {
+          method: 'POST',
+          body: uploadData
+        });
+        const uploadResult = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(uploadResult.error || 'Gagal mengunggah file nota dinas');
+        fileUrl = uploadResult.url;
+      }
+
+      const payload = {
+        nama_nota: formData.get('nama_nota'),
+        tanggal_nota: formData.get('tanggal_nota'),
+        dari_bagian: formData.get('dari_bagian'),
+        file_url: fileUrl,
+      };
+
       const res = await fetch('/api/arsip-nota-dinas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -128,6 +146,20 @@ export default function TambahNotaDinasPage() {
                   <option value="Pengaduan">Pengaduan</option>
                   <option value="Pengawasan">Pengawasan</option>
                 </select>
+              </div>
+            </div>
+
+            {/* UPLOAD FILE NOTA DINAS */}
+            <div>
+              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
+                4. Lampiran Nota Dinas (Opsional)
+              </label>
+              <div className="relative overflow-hidden w-full bg-slate-50 border-2 border-dashed border-slate-900 rounded-xl p-6 text-center hover:bg-slate-100 transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
+                <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
+                <Upload size={32} className="text-slate-400 group-hover:text-slate-900 transition-colors" />
+                <p className="text-sm font-bold text-slate-600">
+                  {file ? <span className="text-fuchsia-600">File terpilih: {file.name}</span> : 'Klik atau seret file ke sini (PDF/Word/Images)'}
+                </p>
               </div>
             </div>
 

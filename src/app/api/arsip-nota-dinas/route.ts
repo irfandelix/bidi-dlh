@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { nama_nota, tanggal_nota, dari_bagian } = body;
+    const { nama_nota, tanggal_nota, dari_bagian, file_url } = body;
     
     if (!nama_nota || !tanggal_nota || !dari_bagian) {
       return NextResponse.json({ error: 'Semua field wajib diisi' }, { status: 400 });
@@ -82,7 +82,8 @@ export async function POST(request: Request) {
       nama_nota,
       tanggal_nota,
       dari_bagian,
-      nomor_otomatis
+      nomor_otomatis,
+      file_url
     };
 
     const { data, error } = await supabase

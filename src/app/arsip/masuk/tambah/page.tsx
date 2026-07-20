@@ -36,13 +36,11 @@ export default function TambahArsipMasukPage() {
     let fileUrl = '';
 
     try {
-      // 1. Upload File if exists
       if (file) {
         const uploadData = new FormData();
         uploadData.append('file', file);
-        uploadData.append('bucket', 'arsip_dokumen');
         
-        const uploadRes = await fetch('/api/upload', {
+        const uploadRes = await fetch('/api/arsip-masuk/upload', {
           method: 'POST',
           body: uploadData
         });
