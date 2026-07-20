@@ -78,6 +78,16 @@ export async function POST(request: Request) {
       }
 
       if (isDataRow) {
+        // Ambil Nomor Berkas, Isi, Item untuk dijadikan pseudo-nomor surat (A/B/C)
+        const colB = getCellValue(row.getCell(2).value);
+        const colC = getCellValue(row.getCell(3).value);
+        let nomorSurat = '-';
+        if (colA && colB && colC) {
+          nomorSurat = `${colA}/${colB}/${colC}`;
+        } else if (colA) {
+          nomorSurat = colA; // fallback
+        }
+
         // Ambil Kode Klasifikasi (gabungan Kolom D, E, F, G sesuai format Excel)
         const d = getCellValue(row.getCell(4).value);
         const e = getCellValue(row.getCell(5).value);
@@ -134,7 +144,7 @@ export async function POST(request: Request) {
 
         payloads.push({
           kode_klasifikasi: kodeStr || '-',
-          nomor_surat_masuk: '-', // Tidak ada di excel, isi default
+          nomor_surat_masuk: nomorSurat, // Otomatis gabungan dari Kolom A, B, C
           tanggal_surat: tglStr,
           tanggal_terima: tglStr, // Default ke tgl surat
           asal_surat: asalSurat, // Otomatis diekstrak dari kata pertama Uraian
