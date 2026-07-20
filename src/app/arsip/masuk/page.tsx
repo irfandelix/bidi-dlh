@@ -159,7 +159,7 @@ export default function DaftarArsipMasukPage() {
       </div>
 
       {/* Dynamic Data Table (NeoBrutalism) */}
-      <div className="bg-white border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] rounded-3xl overflow-hidden mt-8">
+      <div className="bg-white border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] rounded-xl overflow-hidden mt-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-slate-100 border-b-4 border-slate-900">
