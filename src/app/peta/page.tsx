@@ -314,7 +314,7 @@ export default function PetaPengawasan() {
               </div>
             </div>
 
-            <div className="shrink-0 bg-sky-200 border-4 border-slate-900 p-4 rounded-2xl shadow-[4px_4px_0_0_#0f172a] mt-4 mb-2">
+            <div className="hidden lg:block shrink-0 bg-sky-200 border-4 border-slate-900 p-4 rounded-2xl shadow-[4px_4px_0_0_#0f172a] mt-4 mb-2">
               <p className="text-xs text-slate-900 font-bold flex items-start gap-2">
                 <Info size={16} className="shrink-0 mt-0.5" /> 
                 Klik titik pada peta untuk melihat hasil pengawasan dan file BAP.
@@ -322,8 +322,16 @@ export default function PetaPengawasan() {
             </div>
           </div>
 
-          <div className="lg:col-span-3 bg-white p-2 rounded-3xl border-4 border-slate-900 shadow-[12px_12px_0_0_#0f172a] overflow-hidden flex flex-col min-h-0">
-            <div id="map" className="w-full flex-1 rounded-2xl z-0 min-h-[300px]"></div>
+          <div className="lg:col-span-3 flex flex-col gap-4 min-h-0">
+            <div className="lg:hidden shrink-0 bg-sky-200 border-4 border-slate-900 p-4 rounded-2xl shadow-[4px_4px_0_0_#0f172a] mb-2 mt-2">
+              <p className="text-xs text-slate-900 font-bold flex items-start gap-2">
+                <Info size={16} className="shrink-0 mt-0.5" /> 
+                Klik titik pada peta untuk melihat hasil pengawasan dan file BAP.
+              </p>
+            </div>
+            <div className="flex-1 bg-white p-2 rounded-3xl border-4 border-slate-900 shadow-[12px_12px_0_0_#0f172a] overflow-hidden flex flex-col min-h-0">
+              <div id="map" className="w-full flex-1 rounded-2xl z-0 min-h-[300px]"></div>
+            </div>
           </div>
         </div>
       </div>
