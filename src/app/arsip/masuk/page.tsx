@@ -164,13 +164,13 @@ export default function DaftarArsipMasukPage() {
           <table className="w-full text-left">
             <thead className="bg-slate-100 border-b-4 border-slate-900">
               <tr>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 w-16">No. Berkas</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 w-16">No. Isi</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 w-16">No. Item</th>
-                <th colSpan={4} className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 text-center">Kode Klasifikasi</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[200px]">Uraian & Asal Surat</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900">Tanggal</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px]">File</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[100px] text-center">No. Berkas</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[100px] text-center">No. Isi</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[100px] text-center">No. Item</th>
+                <th colSpan={4} className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 text-center min-w-[200px]">Kode Klasifikasi</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[400px]">Uraian & Asal Surat</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[150px]">Tanggal</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] min-w-[100px]">File</th>
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-900">
