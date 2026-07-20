@@ -265,7 +265,7 @@ export default function PetaPengawasan() {
             <div className="flex-1 flex flex-col min-h-0">
               <h4 className="shrink-0 text-xs font-black text-slate-900 uppercase tracking-widest border-b-4 border-slate-900 pb-2 mb-4">Daftar Lokasi (Berkoordinat)</h4>
               
-              <div className="flex-1 overflow-y-auto pr-3 space-y-3 custom-scrollbar">
+              <div className="h-64 lg:h-auto lg:flex-1 overflow-y-auto pr-3 space-y-3 custom-scrollbar">
                 {loading ? (
                   <div className="text-center py-6">
                     <p className="text-xs font-black text-slate-500 uppercase animate-pulse">Memuat data...</p>
