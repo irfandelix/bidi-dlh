@@ -40,13 +40,27 @@ export default function PetaPengawasan() {
           console.warn('Dokumens error (maybe latitude column missing):', dokumensError);
         }
 
+        // Fetch pengaduans (if exists)
+        const { data: pengaduanData, error: pengaduanError } = await supabase.from('pengaduans')
+          .select('*')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .neq('latitude', '')
+          .neq('longitude', '');
+        
+        if (pengaduanError) {
+          console.warn('Pengaduan error (maybe table not ready):', pengaduanError);
+        }
+
         // Add a flag to differentiate them
         // @ts-ignore
         const pengawasanList = (pengawasanData || []).map((item: any) => ({ ...item, isPengawasan: true }));
         // @ts-ignore
         const perizinanList = (dokumensData || []).map((item: any) => ({ ...item, isPengawasan: false }));
+        // @ts-ignore
+        const pengaduanList = (pengaduanData || []).map((item: any) => ({ ...item, isPengaduan: true }));
 
-        setLokasi([...pengawasanList, ...perizinanList]);
+        setLokasi([...pengawasanList, ...perizinanList, ...pengaduanList]);
       } catch (err) {
         console.error(err);
       } finally {
@@ -86,6 +100,9 @@ export default function PetaPengawasan() {
         } else if (!item.status_ketaatan) {
           markerColor = '#64748b'; // Slate (Belum Dinilai)
         }
+      } else if (item.isPengaduan) {
+        // Pengaduan marker
+        markerColor = '#a855f7'; // Purple for Pengaduan
       } else {
         // Perizinan marker
         markerColor = '#3b82f6'; // Blue for Perizinan
@@ -100,7 +117,22 @@ export default function PetaPengawasan() {
 
       const bapLink = item.file_bap ? `<a href="${item.file_bap}" target="_blank" style="display:inline-block; margin-top:12px; padding:6px 12px; background:#14b8a6; color:#0f172a; font-weight:900; text-decoration:none; border:2px solid #0f172a; border-radius:8px; text-transform:uppercase; font-size:10px; box-shadow: 2px 2px 0 0 #0f172a;">Lihat File BAP &rarr;</a>` : '';
 
-      const popupContent = item.isPengawasan ? `
+      let popupContent = '';
+      
+      if (item.isPengaduan) {
+        popupContent = `
+        <div style="font-family: inherit; max-width: 200px; padding: 4px;">
+          <div style="font-size: 10px; font-weight: 900; background: #f3e8ff; color: #7e22ce; padding: 2px 6px; border: 2px solid #7e22ce; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PENGADUAN LINGKUNGAN</div>
+          <h4 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan || item.perihal || 'DETAIL PENGADUAN'}</h4>
+          <p style="font-size: 10px; font-weight: 800; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.lokasi_kegiatan || 'LOKASI BELUM DITENTUKAN'}</p>
+          <div style="background: #f8fafc; border: 2px solid #0f172a; padding: 8px; border-radius: 8px;">
+            <div style="font-size: 10px; margin-bottom: 4px;"><strong>PELAPOR:</strong><br/>${item.pelapor || item.nama_pemrakarsa || '-'}</div>
+            <div style="font-size: 10px;"><strong>STATUS:</strong><br/><span style="color:${markerColor}; font-weight:900;">${(item.status || item.status_ketaatan || 'BELUM DIPROSES').toUpperCase()}</span></div>
+          </div>
+        </div>
+        `;
+      } else if (item.isPengawasan) {
+        popupContent = `
         <div style="font-family: inherit; max-width: 200px; padding: 4px;">
           <div style="font-size: 10px; font-weight: 900; background: #f1f5f9; padding: 2px 6px; border: 2px solid #0f172a; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PENGAWASAN • ${item.token || '-'}</div>
           <h4 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan}</h4>
@@ -111,7 +143,9 @@ export default function PetaPengawasan() {
           </div>
           ${bapLink}
         </div>
-      ` : `
+        `;
+      } else {
+        popupContent = `
         <div style="font-family: inherit; max-width: 200px; padding: 4px;">
           <div style="font-size: 10px; font-weight: 900; background: #dbeafe; color: #1e3a8a; padding: 2px 6px; border: 2px solid #1e3a8a; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PERIZINAN TERBIT</div>
           <h4 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan || '-'}</h4>
@@ -123,7 +157,8 @@ export default function PetaPengawasan() {
           </div>
           <a href="/perizinan/arsip/${item.id}" target="_blank" style="display:inline-block; margin-top:12px; padding:6px 12px; background:#3b82f6; color:#ffffff; font-weight:900; text-decoration:none; border:2px solid #0f172a; border-radius:8px; text-transform:uppercase; font-size:10px; box-shadow: 2px 2px 0 0 #0f172a;">Lihat Detail Arsip &rarr;</a>
         </div>
-      `;
+        `;
+      }
 
       const lat = parseFloat(item.latitude);
       const lng = parseFloat(item.longitude);
@@ -201,6 +236,10 @@ export default function PetaPengawasan() {
               <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest border-b-4 border-slate-900 pb-2 mb-4">Indikator Ketaatan</h4>
               <div className="space-y-4">
                 <div className="flex items-center gap-3 pb-4 mb-4 border-b-4 border-slate-900">
+                  <span className="w-5 h-5 rounded-full bg-purple-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
+                  <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Pengaduan</div>
+                </div>
+                <div className="flex items-center gap-3 pb-4 mb-4 border-b-4 border-slate-900">
                   <span className="w-5 h-5 rounded-full bg-blue-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
                   <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Perizinan Terbit</div>
                 </div>
@@ -237,7 +276,7 @@ export default function PetaPengawasan() {
                   </div>
                 ) : (
                   lokasi.map(lok => {
-                    let warnaTitik = lok.isPengawasan ? 'bg-slate-400' : 'bg-blue-500';
+                    let warnaTitik = lok.isPengaduan ? 'bg-purple-500' : (lok.isPengawasan ? 'bg-slate-400' : 'bg-blue-500');
                     if (lok.isPengawasan) {
                       if (lok.status_ketaatan === 'Taat') warnaTitik = 'bg-emerald-500';
                       else if (lok.status_ketaatan === 'Kurang Taat' || lok.status_ketaatan === 'Taat Bersyarat') warnaTitik = 'bg-amber-500';
@@ -248,24 +287,25 @@ export default function PetaPengawasan() {
                       <div 
                         key={lok.id} 
                         onClick={() => {
-                          if (markersRef.current[lok.id] && mapInstance.current) {
-                            mapInstance.current.setView([parseFloat(lok.latitude), parseFloat(lok.longitude)], 15);
-                            markersRef.current[lok.id].openPopup();
+                          const marker = markersRef.current[lok.id];
+                          if (marker && mapInstance.current) {
+                            mapInstance.current.setView(marker.getLatLng(), 15);
+                            marker.openPopup();
                           }
                         }}
-                        className={`flex items-start gap-3 p-3 bg-slate-50 border-2 ${lok.isPengawasan ? 'border-slate-900' : 'border-blue-800 bg-blue-50'} rounded-xl hover:bg-sky-100 hover:shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 transition-all cursor-pointer`}
+                        className="group flex flex-col p-3 border-2 border-slate-900 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors bg-white shadow-[2px_2px_0_0_#0f172a]"
                       >
-                        <span className={`w-4 h-4 mt-0.5 shrink-0 rounded-full border-2 border-slate-900 ${warnaTitik} inline-block`}></span>
-                        <div className="flex-1">
-                          <p className="text-xs font-black text-slate-900 uppercase leading-tight mb-1">{lok.nama_kegiatan}</p>
-                          <div className="flex justify-between items-center gap-2">
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{lok.isPengawasan ? lok.kategori || 'Umum' : lok.jenis_dokumen || 'PERIZINAN'}</p>
-                            {lok.isPengawasan ? (
-                              <p className="text-[10px] font-black text-slate-900 uppercase">{lok.status_ketaatan || 'Belum Dinilai'} {lok.total_skor ? `(${lok.total_skor})` : ''}</p>
-                            ) : (
-                              <p className="text-[10px] font-black text-blue-800 uppercase">DIARSIPKAN</p>
-                            )}
-                          </div>
+                        <div className="flex items-center gap-3">
+                          <span className={`w-3 h-3 rounded-full ${warnaTitik} border-2 border-slate-900 shrink-0`}></span>
+                          <span className="text-[10px] font-black text-slate-900 truncate uppercase flex-1">
+                            {lok.isPengaduan ? (lok.nama_kegiatan || lok.perihal || 'Pengaduan') : (lok.nama_kegiatan || 'Tanpa Nama')}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between mt-2 pl-6">
+                          <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{lok.kategori || 'UMUM'}</span>
+                          <span className="text-[8px] font-black text-slate-900 uppercase">
+                            {lok.isPengaduan ? (lok.status || lok.status_ketaatan || 'BELUM DIPROSES') : (lok.isPengawasan ? (lok.status_ketaatan || 'BELUM DINILAI') : 'DIARSIPKAN')}
+                          </span>
                         </div>
                       </div>
                     );
