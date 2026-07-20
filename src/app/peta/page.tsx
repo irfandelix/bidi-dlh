@@ -314,7 +314,7 @@ export default function PetaPengawasan() {
               </div>
             </div>
 
-            <div className="shrink-0 bg-sky-200 border-4 border-slate-900 p-4 rounded-2xl shadow-[4px_4px_0_0_#0f172a]">
+            <div className="shrink-0 bg-sky-200 border-4 border-slate-900 p-4 rounded-2xl shadow-[4px_4px_0_0_#0f172a] mt-4 mb-2">
               <p className="text-xs text-slate-900 font-bold flex items-start gap-2">
                 <Info size={16} className="shrink-0 mt-0.5" /> 
                 Klik titik pada peta untuk melihat hasil pengawasan dan file BAP.
