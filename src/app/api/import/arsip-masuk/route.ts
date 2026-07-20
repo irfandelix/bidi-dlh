@@ -106,14 +106,14 @@ export async function POST(request: Request) {
         }
 
         const perihalCell = row.getCell(8).value;
-        let uraian = perihalCell ? perihalCell.toString().trim() : '-';
+        let uraian = perihalCell ? getCellValue(perihalCell).trim() : '-';
         let asalSurat = '-';
 
         // Ekstrak Asal Surat dari kata pertama Uraian (contoh: "DPMPTSP Permohonan...")
+        // TAPI jangan potong Uraian aslinya (biarkan tetap utuh sesuai permintaan)
         if (uraian !== '-' && uraian.includes(' ')) {
           const uraianParts = uraian.split(' ');
           asalSurat = uraianParts[0].trim();
-          uraian = uraianParts.slice(1).join(' ').trim();
         }
 
         const tanggalCell = row.getCell(9).value;
