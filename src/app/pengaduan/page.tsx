@@ -50,7 +50,8 @@ export default function PengaduanListPage() {
                 <th className="p-4 text-xs font-black text-slate-900 uppercase tracking-widest border-r-2 border-slate-200">No</th>
                 <th className="p-4 text-xs font-black text-slate-900 uppercase tracking-widest border-r-2 border-slate-200">Perihal / Nama Kegiatan</th>
                 <th className="p-4 text-xs font-black text-slate-900 uppercase tracking-widest border-r-2 border-slate-200">Tanggal</th>
-                <th className="p-4 text-xs font-black text-slate-900 uppercase tracking-widest">Lampiran GDrive</th>
+                <th className="p-4 text-xs font-black text-slate-900 uppercase tracking-widest border-r-2 border-slate-200">Status</th>
+                <th className="p-4 text-xs font-black text-slate-900 uppercase tracking-widest">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -77,22 +78,17 @@ export default function PengaduanListPage() {
                     <td className="p-4 text-sm font-bold text-slate-600 border-r-2 border-slate-100 whitespace-nowrap">
                       {item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '-'}
                     </td>
-                    <td className="p-4 text-xs font-black text-slate-600 space-y-2 whitespace-nowrap">
-                      {item.dokumentasi_url ? (
-                        <a href={item.dokumentasi_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-purple-600 hover:text-purple-800 bg-purple-50 px-3 py-2 rounded-lg border-2 border-purple-200 hover:border-purple-600 transition-colors">
-                          <ExternalLink size={14} /> Lihat Dokumentasi
-                        </a>
+                    <td className="p-4 text-xs font-black text-slate-600 whitespace-nowrap border-r-2 border-slate-100">
+                      {item.status_tahapan === 'Menunggu Isian' ? (
+                        <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full border-2 border-amber-300">Menunggu Pelapor</span>
                       ) : (
-                        <div className="text-slate-400 bg-slate-50 px-3 py-2 rounded-lg border-2 border-slate-200">Tidak ada dokumentasi</div>
+                        <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full border-2 border-emerald-300">Form Terisi</span>
                       )}
-                      
-                      {item.ba_url ? (
-                        <a href={item.ba_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-2 rounded-lg border-2 border-blue-200 hover:border-blue-600 transition-colors">
-                          <ExternalLink size={14} /> Lihat Berita Acara
-                        </a>
-                      ) : (
-                        <div className="text-slate-400 bg-slate-50 px-3 py-2 rounded-lg border-2 border-slate-200">Tidak ada BA</div>
-                      )}
+                    </td>
+                    <td className="p-4 text-xs font-black text-slate-600 whitespace-nowrap">
+                      <Link href={`/pengaduan/detail/${item.id}`} className="flex items-center gap-2 text-slate-900 bg-white hover:bg-slate-100 border-2 border-slate-900 px-4 py-2 rounded-xl transition-colors w-fit shadow-[2px_2px_0_0_#0f172a] hover:shadow-[4px_4px_0_0_#0f172a]">
+                        <ExternalLink size={14} /> Lihat Detail
+                      </Link>
                     </td>
                   </tr>
                 ))
