@@ -35,8 +35,8 @@ export default function EasterEggPlant({ logoRef }: { logoRef: React.RefObject<H
       
       const distance = Math.sqrt(Math.pow(e.clientX - centerX, 2) + Math.pow(e.clientY - centerY, 2));
       
-      // Start growing when mouse is within 300px. Fully grown at 0px.
-      const p = Math.max(0, Math.min(1, 1 - (distance / 300)));
+      // Start growing when mouse is within 100px. Fully grown at 0px.
+      const p = Math.max(0, Math.min(1, 1 - (distance / 100)));
       
       // Map progress to Lottie frames
       const totalFrames = lottieLeftRef.current?.getDuration(true) || 0;
