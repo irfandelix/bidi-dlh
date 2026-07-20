@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import ExcelJS from 'exceljs';
 import path from 'path';
 import fs from 'fs';
