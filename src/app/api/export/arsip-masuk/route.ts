@@ -64,11 +64,11 @@ export async function GET(request: Request) {
         row.getCell(5).value = d.perihal; // E: Uraian
         row.getCell(6).value = d.tanggal_surat; // F: Tanggal
         row.getCell(7).value = d.jumlah || 1; // G: Jumlah
-        row.getCell(8).value = st === 'Biasa' ? 'v' : ''; // H: Biasa
-        row.getCell(9).value = st === 'Terbatas' ? 'v' : ''; // I: Terbatas
-        row.getCell(10).value = st === 'Rahasia' ? 'v' : ''; // J: Rahasia
-        row.getCell(11).value = st === 'Segera' ? 'v' : ''; // K: Segera
-        row.getCell(12).value = st === 'Penting' ? 'v' : ''; // L: Penting
+        row.getCell(8).value = st === 'Biasa' ? 'Biasa' : ''; // H: Biasa
+        row.getCell(9).value = st === 'Terbatas' ? 'Terbatas' : ''; // I: Terbatas
+        row.getCell(10).value = st === 'Rahasia' ? 'Rahasia' : ''; // J: Rahasia
+        row.getCell(11).value = st === 'Segera' ? 'Segera' : ''; // K: Segera
+        row.getCell(12).value = st === 'Penting' ? 'Penting' : ''; // L: Penting
 
         row.commit();
       });
