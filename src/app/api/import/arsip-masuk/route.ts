@@ -57,35 +57,42 @@ export async function POST(request: Request) {
       return new Date().toISOString().split('T')[0];
     };
 
+    // Helper aman untuk mengekstrak teks dari sel ExcelJS (menghindari object/formula/richText)
+    const getCellValue = (cell: any): string => {
+      if (cell === null || cell === undefined) return '';
+      if (typeof cell === 'object') {
+        if (cell.result !== undefined) return String(cell.result);
+        if (cell.richText) return cell.richText.map((rt: any) => rt.text).join('');
+        if (cell.text) return String(cell.text);
+      }
+      return String(cell).trim();
+    };
+
     worksheet.eachRow((row, rowNumber) => {
       // Kita anggap baris data jika Kolom A adalah sebuah angka
-      const colA = row.getCell(1).value;
+      const colA = getCellValue(row.getCell(1).value);
       
-      // Bisa jadi string atau angka
       let isDataRow = false;
-      if (typeof colA === 'number') {
-        isDataRow = true;
-      } else if (typeof colA === 'string' && !isNaN(parseInt(colA.trim(), 10))) {
+      if (colA && !isNaN(parseInt(colA, 10))) {
         isDataRow = true;
       }
 
       if (isDataRow) {
         // Ambil Kode Klasifikasi (gabungan Kolom D, E, F, G sesuai format Excel)
-        const d = row.getCell(4).value;
-        const e = row.getCell(5).value;
-        const f = row.getCell(6).value;
-        const g = row.getCell(7).value;
+        const d = getCellValue(row.getCell(4).value);
+        const e = getCellValue(row.getCell(5).value);
+        const f = getCellValue(row.getCell(6).value);
+        const g = getCellValue(row.getCell(7).value);
 
         let kodeStr = '';
-        if (d !== null && d !== undefined && d !== '') kodeStr += d;
-        if (e !== null && e !== undefined && e !== '') kodeStr += '.' + e;
-        if (f !== null && f !== undefined && f !== '') kodeStr += '.' + f;
-        if (g !== null && g !== undefined && g !== '') kodeStr += '.' + g;
+        if (d) kodeStr += d;
+        if (e) kodeStr += '.' + e;
+        if (f) kodeStr += '.' + f;
+        if (g) kodeStr += '.' + g;
 
         if (!kodeStr) {
             // Coba ambil satu sel D saja jika nyatanya merge jadi 1 (di beberapa template)
-            const singleVal = row.getCell(4).value;
-            if (singleVal) kodeStr = singleVal.toString();
+            kodeStr = getCellValue(row.getCell(4).value);
         }
 
         const perihalCell = row.getCell(8).value;
@@ -105,14 +112,14 @@ export async function POST(request: Request) {
         if (tanggalCell instanceof Date) {
           tglStr = tanggalCell.toISOString().split('T')[0];
         } else {
-          tglStr = parseIndonesianDate(tanggalCell as string);
+          tglStr = parseIndonesianDate(getCellValue(tanggalCell));
         }
 
         // Jumlah dari J
-        const jumlahCell = row.getCell(10).value;
+        const jumlahVal = getCellValue(row.getCell(10).value);
         let jumlah = 1;
-        if (jumlahCell) {
-          const numMatch = jumlahCell.toString().match(/\d+/);
+        if (jumlahVal) {
+          const numMatch = jumlahVal.match(/\d+/);
           if (numMatch) {
             jumlah = parseInt(numMatch[0], 10);
           }
@@ -120,10 +127,10 @@ export async function POST(request: Request) {
 
         // Status Surat dari kolom Biasa(11), Terbatas(12), Rahasia(13), Segera(14), Penting(15)
         let statusSurat = 'Biasa';
-        if (row.getCell(15).value) statusSurat = 'Penting';
-        else if (row.getCell(14).value) statusSurat = 'Segera';
-        else if (row.getCell(13).value) statusSurat = 'Rahasia';
-        else if (row.getCell(12).value) statusSurat = 'Terbatas';
+        if (getCellValue(row.getCell(15).value)) statusSurat = 'Penting';
+        else if (getCellValue(row.getCell(14).value)) statusSurat = 'Segera';
+        else if (getCellValue(row.getCell(13).value)) statusSurat = 'Rahasia';
+        else if (getCellValue(row.getCell(12).value)) statusSurat = 'Terbatas';
 
         payloads.push({
           kode_klasifikasi: kodeStr || '-',
