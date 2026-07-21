@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { id, yth, dari, tembusan, hal, sifat, lampiran, petugas, foto1_url, foto2_url, ket1, ket2, perihal_aduan, nama_terlapor, lokasi_aduan, deskripsi_aduan } = body;
+    const { id, yth, dari, tembusan, hal, sifat, lampiran, petugas, foto1_url, foto2_url, ket1, ket2, kegiatan_aduan, nama_terlapor, lokasi_aduan, deskripsi_aduan } = body;
 
     // 1. Dapatkan Nomor Nota Dinas terbaru untuk Pengaduan
     const tanggal_nota = new Date().toISOString().split('T')[0];
@@ -140,7 +140,7 @@ export async function POST(request: Request) {
       lampiran: lampiran || '-',
       nomor: nomor_otomatis,
       tanggal: tanggalFull,
-      perihal_aduan: perihal_aduan || '',
+      kegiatan_aduan: kegiatan_aduan || '',
       nama_terlapor: nama_terlapor || '',
       lokasi_aduan: lokasi_aduan || '',
       deskripsi_aduan: deskripsi_aduan || '',

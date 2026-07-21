@@ -86,7 +86,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
         body: JSON.stringify({
           id: id,
           ...suratData,
-          perihal_aduan: data.perihal || '',
+          kegiatan_aduan: data.perihal || '',
           nama_terlapor: data.nama_terlapor || '',
           lokasi_aduan: data.lokasi_aduan || '',
           deskripsi_aduan: data.deskripsi || '',
