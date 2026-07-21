@@ -84,8 +84,11 @@ export default function Navbar() {
             <Link href="/pengaturan/tim-pengawas" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
               Tim Pengawas
             </Link>
-            <Link href="/pengaturan/tim-pengaduan" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100">
+            <Link href="/pengaturan/tim-pengaduan" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
               Tim Pengaduan
+            </Link>
+            <Link href="/pengaturan/anggota-bidang" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100">
+              Anggota Bidang
             </Link>
           </div>
         </div>
