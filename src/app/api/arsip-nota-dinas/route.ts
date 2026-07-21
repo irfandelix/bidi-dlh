@@ -5,10 +5,10 @@ export async function GET(request: Request) {
   try {
     const supabase: any = await createClient();
     
-    // Ambil data dari tabel arsip_nota_dinas, diurutkan dari yang terbaru
+    // Ambil data dari tabel arsip_nota_dinas beserta relasi ke anggota_bidang (pemohon_id)
     const { data, error } = await supabase
       .from('arsip_nota_dinas')
-      .select('*')
+      .select('*, pemohon:anggota_bidang(*)')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { nama_nota, tanggal_nota, dari_bagian, kode_klasifikasi, file_url } = body;
+    const { nama_nota, tanggal_nota, dari_bagian, kode_klasifikasi, file_url, pemohon_id, keterangan, is_sisipan, nomor_sisipan } = body;
     
     if (!nama_nota || !tanggal_nota || !dari_bagian) {
       return NextResponse.json({ error: 'Semua field wajib diisi' }, { status: 400 });
@@ -57,7 +57,16 @@ export async function POST(request: Request) {
       nextUrut = (lastDoc[0].no_urut || 0) + 1;
     }
 
-    const urutStr = String(nextUrut).padStart(3, '0');
+    let urutStr = String(nextUrut).padStart(3, '0');
+    let finalUrutToSave = nextUrut;
+
+    // Jika ini adalah nomor sisipan, kita timpa urutStr dengan input manual (nomor_sisipan)
+    // dan set no_urut (angka di database) ke 0 agar tidak mengganggu auto-increment normal.
+    if (is_sisipan && nomor_sisipan && nomor_sisipan.trim() !== '') {
+      urutStr = nomor_sisipan.trim();
+      finalUrutToSave = 0; 
+    }
+
     const bagianUpper = dari_bagian.toUpperCase();
     
     // Ambil bulan dari tanggal nota (1-12)
@@ -79,12 +88,14 @@ export async function POST(request: Request) {
     }
 
     const payload = {
-      no_urut: nextUrut,
+      no_urut: finalUrutToSave,
       nama_nota,
       tanggal_nota,
       dari_bagian,
       nomor_otomatis,
-      file_url
+      file_url,
+      pemohon_id,
+      keterangan
     };
 
     const { data, error } = await supabase

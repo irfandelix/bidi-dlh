@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, Save, PenTool, Upload } from 'lucide-react';
@@ -13,6 +13,17 @@ export default function TambahNotaDinasPage() {
   const [generatedNo, setGeneratedNo] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [dariBagian, setDariBagian] = useState('Umum');
+  const [anggota, setAnggota] = useState<any[]>([]);
+  const [isSisipan, setIsSisipan] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/pengaturan/anggota-bidang')
+      .then(res => res.json())
+      .then(res => {
+        setAnggota(res.data || []);
+      })
+      .catch(console.error);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,6 +54,10 @@ export default function TambahNotaDinasPage() {
         tanggal_nota: formData.get('tanggal_nota'),
         dari_bagian: dariBagian,
         kode_klasifikasi: formData.get('kode_klasifikasi'),
+        pemohon_id: formData.get('pemohon_id'),
+        keterangan: formData.get('keterangan'),
+        is_sisipan: isSisipan,
+        nomor_sisipan: formData.get('nomor_sisipan'),
         file_url: fileUrl,
       };
 
@@ -122,10 +137,25 @@ export default function TambahNotaDinasPage() {
             
             <div>
               <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                1. Nama Nota Dinas <span className="text-rose-500">*</span>
+                1. Pemohon (Anggota Bidang) <span className="text-rose-500">*</span>
               </label>
-              <input type="text" name="nama_nota" required placeholder="Contoh: Undangan Rapat Evaluasi..." 
-                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
+              <select name="pemohon_id" required 
+                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none cursor-pointer">
+                <option value="">- Pilih Pemohon -</option>
+                {anggota.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.nama} {a.jabatan ? `(${a.jabatan})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
+                2. Isi Nota Dinas (Subjek) <span className="text-rose-500">*</span>
+              </label>
+              <textarea name="nama_nota" required placeholder="Contoh: Permohonan izin pelaksanaan rapat..." rows={3}
+                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none resize-none" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -153,6 +183,42 @@ export default function TambahNotaDinasPage() {
                   <option value="Pengawasan">Pengawasan</option>
                 </select>
               </div>
+            </div>
+
+            {/* SISIPAN BLOCK */}
+            <div className="bg-sky-50 border-4 border-sky-200 p-6 rounded-2xl space-y-4">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className="relative flex items-center justify-center w-6 h-6 border-2 border-slate-900 rounded bg-white group-hover:bg-sky-100 transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={isSisipan}
+                    onChange={(e) => setIsSisipan(e.target.checked)}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                  {isSisipan && <div className="w-3 h-3 bg-slate-900 rounded-sm"></div>}
+                </div>
+                <span className="text-sm font-black text-slate-900 uppercase tracking-wider">
+                  Gunakan Nomor Sisipan (Manual Backdate)
+                </span>
+              </label>
+
+              {isSisipan && (
+                <div className="pt-2 pl-9 animate-in slide-in-from-top-2">
+                  <label className="block text-xs font-black text-slate-900 mb-2 uppercase tracking-wider">
+                    Ketik Nomor Urut Sisipan <span className="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    name="nomor_sisipan"
+                    required={isSisipan}
+                    placeholder="Misal: 015.1 atau 001.1.1" 
+                    className="w-full bg-white border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-3 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" 
+                  />
+                  <p className="text-xs font-bold text-sky-700 mt-2">
+                    Nomor ini akan langsung dirangkai dengan klasifikasi dan tahun. Pastikan ketikannya sesuai urutan yang Anda inginkan.
+                  </p>
+                </div>
+              )}
             </div>
 
             {dariBagian === 'Umum' && (
@@ -201,6 +267,14 @@ export default function TambahNotaDinasPage() {
                   {file ? <span className="text-fuchsia-600">File terpilih: {file.name}</span> : 'Klik atau seret file ke sini (PDF/Word/Images)'}
                 </p>
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
+                5. Keterangan (Opsional)
+              </label>
+              <textarea name="keterangan" placeholder="Tambahkan catatan khusus jika ada..." rows={2}
+                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none resize-none" />
             </div>
 
             <div className="pt-8 border-t-4 border-slate-900 mt-8 flex justify-end">

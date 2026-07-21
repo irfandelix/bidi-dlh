@@ -15,6 +15,11 @@ type NotaDinas = {
   dari_bagian: string;
   nomor_otomatis: string;
   created_at: string;
+  keterangan?: string;
+  pemohon?: {
+    nama: string;
+    jabatan: string;
+  };
 };
 
 export default function DaftarArsipNotaDinasPage() {
@@ -48,11 +53,12 @@ export default function DaftarArsipNotaDinasPage() {
   const handleExportExcel = () => {
     const dataToExport = filteredDocs.map((d, index) => ({
       "No": index + 1,
-      "Nomor Urut": d.no_urut,
-      "Nomor Nota Dinas": d.nomor_otomatis,
-      "Nama Nota Dinas": d.nama_nota,
+      "Pemohon": d.pemohon ? d.pemohon.nama : 'Tanpa Pemohon',
+      "Jabatan Pemohon": d.pemohon ? d.pemohon.jabatan : '',
       "Tanggal": d.tanggal_nota,
-      "Dari Bagian": d.dari_bagian
+      "Nomor Nota Dinas": d.nomor_otomatis,
+      "Isi": d.nama_nota,
+      "Keterangan": d.keterangan || '-'
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -131,42 +137,50 @@ export default function DaftarArsipNotaDinasPage() {
           <table className="w-full text-left">
             <thead className="bg-slate-100 border-b-4 border-slate-900">
               <tr>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Nomor Registrasi</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Nama Nota Dinas</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Tanggal</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Dari / Bagian</th>
+                <th className="px-4 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900 w-16 text-center">No</th>
+                <th className="px-4 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Pemohon</th>
+                <th className="px-4 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Tanggal</th>
+                <th className="px-4 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Nomor Nota Dinas</th>
+                <th className="px-4 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Isi</th>
+                <th className="px-4 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Keterangan</th>
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-900">
               {filteredDocs.length > 0 ? (
-                paginatedDocs.map((d) => (
+                paginatedDocs.map((d, index) => (
                   <tr key={d.id} className="hover:bg-fuchsia-50 transition-colors">
-                    <td className="px-6 py-4 border-r-2 border-slate-900">
+                    <td className="px-4 py-4 border-r-2 border-slate-900 text-center font-bold text-sm">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </td>
+                    <td className="px-4 py-4 border-r-2 border-slate-900">
+                      {d.pemohon ? (
+                        <>
+                          <p className="font-black text-slate-900 text-sm uppercase">{d.pemohon.nama}</p>
+                          {d.pemohon.jabatan && <p className="font-bold text-slate-500 text-xs">{d.pemohon.jabatan}</p>}
+                        </>
+                      ) : (
+                        <p className="font-bold text-slate-500 text-xs italic">Tanpa Pemohon</p>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-900">
+                      {d.tanggal_nota}
+                    </td>
+                    <td className="px-4 py-4 border-r-2 border-slate-900">
                       <span className="bg-slate-200 text-slate-900 font-black px-3 py-2 rounded-lg border-2 border-slate-900 text-sm shadow-[2px_2px_0_0_#0f172a]">
                         {d.nomor_otomatis}
                       </span>
                     </td>
-                    <td className="px-6 py-4 border-r-2 border-slate-900">
+                    <td className="px-4 py-4 border-r-2 border-slate-900">
                       <p className="font-black text-slate-900 text-sm uppercase">{d.nama_nota}</p>
                     </td>
-                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-900">
-                      {d.tanggal_nota}
-                    </td>
-                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-900 uppercase">
-                      <span className={`px-3 py-1 rounded-lg border-2 border-slate-900 font-black shadow-[2px_2px_0_0_#0f172a] ${
-                        d.dari_bagian === 'Umum' ? 'bg-amber-100 text-amber-900' :
-                        d.dari_bagian === 'Perizinan' ? 'bg-blue-100 text-blue-900' :
-                        d.dari_bagian === 'Pengaduan' ? 'bg-rose-100 text-rose-900' :
-                        'bg-emerald-100 text-emerald-900'
-                      }`}>
-                        {d.dari_bagian}
-                      </span>
+                    <td className="px-4 py-4 border-r-2 border-slate-900">
+                      <p className="font-bold text-slate-700 text-sm">{d.keterangan || '-'}</p>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <Archive size={32} className="text-slate-300" />
                       <p className="uppercase tracking-widest">BELUM ADA BUKU REGISTER ATAU TIDAK DITEMUKAN.</p>
