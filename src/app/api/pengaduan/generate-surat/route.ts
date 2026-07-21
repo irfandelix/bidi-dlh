@@ -113,7 +113,7 @@ export async function POST(request: Request) {
     });
 
     // Return the generated file as response
-    return new NextResponse(buf, {
+    return new NextResponse(new Uint8Array(buf), {
       status: 200,
       headers: {
         'Content-Disposition': `attachment; filename="Surat_Tindak_Lanjut_${nomor_otomatis.replace(/\//g, '_')}.docx"`,
