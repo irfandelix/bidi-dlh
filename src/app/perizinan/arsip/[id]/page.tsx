@@ -29,18 +29,55 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
     setSubmitting(true);
     
     const formData = new FormData(e.currentTarget);
-    const fisik = {
-      dokumenCetak: formData.get('dokumenCetak') === '1',
-      noDokumenCetak: formData.get('noDokumenCetak') || '',
-      pkplhArsip: formData.get('pkplhArsip') === '1',
-      noPkplhArsip: formData.get('noPkplhArsip') || '',
-      suratPermohonan: formData.get('suratPermohonan') === '1',
-      noSuratPermohonan: formData.get('noSuratPermohonan') || '',
-      undanganSidang: formData.get('undanganSidang') === '1',
-      noUndanganSidang: formData.get('noUndanganSidang') || '',
+    const getOldUrl = (key: string) => {
+      try {
+        return doc.arsip_fisik ? JSON.parse(doc.arsip_fisik)[key] || '' : '';
+      } catch(e) { return ''; }
     };
 
-    let status_tahapan = 'Diarsipkan';
+    const fisik: any = {
+      dokumenCetak: formData.get('dokumenCetak') === '1',
+      noDokumenCetak: formData.get('noDokumenCetak') || '',
+      urlDokumenCetak: getOldUrl('urlDokumenCetak'),
+      pkplhArsip: formData.get('pkplhArsip') === '1',
+      noPkplhArsip: formData.get('noPkplhArsip') || '',
+      urlPkplh: getOldUrl('urlPkplh'),
+      suratPermohonan: formData.get('suratPermohonan') === '1',
+      noSuratPermohonan: formData.get('noSuratPermohonan') || '',
+      urlSuratPermohonan: getOldUrl('urlSuratPermohonan'),
+      undanganSidang: formData.get('undanganSidang') === '1',
+      noUndanganSidang: formData.get('noUndanganSidang') || '',
+      urlUndanganSidang: getOldUrl('urlUndanganSidang'),
+    };
+
+    const uploadFile = async (file: File | null) => {
+      if (!file || file.size === 0) return null;
+      try {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        return data.url;
+      } catch (err) {
+        console.error('Upload err', err);
+        return null;
+      }
+    };
+
+    const f1 = formData.get('file_dokumen_cetak') as File;
+    if (f1 && f1.size > 0) { const url = await uploadFile(f1); if(url) fisik.urlDokumenCetak = url; }
+    
+    const f2 = formData.get('file_pkplh') as File;
+    if (f2 && f2.size > 0) { const url = await uploadFile(f2); if(url) fisik.urlPkplh = url; }
+    
+    const f3 = formData.get('file_surat_permohonan') as File;
+    if (f3 && f3.size > 0) { const url = await uploadFile(f3); if(url) fisik.urlSuratPermohonan = url; }
+    
+    const f4 = formData.get('file_undangan_sidang') as File;
+    if (f4 && f4.size > 0) { const url = await uploadFile(f4); if(url) fisik.urlUndanganSidang = url; }
+
+    const action = (e.nativeEvent as any).submitter?.value;
+    let status_tahapan = action === 'final' ? 'Diarsipkan' : doc.status_tahapan;
 
     const payload = {
       lokasi_arsip: formData.get('lokasi_arsip'),
@@ -315,9 +352,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
           </div>
   
           {/* TOMBOL AKSI */}
-          <div className="pt-8 border-t-4 border-slate-900 flex justify-end gap-4 mt-8">
-            <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-emerald-400 hover:bg-emerald-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
-              {submitting ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Simpan Arsip
+          <div className="pt-8 border-t-4 border-slate-900 flex flex-col sm:flex-row justify-end gap-4 mt-8">
+            <button type="submit" name="action" value="draft" disabled={submitting} className="w-full sm:w-auto px-6 py-4 bg-amber-300 hover:bg-amber-400 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
+              {submitting ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Simpan Sementara (Belum Selesai)
+            </button>
+            <button type="submit" name="action" value="final" disabled={submitting} className="w-full sm:w-auto px-6 py-4 bg-emerald-400 hover:bg-emerald-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
+              {submitting ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />} Finalisasi & Arsipkan
             </button>
           </div>
         </form>

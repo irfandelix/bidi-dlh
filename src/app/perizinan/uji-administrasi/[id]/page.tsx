@@ -12,6 +12,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+  const [isAmdalnet, setIsAmdalnet] = useState(false);
 
   const [daftarPegawai, setDaftarPegawai] = useState<any[]>([]);
 
@@ -54,48 +55,63 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
     
     const formData = new FormData(e.currentTarget);
     
-    // Process complex checklist arrays
-    const keberadaan = checklistItems.map((_, i) => formData.get(`keberadaan[${i}]`) || '');
-    const kesesuaian = checklistItems.map((_, i) => formData.get(`kesesuaian[${i}]`) || '');
-    const keterangan_uji = checklistItems.map((_, i) => formData.get(`keterangan_uji[${i}]`) || '');
-    
-    // Simulated saving Data Uji Admin JSON
-    const data_uji_admin = JSON.stringify({ keberadaan, kesesuaian, keterangan: keterangan_uji });
-
-    // Process Tim Penilai array
-    const penandatangan = formData.getAll('penandatangan[]');
-
-    // Get existing ekstra_baris to merge
-    let ekstra = {};
+    let ekstra: any = {};
     try { if (doc.penandatangan_hua) ekstra = typeof doc.penandatangan_hua === 'string' ? JSON.parse(doc.penandatangan_hua) : doc.penandatangan_hua; } catch(e) {}
 
-    const updatedEkstra = {
-      ...ekstra,
-      kewenangan: formData.get('kewenangan'),
-      kbli: formData.get('kbli'),
-      hasil_verifikasi_uji: formData.get('hasil_verifikasi_uji'),
-      keberadaan,
-      kesesuaian,
-      keterangan_uji
+    let payload: any = {
+      status_tahapan: 'Uji Administrasi Selesai',
     };
 
-    const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : 
-                         doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 
-                         doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
-                         doc.jenis_dokumen === 'AMDAL' ? 'AMDAL' : 'DOK';
-    const noUrutPadded = String(doc.no_urut || doc.id).padStart(3, '0');
-    const bulan = new Date().getMonth() + 1;
-    const tahun = new Date().getFullYear();
-    const nomorUji = `600.4/${noUrutPadded}.${bulan}/17/BA.HUA.${jenisAcronym}/${tahun}`;
+    if (isAmdalnet) {
+      const file = formData.get('file_amdalnet') as File;
+      let amdalnetUrl = null;
+      if (file && file.size > 0) {
+        try {
+          const fd = new FormData();
+          fd.append('file', file);
+          const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd });
+          const uploadData = await uploadRes.json();
+          if (uploadData.url) amdalnetUrl = uploadData.url;
+        } catch (err) {
+          console.error('Upload failed', err);
+        }
+      }
 
-    const payload = {
-      nomor_uji_berkas: nomorUji,
-      tanggal_uji_berkas: formData.get('tanggal_uji_berkas'),
-      keterangan: formData.get('catatan_uji_admin'),
-      penandatangan_uji_admin: JSON.stringify(penandatangan),
-      status_tahapan: 'Uji Administrasi Selesai', // Pindah ke Verlap
-      penandatangan_hua: updatedEkstra
-    };
+      payload.tanggal_uji_berkas = new Date().toISOString().split('T')[0];
+      payload.keterangan = 'Lolos Uji Administrasi via Amdalnet';
+      payload.penandatangan_hua = { ...ekstra, is_amdalnet: true, file_amdalnet_url: amdalnetUrl };
+    } else {
+      const keberadaan = checklistItems.map((_, i) => formData.get(`keberadaan[${i}]`) || '');
+      const kesesuaian = checklistItems.map((_, i) => formData.get(`kesesuaian[${i}]`) || '');
+      const keterangan_uji = checklistItems.map((_, i) => formData.get(`keterangan_uji[${i}]`) || '');
+      
+      const penandatangan = formData.getAll('penandatangan[]');
+
+      const updatedEkstra = {
+        ...ekstra,
+        kewenangan: formData.get('kewenangan'),
+        kbli: formData.get('kbli'),
+        hasil_verifikasi_uji: formData.get('hasil_verifikasi_uji'),
+        keberadaan,
+        kesesuaian,
+        keterangan_uji
+      };
+
+      const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : 
+                           doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 
+                           doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
+                           doc.jenis_dokumen === 'AMDAL' ? 'AMDAL' : 'DOK';
+      const noUrutPadded = String(doc.no_urut || doc.id).padStart(3, '0');
+      const bulan = new Date().getMonth() + 1;
+      const tahun = new Date().getFullYear();
+      const nomorUji = `600.4/${noUrutPadded}.${bulan}/17/BA.HUA.${jenisAcronym}/${tahun}`;
+
+      payload.nomor_uji_berkas = nomorUji;
+      payload.tanggal_uji_berkas = formData.get('tanggal_uji_berkas');
+      payload.keterangan = formData.get('catatan_uji_admin');
+      payload.penandatangan_uji_admin = JSON.stringify(penandatangan);
+      payload.penandatangan_hua = updatedEkstra;
+    }
 
     try {
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
@@ -105,28 +121,29 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
       });
       
       if(res.ok) {
-        setMessage('Menyiapkan Dokumen BA HUA (Mohon Tunggu)...');
-        
-        // Auto Download File via Fetch to prevent cancellation
-        try {
-          const downloadUrl = `/api/generate?stage=uji-administrasi&type=template_ba_uji_admin&id=${unwrappedParams.id}`;
-          const fileRes = await fetch(downloadUrl);
+        if (!isAmdalnet) {
+          setMessage('Menyiapkan Dokumen BA HUA (Mohon Tunggu)...');
           
-          if (fileRes.ok) {
-            const blob = await fileRes.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `BA_UJI_ADMIN_${unwrappedParams.id}.docx`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-          } else {
-            console.error('Gagal generate dokumen BA HUA');
+          try {
+            const downloadUrl = `/api/generate?stage=uji-administrasi&type=template_ba_uji_admin&id=${unwrappedParams.id}`;
+            const fileRes = await fetch(downloadUrl);
+            
+            if (fileRes.ok) {
+              const blob = await fileRes.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `BA_UJI_ADMIN_${unwrappedParams.id}.docx`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              window.URL.revokeObjectURL(url);
+            } else {
+              console.error('Gagal generate dokumen BA HUA');
+            }
+          } catch (downloadErr) {
+            console.error('Error saat download otomatis:', downloadErr);
           }
-        } catch (downloadErr) {
-          console.error('Error saat download otomatis:', downloadErr);
         }
 
         setMessage('Uji Administrasi Berhasil Disimpan!');
@@ -181,6 +198,22 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* Opsi Amdalnet */}
+          <div className="mb-6 p-4 rounded-xl border-4 border-slate-900 bg-emerald-100 shadow-[4px_4px_0_0_#0f172a]">
+             <label className="flex items-center gap-3 cursor-pointer">
+               <input type="checkbox" checked={isAmdalnet} onChange={(e) => setIsAmdalnet(e.target.checked)} className="w-6 h-6 border-2 border-slate-900 rounded bg-white text-emerald-500 shadow-[2px_2px_0_0_#0f172a] focus:ring-emerald-500" />
+               <span className="font-black text-slate-900 uppercase">Sudah melalui AMDALNET (Lewati Uji Administrasi Manual)</span>
+             </label>
+             {isAmdalnet && (
+               <div className="mt-4 pt-4 border-t-2 border-slate-900">
+                 <label className="block text-sm font-black text-slate-900 mb-2 uppercase">Upload Dokumen Hasil Uji Administrasi (PDF)</label>
+                 <input type="file" name="file_amdalnet" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-white file:text-slate-900 hover:file:bg-slate-100 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer bg-emerald-200 border-2 border-slate-900 rounded-xl p-2 shadow-[2px_2px_0_0_#0f172a]" />
+               </div>
+             )}
+          </div>
+
+          {!isAmdalnet && (
+            <>
           {/* Tanggal */}
           <div className="mb-8">
             <label className="block text-sm font-black text-slate-900 mb-2 uppercase">Tanggal BA Uji Administrasi <span className="text-rose-500">*</span></label>
@@ -331,6 +364,8 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
               )}
             </div>
           </div>
+          </>
+          )}
 
           <div className="flex justify-end pt-8 border-t-4 border-slate-900 mt-8">
             <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-teal-400 hover:bg-teal-300 text-slate-900 font-black rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70 disabled:hover:translate-y-0">
