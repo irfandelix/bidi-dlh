@@ -111,7 +111,7 @@ export default function TimPengaduanPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 lg:p-12">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="w-full py-8 space-y-8">
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">

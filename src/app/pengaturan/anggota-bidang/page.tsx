@@ -69,7 +69,7 @@ export default function AnggotaBidangPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-8 space-y-8 px-4">
+    <div className="w-full py-8 space-y-8">
       <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-900 font-black transition-all bg-white border-2 border-slate-900 px-4 py-2 rounded-xl shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] uppercase tracking-wide">
         <ArrowLeft size={16} /> Kembali ke Beranda
       </Link>
