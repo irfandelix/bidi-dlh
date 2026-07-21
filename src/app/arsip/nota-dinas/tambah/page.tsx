@@ -217,6 +217,14 @@ export default function TambahNotaDinasPage() {
                   <p className="text-xs font-bold text-sky-700 mt-2">
                     Nomor ini akan langsung dirangkai dengan klasifikasi dan tahun. Pastikan ketikannya sesuai urutan yang Anda inginkan.
                   </p>
+                  <div className="mt-3 p-3 bg-amber-100 border-2 border-amber-500 rounded-lg">
+                    <p className="text-xs font-black text-amber-900 uppercase">
+                      ⚠️ Peringatan Penting
+                    </p>
+                    <p className="text-xs font-bold text-amber-800 mt-1">
+                      Saat membuat nomor sisipan, harap **periksa kembali isian Tanggal Nota** di atas agar sesuai dengan tanggal sisipan (mundur) yang Anda maksud, bukan tanggal hari ini.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
