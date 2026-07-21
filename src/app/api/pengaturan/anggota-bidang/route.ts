@@ -7,7 +7,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from('anggota_bidang')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('hierarki', { ascending: true });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });

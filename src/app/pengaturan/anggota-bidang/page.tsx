@@ -160,7 +160,6 @@ export default function AnggotaBidangPage() {
                       </td>
                       <td className="p-4 border-r-2 border-slate-100">
                         <p className="font-bold text-slate-900 text-sm">{item.jabatan || '-'}</p>
-                        {item.hierarki && <span className="inline-block mt-1 bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-xs font-black uppercase">{item.hierarki}</span>}
                       </td>
                       <td className="p-4">
                         <button onClick={() => handleDelete(item.id)} className="w-8 h-8 flex items-center justify-center bg-rose-100 text-rose-600 hover:bg-rose-600 hover:text-white rounded-lg transition-colors">
