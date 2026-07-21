@@ -24,6 +24,11 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
     sifat: 'Biasa',
     lampiran: '-'
   });
+  const [petugas, setPetugas] = useState<string[]>(['']);
+  const [foto1, setFoto1] = useState<File | null>(null);
+  const [ketFoto1, setKetFoto1] = useState('');
+  const [foto2, setFoto2] = useState<File | null>(null);
+  const [ketFoto2, setKetFoto2] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
   async function fetchData() {
@@ -53,12 +58,39 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
     setIsGenerating(true);
     
     try {
+      // Upload photos first if they exist
+      let foto1_url = '';
+      let foto2_url = '';
+
+      if (foto1) {
+        const ext = foto1.name.split('.').pop();
+        const fileName = `surat_${id}_foto1_${Date.now()}.${ext}`;
+        const { data: d1, error: e1 } = await supabase.storage.from('dokumen_pengaduan').upload(fileName, foto1);
+        if (e1) throw new Error('Gagal upload foto 1: ' + e1.message);
+        const { data: p1 } = supabase.storage.from('dokumen_pengaduan').getPublicUrl(fileName);
+        foto1_url = p1.publicUrl;
+      }
+
+      if (foto2) {
+        const ext = foto2.name.split('.').pop();
+        const fileName = `surat_${id}_foto2_${Date.now()}.${ext}`;
+        const { data: d2, error: e2 } = await supabase.storage.from('dokumen_pengaduan').upload(fileName, foto2);
+        if (e2) throw new Error('Gagal upload foto 2: ' + e2.message);
+        const { data: p2 } = supabase.storage.from('dokumen_pengaduan').getPublicUrl(fileName);
+        foto2_url = p2.publicUrl;
+      }
+
       const response = await fetch('/api/pengaduan/generate-surat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: id,
-          ...suratData
+          ...suratData,
+          petugas: petugas.filter(p => p.trim() !== ''),
+          foto1_url,
+          foto2_url,
+          ket1: ketFoto1,
+          ket2: ketFoto2
         })
       });
 
@@ -352,6 +384,87 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                   className="w-full bg-white border-2 border-slate-900 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-purple-500/20"
                   placeholder="Contoh: Kepala Kepolisian Resor Sragen Polda Jateng"
                 />
+              </div>
+
+              {/* TIM PETUGAS */}
+              <div className="pt-4 border-t-4 border-dashed border-slate-200">
+                <label className="text-sm font-black text-slate-900 uppercase tracking-widest mb-3 block">Yang Melaksanakan Tugas</label>
+                <div className="space-y-3">
+                  {petugas.map((p, index) => (
+                    <div key={index} className="flex gap-2">
+                      <div className="w-10 h-10 bg-slate-100 border-2 border-slate-900 rounded-xl flex items-center justify-center font-black text-slate-500 shrink-0">
+                        {index + 1}
+                      </div>
+                      <input 
+                        type="text" 
+                        value={p}
+                        onChange={(e) => {
+                          const newPetugas = [...petugas];
+                          newPetugas[index] = e.target.value;
+                          setPetugas(newPetugas);
+                        }}
+                        className="flex-1 bg-white border-2 border-slate-900 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-purple-500/20"
+                        placeholder="Nama Petugas"
+                      />
+                      {petugas.length > 1 && (
+                        <button type="button" onClick={() => setPetugas(petugas.filter((_, i) => i !== index))} className="w-10 h-10 bg-rose-100 text-rose-600 border-2 border-slate-900 rounded-xl flex items-center justify-center hover:bg-rose-200 transition-colors">
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button type="button" onClick={() => setPetugas([...petugas, ''])} className="w-full py-2 bg-slate-100 border-2 border-dashed border-slate-900 rounded-xl text-xs font-black text-slate-600 uppercase hover:bg-slate-200 transition-colors">
+                    + Tambah Petugas
+                  </button>
+                </div>
+              </div>
+
+              {/* DOKUMENTASI FOTO */}
+              <div className="pt-4 border-t-4 border-dashed border-slate-200">
+                <label className="text-sm font-black text-slate-900 uppercase tracking-widest mb-3 block">Dokumentasi Lapangan</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  
+                  {/* Foto 1 */}
+                  <div className="bg-slate-50 p-4 border-2 border-slate-900 rounded-xl space-y-3">
+                    <p className="text-xs font-bold text-slate-500 uppercase text-center">Foto 1</p>
+                    <label className="block w-full border-2 border-dashed border-slate-400 bg-white rounded-lg p-4 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-colors">
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => setFoto1(e.target.files?.[0] || null)} />
+                      {foto1 ? (
+                        <div className="text-xs font-bold text-purple-600 truncate">{foto1.name}</div>
+                      ) : (
+                        <div className="text-xs font-bold text-slate-400">Pilih Foto 1...</div>
+                      )}
+                    </label>
+                    <input 
+                      type="text" 
+                      value={ketFoto1}
+                      onChange={(e) => setKetFoto1(e.target.value)}
+                      placeholder="Keterangan Foto 1"
+                      className="w-full bg-white border-2 border-slate-900 rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                    />
+                  </div>
+
+                  {/* Foto 2 */}
+                  <div className="bg-slate-50 p-4 border-2 border-slate-900 rounded-xl space-y-3">
+                    <p className="text-xs font-bold text-slate-500 uppercase text-center">Foto 2</p>
+                    <label className="block w-full border-2 border-dashed border-slate-400 bg-white rounded-lg p-4 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-colors">
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => setFoto2(e.target.files?.[0] || null)} />
+                      {foto2 ? (
+                        <div className="text-xs font-bold text-purple-600 truncate">{foto2.name}</div>
+                      ) : (
+                        <div className="text-xs font-bold text-slate-400">Pilih Foto 2...</div>
+                      )}
+                    </label>
+                    <input 
+                      type="text" 
+                      value={ketFoto2}
+                      onChange={(e) => setKetFoto2(e.target.value)}
+                      placeholder="Keterangan Foto 2"
+                      className="w-full bg-white border-2 border-slate-900 rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                    />
+                  </div>
+
+                </div>
               </div>
 
               <div className="pt-4 border-t-2 border-slate-200 flex gap-4">

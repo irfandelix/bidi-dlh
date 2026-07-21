@@ -4,13 +4,15 @@ import fs from 'fs';
 import path from 'path';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
+// @ts-ignore
+import ImageModule from 'docxtemplater-image-module-free';
 
 export async function POST(request: Request) {
   try {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { id, yth, dari, tembusan, hal, sifat, lampiran } = body;
+    const { id, yth, dari, tembusan, hal, sifat, lampiran, petugas, foto1_url, foto2_url, ket1, ket2 } = body;
 
     // 1. Dapatkan Nomor Nota Dinas terbaru untuk Pengaduan
     const tanggal_nota = new Date().toISOString().split('T')[0];
@@ -82,9 +84,38 @@ export async function POST(request: Request) {
 
     const content = fs.readFileSync(templatePath, 'binary');
     const zip = new PizZip(content);
+    
+    // Konfigurasi Image Module
+    const imageOptions = {
+      centered: false,
+      getImage: async function (tagValue: string, tagName: string) {
+        if (!tagValue) {
+          // Jika tidak ada gambar, berikan gambar transparan 1x1 pixel
+          const transparentPixel = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+          return transparentPixel;
+        }
+        try {
+          const res = await fetch(tagValue);
+          const arrayBuffer = await res.arrayBuffer();
+          return Buffer.from(arrayBuffer);
+        } catch (e) {
+          console.error("Gagal load gambar", tagValue, e);
+          const transparentPixel = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+          return transparentPixel;
+        }
+      },
+      getSize: function (img: any, tagValue: string, tagName: string) {
+        if (!tagValue) return [1, 1]; // pixel kecil
+        return [250, 200]; // ukuran default foto (lebar, tinggi) dalam pixel
+      },
+    };
+
+    const imageModule = new ImageModule(imageOptions);
+
     const doc = new Docxtemplater(zip, {
       paragraphLoop: true,
       linebreaks: true,
+      modules: [imageModule]
     });
 
     // Format Tanggal untuk Surat (contoh: 22 April 2026)
@@ -96,7 +127,11 @@ export async function POST(request: Request) {
     const hari = tglObj.toLocaleDateString('id-ID', { weekday: 'long' });
     const tanggalFull = `${hari}, ${tanggalIndo}`;
 
-    doc.render({
+    // Format Data Petugas
+    const petugasArr = Array.isArray(petugas) ? petugas.map((p, idx) => ({ nomor: idx + 1, nama: p })) : [];
+
+    // Proses render async untuk gambar
+    await doc.renderAsync({
       yth: yth || '',
       dari: dari || 'Kepala Dinas Lingkungan Hidup Kabupaten Sragen',
       tembusan: tembusan || '',
@@ -104,7 +139,12 @@ export async function POST(request: Request) {
       sifat: sifat || 'Biasa',
       lampiran: lampiran || '-',
       nomor: nomor_otomatis,
-      tanggal: tanggalFull
+      tanggal: tanggalFull,
+      petugas: petugasArr,
+      foto1: foto1_url || '',
+      foto2: foto2_url || '',
+      ket_foto1: foto1_url ? (ket1 || '-') : '',
+      ket_foto2: foto2_url ? (ket2 || '-') : ''
     });
 
     const buf = doc.getZip().generate({
