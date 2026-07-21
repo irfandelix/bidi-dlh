@@ -42,6 +42,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
       setErrorMsg('Data tiket pengaduan tidak ditemukan.');
     } else {
       setData(fetch);
+      setSuratData(prev => ({ ...prev, hal: `Hasil Tindak Lanjut Aduan Masyarakat terkait ${fetch.perihal}` }));
     }
   }
 
