@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { nama_nota, tanggal_nota, dari_bagian, file_url } = body;
+    const { nama_nota, tanggal_nota, dari_bagian, kode_klasifikasi, file_url } = body;
     
     if (!nama_nota || !tanggal_nota || !dari_bagian) {
       return NextResponse.json({ error: 'Semua field wajib diisi' }, { status: 400 });
@@ -74,7 +74,8 @@ export async function POST(request: Request) {
       nomor_otomatis = `600.4.1/${urutStr}.${bulan}/17/PL/${tahun}`;
     } else {
       // Default (Umum)
-      nomor_otomatis = `600.4/${urutStr}.${bulan}/17/${tahun}`;
+      const kodeAwal = kode_klasifikasi && kode_klasifikasi.trim() !== '' ? kode_klasifikasi.trim() : '600.4';
+      nomor_otomatis = `${kodeAwal}/${urutStr}.${bulan}/17/${tahun}`;
     }
 
     const payload = {

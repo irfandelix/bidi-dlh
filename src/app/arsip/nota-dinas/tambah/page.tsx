@@ -12,6 +12,7 @@ export default function TambahNotaDinasPage() {
   const [successMsg, setSuccessMsg] = useState('');
   const [generatedNo, setGeneratedNo] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [dariBagian, setDariBagian] = useState('Umum');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,7 +41,8 @@ export default function TambahNotaDinasPage() {
       const payload = {
         nama_nota: formData.get('nama_nota'),
         tanggal_nota: formData.get('tanggal_nota'),
-        dari_bagian: formData.get('dari_bagian'),
+        dari_bagian: dariBagian,
+        kode_klasifikasi: formData.get('kode_klasifikasi'),
         file_url: fileUrl,
       };
 
@@ -139,7 +141,11 @@ export default function TambahNotaDinasPage() {
                 <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
                   3. Asal Bagian <span className="text-rose-500">*</span>
                 </label>
-                <select name="dari_bagian" required 
+                <select 
+                  name="dari_bagian" 
+                  required 
+                  value={dariBagian}
+                  onChange={(e) => setDariBagian(e.target.value)}
                   className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-black rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none cursor-pointer uppercase">
                   <option value="Umum">Umum</option>
                   <option value="Perizinan">Perizinan</option>
@@ -148,6 +154,42 @@ export default function TambahNotaDinasPage() {
                 </select>
               </div>
             </div>
+
+            {dariBagian === 'Umum' && (
+              <div className="bg-fuchsia-50 border-4 border-fuchsia-200 p-6 rounded-2xl">
+                <label className="block text-sm font-black text-fuchsia-900 mb-2 uppercase tracking-wider">
+                  3b. Kode Klasifikasi Surat (Pencarian Pintar) <span className="text-rose-500">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  name="kode_klasifikasi" 
+                  required 
+                  list="kode-klasifikasi-list"
+                  placeholder="Ketik kode (misal: 005) atau cari..." 
+                  className="w-full bg-white border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" 
+                />
+                <p className="text-xs font-bold text-fuchsia-700 mt-2">
+                  Ketik kode atau nama klasifikasi. Jika tidak ada di daftar, Anda tetap bisa mengetik kode kustom.
+                </p>
+                <datalist id="kode-klasifikasi-list">
+                  <option value="000">000 - Umum</option>
+                  <option value="005">005 - Undangan</option>
+                  <option value="020">020 - Perlengkapan / Barang</option>
+                  <option value="040">040 - Perpustakaan / Dokumentasi</option>
+                  <option value="090">090 - Perjalanan Dinas</option>
+                  <option value="100">100 - Pemerintahan</option>
+                  <option value="300">300 - Keamanan dan Ketertiban</option>
+                  <option value="400">400 - Kesejahteraan Rakyat</option>
+                  <option value="500">500 - Perekonomian</option>
+                  <option value="600">600 - Pekerjaan Umum dan Ketenagaan</option>
+                  <option value="660">660 - Lingkungan Hidup</option>
+                  <option value="700">700 - Pengawasan</option>
+                  <option value="800">800 - Kepegawaian (Umum)</option>
+                  <option value="850">850 - Cuti Pegawai</option>
+                  <option value="900">900 - Keuangan</option>
+                </datalist>
+              </div>
+            )}
 
             {/* UPLOAD FILE NOTA DINAS */}
             <div>
