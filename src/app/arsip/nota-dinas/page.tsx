@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
-  Archive, FileText, ArrowLeft, Plus, Search, Loader2, Download 
+  Archive, FileText, ArrowLeft, Plus, Search, Loader2, Download, Upload 
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
@@ -27,6 +27,8 @@ export default function DaftarArsipNotaDinasPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterBagian, setFilterBagian] = useState('Semua');
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
     fetch('/api/arsip-nota-dinas')
@@ -66,6 +68,46 @@ export default function DaftarArsipNotaDinasPage() {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Nota Dinas");
     XLSX.writeFile(workbook, "Buku_Register_Nota_Dinas.xlsx");
   };
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const firstSheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[firstSheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
+
+      const payload = jsonData.map(row => ({
+        nama_nota: row['Nama Nota Dinas'] || row['Isi'] || 'Tanpa Subjek',
+        tanggal_nota: row['Tanggal'] || new Date().toISOString().split('T')[0],
+        dari_bagian: row['Bagian'] || 'Umum',
+        nomor_otomatis: row['Nomor Otomatis'] || row['Nomor Nota Dinas'] || '',
+        keterangan: row['Keterangan'] || null
+      }));
+
+      const res = await fetch('/api/import/nota-dinas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: payload })
+      });
+
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error);
+      
+      alert(`Berhasil mengimpor ${resData.count} data!`);
+      window.location.reload();
+    } catch (error: any) {
+      alert(`Gagal mengimpor data: ${error.message}`);
+      console.error(error);
+    } finally {
+      setIsImporting(false);
+      setShowImportModal(false);
+    }
+  };
 
   if (loading) {
     return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="animate-spin text-fuchsia-600" size={40} /></div>;
@@ -91,6 +133,9 @@ export default function DaftarArsipNotaDinasPage() {
         </div>
         
         <div className="flex items-center flex-wrap gap-3 relative z-10">
+          <button onClick={() => setShowImportModal(true)} className="bg-sky-400 hover:bg-sky-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest">
+            <Upload size={18} /> Import Excel
+          </button>
           <button onClick={handleExportExcel} className="bg-white hover:bg-slate-100 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest">
             <Download size={18} /> Export Excel
           </button>
@@ -217,6 +262,49 @@ export default function DaftarArsipNotaDinasPage() {
           </div>
         )}
       </div>
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white border-4 border-slate-900 rounded-2xl p-6 shadow-[8px_8px_0_0_#0f172a] max-w-md w-full animate-in zoom-in-95">
+            <h3 className="text-xl font-black text-slate-900 uppercase mb-2">Import Excel</h3>
+            <p className="text-sm font-bold text-slate-600 mb-6">
+              Pastikan file Excel Anda memiliki kolom: <strong>Nama Nota Dinas, Tanggal, Bagian, Nomor Otomatis</strong>
+            </p>
+            
+            <div className="space-y-4">
+              <label className="block w-full border-2 border-dashed border-slate-900 rounded-xl p-8 text-center cursor-pointer hover:bg-slate-50 transition-colors">
+                <input 
+                  type="file" 
+                  accept=".xlsx, .xls, .csv" 
+                  className="hidden" 
+                  onChange={handleFileUpload}
+                  disabled={isImporting}
+                />
+                {isImporting ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="animate-spin text-sky-500" size={32} />
+                    <span className="text-sm font-bold text-slate-900 uppercase">Mengimpor Data...</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center gap-3">
+                    <Upload className="text-sky-500" size={32} />
+                    <span className="text-sm font-bold text-slate-900 uppercase">Pilih File Excel</span>
+                  </div>
+                )}
+              </label>
+
+              <button 
+                onClick={() => setShowImportModal(false)}
+                disabled={isImporting}
+                className="w-full px-5 py-3 bg-rose-400 border-2 border-slate-900 rounded-xl text-sm font-black text-slate-900 uppercase shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all disabled:opacity-50"
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
