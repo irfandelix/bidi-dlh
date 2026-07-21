@@ -15,6 +15,7 @@ export default function TambahNotaDinasPage() {
   const [dariBagian, setDariBagian] = useState('Umum');
   const [anggota, setAnggota] = useState<any[]>([]);
   const [isSisipan, setIsSisipan] = useState(false);
+  const [tanggalNota, setTanggalNota] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
     fetch('/api/pengaturan/anggota-bidang')
@@ -24,6 +25,30 @@ export default function TambahNotaDinasPage() {
       })
       .catch(console.error);
   }, []);
+
+  const handleTanggalChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setTanggalNota(val);
+    
+    if (val) {
+      try {
+        const res = await fetch('/api/arsip-nota-dinas/check-backdate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tanggal: val })
+        });
+        const data = await res.json();
+        
+        if (data.isBackdate) {
+          setIsSisipan(true);
+        } else {
+          setIsSisipan(false);
+        }
+      } catch (err) {
+        console.error('Failed to check backdate:', err);
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -163,7 +188,7 @@ export default function TambahNotaDinasPage() {
                 <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
                   2. Tanggal Nota <span className="text-rose-500">*</span>
                 </label>
-                <input type="date" name="tanggal_nota" required defaultValue={new Date().toISOString().split('T')[0]}
+                <input type="date" name="tanggal_nota" required value={tanggalNota} onChange={handleTanggalChange}
                   className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none cursor-pointer" />
               </div>
 
