@@ -4,16 +4,20 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET() {
   try {
     const supabase: any = await createClient();
-    const { data, error } = await supabase
-      .from('anggota_bidang')
-      .select('*')
-      .order('hierarki', { ascending: true });
+    const { data, error } = await supabase.from('anggota_bidang').select('*');
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ data }, { status: 200 });
+    // Sort numerically on backend since column might be text
+    const sortedData = data.sort((a: any, b: any) => {
+      const hA = parseInt(a.hierarki) || 999;
+      const hB = parseInt(b.hierarki) || 999;
+      return hA - hB;
+    });
+
+    return NextResponse.json({ data: sortedData }, { status: 200 });
   } catch (error: any) {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }

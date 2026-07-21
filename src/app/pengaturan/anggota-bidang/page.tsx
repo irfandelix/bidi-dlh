@@ -112,13 +112,7 @@ export default function AnggotaBidangPage() {
 
             <div>
               <label className="block text-xs font-black text-slate-900 mb-1 uppercase tracking-wider">Hierarki (Opsional)</label>
-              <select name="hierarki" className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-3 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none">
-                <option value="">- Pilih Hierarki -</option>
-                <option value="Kepala Dinas">Kepala Dinas</option>
-                <option value="Sekretaris">Sekretaris</option>
-                <option value="Kepala Bidang">Kepala Bidang</option>
-                <option value="Staf">Staf</option>
-              </select>
+              <input type="number" name="hierarki" placeholder="1, 2, 3..." className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-3 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
             </div>
 
             <button type="submit" disabled={submitting} className="w-full mt-4 px-6 py-4 bg-slate-900 text-white font-black rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2">
