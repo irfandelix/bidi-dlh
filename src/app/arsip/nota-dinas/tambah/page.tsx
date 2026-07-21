@@ -174,19 +174,17 @@ export default function TambahNotaDinasPage() {
                 <datalist id="kode-klasifikasi-list">
                   <option value="000">000 - Umum</option>
                   <option value="005">005 - Undangan</option>
-                  <option value="020">020 - Perlengkapan / Barang</option>
-                  <option value="040">040 - Perpustakaan / Dokumentasi</option>
                   <option value="090">090 - Perjalanan Dinas</option>
                   <option value="100">100 - Pemerintahan</option>
-                  <option value="300">300 - Keamanan dan Ketertiban</option>
-                  <option value="400">400 - Kesejahteraan Rakyat</option>
-                  <option value="500">500 - Perekonomian</option>
                   <option value="600">600 - Pekerjaan Umum dan Ketenagaan</option>
                   <option value="660">660 - Lingkungan Hidup</option>
-                  <option value="700">700 - Pengawasan</option>
                   <option value="800">800 - Kepegawaian (Umum)</option>
-                  <option value="850">850 - Cuti Pegawai</option>
                   <option value="900">900 - Keuangan</option>
+                  
+                  {/* Contoh 4 Ruang (a.b.c.d) */}
+                  <option value="600.4.17.2">600.4.17.2 - Pengaduan Lingkungan</option>
+                  <option value="600.4.1">600.4.1 - Perizinan Lingkungan</option>
+                  <option value="600.4.6">600.4.6 - Pengawasan Lingkungan</option>
                 </datalist>
               </div>
             )}
