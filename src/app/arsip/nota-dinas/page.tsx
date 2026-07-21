@@ -76,18 +76,43 @@ export default function DaftarArsipNotaDinasPage() {
     
     try {
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array' });
+      const workbook = XLSX.read(data, { type: 'array', cellDates: true });
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
 
-      const payload = jsonData.map(row => ({
-        nama_nota: row['Nama Nota Dinas'] || row['Isi'] || 'Tanpa Subjek',
-        tanggal_nota: row['Tanggal'] || new Date().toISOString().split('T')[0],
-        dari_bagian: row['Bagian'] || 'Umum',
-        nomor_otomatis: row['Nomor Otomatis'] || row['Nomor Nota Dinas'] || '',
-        keterangan: row['Keterangan'] || null
-      }));
+      const payload = jsonData.map(row => {
+        let tgl = row['Tanggal'];
+        if (tgl instanceof Date) {
+          // Adjust for timezone offset to prevent date shifting
+          const offset = tgl.getTimezoneOffset();
+          tgl = new Date(tgl.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0];
+        } else if (typeof tgl === 'number') {
+          // Fallback if cellDates didn't work for some reason
+          const excelDate = new Date(Math.round((tgl - 25569) * 86400 * 1000));
+          tgl = excelDate.toISOString().split('T')[0];
+        } else if (!tgl) {
+          tgl = new Date().toISOString().split('T')[0];
+        }
+
+        const nomorOtomatis = row['Nomor Otomatis'] || row['Nomor Nota Dinas'] || '';
+        let bagian = row['Bagian'] || 'Umum';
+        
+        // Auto-detect Bagian if missing
+        if (!row['Bagian']) {
+          if (nomorOtomatis.includes('/PG/')) bagian = 'Pengaduan';
+          else if (nomorOtomatis.includes('/PW/')) bagian = 'Pengawasan';
+          else if (nomorOtomatis.includes('/PL/')) bagian = 'Perizinan';
+        }
+
+        return {
+          nama_nota: row['Nama Nota Dinas'] || row['Isi'] || 'Tanpa Subjek',
+          tanggal_nota: tgl,
+          dari_bagian: bagian,
+          nomor_otomatis: nomorOtomatis,
+          keterangan: row['Keterangan'] || null
+        };
+      });
 
       const res = await fetch('/api/import/nota-dinas', {
         method: 'POST',
