@@ -31,7 +31,10 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
     const formData = new FormData(e.currentTarget);
     const getOldUrl = (key: string) => {
       try {
-        return doc.arsip_fisik ? JSON.parse(doc.arsip_fisik)[key] || '' : '';
+        if (!doc.arsip_fisik) return '';
+        let parsed = JSON.parse(doc.arsip_fisik);
+        if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+        return parsed[key] || '';
       } catch(e) { return ''; }
     };
 
@@ -48,6 +51,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
       undanganSidang: formData.get('undanganSidang') === '1',
       noUndanganSidang: formData.get('noUndanganSidang') || '',
       urlUndanganSidang: getOldUrl('urlUndanganSidang'),
+      lokasiArsip: formData.get('lokasi_arsip') || '',
     };
 
     const uploadFile = async (file: File | null) => {
@@ -99,7 +103,6 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
     let status_tahapan = action === 'final' ? 'Diarsipkan' : doc.status_tahapan;
 
     const payload = {
-      lokasi_arsip: formData.get('lokasi_arsip'),
       latitude: formData.get('latitude') || null,
       longitude: formData.get('longitude') || null,
       status_tahapan,
@@ -116,9 +119,13 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
       if(res.ok) {
         setMessage('Data Arsip Berhasil Disimpan!');
         setTimeout(() => router.push('/perizinan/daftar'), 1500);
+      } else {
+        const errData = await res.json();
+        alert('Gagal menyimpan: ' + (errData.error || 'Server error'));
       }
     } catch (err) {
       console.error(err);
+      alert('Terjadi kesalahan jaringan.');
     } finally {
       setSubmitting(false);
     }
@@ -129,7 +136,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
 
   let fisik: any = {};
   try {
-    fisik = doc.arsip_fisik ? JSON.parse(doc.arsip_fisik) : {};
+    if (doc.arsip_fisik) {
+      fisik = JSON.parse(doc.arsip_fisik);
+      if (typeof fisik === 'string') {
+        fisik = JSON.parse(fisik);
+      }
+    }
   } catch (e) {}
 
   return (
@@ -347,7 +359,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             <div className="p-6 bg-slate-100 border-4 border-slate-900 rounded-2xl shadow-[4px_4px_0_0_#0f172a]">
               <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">Lokasi Arsip / Lemari</label>
               <p className="text-xs font-bold text-slate-600 mb-4 uppercase">Letak fisik dokumen disimpan.</p>
-              <input type="text" name="lokasi_arsip" defaultValue={doc.lokasi_arsip || ''} placeholder="Contoh: Lemari A, Rak 3"
+              <input type="text" name="lokasi_arsip" defaultValue={fisik.lokasiArsip || ''} placeholder="Contoh: Lemari A, Rak 3"
                 className="w-full bg-white border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl p-3 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
             </div>
 
