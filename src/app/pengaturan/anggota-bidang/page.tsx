@@ -136,9 +136,7 @@ export default function AnggotaBidangPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={3} className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest">
-                      <LottieLoader size={24} /> Memuat...
-                    </td>
+                    <td colSpan={3} className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest"><LottieLoader size={150} text="MEMUAT DATA..." /></td>
                   </tr>
                 ) : data.length === 0 ? (
                   <tr>

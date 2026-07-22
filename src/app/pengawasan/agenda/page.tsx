@@ -142,7 +142,7 @@ export default function DaftarAgenda() {
               <tbody className="divide-y-4 divide-slate-900">
                 {loading ? (
                   <tr>
-                    <td colSpan={7} className="p-10 text-center font-black text-slate-900 uppercase text-lg">Memuat data agenda...</td>
+                    <td colSpan={7} className="p-10 text-center font-black text-slate-900 uppercase text-lg"><LottieLoader size={150} text="MEMUAT DATA..." /></td>
                   </tr>
                 ) : paginated.length === 0 ? (
                   <tr>

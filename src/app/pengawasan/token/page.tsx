@@ -98,7 +98,7 @@ function TokenForm() {
 export default function VerifikasiToken() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-teal-50">
-      <Suspense fallback={<div className="font-black animate-pulse text-slate-500 uppercase">Memuat sistem...</div>}>
+      <Suspense fallback={<LottieLoader size={150} text="MEMUAT DATA..." />}>
         <TokenForm />
       </Suspense>
       <p className="mt-8 text-xs font-black text-slate-400 uppercase tracking-[0.2em]">SI-DLH Field Module v1.0</p>

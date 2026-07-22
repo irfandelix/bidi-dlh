@@ -285,7 +285,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       }
     };
 
-  if (loading) return <div className="min-h-screen bg-slate-50 p-6 flex items-center justify-center font-black text-xl animate-pulse text-slate-400 uppercase tracking-widest">Memuat Form...</div>;
+  if (loading) return <LottieLoader size={150} text="MEMUAT DATA..." />;
   if (!agenda) return <div className="min-h-screen bg-slate-50 p-6 flex items-center justify-center font-black text-xl text-rose-500 uppercase tracking-widest">Agenda Tidak Ditemukan</div>;
 
   return (

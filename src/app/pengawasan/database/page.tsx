@@ -142,7 +142,7 @@ export default function DatabaseGabungan() {
               <tbody className="divide-y-4 divide-slate-900 bg-white">
                 {loading ? (
                   <tr>
-                    <td colSpan={4} className="p-10 text-center text-slate-900 font-black uppercase text-lg">Memuat data...</td>
+                    <td colSpan={4} className="p-10 text-center text-slate-900 font-black uppercase text-lg"><LottieLoader size={150} text="MEMUAT DATA..." /></td>
                   </tr>
                 ) : paginatedData.length === 0 ? (
                   <tr>

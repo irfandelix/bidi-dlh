@@ -149,7 +149,7 @@ export default function TimPengaduanPage() {
               </thead>
               <tbody className="divide-y-4 divide-slate-900">
                 {loading ? (
-                  <tr><td colSpan={6} className="p-10 text-center font-black text-slate-900 uppercase">Memuat...</td></tr>
+                  <tr><td colSpan={6} className="p-10 text-center font-black text-slate-900 uppercase"><LottieLoader size={150} text="MEMUAT DATA..." /></td></tr>
                 ) : personil.length === 0 ? (
                   <tr><td colSpan={6} className="p-10 text-center text-slate-500 font-bold uppercase tracking-widest">Belum ada data tim Pengaduan.</td></tr>
                 ) : (

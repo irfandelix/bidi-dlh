@@ -58,10 +58,7 @@ export default function PengaduanListPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest">
-                    <LottieLoader size={24} />
-                    Memuat data...
-                  </td>
+                  <td colSpan={4} className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest"><LottieLoader size={150} text="MEMUAT DATA..." /></td>
                 </tr>
               ) : data.length === 0 ? (
                 <tr>

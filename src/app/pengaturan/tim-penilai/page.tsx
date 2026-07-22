@@ -147,7 +147,7 @@ export default function TimPenilaiPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={5} className="p-8 text-center font-bold text-slate-500">Memuat data...</td></tr>
+                <tr><td colSpan={5} className="p-8 text-center font-bold text-slate-500"><LottieLoader size={150} text="MEMUAT DATA..." /></td></tr>
               ) : personil.length === 0 ? (
                 <tr><td colSpan={5} className="p-8 text-center font-bold text-slate-500">Belum ada personil terdaftar.</td></tr>
               ) : (

@@ -131,7 +131,7 @@ export default function ArsipPengawasan() {
           </div>
 
           {loading ? (
-            <div className="py-20 text-center font-bold text-slate-500">Memuat data arsip...</div>
+            <LottieLoader size={150} text="MEMUAT DATA..." />
           ) : paginated.length === 0 ? (
             <div className="py-20 text-center font-bold text-slate-500 border-4 border-dashed border-slate-300 rounded-2xl bg-slate-50">
               Tidak ada arsip yang ditemukan.

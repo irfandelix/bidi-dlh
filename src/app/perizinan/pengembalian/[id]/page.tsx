@@ -53,7 +53,7 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
     }
   };
 
-  if (loading) return <div className="text-center py-20 text-slate-900 font-black flex items-center justify-center gap-2"><LottieLoader size={24} /> MEMUAT...</div>;
+  if (loading) return <LottieLoader size={150} text="MEMUAT DATA..." />;
   if (!doc) return <div className="text-center py-20 text-rose-600 font-black bg-rose-100 border-4 border-slate-900 m-8 rounded-2xl shadow-[4px_4px_0_0_#0f172a]">DATA TIDAK DITEMUKAN!</div>;
 
   return (

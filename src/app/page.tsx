@@ -230,7 +230,7 @@ export default function Home() {
               </div>
               <div className="p-4 flex-1 bg-slate-50">
                 {loading ? (
-                  <div className="flex items-center justify-center h-48 text-slate-500 font-bold text-sm">Memuat data...</div>
+                  <LottieLoader size={150} text="MEMUAT DATA..." />
                 ) : recentDocs.length === 0 ? (
                   <div className="flex items-center justify-center h-48 text-slate-500 font-black uppercase tracking-widest text-[10px] border-2 border-dashed border-slate-200 rounded-xl m-2">Belum ada data dokumen</div>
                 ) : (
@@ -266,7 +266,7 @@ export default function Home() {
               </div>
               <div className="p-4 flex-1 bg-slate-50">
                 {loading ? (
-                  <div className="flex items-center justify-center h-48 text-slate-500 font-bold text-sm">Memuat data...</div>
+                  <LottieLoader size={150} text="MEMUAT DATA..." />
                 ) : recentPengawasan.length === 0 ? (
                   <div className="flex items-center justify-center h-48 text-slate-500 font-black uppercase tracking-widest text-[10px] border-2 border-dashed border-slate-200 rounded-xl m-2">Belum ada data pengawasan</div>
                 ) : (
@@ -309,7 +309,7 @@ export default function Home() {
               </div>
               <div className="p-4 flex-1 bg-slate-50">
                 {loading ? (
-                  <div className="flex items-center justify-center h-48 text-slate-500 font-bold text-sm">Memuat data...</div>
+                  <LottieLoader size={150} text="MEMUAT DATA..." />
                 ) : recentAduan.length === 0 ? (
                   <div className="flex items-center justify-center h-48 text-slate-500 font-black uppercase tracking-widest text-[10px] border-2 border-dashed border-slate-200 rounded-xl m-2">Belum ada data pengaduan</div>
                 ) : (
