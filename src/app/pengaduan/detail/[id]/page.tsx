@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Loader2, FileText, CheckCircle2, Clock, User, MapPin, ExternalLink, Download, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { use } from 'react';
+import LottieLoader from '@/components/LottieLoader';
 
 const supabase = createClient();
 
@@ -138,7 +139,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-12 h-12 text-slate-900 animate-spin mb-4" />
+        <LottieLoader size={24} />
         <h2 className="text-xl font-black text-slate-900 uppercase">Memuat Data...</h2>
       </div>
     );
@@ -488,7 +489,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                   className="flex-[2] px-5 py-4 bg-purple-400 border-2 border-slate-900 rounded-xl text-sm font-black text-slate-900 uppercase shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_0_#0f172a] flex items-center justify-center gap-2"
                 >
                   {isGenerating ? (
-                    <><Loader2 className="animate-spin" size={20} /> Memproses...</>
+                    <><LottieLoader size={24} /> Memproses...</>
                   ) : (
                     <><Download size={20} /> Generate DOCX</>
                   )}

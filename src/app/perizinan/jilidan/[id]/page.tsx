@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, BookCopy, Info, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function JilidanPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -73,7 +74,7 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
     }
   };
 
-  if (loading) return <div className="text-center py-20 text-slate-900 font-black flex items-center justify-center gap-2"><Loader2 className="animate-spin" /> MEMUAT...</div>;
+  if (loading) return <div className="text-center py-20 text-slate-900 font-black flex items-center justify-center gap-2"><LottieLoader size={24} /> MEMUAT...</div>;
   if (!doc) return <div className="text-center py-20 text-rose-600 font-black bg-rose-100 border-4 border-slate-900 m-8 rounded-2xl shadow-[4px_4px_0_0_#0f172a]">DATA TIDAK DITEMUKAN!</div>;
 
   return (
@@ -144,7 +145,7 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
           </div>
           <div className="pt-8 border-t-4 border-slate-900 flex justify-end mt-8">
             <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-orange-400 hover:bg-orange-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
-              {submitting ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
+              {submitting ? <LottieLoader size={24} /> : <CheckCircle2 size={18} />}
               Simpan Penerimaan Jilidan
             </button>
           </div>

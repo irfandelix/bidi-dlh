@@ -4,6 +4,7 @@ import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, FilePen, RotateCcw, CheckCircle2, ClipboardList } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
@@ -76,7 +77,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
     }
   };
 
-  if (loading) return <div className="text-center py-20 text-slate-900 font-black flex items-center justify-center gap-2"><Loader2 className="animate-spin" /> MEMUAT...</div>;
+  if (loading) return <div className="text-center py-20 text-slate-900 font-black flex items-center justify-center gap-2"><LottieLoader size={24} /> MEMUAT...</div>;
   if (!doc) return <div className="text-center py-20 text-rose-600 font-black bg-rose-100 border-4 border-slate-900 m-8 rounded-2xl shadow-[4px_4px_0_0_#0f172a]">DATA TIDAK DITEMUKAN!</div>;
 
   return (
@@ -190,13 +191,13 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
           <div className="pt-8 border-t-4 border-slate-900 flex flex-col sm:flex-row justify-end gap-4 mt-8">
             <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
               className="w-full sm:w-auto px-6 py-4 bg-rose-400 hover:bg-rose-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
-              {submittingAction === 'revisi' ? <Loader2 size={18} className="animate-spin" /> : <RotateCcw size={18} />}
+              {submittingAction === 'revisi' ? <LottieLoader size={24} /> : <RotateCcw size={18} />}
               Terbitkan BA Revisi
             </button>
 
             <button type="submit" name="action" value="acc" disabled={submittingAction !== null}
               className="w-full sm:w-auto px-8 py-4 bg-teal-400 hover:bg-teal-300 text-slate-900 font-black rounded-xl border-4 border-slate-900 text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
-              {submittingAction === 'acc' ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
+              {submittingAction === 'acc' ? <LottieLoader size={24} /> : <CheckCircle2 size={18} />}
               ACC & Lanjut Selesai
             </button>
           </div>

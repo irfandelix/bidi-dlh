@@ -6,6 +6,7 @@ import {
   Send, FileText, ArrowLeft, Plus, Search, Loader2, Download 
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import LottieLoader from '@/components/LottieLoader';
 
 type ArsipKeluar = {
   id: number;
@@ -64,7 +65,7 @@ export default function DaftarArsipKeluarPage() {
   };
 
   if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="animate-spin text-emerald-600" size={40} /></div>;
+    return <div className="min-h-[50vh] flex items-center justify-center"><LottieLoader size={24} /></div>;
   }
 
   return (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import LottieLoader from '@/components/LottieLoader';
 import { 
   Archive, FileText, ArrowLeft, Printer, Search, Map, Loader2, Info
 } from 'lucide-react';
@@ -41,7 +42,7 @@ export default function DaftarArsipPerizinanPage() {
   const paginatedDocs = filteredDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
+    return <div className="min-h-[50vh] flex items-center justify-center"><LottieLoader size={24} /></div>;
   }
 
   return (

@@ -6,6 +6,7 @@ import {
   Archive, FileText, ArrowLeft, Plus, Search, Loader2, Download, Upload 
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import LottieLoader from '@/components/LottieLoader';
 
 type NotaDinas = {
   id: number;
@@ -135,7 +136,7 @@ export default function DaftarArsipNotaDinasPage() {
   };
 
   if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="animate-spin text-fuchsia-600" size={40} /></div>;
+    return <div className="min-h-[50vh] flex items-center justify-center"><LottieLoader size={24} /></div>;
   }
 
   return (
@@ -308,7 +309,7 @@ export default function DaftarArsipNotaDinasPage() {
                 />
                 {isImporting ? (
                   <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="animate-spin text-sky-500" size={32} />
+                    <LottieLoader size={24} />
                     <span className="text-sm font-bold text-slate-900 uppercase">Mengimpor Data...</span>
                   </div>
                 ) : (

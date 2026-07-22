@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 import { Loader2, Save, Upload, ShieldCheck, User, MapPin, FileText } from 'lucide-react';
 import { use } from 'react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function IsiFormPengaduanPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -103,7 +104,7 @@ export default function IsiFormPengaduanPage({ params }: { params: Promise<{ id:
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-12 h-12 text-purple-600 animate-spin mb-4" />
+        <LottieLoader size={24} />
         <h2 className="text-xl font-black text-slate-900 uppercase">Memuat Form...</h2>
       </div>
     );
@@ -255,7 +256,7 @@ export default function IsiFormPengaduanPage({ params }: { params: Promise<{ id:
           <div className="pt-10 flex justify-end">
             <button type="submit" disabled={submitting} 
               className="w-full md:w-auto px-10 py-5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-xl border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[8px_8px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70 disabled:hover:translate-y-0 disabled:shadow-[4px_4px_0_0_#0f172a]">
-              {submitting ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
+              {submitting ? <LottieLoader size={24} /> : <Save size={20} />}
               Simpan & Kirim Formulir
             </button>
           </div>

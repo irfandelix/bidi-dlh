@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Send, Loader2, Monitor, Globe, FilePlus, MapPin, UserCheck, CheckCircle, Printer } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function RegistrasiPage() {
   const router = useRouter();
@@ -219,7 +220,7 @@ export default function RegistrasiPage() {
                 disabled={downloading === 'Lembar_Registrasi_Amdalnet'}
                 className="w-full sm:w-auto px-6 py-4 bg-emerald-400 hover:bg-emerald-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
               >
-                {downloading === 'Lembar_Registrasi_Amdalnet' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                {downloading === 'Lembar_Registrasi_Amdalnet' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Lembar Registrasi Amdalnet
               </button>
             ) : (
@@ -230,7 +231,7 @@ export default function RegistrasiPage() {
                   disabled={downloading === 'template_tanda_terima_registrasi'}
                   className="w-full sm:w-auto px-6 py-4 bg-amber-400 hover:bg-amber-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {downloading === 'template_tanda_terima_registrasi' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                  {downloading === 'template_tanda_terima_registrasi' ? <LottieLoader size={24} /> : <Printer size={18} />}
                   Cetak Tanda Terima
                 </button>
                 <button 
@@ -239,7 +240,7 @@ export default function RegistrasiPage() {
                   disabled={downloading === 'template_checklist'}
                   className="w-full sm:w-auto px-6 py-4 bg-teal-400 hover:bg-teal-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {downloading === 'template_checklist' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                  {downloading === 'template_checklist' ? <LottieLoader size={24} /> : <Printer size={18} />}
                   Cetak Checklist
                 </button>
               </>
@@ -434,7 +435,7 @@ export default function RegistrasiPage() {
                   </select>
                 </div>
                 <button type="submit" disabled={loading} className="w-full py-4 rounded-xl font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[6px_6px_0_0_#0f172a] flex justify-center items-center gap-2 text-slate-900 border-4 border-slate-900 bg-indigo-400 hover:bg-indigo-300 hover:-translate-y-1 transition-all uppercase tracking-widest text-sm disabled:opacity-70 disabled:hover:translate-y-0">
-                  {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                  {loading ? <LottieLoader size={24} /> : <Send size={18} />}
                   Simpan Registrasi
                 </button>
               </div>
@@ -545,7 +546,7 @@ export default function RegistrasiPage() {
               
               <div className="md:col-span-2 mt-8 pt-6 border-t-4 border-slate-900 flex justify-end">
                 <button type="submit" disabled={loading} className="w-full sm:w-auto px-10 py-4 bg-emerald-400 hover:bg-emerald-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:shadow-[6px_6px_0_0_#0f172a] hover:-translate-y-1 flex items-center justify-center gap-2 uppercase tracking-widest transition-all disabled:opacity-70 disabled:hover:translate-y-0">
-                  {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+                  {loading ? <LottieLoader size={24} /> : <Send size={18} />}
                   Simpan Amdalnet
                 </button>
               </div>

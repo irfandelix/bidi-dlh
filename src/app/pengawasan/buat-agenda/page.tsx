@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 import Link from 'next/link';
 import { ArrowLeft, Save, Loader2, Calendar, MapPin, Building2, User, Edit3, Database } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function BuatAgenda() {
   const router = useRouter();
@@ -319,7 +320,7 @@ export default function BuatAgenda() {
                 disabled={loading}
                 className="w-full md:w-auto bg-teal-400 hover:bg-teal-500 text-slate-900 px-10 py-4 rounded-full text-sm font-black uppercase tracking-widest border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-1 transition-all disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-[6px_6px_0_0_#0f172a] flex items-center justify-center gap-2"
               >
-                {loading ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
+                {loading ? <LottieLoader size={24} /> : <Save size={20} />}
                 {loading ? 'Menyimpan...' : 'Simpan Agenda'}
               </button>
             </div>

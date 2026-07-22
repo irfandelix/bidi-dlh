@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 import { ShieldCheck, ArrowRight, AlertTriangle, Loader2 } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 function TokenForm() {
   const router = useRouter();
@@ -84,7 +85,7 @@ function TokenForm() {
           className="w-full bg-purple-400 hover:bg-purple-500 disabled:bg-slate-300 disabled:translate-y-0 disabled:shadow-[6px_6px_0_0_#0f172a] text-slate-900 font-black py-4 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
         >
           {loading ? (
-            <><Loader2 className="animate-spin" size={20} /> Memverifikasi...</>
+            <><LottieLoader size={24} /> Memverifikasi...</>
           ) : (
             <>Masuk ke Form <ArrowRight size={20} /></>
           )}

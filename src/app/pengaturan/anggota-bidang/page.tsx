@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, ArrowLeft, Loader2, Trash2, Users } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function AnggotaBidangPage() {
   const [data, setData] = useState<any[]>([]);
@@ -116,7 +117,7 @@ export default function AnggotaBidangPage() {
             </div>
 
             <button type="submit" disabled={submitting} className="w-full mt-4 px-6 py-4 bg-slate-900 text-white font-black rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2">
-              {submitting ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+              {submitting ? <LottieLoader size={24} /> : <Plus size={16} />}
               Simpan Anggota
             </button>
           </form>
@@ -136,7 +137,7 @@ export default function AnggotaBidangPage() {
                 {loading ? (
                   <tr>
                     <td colSpan={3} className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest">
-                      <Loader2 size={24} className="animate-spin mx-auto mb-2 text-slate-900" /> Memuat...
+                      <LottieLoader size={24} /> Memuat...
                     </td>
                   </tr>
                 ) : data.length === 0 ? (

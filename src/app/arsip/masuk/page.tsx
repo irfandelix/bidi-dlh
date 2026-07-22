@@ -6,6 +6,7 @@ import {
   Inbox, FileText, ArrowLeft, Plus, Search, Loader2, Download, Upload
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import LottieLoader from '@/components/LottieLoader';
 
 type ArsipMasuk = {
   id: number;
@@ -96,7 +97,7 @@ export default function DaftarArsipMasukPage() {
   };
 
   if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center"><Loader2 className="animate-spin text-blue-600" size={40} /></div>;
+    return <div className="min-h-[50vh] flex items-center justify-center"><LottieLoader size={24} /></div>;
   }
 
   return (
@@ -127,7 +128,7 @@ export default function DaftarArsipMasukPage() {
             className="hidden" 
           />
           <button onClick={() => fileInputRef.current?.click()} disabled={isImporting} className="bg-amber-300 hover:bg-amber-200 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest disabled:opacity-50">
-            {isImporting ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />} Import
+            {isImporting ? <LottieLoader size={24} /> : <Upload size={18} />} Import
           </button>
           <button onClick={handleExportExcel} className="bg-white hover:bg-slate-100 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest">
             <Download size={18} /> Export

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Printer, Loader2, ArrowLeft, FileText, CheckCircle } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function CetakClient({ doc }: { doc: any }) {
   const router = useRouter();
@@ -263,7 +264,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                 disabled={downloading === 'Lembar_Registrasi_Amdalnet'}
                 className="w-full px-4 py-3 bg-emerald-400 hover:bg-emerald-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
               >
-                {downloading === 'Lembar_Registrasi_Amdalnet' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                {downloading === 'Lembar_Registrasi_Amdalnet' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Dokumen
               </button>
             </div>
@@ -285,7 +286,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                   disabled={downloading === 'template_tanda_terima_registrasi'}
                   className="w-full px-4 py-3 bg-teal-400 hover:bg-teal-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {downloading === 'template_tanda_terima_registrasi' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                  {downloading === 'template_tanda_terima_registrasi' ? <LottieLoader size={24} /> : <Printer size={18} />}
                   Cetak Dokumen
                 </button>
               </div>
@@ -306,7 +307,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                   disabled={downloading === 'template_checklist'}
                   className="w-full px-4 py-3 bg-blue-400 hover:bg-blue-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {downloading === 'template_checklist' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                  {downloading === 'template_checklist' ? <LottieLoader size={24} /> : <Printer size={18} />}
                   Cetak Dokumen
                 </button>
               </div>
@@ -330,7 +331,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                 disabled={downloading === 'template_ba_uji_admin'}
                 className="w-full px-4 py-3 bg-indigo-400 hover:bg-indigo-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
               >
-                {downloading === 'template_ba_uji_admin' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                {downloading === 'template_ba_uji_admin' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Dokumen
               </button>
             </div>
@@ -353,7 +354,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                 disabled={downloading === 'template_ba_verlap'}
                 className="w-full px-4 py-3 bg-amber-400 hover:bg-amber-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
               >
-                {downloading === 'template_ba_verlap' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                {downloading === 'template_ba_verlap' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Dokumen
               </button>
             </div>
@@ -376,7 +377,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                 disabled={downloading === 'template_ba_substansi'}
                 className="w-full px-4 py-3 bg-emerald-400 hover:bg-emerald-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
               >
-                {downloading === 'template_ba_substansi' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                {downloading === 'template_ba_substansi' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Dokumen
               </button>
             </div>
@@ -407,7 +408,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                         disabled={downloading === `template_ba_pemeriksaan_revisi_${latest}`}
                         className="w-full px-4 py-3 bg-pink-400 hover:bg-pink-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
                       >
-                        {downloading === `template_ba_pemeriksaan_revisi_${latest}` ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                        {downloading === `template_ba_pemeriksaan_revisi_${latest}` ? <LottieLoader size={24} /> : <Printer size={18} />}
                         Cetak BA.P.P{latest}
                       </button>
 
@@ -422,7 +423,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                                 disabled={downloading === `template_ba_pemeriksaan_revisi_${rev}`}
                                 className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border-2 border-slate-900 font-bold rounded-lg text-xs shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all flex items-center gap-1 uppercase disabled:opacity-70"
                               >
-                                {downloading === `template_ba_pemeriksaan_revisi_${rev}` ? <Loader2 size={14} className="animate-spin" /> : <Printer size={14} />}
+                                {downloading === `template_ba_pemeriksaan_revisi_${rev}` ? <LottieLoader size={24} /> : <Printer size={14} />}
                                 BA.P.P{rev}
                               </button>
                             ))}
@@ -461,7 +462,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                         disabled={downloading === `template_tanda_terima_perbaikan_${latest}`}
                         className="w-full px-4 py-3 bg-fuchsia-400 hover:bg-fuchsia-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
                       >
-                        {downloading === `template_tanda_terima_perbaikan_${latest}` ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                        {downloading === `template_tanda_terima_perbaikan_${latest}` ? <LottieLoader size={24} /> : <Printer size={18} />}
                         Cetak PHP{latest}
                       </button>
 
@@ -476,7 +477,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                                 disabled={downloading === `template_tanda_terima_perbaikan_${rev}`}
                                 className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border-2 border-slate-900 font-bold rounded-lg text-xs shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all flex items-center gap-1 uppercase disabled:opacity-70"
                               >
-                                {downloading === `template_tanda_terima_perbaikan_${rev}` ? <Loader2 size={14} className="animate-spin" /> : <Printer size={14} />}
+                                {downloading === `template_tanda_terima_perbaikan_${rev}` ? <LottieLoader size={24} /> : <Printer size={14} />}
                                 PHP{rev}
                               </button>
                             ))}
@@ -507,7 +508,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                 disabled={downloading === 'template_tanda_terima_jilidan'}
                 className="w-full px-4 py-3 bg-orange-400 hover:bg-orange-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
               >
-                {downloading === 'template_tanda_terima_jilidan' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                {downloading === 'template_tanda_terima_jilidan' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Dokumen
               </button>
             </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, ArrowLeft, Loader2, AlertTriangle, ExternalLink } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function PengaduanListPage() {
   const [data, setData] = useState<any[]>([]);
@@ -58,7 +59,7 @@ export default function PengaduanListPage() {
               {loading ? (
                 <tr>
                   <td colSpan={4} className="p-8 text-center text-slate-500 font-bold uppercase tracking-widest">
-                    <Loader2 size={24} className="animate-spin mx-auto mb-2 text-slate-900" />
+                    <LottieLoader size={24} />
                     Memuat data...
                   </td>
                 </tr>

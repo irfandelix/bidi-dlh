@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, Save, PenTool, Upload } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function TambahNotaDinasPage() {
   const router = useRouter();
@@ -313,7 +314,7 @@ export default function TambahNotaDinasPage() {
             <div className="pt-8 border-t-4 border-slate-900 mt-8 flex justify-end">
               <button type="submit" disabled={loading} 
                 className="w-full md:w-auto px-10 py-4 bg-fuchsia-400 hover:bg-fuchsia-300 text-slate-900 font-black rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70 disabled:hover:translate-y-0">
-                {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                {loading ? <LottieLoader size={24} /> : <Save size={18} />}
                 Generate Nomor Nota
               </button>
             </div>
