@@ -64,21 +64,23 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
       let foto2_url = '';
 
       if (foto1) {
-        const ext = foto1.name.split('.').pop();
-        const fileName = `surat_${id}_foto1_${Date.now()}.${ext}`;
-        const { data: d1, error: e1 } = await supabase.storage.from('dokumen_pengaduan').upload(fileName, foto1);
-        if (e1) throw new Error('Gagal upload foto 1: ' + e1.message);
-        const { data: p1 } = supabase.storage.from('dokumen_pengaduan').getPublicUrl(fileName);
-        foto1_url = p1.publicUrl;
+        const fd = new FormData();
+        fd.append('file', foto1);
+        fd.append('folderName', data.nama_terlapor || 'Surat');
+        const r1 = await fetch('/api/pengaduan/upload', { method: 'POST', body: fd });
+        const d1 = await r1.json();
+        if (d1.error) throw new Error('Gagal upload foto 1: ' + d1.error);
+        foto1_url = d1.url;
       }
 
       if (foto2) {
-        const ext = foto2.name.split('.').pop();
-        const fileName = `surat_${id}_foto2_${Date.now()}.${ext}`;
-        const { data: d2, error: e2 } = await supabase.storage.from('dokumen_pengaduan').upload(fileName, foto2);
-        if (e2) throw new Error('Gagal upload foto 2: ' + e2.message);
-        const { data: p2 } = supabase.storage.from('dokumen_pengaduan').getPublicUrl(fileName);
-        foto2_url = p2.publicUrl;
+        const fd = new FormData();
+        fd.append('file', foto2);
+        fd.append('folderName', data.nama_terlapor || 'Surat');
+        const r2 = await fetch('/api/pengaduan/upload', { method: 'POST', body: fd });
+        const d2 = await r2.json();
+        if (d2.error) throw new Error('Gagal upload foto 2: ' + d2.error);
+        foto2_url = d2.url;
       }
 
       const response = await fetch('/api/pengaduan/generate-surat', {

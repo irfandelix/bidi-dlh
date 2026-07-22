@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { uploadFileToDrive } from '@/lib/gdrive';
 
 export async function POST(
   request: Request,
@@ -20,21 +21,15 @@ export async function POST(
     const fileName = `manual_${id}_${Date.now()}.${fileExt}`;
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-
-    // 1. Upload ke Storage
-    const { data: storageData, error: storageError } = await supabase.storage
-      .from('arsip_bap')
-      .upload(fileName, buffer, {
-        contentType: file.type,
-        upsert: true
-      });
-
-    if (storageError) {
-      throw storageError;
+    const mimeType = file.type || 'application/octet-stream';
+    
+    // Upload ke GDrive
+    const driveFileId = await uploadFileToDrive(buffer, fileName, 'Arsip BAP Pengawasan', mimeType);
+    if (!driveFileId) {
+      throw new Error('Gagal mengupload file ke Google Drive');
     }
-
-    const { data: publicUrlData } = supabase.storage.from('arsip_bap').getPublicUrl(fileName);
-    const publicUrl = publicUrlData.publicUrl;
+    
+    const publicUrl = `https://drive.google.com/open?id=${driveFileId}`;
 
     // 2. Fetch BAP saat ini untuk update JSON
     const { data: bapData, error: bapError } = await supabase
