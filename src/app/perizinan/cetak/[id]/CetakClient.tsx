@@ -248,7 +248,6 @@ export default function CetakClient({ doc }: { doc: any }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
           {doc.nomor_registrasi_amdalnet ? (
-            {/* Lembar Registrasi Amdalnet */}
             <div className="bg-white p-6 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] flex flex-col justify-start">
               <div>
                 <div className="flex items-center gap-3 mb-3">
