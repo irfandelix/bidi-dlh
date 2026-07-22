@@ -55,7 +55,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
       try {
         const fd = new FormData();
         fd.append('file', file);
-        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const res = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
         const data = await res.json();
         return data.url;
       } catch (err) {
