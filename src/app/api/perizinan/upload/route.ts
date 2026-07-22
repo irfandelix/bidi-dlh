@@ -20,8 +20,11 @@ export async function POST(request: Request) {
     
     // Asumsikan mimeType sesuai dengan file
     const mimeType = file.type || 'application/octet-stream';
+
+    // Ambil nama folder dari client, default ke 'Arsip Perizinan' jika tidak ada
+    const folderName = formData.get('folderName') as string || 'Arsip Perizinan';
     
-    const driveFileId = await uploadFileToDrive(buffer, fileName, 'Arsip Perizinan', mimeType);
+    const driveFileId = await uploadFileToDrive(buffer, fileName, folderName, mimeType);
     
     // Return link GDrive (view link)
     const publicUrl = `https://drive.google.com/file/d/${driveFileId}/view?usp=sharing`;

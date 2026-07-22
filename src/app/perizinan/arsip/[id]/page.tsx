@@ -55,6 +55,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
       try {
         const fd = new FormData();
         fd.append('file', file);
+        fd.append('folderName', doc.nama_pemrakarsa || doc.nama_kegiatan || 'Arsip Tanpa Nama');
         const res = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
         const data = await res.json();
         return data.url;
@@ -75,6 +76,24 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
     
     const f4 = formData.get('file_undangan_sidang') as File;
     if (f4 && f4.size > 0) { const url = await uploadFile(f4); if(url) fisik.urlUndanganSidang = url; }
+    
+    const f5 = formData.get('file_uji_admin') as File;
+    if (f5 && f5.size > 0) { const url = await uploadFile(f5); if(url) fisik.urlUjiAdmin = url; }
+    
+    const f6 = formData.get('file_ba_verlap') as File;
+    if (f6 && f6.size > 0) { const url = await uploadFile(f6); if(url) fisik.urlBaVerlap = url; }
+    
+    const f7 = formData.get('file_ba_sidang') as File;
+    if (f7 && f7.size > 0) { const url = await uploadFile(f7); if(url) fisik.urlBaSidang = url; }
+    
+    const f8 = formData.get('file_registrasi') as File;
+    if (f8 && f8.size > 0) { const url = await uploadFile(f8); if(url) fisik.urlRegistrasi = url; }
+    
+    const f9 = formData.get('file_pengembalian') as File;
+    if (f9 && f9.size > 0) { const url = await uploadFile(f9); if(url) fisik.urlPengembalian = url; }
+    
+    const f10 = formData.get('file_php') as File;
+    if (f10 && f10.size > 0) { const url = await uploadFile(f10); if(url) fisik.urlPhp = url; }
 
     const action = (e.nativeEvent as any).submitter?.value;
     let status_tahapan = action === 'final' ? 'Diarsipkan' : doc.status_tahapan;
@@ -157,7 +176,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* 1. DOKUMEN LINGKUNGAN FINAL */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${fisik.dokumenCetak ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${fisik.dokumenCetak || fisik.urlDokumenCetak ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <input type="checkbox" name="dokumenCetak" value="1" defaultChecked={fisik.dokumenCetak} className="mt-1 w-6 h-6 text-emerald-500 bg-white border-2 border-slate-900 rounded focus:ring-emerald-500 cursor-pointer shadow-[2px_2px_0_0_#0f172a]" />
                 <div className="w-full">
@@ -172,7 +191,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 2. PKPLH ARSIP */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${fisik.pkplhArsip ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${fisik.pkplhArsip || fisik.urlPkplh ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <input type="checkbox" name="pkplhArsip" value="1" defaultChecked={fisik.pkplhArsip} className="mt-1 w-6 h-6 text-emerald-500 bg-white border-2 border-slate-900 rounded focus:ring-emerald-500 cursor-pointer shadow-[2px_2px_0_0_#0f172a]" />
                 <div className="w-full">
@@ -187,7 +206,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 3. BA UJI ADMINISTRASI */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_uji_berkas ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_uji_berkas || fisik.urlUjiAdmin ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.nomor_uji_berkas ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -202,7 +221,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 4. BA VERLAP */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_ba_verlap ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_ba_verlap || fisik.urlBaVerlap ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.nomor_ba_verlap ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -217,7 +236,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 5. BA PEMERIKSAAN SIDANG */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_ba_pemeriksaan ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_ba_pemeriksaan || fisik.urlBaSidang ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.nomor_ba_pemeriksaan ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -232,7 +251,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 6. SURAT PERMOHONAN */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${fisik.suratPermohonan ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${fisik.suratPermohonan || fisik.urlSuratPermohonan ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <input type="checkbox" name="suratPermohonan" value="1" defaultChecked={fisik.suratPermohonan} className="mt-1 w-6 h-6 text-emerald-500 bg-white border-2 border-slate-900 rounded focus:ring-emerald-500 cursor-pointer shadow-[2px_2px_0_0_#0f172a]" />
                 <div className="w-full">
@@ -247,7 +266,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 7. LEMBAR REGISTRASI */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_checklist ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_checklist || fisik.urlRegistrasi ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.nomor_checklist ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -262,7 +281,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 8. LEMBAR PENGEMBALIAN */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.tanggal_pengembalian ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.tanggal_pengembalian || fisik.urlPengembalian ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.tanggal_pengembalian ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -277,7 +296,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 9. PHP */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_php ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_php || fisik.urlPhp ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.nomor_php ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -292,7 +311,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 10. UNDANGAN SIDANG */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${fisik.undanganSidang ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${fisik.undanganSidang || fisik.urlUndanganSidang ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <input type="checkbox" name="undanganSidang" value="1" defaultChecked={fisik.undanganSidang} className="mt-1 w-6 h-6 text-emerald-500 bg-white border-2 border-slate-900 rounded focus:ring-emerald-500 cursor-pointer shadow-[2px_2px_0_0_#0f172a]" />
                 <div className="w-full">
