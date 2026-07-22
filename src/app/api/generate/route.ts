@@ -111,9 +111,10 @@ export async function POST(request: Request) {
         return j;
     };
 
-    // Anggota is everyone EXCEPT the ketua (so it's not printed twice in the table)
+    // Anggota is everyone EXCEPT the ketua (so it's not printed twice in the table), 
+    // UNLESS it's Uji Administrasi which doesn't separate Ketua and Anggota in its default template.
     const tim_penilai_anggota = tim_penilai
-        .filter((_, idx) => idx !== (ketuaIndex !== -1 ? ketuaIndex : 0))
+        .filter((_, idx) => stage === 'uji-administrasi' ? true : idx !== (ketuaIndex !== -1 ? ketuaIndex : 0))
         .map((item, idx) => ({ 
             ...item, 
             nomor_urut: idx + 1, 
