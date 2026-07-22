@@ -1,5 +1,6 @@
-import LottieLoader from '@/components/LottieLoader';
 'use client';
+import LottieLoader from '@/components/LottieLoader';
+
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';

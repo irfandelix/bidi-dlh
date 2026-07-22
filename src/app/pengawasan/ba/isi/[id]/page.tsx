@@ -1,5 +1,6 @@
-import LottieLoader from '@/components/LottieLoader';
 'use client';
+import LottieLoader from '@/components/LottieLoader';
+
 
 import { useState, useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
