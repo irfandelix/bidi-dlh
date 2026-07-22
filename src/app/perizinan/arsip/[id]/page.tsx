@@ -55,7 +55,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
       try {
         const fd = new FormData();
         fd.append('file', file);
-        fd.append('folderName', doc.nama_pemrakarsa || doc.nama_kegiatan || 'Arsip Tanpa Nama');
+        fd.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
         const res = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
         const data = await res.json();
         return data.url;
