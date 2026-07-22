@@ -51,6 +51,15 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
       undanganSidang: formData.get('undanganSidang') === '1',
       noUndanganSidang: formData.get('noUndanganSidang') || '',
       urlUndanganSidang: getOldUrl('urlUndanganSidang'),
+      urlUjiAdmin: getOldUrl('urlUjiAdmin'),
+      urlBaVerlap: getOldUrl('urlBaVerlap'),
+      urlBaSidang: getOldUrl('urlBaSidang'),
+      urlRegistrasi: getOldUrl('urlRegistrasi'),
+      urlPengembalian: getOldUrl('urlPengembalian'),
+      urlPhp: getOldUrl('urlPhp'),
+      rpdArsip: formData.get('rpdArsip') === '1',
+      noRpdArsip: formData.get('noRpdArsip') || '',
+      urlRpd: getOldUrl('urlRpd'),
       lokasiArsip: formData.get('lokasi_arsip') || '',
     };
 
@@ -98,6 +107,9 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
     
     const f10 = formData.get('file_php') as File;
     if (f10 && f10.size > 0) { const url = await uploadFile(f10); if(url) fisik.urlPhp = url; }
+
+    const f11 = formData.get('file_rpd') as File;
+    if (f11 && f11.size > 0) { const url = await uploadFile(f11); if(url) fisik.urlRpd = url; }
 
     const action = (e.nativeEvent as any).submitter?.value;
     let status_tahapan = action === 'final' ? 'Diarsipkan' : doc.status_tahapan;
@@ -338,14 +350,24 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 11. RPD */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_risalah ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_risalah || fisik.rpdArsip || fisik.urlRpd ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
-                <div className="mt-1">{doc.nomor_risalah ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
+                {doc.jenis_dokumen === 'SPPL' ? (
+                  <input type="checkbox" name="rpdArsip" value="1" defaultChecked={fisik.rpdArsip} className="mt-1 w-6 h-6 text-emerald-500 bg-white border-2 border-slate-900 rounded focus:ring-emerald-500 cursor-pointer shadow-[2px_2px_0_0_#0f172a]" />
+                ) : (
+                  <div className="mt-1">{doc.nomor_risalah ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
+                )}
                 <div className="w-full">
-                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">11. Penyusunan RPD</p>
-                  <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.nomor_risalah || 'Belum terbit'}</p>
+                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">11. {doc.jenis_dokumen === 'SPPL' ? 'Pengesahan SPPL' : 'Penyusunan RPD'}</p>
+                  
+                  {doc.jenis_dokumen === 'SPPL' ? (
+                    <input type="text" name="noRpdArsip" defaultValue={fisik.noRpdArsip} placeholder="Input nomor surat pengesahan..." className="mt-3 w-full p-3 bg-white border-2 border-slate-900 rounded-xl text-sm text-slate-900 font-bold outline-none focus:shadow-[4px_4px_0_0_#0f172a] transition-all" />
+                  ) : (
+                    <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.nomor_risalah || 'Belum terbit'}</p>
+                  )}
+
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Arsip RPD (PDF)</label>
+                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Arsip {doc.jenis_dokumen === 'SPPL' ? 'Pengesahan (PDF)' : 'RPD (PDF)'}</label>
                     <input type="file" name="file_rpd" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
