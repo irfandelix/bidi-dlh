@@ -10,6 +10,14 @@ export default function CetakClient({ doc }: { doc: any }) {
   const router = useRouter();
   const [downloading, setDownloading] = useState<string | null>(null);
 
+  const isAmdalnet = !!doc.nomor_registrasi_amdalnet || (() => {
+    try {
+      if (!doc.extra_data) return false;
+      const extra = typeof doc.extra_data === 'string' ? JSON.parse(doc.extra_data) : doc.extra_data;
+      return !!extra?.is_amdalnet;
+    } catch { return false; }
+  })();
+
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -248,7 +256,7 @@ export default function CetakClient({ doc }: { doc: any }) {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
-          {doc.nomor_registrasi_amdalnet ? (
+          {isAmdalnet ? (
             <div className="bg-white p-6 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] flex flex-col justify-start">
               <div>
                 <div className="flex items-center gap-3 mb-3">
