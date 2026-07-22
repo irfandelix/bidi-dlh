@@ -29,7 +29,7 @@ export async function POST(
       throw new Error('Gagal mengupload file ke Google Drive');
     }
     
-    const publicUrl = `https://drive.google.com/open?id=${driveFileId}`;
+    const publicUrl = driveFileId;
 
     // 2. Fetch BAP saat ini untuk update JSON
     const { data: bapData, error: bapError } = await supabase

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     if (!driveFileId) {
       throw new Error('Gagal mengupload file ke Google Drive');
     }
-    const publicUrl = `https://drive.google.com/open?id=${driveFileId}`;
+    const publicUrl = driveFileId;
 
     return NextResponse.json({ url: publicUrl }, { status: 200 });
   } catch (error: any) {

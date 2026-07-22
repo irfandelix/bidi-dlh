@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const driveFileId = await uploadFileToDrive(buffer, fileName, folderName, mimeType);
     
     // Return link GDrive (view link)
-    const publicUrl = `https://drive.google.com/file/d/${driveFileId}/view?usp=sharing`;
+    const publicUrl = driveFileId;
 
     return NextResponse.json({ url: publicUrl, id: driveFileId }, { status: 200 });
   } catch (error: any) {
