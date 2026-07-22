@@ -71,7 +71,8 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
         try {
           const fd = new FormData();
           fd.append('file', file);
-          const uploadRes = await fetch('/api/upload', { method: 'POST', body: fd });
+          fd.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
+          const uploadRes = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
           const uploadData = await uploadRes.json();
           if (uploadData.url) amdalnetUrl = uploadData.url;
         } catch (err) {

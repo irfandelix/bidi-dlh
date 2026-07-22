@@ -156,6 +156,16 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
     }
   } catch (e) {}
 
+  let isAmdalnet = false;
+  let amdalnetUrl = '';
+  try {
+    const extra = typeof doc.penandatangan_hua === 'string' ? JSON.parse(doc.penandatangan_hua) : doc.penandatangan_hua;
+    if (extra && extra.is_amdalnet) {
+      isAmdalnet = true;
+      amdalnetUrl = extra.file_amdalnet_url || '';
+    }
+  } catch (e) {}
+
   return (
     <div className="max-w-6xl mx-auto py-8 space-y-8 pb-20">
       <Link href="/perizinan/daftar" className="inline-flex items-center gap-2 text-sm text-slate-900 font-black transition-all bg-white border-2 border-slate-900 px-4 py-2 rounded-xl shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] uppercase tracking-wide">
@@ -230,12 +240,24 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 3. BA UJI ADMINISTRASI */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_uji_berkas || fisik.urlUjiAdmin ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_uji_berkas || isAmdalnet || fisik.urlUjiAdmin ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
-                <div className="mt-1">{doc.nomor_uji_berkas ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
+                <div className="mt-1">{doc.nomor_uji_berkas || isAmdalnet ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
                   <p className="text-sm font-black uppercase tracking-wider text-slate-900">3. BA Uji Administrasi</p>
-                  <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.nomor_uji_berkas || 'Belum terbit'}</p>
+                  <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">
+                    {isAmdalnet ? 'DIPROSES VIA AMDALNET' : (doc.nomor_uji_berkas || 'Belum terbit')}
+                  </p>
+                  
+                  {isAmdalnet && amdalnetUrl && !fisik.urlUjiAdmin && (
+                     <div className="mt-4 p-3 bg-amber-100 border-2 border-slate-900 rounded-xl shadow-[2px_2px_0_0_#0f172a]">
+                        <p className="text-xs font-bold text-slate-900">
+                           Catatan: Anda memproses via Amdalnet sebelumnya. File upload di tahap Uji Admin mungkin tersimpan di penyimpanan lama (bukan GDrive). 
+                           Anda bisa menimpa / mengupload ulang file fisiknya di bawah ini agar tersimpan di GDrive Arsip.
+                        </p>
+                     </div>
+                  )}
+
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
                     <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Arsip Scan BA (PDF)</label>
                     <input type="file" name="file_uji_admin" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
