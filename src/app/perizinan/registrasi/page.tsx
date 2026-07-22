@@ -212,24 +212,38 @@ export default function RegistrasiPage() {
           <p className="text-sm font-bold text-slate-600">Silakan cetak Tanda Terima dan Checklist pendaftaran berikut:</p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button 
-              type="button"
-              onClick={() => handleDownload('template_tanda_terima_registrasi')}
-              disabled={downloading === 'template_tanda_terima_registrasi'}
-              className="w-full sm:w-auto px-6 py-4 bg-amber-400 hover:bg-amber-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
-            >
-              {downloading === 'template_tanda_terima_registrasi' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
-              Cetak Tanda Terima
-            </button>
-            <button 
-              type="button"
-              onClick={() => handleDownload('template_checklist')}
-              disabled={downloading === 'template_checklist'}
-              className="w-full sm:w-auto px-6 py-4 bg-teal-400 hover:bg-teal-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
-            >
-              {downloading === 'template_checklist' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
-              Cetak Checklist
-            </button>
+            {activeTab === 'amdalnet' ? (
+              <button 
+                type="button"
+                onClick={() => handleDownload('Lembar_Registrasi_Amdalnet')}
+                disabled={downloading === 'Lembar_Registrasi_Amdalnet'}
+                className="w-full sm:w-auto px-6 py-4 bg-emerald-400 hover:bg-emerald-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
+              >
+                {downloading === 'Lembar_Registrasi_Amdalnet' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                Cetak Lembar Registrasi Amdalnet
+              </button>
+            ) : (
+              <>
+                <button 
+                  type="button"
+                  onClick={() => handleDownload('template_tanda_terima_registrasi')}
+                  disabled={downloading === 'template_tanda_terima_registrasi'}
+                  className="w-full sm:w-auto px-6 py-4 bg-amber-400 hover:bg-amber-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
+                >
+                  {downloading === 'template_tanda_terima_registrasi' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                  Cetak Tanda Terima
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => handleDownload('template_checklist')}
+                  disabled={downloading === 'template_checklist'}
+                  className="w-full sm:w-auto px-6 py-4 bg-teal-400 hover:bg-teal-300 text-slate-900 border-4 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
+                >
+                  {downloading === 'template_checklist' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                  Cetak Checklist
+                </button>
+              </>
+            )}
           </div>
 
           <div className="pt-6 mt-6 border-t-4 border-slate-900">

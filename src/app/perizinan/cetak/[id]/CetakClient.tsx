@@ -247,47 +247,72 @@ export default function CetakClient({ doc }: { doc: any }) {
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
-          {/* Tanda Terima Registrasi */}
-          <div className="bg-white p-6 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] flex flex-col justify-start">
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-teal-200 border-2 border-slate-900 flex items-center justify-center">
-                  <FileText size={20} className="text-slate-900" />
+          {doc.nomor_registrasi_amdalnet ? (
+            {/* Lembar Registrasi Amdalnet */}
+            <div className="bg-white p-6 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] flex flex-col justify-start">
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-200 border-2 border-slate-900 flex items-center justify-center">
+                    <FileText size={20} className="text-slate-900" />
+                  </div>
+                  <h5 className="font-black text-slate-900 uppercase">Lembar Registrasi Amdalnet</h5>
                 </div>
-                <h5 className="font-black text-slate-900 uppercase">Tanda Terima Registrasi</h5>
+                <p className="text-xs font-bold text-slate-500 mb-6">Bukti registrasi via sistem Amdalnet.</p>
               </div>
-              <p className="text-xs font-bold text-slate-500 mb-6">Bukti penerimaan awal dokumen masuk (MPP / DLH).</p>
+              <button 
+                onClick={() => handleDownload('Lembar_Registrasi_Amdalnet', 'registrasi')}
+                disabled={downloading === 'Lembar_Registrasi_Amdalnet'}
+                className="w-full px-4 py-3 bg-emerald-400 hover:bg-emerald-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+              >
+                {downloading === 'Lembar_Registrasi_Amdalnet' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                Cetak Dokumen
+              </button>
             </div>
-            <button 
-              onClick={() => handleDownload('template_tanda_terima_registrasi', 'registrasi')}
-              disabled={downloading === 'template_tanda_terima_registrasi'}
-              className="w-full px-4 py-3 bg-teal-400 hover:bg-teal-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
-            >
-              {downloading === 'template_tanda_terima_registrasi' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
-              Cetak Dokumen
-            </button>
-          </div>
+          ) : (
+            <>
+              {/* Tanda Terima Registrasi */}
+              <div className="bg-white p-6 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] flex flex-col justify-start">
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-teal-200 border-2 border-slate-900 flex items-center justify-center">
+                      <FileText size={20} className="text-slate-900" />
+                    </div>
+                    <h5 className="font-black text-slate-900 uppercase">Tanda Terima Registrasi</h5>
+                  </div>
+                  <p className="text-xs font-bold text-slate-500 mb-6">Bukti penerimaan awal dokumen masuk (MPP / DLH).</p>
+                </div>
+                <button 
+                  onClick={() => handleDownload('template_tanda_terima_registrasi', 'registrasi')}
+                  disabled={downloading === 'template_tanda_terima_registrasi'}
+                  className="w-full px-4 py-3 bg-teal-400 hover:bg-teal-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                >
+                  {downloading === 'template_tanda_terima_registrasi' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                  Cetak Dokumen
+                </button>
+              </div>
 
-          {/* Checklist Registrasi */}
-          <div className="bg-white p-6 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] flex flex-col justify-start">
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-blue-200 border-2 border-slate-900 flex items-center justify-center">
-                  <CheckCircle size={20} className="text-slate-900" />
+              {/* Checklist Registrasi */}
+              <div className="bg-white p-6 rounded-2xl border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] flex flex-col justify-start">
+                <div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-200 border-2 border-slate-900 flex items-center justify-center">
+                      <CheckCircle size={20} className="text-slate-900" />
+                    </div>
+                    <h5 className="font-black text-slate-900 uppercase">Checklist Kelengkapan</h5>
+                  </div>
+                  <p className="text-xs font-bold text-slate-500 mb-6">Daftar periksa kelengkapan berkas administrasi.</p>
                 </div>
-                <h5 className="font-black text-slate-900 uppercase">Checklist Kelengkapan</h5>
+                <button 
+                  onClick={() => handleDownload('template_checklist', 'registrasi')}
+                  disabled={downloading === 'template_checklist'}
+                  className="w-full px-4 py-3 bg-blue-400 hover:bg-blue-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                >
+                  {downloading === 'template_checklist' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
+                  Cetak Dokumen
+                </button>
               </div>
-              <p className="text-xs font-bold text-slate-500 mb-6">Daftar periksa kelengkapan berkas administrasi.</p>
-            </div>
-            <button 
-              onClick={() => handleDownload('template_checklist', 'registrasi')}
-              disabled={downloading === 'template_checklist'}
-              className="w-full px-4 py-3 bg-blue-400 hover:bg-blue-300 text-slate-900 border-2 border-slate-900 font-black rounded-xl text-sm shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
-            >
-              {downloading === 'template_checklist' ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />}
-              Cetak Dokumen
-            </button>
-          </div>
+            </>
+          )}
 
           {/* BA Uji Administrasi (Conditional) */}
           {(doc.nomor_uji_berkas || doc.status_tahapan === 'Uji Administrasi Selesai' || doc.status_tahapan === 'Verlap Selesai' || doc.status_tahapan === 'Pemeriksaan Selesai') && (
