@@ -1,5 +1,6 @@
 'use client';
 
+import LottieLoader from '@/components/LottieLoader';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
@@ -65,7 +66,7 @@ export default function DaftarPerizinanPage() {
   const itemsPerPage = 10;
 
   if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center"><CircleDashed className="animate-spin text-indigo-600" size={40} /></div>;
+    return <LottieLoader size={150} text="MEMUAT DATA..." />;
   }
 
   const getStageForStatus = (status: string) => {
