@@ -74,6 +74,9 @@ export default function DaftarPerizinanPage() {
 
   // Filter docs based on active stage
   const activeDocs = activeStage.id === 0 ? docs : docs.filter(d => {
+    // Tampilkan semua dokumen di menu Arsip (ID 12) agar pemrakarsa bisa mencicil upload file arsip kapan saja
+    if (activeStage.id === 12) return true;
+
     const currentStage = getStageForStatus(d.status_tahapan);
     // Jika dokumen sedang berada di tahap yang dipilih, tampilkan
     if (activeStage.statuses.includes(d.status_tahapan)) return true;
