@@ -217,7 +217,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   <p className="text-sm font-black uppercase tracking-wider text-slate-900">1. Dokumen Lingkungan Final</p>
                   <input type="text" name="noDokumenCetak" defaultValue={fisik.noDokumenCetak} placeholder="Input nomor / posisi rak..." className="mt-3 w-full p-3 bg-white border-2 border-slate-900 rounded-xl text-sm text-slate-900 font-bold outline-none focus:shadow-[4px_4px_0_0_#0f172a] transition-all" />
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Softcopy (PDF/ZIP)</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Softcopy (PDF/ZIP)</label>
+                      {fisik.urlDokumenCetak && (
+                        <a href={fisik.urlDokumenCetak} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_dokumen_cetak" accept=".pdf,.zip,.rar" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
@@ -232,7 +237,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   <p className="text-sm font-black uppercase tracking-wider text-slate-900">2. PKPLH Arsip</p>
                   <input type="text" name="noPkplhArsip" defaultValue={fisik.noPkplhArsip} placeholder="Input keterangan..." className="mt-3 w-full p-3 bg-white border-2 border-slate-900 rounded-xl text-sm text-slate-900 font-bold outline-none focus:shadow-[4px_4px_0_0_#0f172a] transition-all" />
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Scan PKPLH (PDF)</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Scan PKPLH (PDF)</label>
+                      {fisik.urlPkplh && (
+                        <a href={fisik.urlPkplh} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_pkplh" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
@@ -259,7 +269,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   )}
 
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Arsip Scan BA (PDF)</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Arsip Scan BA (PDF)</label>
+                      {(fisik.urlUjiAdmin || (isAmdalnet ? amdalnetUrl : null)) && (
+                        <a href={(fisik.urlUjiAdmin || (isAmdalnet ? amdalnetUrl : null))} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_uji_admin" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
@@ -274,7 +289,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   <p className="text-sm font-black uppercase tracking-wider text-slate-900">4. BA Verlap</p>
                   <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.nomor_ba_verlap || 'Belum terbit'}</p>
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Arsip Scan Verlap (PDF)</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Arsip Scan Verlap (PDF)</label>
+                      {fisik.urlBaVerlap && (
+                        <a href={fisik.urlBaVerlap} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_ba_verlap" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
@@ -289,7 +309,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   <p className="text-sm font-black uppercase tracking-wider text-slate-900">5. BA Pemeriksa/Sidang</p>
                   <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.nomor_ba_pemeriksaan || 'Belum terbit'}</p>
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Arsip Scan Sidang (PDF)</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Arsip Scan Sidang (PDF)</label>
+                      {fisik.urlBaSidang && (
+                        <a href={fisik.urlBaSidang} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_ba_sidang" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
@@ -304,7 +329,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   <p className="text-sm font-black uppercase tracking-wider text-slate-900">6. Surat Permohonan (Awal)</p>
                   <input type="text" name="noSuratPermohonan" defaultValue={fisik.noSuratPermohonan} placeholder="Input letak arsip..." className="mt-3 w-full p-3 bg-white border-2 border-slate-900 rounded-xl text-sm text-slate-900 font-bold outline-none focus:shadow-[4px_4px_0_0_#0f172a] transition-all" />
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Scan Permohonan (PDF)</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Scan Permohonan (PDF)</label>
+                      {fisik.urlSuratPermohonan && (
+                        <a href={fisik.urlSuratPermohonan} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_surat_permohonan" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
@@ -319,7 +349,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   <p className="text-sm font-black uppercase tracking-wider text-slate-900">7. Lembar Registrasi</p>
                   <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.nomor_checklist || 'Belum ada nomor'}</p>
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Arsip Registrasi (PDF)</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Arsip Registrasi (PDF)</label>
+                      {fisik.urlRegistrasi && (
+                        <a href={fisik.urlRegistrasi} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_registrasi" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
@@ -334,7 +369,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   <p className="text-sm font-black uppercase tracking-wider text-slate-900">8. Lembar Pengembalian</p>
                   <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.tanggal_pengembalian || 'Tidak/Belum ada'}</p>
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Arsip Pengembalian (PDF)</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Arsip Pengembalian (PDF)</label>
+                      {fisik.urlPengembalian && (
+                        <a href={fisik.urlPengembalian} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_pengembalian" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
@@ -349,7 +389,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   <p className="text-sm font-black uppercase tracking-wider text-slate-900">9. Penerimaan Perbaikan / PHP</p>
                   <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.nomor_php || 'Belum terbit'}</p>
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Arsip PHP (PDF)</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Arsip PHP (PDF)</label>
+                      {fisik.urlPhp && (
+                        <a href={fisik.urlPhp} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_php" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
@@ -364,7 +409,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   <p className="text-sm font-black uppercase tracking-wider text-slate-900">10. Undangan Sidang</p>
                   <input type="text" name="noUndanganSidang" defaultValue={fisik.noUndanganSidang} placeholder="Input nomor surat..." className="mt-3 w-full p-3 bg-white border-2 border-slate-900 rounded-xl text-sm text-slate-900 font-bold outline-none focus:shadow-[4px_4px_0_0_#0f172a] transition-all" />
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Scan Undangan (PDF)</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Scan Undangan (PDF)</label>
+                      {fisik.urlUndanganSidang && (
+                        <a href={fisik.urlUndanganSidang} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_undangan_sidang" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
@@ -389,7 +439,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   )}
 
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
-                    <label className="text-xs text-slate-900 font-black mb-2 block uppercase">Upload Arsip {doc.jenis_dokumen === 'SPPL' ? 'Pengesahan (PDF)' : 'RPD (PDF)'}</label>
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Arsip {doc.jenis_dokumen === 'SPPL' ? 'Pengesahan (PDF)' : 'RPD (PDF)'}</label>
+                      {fisik.urlRpd && (
+                        <a href={fisik.urlRpd} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
                     <input type="file" name="file_rpd" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
                   </div>
                 </div>
