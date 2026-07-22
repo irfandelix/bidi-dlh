@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 import Link from 'next/link';
 import { ArrowLeft, Search, CalendarPlus, Edit3, Copy, MapPin, Database, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function DaftarAgenda() {
   const [agendas, setAgendas] = useState<any[]>([]);

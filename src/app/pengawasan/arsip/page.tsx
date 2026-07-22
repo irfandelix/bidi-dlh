@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 import Link from 'next/link';
 import { ArrowLeft, Clock, Search, ExternalLink, Calendar, MapPin, Building2, CheckCircle, Printer, ChevronLeft, ChevronRight, Upload, FileCheck } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function ArsipPengawasan() {
   const [arsip, setArsip] = useState<any[]>([]);

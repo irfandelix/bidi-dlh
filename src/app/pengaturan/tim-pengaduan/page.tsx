@@ -1,3 +1,4 @@
+import LottieLoader from '@/components/LottieLoader';
 'use client';
 
 import { useState, useEffect } from 'react';

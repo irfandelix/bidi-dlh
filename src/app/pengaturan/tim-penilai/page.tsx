@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Edit2, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 type TimPenilai = {
   id: number;

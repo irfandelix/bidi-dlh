@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from "next/link";
 import { ArrowRight, FileText, ShieldCheck, Activity, CheckCircle, Clock, RotateCcw, AlertTriangle, ChevronRight, BarChart3, Database, Calendar as CalendarIcon, Phone, FileSignature, MapPin, Building2, User, Printer } from "lucide-react";
 import { createClient } from '@/lib/supabase/client';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function Home() {
   const [stats, setStats] = useState({

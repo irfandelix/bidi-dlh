@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Database, Inbox, ArrowLeft, Archive, Factory, Building2, Home, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import LottieLoader from '@/components/LottieLoader';
 
 export default function DatabaseGabungan() {
   const [data, setData] = useState<any[]>([]);
