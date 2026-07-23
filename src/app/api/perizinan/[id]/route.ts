@@ -37,15 +37,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: fetchError?.message || 'Doc not found' }, { status: 400 });
     }
 
-    const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : 
-                         doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 
-                         doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
-                         doc.jenis_dokumen === 'AMDAL' ? 'AMDAL' : 
-                         doc.jenis_dokumen === 'DELH' ? 'DELH' : 
-                         doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'ST.AL' : 
-                         doc.jenis_dokumen === 'PERTEK EMISI' ? 'ST.EM' : 
-                         doc.jenis_dokumen === 'PERTEK ANDALALIN' ? 'ANDALALIN' : 
-                         doc.jenis_dokumen;
+    const jenisAcronym = ({
+  'SPPL': 'SPPL', 'UKLUPL': 'UKLUPL', 'UKL-UPL': 'UKLUPL',
+  'RINTEK LB3': 'RT.LB3', 'PERTEK AIR LIMBAH': 'ST.AL', 'PERTEK EMISI': 'ST.EM',
+  'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
+  'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
+  'DELH': 'DELH', 'AMDAL': 'AMDAL'
+})[doc.jenis_dokumen] || doc.jenis_dokumen;
 
     // Auto-generate nomor_ba_verlap if "AUTO"
     if (body.nomor_ba_verlap === 'AUTO') {
