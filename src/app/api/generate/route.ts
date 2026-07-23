@@ -265,6 +265,28 @@ export async function POST(request: Request) {
       jabatan_petugas_mpp: petugas_jilidan ? petugas_jilidan.jabatan_dinas : '-',
       nama_petugas_jilidan: petugas_jilidan ? petugas_jilidan.nama : '-',
       jabatan_petugas_jilidan: petugas_jilidan ? petugas_jilidan.jabatan_dinas : '-',
+      
+      // Arsip Perizinan specific lists
+      revisiList: (() => {
+        const list = [];
+        if (doc.nomor_revisi) list.push({ key: '', nomor: doc.nomor_revisi, title: 'BA Pemeriksaan Revisi' });
+        for (let i = 1; i <= 5; i++) {
+          if (doc['nomor_revisi_' + i]) {
+            list.push({ key: i, nomor: doc['nomor_revisi_' + i], title: 'BA Pemeriksaan Revisi ' + i });
+          }
+        }
+        return list;
+      })(),
+      phpList: (() => {
+        const list = [];
+        if (doc.nomor_php) list.push({ key: '', nomor: doc.nomor_php, title: 'Penerimaan Perbaikan / PHP' });
+        for (let i = 1; i <= 5; i++) {
+          if (doc['nomor_php' + i]) {
+            list.push({ key: i, nomor: doc['nomor_php' + i], title: 'Penerimaan Perbaikan / PHP ' + i });
+          }
+        }
+        return list;
+      })(),
       // Petugas Penerima (Registrasi)
       petugas_penerima: petugas_penerima ? petugas_penerima.nama : '-',
       // Amdalnet

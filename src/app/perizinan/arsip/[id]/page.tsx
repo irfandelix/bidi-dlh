@@ -10,7 +10,34 @@ import LottieLoader from '@/components/LottieLoader';
 export default function ArsipPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   const router = useRouter();
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      const payload = { id: doc.id, type: 'arsip', stage: 'arsip-perizinan' };
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Gagal generate dokumen. Pastikan file src/templates/arsip-perizinan/arsip.docx tersedia.');
+      
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Lembar_Arsip_${doc.id}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (e: any) {
+      console.error(e);
+      alert('Error: ' + e.message);
+    } finally {
+      setDownloading(false);
+    }
+  };
   const [doc, setDoc] = useState<any>(null);
+  const [downloading, setDownloading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
@@ -227,8 +254,9 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             <p className="text-sm font-bold text-slate-600 mt-1 uppercase">Konfirmasi kelengkapan berkas #{String(doc.no_urut || doc.id).padStart(3, '0')}</p>
           </div>
         </div>
-        <button onClick={() => window.open(`/perizinan/cetak-arsip/${doc.id}`, '_blank')} className="px-6 py-3 bg-indigo-300 hover:bg-indigo-400 text-slate-900 font-black border-2 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 transition-all uppercase flex items-center gap-2 tracking-wider text-sm whitespace-nowrap">
-          <Printer size={18} /> Cetak Lembar Arsip
+        <button onClick={handleDownload} disabled={downloading} className="px-6 py-3 bg-indigo-300 hover:bg-indigo-400 text-slate-900 font-black border-2 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 transition-all uppercase flex items-center gap-2 tracking-wider text-sm whitespace-nowrap disabled:opacity-50">
+          {downloading ? <Loader2 size={18} className="animate-spin" /> : <Printer size={18} />} 
+          {downloading ? 'Memproses...' : 'Cetak Lembar Arsip (DOCX)'}
         </button>
       </div>
       
