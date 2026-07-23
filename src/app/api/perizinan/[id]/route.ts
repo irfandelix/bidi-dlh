@@ -43,7 +43,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL'
-})[doc.jenis_dokumen] || doc.jenis_dokumen;
+} as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
 
     // Auto-generate nomor_ba_verlap if "AUTO"
     if (body.nomor_ba_verlap === 'AUTO') {

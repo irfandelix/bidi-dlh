@@ -214,7 +214,7 @@ export async function POST(request: Request) {
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL'
-})[doc.jenis_dokumen] || doc.jenis_dokumen;
+} as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
         const targetPhp = targetRevisi === '1' ? doc.nomor_php : doc[`nomor_php${parseInt(targetRevisi) - 1}`];
         if (targetPhp) return targetPhp;
         
@@ -232,7 +232,7 @@ export async function POST(request: Request) {
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL'
-})[doc.jenis_dokumen] || doc.jenis_dokumen;
+} as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
         const tglObj = new Date();
         const seqUntukRevisi = doc.seq_pemeriksaan ?? ((doc.no_urut || doc.id) + 48);
         const seqPadded = String(seqUntukRevisi).padStart(3, '0');

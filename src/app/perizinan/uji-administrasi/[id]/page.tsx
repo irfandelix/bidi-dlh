@@ -107,7 +107,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL'
-})[doc.jenis_dokumen] || doc.jenis_dokumen;
+} as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
       const noUrutPadded = String(doc.no_urut || doc.id).padStart(3, '0');
       const bulan = new Date().getMonth() + 1;
       const tahun = new Date().getFullYear();
