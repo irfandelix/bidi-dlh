@@ -103,7 +103,11 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
 
       const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : 
                            doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 
+                           doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'PERTEK.AL' : 
+                           doc.jenis_dokumen === 'PERTEK EMISI' ? 'PERTEK.EM' : 
+                           doc.jenis_dokumen === 'PERTEK ANDALALIN' ? 'ANDALALIN' : 
                            doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
+                           doc.jenis_dokumen === 'DELH' ? 'DELH' : 
                            doc.jenis_dokumen === 'AMDAL' ? 'AMDAL' : 'DOK';
       const noUrutPadded = String(doc.no_urut || doc.id).padStart(3, '0');
       const bulan = new Date().getMonth() + 1;

@@ -208,7 +208,13 @@ export async function POST(request: Request) {
       tanggal_surat_permohonan_format: doc.tanggal_surat_permohonan ? new Date(doc.tanggal_surat_permohonan).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '',
       tanggal_pemeriksaan_format: doc.tanggal_pemeriksaan ? new Date(doc.tanggal_pemeriksaan).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '',
       nomor_php: (() => {
-        const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : (doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 'AMDAL');
+        const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : 
+                             doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 
+                             doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'PERTEK.AL' : 
+                             doc.jenis_dokumen === 'PERTEK EMISI' ? 'PERTEK.EM' : 
+                             doc.jenis_dokumen === 'PERTEK ANDALALIN' ? 'ANDALALIN' : 
+                             doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
+                             doc.jenis_dokumen === 'DELH' ? 'DELH' : 'AMDAL';
         const targetPhp = targetRevisi === '1' ? doc.nomor_php : doc[`nomor_php${parseInt(targetRevisi) - 1}`];
         if (targetPhp) return targetPhp;
         
@@ -220,7 +226,13 @@ export async function POST(request: Request) {
       })(),
       nomor_revisi_1: doc.nomor_revisi_1 || (() => {
         if(targetRevisi !== '1') return '';
-        const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : (doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 'AMDAL');
+        const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : 
+                             doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 
+                             doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'PERTEK.AL' : 
+                             doc.jenis_dokumen === 'PERTEK EMISI' ? 'PERTEK.EM' : 
+                             doc.jenis_dokumen === 'PERTEK ANDALALIN' ? 'ANDALALIN' : 
+                             doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
+                             doc.jenis_dokumen === 'DELH' ? 'DELH' : 'AMDAL';
         const tglObj = new Date();
         const seqUntukRevisi = doc.seq_pemeriksaan ?? ((doc.no_urut || doc.id) + 48);
         const seqPadded = String(seqUntukRevisi).padStart(3, '0');

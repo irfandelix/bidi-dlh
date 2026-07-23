@@ -137,7 +137,13 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
                         const dateVal = dateInput ? dateInput.value : '';
                         const dateObj = dateVal ? new Date(dateVal) : new Date();
                         const bulan = dateObj.getMonth() + 1;
-                        const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : (doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 'AMDAL');
+                        const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : 
+                                             doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 
+                                             doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'PERTEK.AL' : 
+                                             doc.jenis_dokumen === 'PERTEK EMISI' ? 'PERTEK.EM' : 
+                                             doc.jenis_dokumen === 'PERTEK ANDALALIN' ? 'ANDALALIN' : 
+                                             doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
+                                             doc.jenis_dokumen === 'DELH' ? 'DELH' : 'AMDAL';
                         input.value = `600.4/${String(doc.no_urut || doc.id).padStart(3, '0')}.${bulan}/17/RPD.${jenisAcronym}/${doc.tahun || dateObj.getFullYear()}`;
                       }
                     }}
