@@ -15,7 +15,7 @@ interface LottieLoaderProps {
 export default function LottieLoader({ size = 150, text }: LottieLoaderProps) {
   if (text) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 w-full py-10">
+      <div className="flex flex-col items-center justify-center gap-4 w-full min-h-[60vh]">
         <div style={{ width: size, height: size, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Lottie animationData={loadingAnimation} loop={true} />
         </div>
