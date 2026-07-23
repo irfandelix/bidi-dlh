@@ -58,6 +58,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
       urlRegistrasi: getOldUrl('urlRegistrasi'),
       urlPengembalian: getOldUrl('urlPengembalian'),
       urlPhp: getOldUrl('urlPhp'),
+      urlRevisi: getOldUrl('urlRevisi'),
       rpdArsip: formData.get('rpdArsip') === '1',
       noRpdArsip: formData.get('noRpdArsip') || '',
       urlRpd: getOldUrl('urlRpd'),
@@ -108,6 +109,9 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
     
     const f10 = formData.get('file_php') as File;
     if (f10 && f10.size > 0) { const url = await uploadFile(f10); if(url) fisik.urlPhp = url; }
+
+    const f12 = formData.get('file_revisi') as File;
+    if (f12 && f12.size > 0) { const url = await uploadFile(f12); if(url) fisik.urlRevisi = url; }
 
     const f11 = formData.get('file_rpd') as File;
     if (f11 && f11.size > 0) { const url = await uploadFile(f11); if(url) fisik.urlRpd = url; }
@@ -166,6 +170,22 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
       amdalnetUrl = extra.file_amdalnet_url || '';
     }
   } catch (e) {}
+
+  let latestNomorRevisi = '';
+  for (let i = 5; i >= 1; i--) {
+    if (doc[`nomor_revisi_${i}`]) {
+      latestNomorRevisi = doc[`nomor_revisi_${i}`];
+      break;
+    }
+  }
+  
+  let latestNomorPhp = doc.nomor_php || '';
+  for (let i = 5; i >= 1; i--) {
+    if (doc[`nomor_php${i}`]) {
+      latestNomorPhp = doc[`nomor_php${i}`];
+      break;
+    }
+  }
 
   return (
     <div className="max-w-6xl mx-auto py-8 space-y-8 pb-20">
@@ -322,12 +342,32 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
               </div>
             </div>
 
-            {/* 6. SURAT PERMOHONAN */}
+            {/* 6. BA PEMERIKSAAN REVISI */}
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${latestNomorRevisi || fisik.urlRevisi ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+              <div className="flex items-start gap-3 w-full">
+                <div className="mt-1">{latestNomorRevisi ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
+                <div className="w-full">
+                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">6. BA Pemeriksaan Revisi</p>
+                  <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{latestNomorRevisi || 'Belum terbit'}</p>
+                  <div className="mt-4 pt-4 border-t-2 border-slate-900">
+                    <div className="flex justify-between items-center mb-2">
+                      <label className="text-xs text-slate-900 font-black uppercase">Upload Arsip Revisi (PDF)</label>
+                      {fisik.urlRevisi && (
+                        <a href={fisik.urlRevisi} target="_blank" rel="noreferrer" className="text-xs font-bold bg-indigo-200 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[3px_3px_0_0_#0f172a] transition-all uppercase">Lihat Dokumen</a>
+                      )}
+                    </div>
+                    <input type="file" name="file_revisi" accept=".pdf" className="w-full text-xs text-slate-900 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-slate-900 file:text-xs file:font-black file:bg-amber-300 file:text-slate-900 hover:file:bg-amber-400 file:shadow-[2px_2px_0_0_#0f172a] file:transition-all cursor-pointer" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 7. SURAT PERMOHONAN */}
             <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${fisik.suratPermohonan || fisik.urlSuratPermohonan ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <input type="checkbox" name="suratPermohonan" value="1" defaultChecked={fisik.suratPermohonan} className="mt-1 w-6 h-6 text-emerald-500 bg-white border-2 border-slate-900 rounded focus:ring-emerald-500 cursor-pointer shadow-[2px_2px_0_0_#0f172a]" />
                 <div className="w-full">
-                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">6. Surat Permohonan (Awal)</p>
+                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">7. Surat Permohonan (Awal)</p>
                   <input type="text" name="noSuratPermohonan" defaultValue={fisik.noSuratPermohonan} placeholder="Input letak arsip..." className="mt-3 w-full p-3 bg-white border-2 border-slate-900 rounded-xl text-sm text-slate-900 font-bold outline-none focus:shadow-[4px_4px_0_0_#0f172a] transition-all" />
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
                     <div className="flex justify-between items-center mb-2">
@@ -342,12 +382,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
               </div>
             </div>
 
-            {/* 7. LEMBAR REGISTRASI */}
+            {/* 8. LEMBAR REGISTRASI */}
             <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_checklist || fisik.urlRegistrasi ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.nomor_checklist ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
-                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">7. Lembar Registrasi</p>
+                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">8. Lembar Registrasi</p>
                   <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.nomor_checklist || 'Belum ada nomor'}</p>
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
                     <div className="flex justify-between items-center mb-2">
@@ -362,12 +402,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
               </div>
             </div>
 
-            {/* 8. LEMBAR PENGEMBALIAN */}
+            {/* 9. LEMBAR PENGEMBALIAN */}
             <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.tanggal_pengembalian || fisik.urlPengembalian ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.tanggal_pengembalian ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
-                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">8. Lembar Pengembalian</p>
+                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">9. Lembar Pengembalian</p>
                   <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.tanggal_pengembalian || 'Tidak/Belum ada'}</p>
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
                     <div className="flex justify-between items-center mb-2">
@@ -382,13 +422,13 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
               </div>
             </div>
 
-            {/* 9. PHP */}
-            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_php || fisik.urlPhp ? 'bg-emerald-200' : 'bg-slate-50'}`}>
+            {/* 10. PHP */}
+            <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${latestNomorPhp || fisik.urlPhp ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
-                <div className="mt-1">{doc.nomor_php ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
+                <div className="mt-1">{latestNomorPhp ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
-                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">9. Penerimaan Perbaikan / PHP</p>
-                  <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{doc.nomor_php || 'Belum terbit'}</p>
+                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">10. Penerimaan Perbaikan / PHP</p>
+                  <p className="text-xs font-bold mt-2 text-slate-700 bg-white inline-block px-3 py-1 rounded border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a]">{latestNomorPhp || 'Belum terbit'}</p>
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
                     <div className="flex justify-between items-center mb-2">
                       <label className="text-xs text-slate-900 font-black uppercase">Upload Arsip PHP (PDF)</label>
@@ -402,12 +442,12 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
               </div>
             </div>
 
-            {/* 10. UNDANGAN SIDANG */}
+            {/* 11. UNDANGAN SIDANG */}
             <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${fisik.undanganSidang || fisik.urlUndanganSidang ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 <input type="checkbox" name="undanganSidang" value="1" defaultChecked={fisik.undanganSidang} className="mt-1 w-6 h-6 text-emerald-500 bg-white border-2 border-slate-900 rounded focus:ring-emerald-500 cursor-pointer shadow-[2px_2px_0_0_#0f172a]" />
                 <div className="w-full">
-                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">10. Undangan Sidang</p>
+                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">11. Undangan Sidang</p>
                   <input type="text" name="noUndanganSidang" defaultValue={fisik.noUndanganSidang} placeholder="Input nomor surat..." className="mt-3 w-full p-3 bg-white border-2 border-slate-900 rounded-xl text-sm text-slate-900 font-bold outline-none focus:shadow-[4px_4px_0_0_#0f172a] transition-all" />
                   <div className="mt-4 pt-4 border-t-2 border-slate-900">
                     <div className="flex justify-between items-center mb-2">
@@ -422,7 +462,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
               </div>
             </div>
 
-            {/* 11. RPD */}
+            {/* 12. RPD */}
             <div className={`p-6 rounded-2xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] transition-colors ${doc.nomor_risalah || fisik.rpdArsip || fisik.urlRpd ? 'bg-emerald-200' : 'bg-slate-50'}`}>
               <div className="flex items-start gap-3 w-full">
                 {doc.jenis_dokumen === 'SPPL' ? (
@@ -431,7 +471,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                   <div className="mt-1">{doc.nomor_risalah ? <CheckCircle2 size={24} className="text-slate-900" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 )}
                 <div className="w-full">
-                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">11. {doc.jenis_dokumen === 'SPPL' ? 'Pengesahan SPPL' : 'Penyusunan RPD'}</p>
+                  <p className="text-sm font-black uppercase tracking-wider text-slate-900">12. {doc.jenis_dokumen === 'SPPL' ? 'Pengesahan SPPL' : 'Penyusunan RPD'}</p>
                   
                   {doc.jenis_dokumen === 'SPPL' ? (
                     <input type="text" name="noRpdArsip" defaultValue={fisik.noRpdArsip} placeholder="Input nomor surat pengesahan..." className="mt-3 w-full p-3 bg-white border-2 border-slate-900 rounded-xl text-sm text-slate-900 font-bold outline-none focus:shadow-[4px_4px_0_0_#0f172a] transition-all" />
