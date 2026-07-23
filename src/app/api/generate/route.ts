@@ -210,8 +210,8 @@ export async function POST(request: Request) {
       nomor_php: (() => {
         const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : 
                              doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 
-                             doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'PERTEK.AL' : 
-                             doc.jenis_dokumen === 'PERTEK EMISI' ? 'PERTEK.EM' : 
+                             doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'ST.AL' : 
+                             doc.jenis_dokumen === 'PERTEK EMISI' ? 'ST.EM' : 
                              doc.jenis_dokumen === 'PERTEK ANDALALIN' ? 'ANDALALIN' : 
                              doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
                              doc.jenis_dokumen === 'DELH' ? 'DELH' : 'AMDAL';
@@ -228,8 +228,8 @@ export async function POST(request: Request) {
         if(targetRevisi !== '1') return '';
         const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : 
                              doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 
-                             doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'PERTEK.AL' : 
-                             doc.jenis_dokumen === 'PERTEK EMISI' ? 'PERTEK.EM' : 
+                             doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'ST.AL' : 
+                             doc.jenis_dokumen === 'PERTEK EMISI' ? 'ST.EM' : 
                              doc.jenis_dokumen === 'PERTEK ANDALALIN' ? 'ANDALALIN' : 
                              doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
                              doc.jenis_dokumen === 'DELH' ? 'DELH' : 'AMDAL';

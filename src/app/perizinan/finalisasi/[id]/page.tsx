@@ -139,8 +139,8 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
                         const bulan = dateObj.getMonth() + 1;
                         const jenisAcronym = doc.jenis_dokumen === 'SPPL' ? 'SPPL' : 
                                              doc.jenis_dokumen === 'UKL-UPL' ? 'UKL-UPL' : 
-                                             doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'PERTEK.AL' : 
-                                             doc.jenis_dokumen === 'PERTEK EMISI' ? 'PERTEK.EM' : 
+                                             doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'ST.AL' : 
+                                             doc.jenis_dokumen === 'PERTEK EMISI' ? 'ST.EM' : 
                                              doc.jenis_dokumen === 'PERTEK ANDALALIN' ? 'ANDALALIN' : 
                                              doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
                                              doc.jenis_dokumen === 'DELH' ? 'DELH' : 'AMDAL';

@@ -42,8 +42,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
                          doc.jenis_dokumen === 'DPLH' ? 'DPLH' : 
                          doc.jenis_dokumen === 'AMDAL' ? 'AMDAL' : 
                          doc.jenis_dokumen === 'DELH' ? 'DELH' : 
-                         doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'PERTEK.AL' : 
-                         doc.jenis_dokumen === 'PERTEK EMISI' ? 'PERTEK.EM' : 
+                         doc.jenis_dokumen === 'PERTEK AIR LIMBAH' ? 'ST.AL' : 
+                         doc.jenis_dokumen === 'PERTEK EMISI' ? 'ST.EM' : 
                          doc.jenis_dokumen === 'PERTEK ANDALALIN' ? 'ANDALALIN' : 
                          doc.jenis_dokumen;
 
