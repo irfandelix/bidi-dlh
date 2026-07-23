@@ -227,7 +227,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             <p className="text-sm font-bold text-slate-600 mt-1 uppercase">Konfirmasi kelengkapan berkas #{String(doc.no_urut || doc.id).padStart(3, '0')}</p>
           </div>
         </div>
-        <button onClick={() => window.open(`/api/perizinan/cetak-arsip?id=${doc.id}`, '_blank')} className="px-6 py-3 bg-indigo-300 hover:bg-indigo-400 text-slate-900 font-black border-2 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 transition-all uppercase flex items-center gap-2 tracking-wider text-sm whitespace-nowrap">
+        <button onClick={() => window.open(`/perizinan/cetak-arsip/${doc.id}`, '_blank')} className="px-6 py-3 bg-indigo-300 hover:bg-indigo-400 text-slate-900 font-black border-2 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 transition-all uppercase flex items-center gap-2 tracking-wider text-sm whitespace-nowrap">
           <Printer size={18} /> Cetak Lembar Arsip
         </button>
       </div>
