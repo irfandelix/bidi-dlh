@@ -2,33 +2,26 @@ const fs = require('fs');
 const PizZip = require('pizzip');
 
 try {
-  const content = fs.readFileSync('./public/templates-bap/bap-toko.docx', 'binary');
+  const content = fs.readFileSync('src/templates/arsip-perizinan/arsip.docx', 'binary');
   const zip = new PizZip(content);
   
-  // Extract document.xml text directly
-  const docXml = zip.files['word/document.xml'].asText();
-  const headerXml = zip.files['word/header1.xml'] ? zip.files['word/header1.xml'].asText() : '';
-  const footerXml = zip.files['word/footer1.xml'] ? zip.files['word/footer1.xml'].asText() : '';
-  const footer2Xml = zip.files['word/footer2.xml'] ? zip.files['word/footer2.xml'].asText() : '';
-  const footer3Xml = zip.files['word/footer3.xml'] ? zip.files['word/footer3.xml'].asText() : '';
+  const docXml = zip.file('word/document.xml').asText();
   
-  const fullText = docXml + headerXml + footerXml + footer2Xml + footer3Xml;
+  // A naive regex to find all docxtemplater tags {something} or {#something}
+  // docxtemplater tags might be split across XML nodes, so we first strip all XML tags
+  // to get the plain text of the document.
+  const plainText = docXml.replace(/<[^>]+>/g, '');
   
-  // Find everything between { and }
-  const regex = /\{([^}]+)\}/g;
-  let match;
-  const tags = new Set();
+  const tags = plainText.match(/\{[^}]+\}/g);
   
-  while ((match = regex.exec(fullText)) !== null) {
-    const cleanTag = match[1].replace(/<[^>]+>/g, '').trim();
-    if (cleanTag) tags.add(cleanTag);
+  if (tags) {
+    // Deduplicate tags
+    const uniqueTags = [...new Set(tags)];
+    console.log("Variabel yang terdeteksi di arsip.docx:");
+    uniqueTags.forEach(tag => console.log(tag));
+  } else {
+    console.log("Tidak ditemukan variabel {} di dalam dokumen.");
   }
-
-  const sortedTags = Array.from(tags).sort();
-  console.log('Found tags:');
-  console.log(JSON.stringify(sortedTags, null, 2));
-
-} catch (error) {
-  console.error('Error reading docx:', error);
+} catch (e) {
+  console.error("Gagal membaca arsip.docx:", e.message);
 }
-
