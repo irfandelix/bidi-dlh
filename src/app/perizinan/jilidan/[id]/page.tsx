@@ -64,8 +64,21 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
       });
       
       if(res.ok) {
-        setMessage('Data Jilidan Berhasil Disimpan!');
-        setTimeout(() => router.push('/perizinan/daftar'), 1500);
+        setMessage('Menyiapkan Dokumen Tanda Terima...');
+        // Auto Download File
+        const downloadUrl = `/api/generate?stage=jilidan&type=template_tanda_terima_jilidan&id=${unwrappedParams.id}`;
+        
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(a);
+          setMessage('Data Jilidan Berhasil Disimpan!');
+          setTimeout(() => router.push('/perizinan/daftar'), 1500);
+        }, 1000);
       }
     } catch (err) {
       console.error(err);
