@@ -222,7 +222,7 @@ export async function POST(request: Request) {
         const tglObj = new Date();
         const seqPadded = String(doc.no_urut || doc.id).padStart(3, '0');
         const kodeTahapan = targetRevisi === '1' ? 'PHP' : `PHP${parseInt(targetRevisi) - 1}`;
-        return `600.4/${seqPadded}.${tglObj.getMonth()+1}/17/${kodeTahapan}.${jenisAcronym}/${doc.tahun || tglObj.getFullYear()}`;
+        return `600.4.5/${seqPadded}.${tglObj.getMonth()+1}/17/${kodeTahapan}.${jenisAcronym}/${doc.tahun || tglObj.getFullYear()}`;
       })(),
       nomor_revisi_1: doc.nomor_revisi_1 || (() => {
         if(targetRevisi !== '1') return '';
@@ -236,7 +236,7 @@ export async function POST(request: Request) {
         const tglObj = new Date();
         const seqUntukRevisi = doc.seq_pemeriksaan ?? ((doc.no_urut || doc.id) + 48);
         const seqPadded = String(seqUntukRevisi).padStart(3, '0');
-        return `600.4/${seqPadded}.${tglObj.getMonth()+1}/17/BA.P.P1.${jenisAcronym}/${doc.tahun || tglObj.getFullYear()}`;
+        return `600.4.5/${seqPadded}.${tglObj.getMonth()+1}/17/BA.P.P1.${jenisAcronym}/${doc.tahun || tglObj.getFullYear()}`;
       })(),
       tanggal_revisi_format: doc[`tanggal_revisi_${targetRevisi}`] 
         ? new Date(doc[`tanggal_revisi_${targetRevisi}`]).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) 

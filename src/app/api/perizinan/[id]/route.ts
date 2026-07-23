@@ -110,7 +110,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       const tahun = doc.tahun || tglObj.getFullYear().toString();
       
       const seqPadded = String(doc.no_urut || doc.id).padStart(3, '0');
-      const generatedNomorStr = `600.4/${seqPadded}.${bulan}/17/${kodeTahapan}.${jenisAcronym}/${tahun}`;
+      const generatedNomorStr = `600.4.5/${seqPadded}.${bulan}/17/${kodeTahapan}.${jenisAcronym}/${tahun}`;
 
       if (nomorRevisi === 1) {
           body.nomor_php = generatedNomorStr;
@@ -140,7 +140,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         
         const seqUntukRevisi = doc.seq_pemeriksaan ?? ((doc.no_urut || doc.id) + 48);
         const seqPadded = String(seqUntukRevisi).padStart(3, '0');
-        const generatedNomorStr = `600.4/${seqPadded}.${bulan}/17/${kodeTahapan}.${jenisAcronym}/${tahun}`;
+        const generatedNomorStr = `600.4.5/${seqPadded}.${bulan}/17/${kodeTahapan}.${jenisAcronym}/${tahun}`;
 
         body[`nomor_revisi_${nomorRevisi}`] = generatedNomorStr;
       }
