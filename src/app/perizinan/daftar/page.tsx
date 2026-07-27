@@ -69,7 +69,10 @@ export default function DaftarPerizinanPage() {
     return <LottieLoader size={150} text="MEMUAT DATA..." />;
   }
 
-  const getStageForStatus = (status: string) => {
+  const getStageForStatus = (status: string, d?: any) => {
+    if (d && d.nomor_sk && !['Arsip', 'Diarsipkan', 'ARSIP', 'Jilidan Selesai', 'Penerimaan Jilidan'].includes(status)) {
+      return stages.find(s => s.id === 11) || stages[10];
+    }
     return stages.find(s => s.statuses.includes(status)) || stages[1]; // default to Uji Admin if not found
   };
 
@@ -78,7 +81,7 @@ export default function DaftarPerizinanPage() {
     // Tampilkan semua dokumen di menu Arsip (ID 12) agar pemrakarsa bisa mencicil upload file arsip kapan saja
     if (activeStage.id === 12) return true;
 
-    const currentStage = getStageForStatus(d.status_tahapan);
+    const currentStage = getStageForStatus(d.status_tahapan, d);
     // Jika dokumen sedang berada di tahap yang dipilih, tampilkan
     if (activeStage.statuses.includes(d.status_tahapan)) return true;
     
@@ -223,7 +226,7 @@ export default function DaftarPerizinanPage() {
                     <td className="px-6 py-4 text-center">
                       <div className="flex justify-center gap-2">
                         <Link 
-                          href={activeStage.id !== 0 && activeStage.id !== 1 ? `${activeStage.link}/${d.id}` : `${getStageForStatus(d.status_tahapan).link}/${d.id}`}
+                          href={activeStage.id !== 0 && activeStage.id !== 1 ? `${activeStage.link}/${d.id}` : `${getStageForStatus(d.status_tahapan, d).link}/${d.id}`}
                           className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#0f172a] transition-all uppercase"
                         >
                           {activeStage.id !== 0 && activeStage.id !== 1 ? `Buka ${activeStage.shortTitle}` : 'Buka'}
