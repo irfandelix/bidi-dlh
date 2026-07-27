@@ -31,9 +31,10 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
     // Jika semua tanggal diisi, statusnya menjadi "Diarsipkan"
     // Jika hanya SK, statusnya "Menunggu Jilidan"
     const tglSK = formData.get('tanggal_penyerahan_sk');
+    const nomorSK = formData.get('nomor_sk');
     
     let status_tahapan = 'Selesai / SK';
-    if (tglSK) status_tahapan = 'Menunggu Jilidan';
+    if (nomorSK || tglSK) status_tahapan = 'Menunggu Jilidan';
 
     const payload = {
       tanggal_risalah: formData.get('tanggal_risalah'),
