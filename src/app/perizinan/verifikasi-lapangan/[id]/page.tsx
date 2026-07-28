@@ -49,7 +49,7 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
       nomor_ba_verlap: 'AUTO',
       tanggal_verlap: formData.get('tanggal_verlap'),
       penandatangan_verlap: JSON.stringify(penandatangan),
-      status_tahapan: 'Verlap Selesai', // Pindah ke tahap Pemeriksaan Substansi
+      status_tahapan: doc.jenis_dokumen === 'Integrasi RINTEK LB3 ke Persetujuan Lingkungan' ? 'Revisi Selesai' : 'Verlap Selesai', // Langsung ke Finalisasi jika INT.LB3
       penandatangan_hua: updatedEkstra
     };
 
