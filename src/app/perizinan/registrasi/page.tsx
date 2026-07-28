@@ -312,7 +312,7 @@ export default function RegistrasiPage() {
                       <option value="DPLH">DPLH</option>
                       <option value="DELH">DELH</option>
                       <option value="Permohonan Arahan">Permohonan Arahan</option>
-                      <option value="Permohonan Integrasi RINTEK LB3">Permohonan Integrasi RINTEK LB3 ke Persetujuan Lingkungan</option>
+                      <option value="Integrasi RINTEK LB3 ke Persetujuan Lingkungan">Permohonan Integrasi RINTEK LB3 ke Persetujuan Lingkungan</option>
                       <option value="Permohonan Perubahan Lingkungan">Permohonan Perubahan Lingkungan</option>
                     </select>
                   </div>
@@ -482,7 +482,7 @@ export default function RegistrasiPage() {
                   <option value="DPLH">DPLH</option>
                   <option value="DELH">DELH</option>
                   <option value="Permohonan Arahan">Permohonan Arahan</option>
-                  <option value="Permohonan Integrasi RINTEK LB3">Permohonan Integrasi RINTEK LB3 ke Persetujuan Lingkungan</option>
+                  <option value="Integrasi RINTEK LB3 ke Persetujuan Lingkungan">Permohonan Integrasi RINTEK LB3 ke Persetujuan Lingkungan</option>
                   <option value="Permohonan Perubahan Lingkungan">Permohonan Perubahan Lingkungan</option>
                 </select>
               </div>
