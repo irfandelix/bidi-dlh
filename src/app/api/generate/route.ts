@@ -192,7 +192,7 @@ export async function POST(request: Request) {
 
     const targetRevisi = target_revisi ? String(target_revisi) : doc.revisi_ke;
 
-    const formattedJenisDokumen = (doc.jenis_dokumen || '').replace(/RINTEK LB3/gi, 'Rincian Teknis LB3');
+    const formattedJenisDokumen = (doc.jenis_dokumen || '').replace(/RINTEK LB3/gi, 'Rincian Teknis Penyimpanan Limbah B3');
 
     const templateData = {
       ...doc,
