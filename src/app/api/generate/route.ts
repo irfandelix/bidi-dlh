@@ -61,6 +61,23 @@ export async function POST(request: Request) {
         const { data: pPenerimaData } = await supabase.from('tim_penilais').select('*').eq('id', doc.petugas_mpp_id).maybeSingle();
         petugas_penerima = pPenerimaData;
       }
+      
+      // Populate NIP from anggota_bidang for all tim_penilai members
+      const { data: abData } = await supabase.from('anggota_bidang').select('nama, nip');
+      if (abData) {
+        tim_penilai = tim_penilai.map(tp => {
+          const match = abData.find(ab => ab.nama === tp.nama);
+          return { ...tp, nip: match?.nip || tp.nip || '-' };
+        });
+        if (petugas_jilidan) {
+          const match = abData.find(ab => ab.nama === petugas_jilidan.nama);
+          petugas_jilidan.nip = match?.nip || petugas_jilidan.nip || '-';
+        }
+        if (petugas_penerima) {
+          const match = abData.find(ab => ab.nama === petugas_penerima.nama);
+          petugas_penerima.nip = match?.nip || petugas_penerima.nip || '-';
+        }
+      }
     } catch (e) {}
 
     const terbilang = (angka: number): string => {
