@@ -146,6 +146,10 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
   'DELH': 'DELH', 'AMDAL': 'AMDAL',
   'Permohonan Arahan': 'ARH',
   'Integrasi RINTEK LB3 ke Persetujuan Lingkungan': 'INT.LB3',
+  'INTEGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
+  'INTERGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
+  'Permohonan Integrasi RINTEK LB3': 'INT.LB3',
+  'Permohonan Intergrasi RINTEK LB3': 'INT.LB3',
   'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
                         input.value = `600.4/${String(doc.no_urut || doc.id).padStart(3, '0')}.${bulan}/17/RPD.${jenisAcronym}/${doc.tahun || dateObj.getFullYear()}`;

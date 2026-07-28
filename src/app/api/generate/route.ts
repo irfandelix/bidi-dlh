@@ -216,6 +216,10 @@ export async function POST(request: Request) {
   'DELH': 'DELH', 'AMDAL': 'AMDAL',
   'Permohonan Arahan': 'ARH',
   'Integrasi RINTEK LB3 ke Persetujuan Lingkungan': 'INT.LB3',
+  'INTEGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
+  'INTERGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
+  'Permohonan Integrasi RINTEK LB3': 'INT.LB3',
+  'Permohonan Intergrasi RINTEK LB3': 'INT.LB3',
   'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
         const targetPhp = targetRevisi === '1' ? doc.nomor_php : doc[`nomor_php${parseInt(targetRevisi) - 1}`];
@@ -237,6 +241,10 @@ export async function POST(request: Request) {
   'DELH': 'DELH', 'AMDAL': 'AMDAL',
   'Permohonan Arahan': 'ARH',
   'Integrasi RINTEK LB3 ke Persetujuan Lingkungan': 'INT.LB3',
+  'INTEGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
+  'INTERGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
+  'Permohonan Integrasi RINTEK LB3': 'INT.LB3',
+  'Permohonan Intergrasi RINTEK LB3': 'INT.LB3',
   'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
         const tglObj = new Date();
