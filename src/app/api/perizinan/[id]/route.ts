@@ -42,7 +42,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   'RINTEK LB3': 'RT.LB3', 'PERTEK AIR LIMBAH': 'ST.AL', 'PERTEK EMISI': 'ST.EM',
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
-  'DELH': 'DELH', 'AMDAL': 'AMDAL'
+  'DELH': 'DELH', 'AMDAL': 'AMDAL',
+  'Permohonan Arahan': 'ARH',
+  'Permohonan Integrasi RINTEK LB3': 'RT.LB3',
+  'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
 
     // Auto-generate nomor_ba_verlap if "AUTO"

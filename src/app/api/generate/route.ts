@@ -213,7 +213,10 @@ export async function POST(request: Request) {
   'RINTEK LB3': 'RT.LB3', 'PERTEK AIR LIMBAH': 'ST.AL', 'PERTEK EMISI': 'ST.EM',
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
-  'DELH': 'DELH', 'AMDAL': 'AMDAL'
+  'DELH': 'DELH', 'AMDAL': 'AMDAL',
+  'Permohonan Arahan': 'ARH',
+  'Permohonan Integrasi RINTEK LB3': 'RT.LB3',
+  'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
         const targetPhp = targetRevisi === '1' ? doc.nomor_php : doc[`nomor_php${parseInt(targetRevisi) - 1}`];
         if (targetPhp) return targetPhp;
@@ -231,7 +234,10 @@ export async function POST(request: Request) {
   'RINTEK LB3': 'RT.LB3', 'PERTEK AIR LIMBAH': 'ST.AL', 'PERTEK EMISI': 'ST.EM',
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
-  'DELH': 'DELH', 'AMDAL': 'AMDAL'
+  'DELH': 'DELH', 'AMDAL': 'AMDAL',
+  'Permohonan Arahan': 'ARH',
+  'Permohonan Integrasi RINTEK LB3': 'RT.LB3',
+  'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
         const tglObj = new Date();
         const seqUntukRevisi = doc.seq_pemeriksaan ?? ((doc.no_urut || doc.id) + 48);
