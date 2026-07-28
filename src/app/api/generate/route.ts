@@ -129,8 +129,10 @@ export async function POST(request: Request) {
         return j;
     };
 
-    // Semua anggota dimasukkan tanpa menyembunyikan siapapun sesuai permintaan
+    const actualKetuaIndex = ketuaIndex !== -1 ? ketuaIndex : (tim_penilai.length > 0 ? 0 : -1);
+
     const tim_penilai_anggota = tim_penilai
+        .filter((_, idx) => idx !== actualKetuaIndex)
         .map((item, idx) => ({ 
             ...item, 
             nomor_urut: idx + 1, 
