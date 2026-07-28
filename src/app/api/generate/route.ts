@@ -191,15 +191,18 @@ export async function POST(request: Request) {
 
     const targetRevisi = target_revisi ? String(target_revisi) : doc.revisi_ke;
 
+    const formattedJenisDokumen = (doc.jenis_dokumen || '').replace(/RINTEK LB3/gi, 'Rincian Teknis LB3');
+
     const templateData = {
       ...doc,
+      jenis_dokumen: formattedJenisDokumen,
       ...ekstra,
       ...checklistData,
       nama_kegiatan_upper: doc.nama_kegiatan?.toUpperCase() || '',
       lokasi_kegiatan_upper: doc.lokasi_kegiatan?.toUpperCase() || '',
       nama_pemrakarsa_upper: doc.nama_pemrakarsa?.toUpperCase() || '',
       alamat_pemrakarsa_upper: doc.alamat_pemrakarsa?.toUpperCase() || '',
-      JENIS_DOKUMEN: doc.jenis_dokumen?.toUpperCase() || '-',
+      JENIS_DOKUMEN: formattedJenisDokumen.toUpperCase(),
       NAMA_KEGIATAN: doc.nama_kegiatan?.toUpperCase() || '-',
       LOKASI_KEGIATAN: doc.lokasi_kegiatan?.toUpperCase() || '-',
       persyaratan: persyaratan,
