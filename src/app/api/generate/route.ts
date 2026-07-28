@@ -215,7 +215,7 @@ export async function POST(request: Request) {
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL',
   'Permohonan Arahan': 'ARH',
-  'Permohonan Integrasi RINTEK LB3': 'RT.LB3',
+  'Permohonan Integrasi RINTEK LB3': 'INT.LB3',
   'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
         const targetPhp = targetRevisi === '1' ? doc.nomor_php : doc[`nomor_php${parseInt(targetRevisi) - 1}`];
@@ -236,7 +236,7 @@ export async function POST(request: Request) {
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL',
   'Permohonan Arahan': 'ARH',
-  'Permohonan Integrasi RINTEK LB3': 'RT.LB3',
+  'Permohonan Integrasi RINTEK LB3': 'INT.LB3',
   'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
         const tglObj = new Date();
