@@ -63,8 +63,9 @@ export async function POST(request: Request) {
       }
       
       // Populate NIP from anggota_bidang for all tim_penilai members
-      const { data: abData } = await supabase.from('anggota_bidang').select('nama, nip');
-      if (abData) {
+      const { data: abDataResponse } = await supabase.from('anggota_bidang').select('nama, nip');
+      const abData = (abDataResponse || []) as any[];
+      if (abData.length > 0) {
         tim_penilai = tim_penilai.map(tp => {
           const match = abData.find((ab: any) => ab.nama === tp.nama);
           return { ...tp, nip: match?.nip || tp.nip || '-' };
