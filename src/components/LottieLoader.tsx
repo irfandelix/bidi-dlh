@@ -19,7 +19,7 @@ export default function LottieLoader({ size = 150, text }: LottieLoaderProps) {
         <div style={{ width: size, height: size, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Lottie animationData={loadingAnimation} loop={true} />
         </div>
-        <span className="font-black text-slate-900 uppercase tracking-widest text-lg animate-pulse">
+        <span className="font-bold text-on-surface uppercase tracking-widest text-lg animate-pulse">
           {text}
         </span>
       </div>

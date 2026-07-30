@@ -104,18 +104,18 @@ export default function DaftarArsipMasukPage() {
     <div className="max-w-7xl mx-auto py-8 space-y-8 pb-20">
       
       {/* Header Neobrutalism */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-white p-6 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] text-slate-900 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-200 rounded-full border-4 border-slate-900 opacity-30"></div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-surface p-6 rounded-3xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow text-on-surface relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-200 rounded-full border border-outline-variant opacity-30"></div>
         <div className="flex items-center gap-4 relative z-10">
-          <Link href="/arsip" className="w-12 h-12 rounded-xl bg-white text-slate-900 border-4 border-slate-900 flex items-center justify-center hover:bg-slate-200 hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0f172a] transition-all shrink-0">
+          <Link href="/arsip" className="w-12 h-12 rounded-xl bg-surface text-on-surface border border-outline-variant flex items-center justify-center hover:bg-surface-container hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all shrink-0">
             <ArrowLeft size={24} />
           </Link>
-          <div className="w-14 h-14 shrink-0 rounded-2xl bg-blue-400 border-2 border-slate-900 flex items-center justify-center text-slate-900 shadow-[4px_4px_0_0_#0f172a]">
+          <div className="w-14 h-14 shrink-0 rounded-2xl bg-blue-400 border border-outline-variant flex items-center justify-center text-on-surface shadow-sm hover:shadow-md transition-shadow">
             <Inbox size={28} />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 leading-tight uppercase">Buku Agenda Surat Masuk</h2>
-            <p className="text-sm text-slate-600 font-bold mt-1 uppercase">Pencatatan arsip surat dari pihak eksternal.</p>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface leading-tight uppercase">Buku Agenda Surat Masuk</h2>
+            <p className="text-sm text-on-surface-variant font-bold mt-1 uppercase">Pencatatan arsip surat dari pihak eksternal.</p>
           </div>
         </div>
         
@@ -127,17 +127,17 @@ export default function DaftarArsipMasukPage() {
             accept=".xlsx,.csv" 
             className="hidden" 
           />
-          <button onClick={() => fileInputRef.current?.click()} disabled={isImporting} className="bg-amber-300 hover:bg-amber-200 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest disabled:opacity-50">
+          <button onClick={() => fileInputRef.current?.click()} disabled={isImporting} className="bg-amber-300 hover:bg-amber-200 hover:-translate-y-1 text-on-surface px-5 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow border border-outline-variant transition-all flex items-center gap-2 uppercase tracking-widest disabled:opacity-50">
             {isImporting ? <LottieLoader size={24} /> : <Upload size={18} />} Import
           </button>
-          <button onClick={handleExportExcel} className="bg-white hover:bg-slate-100 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest">
+          <button onClick={handleExportExcel} className="bg-surface hover:bg-surface-container-low hover:-translate-y-1 text-on-surface px-5 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow border border-outline-variant transition-all flex items-center gap-2 uppercase tracking-widest">
             <Download size={18} /> Export
           </button>
-          <div className="bg-emerald-50 px-5 py-3 rounded-xl border-2 border-slate-900 flex items-center gap-3 text-sm font-black text-slate-900 shadow-[4px_4px_0_0_#0f172a] uppercase">
-            <FileText size={18} className="text-emerald-500 fill-emerald-500" />
+          <div className="bg-secondary-container px-5 py-3 rounded-xl border border-outline-variant flex items-center gap-3 text-sm font-bold text-on-surface shadow-sm hover:shadow-md transition-shadow uppercase">
+            <FileText size={18} className="text-secondary fill-emerald-500" />
             Total {docs.length} Surat
           </div>
-          <Link href="/arsip/masuk/tambah" className="bg-blue-400 hover:bg-blue-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest">
+          <Link href="/arsip/masuk/tambah" className="bg-blue-400 hover:bg-blue-300 hover:-translate-y-1 text-on-surface px-5 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow border border-outline-variant transition-all flex items-center gap-2 uppercase tracking-widest">
             <Plus size={18} /> Tambah Surat
           </Link>
         </div>
@@ -154,46 +154,46 @@ export default function DaftarArsipMasukPage() {
             placeholder="CARI PERIHAL, NOMOR SURAT, ATAU ASAL SURAT..." 
             value={search}
             onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-white border-4 border-slate-900 text-slate-900 text-sm font-black uppercase rounded-2xl pl-12 pr-4 py-4 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none placeholder:text-slate-400"
+            className="w-full bg-surface border border-outline-variant text-on-surface text-sm font-bold uppercase rounded-2xl pl-12 pr-4 py-4 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none placeholder:text-slate-400"
           />
         </div>
       </div>
 
       {/* Dynamic Data Table (NeoBrutalism) */}
-      <div className="bg-white border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] rounded-xl overflow-hidden mt-8">
+      <div className="bg-surface border border-outline-variant shadow-sm hover:shadow-md transition-shadow rounded-xl overflow-hidden mt-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-100 border-b-4 border-slate-900">
+            <thead className="bg-surface-container-low border-b-4 border-outline-variant">
               <tr>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[100px] text-center">No. Berkas</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[100px] text-center">No. Isi</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[100px] text-center">No. Item</th>
-                <th colSpan={4} className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 text-center min-w-[320px]">Kode Klasifikasi</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[400px]">Uraian & Asal Surat</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] border-r-2 border-slate-900 min-w-[150px]">Tanggal</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-[10px] min-w-[100px]">File</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] border-r border-outline-variant min-w-[100px] text-center">No. Berkas</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] border-r border-outline-variant min-w-[100px] text-center">No. Isi</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] border-r border-outline-variant min-w-[100px] text-center">No. Item</th>
+                <th colSpan={4} className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] border-r border-outline-variant text-center min-w-[320px]">Kode Klasifikasi</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] border-r border-outline-variant min-w-[400px]">Uraian & Asal Surat</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] border-r border-outline-variant min-w-[150px]">Tanggal</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] min-w-[100px]">File</th>
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-900">
               {filteredDocs.length > 0 ? (
                 paginatedDocs.map((d) => (
                   <tr key={d.id} className="hover:bg-blue-50 transition-colors">
-                    <td className="px-6 py-4 border-r-2 border-slate-900 text-center font-black text-slate-900">{d.nomor_berkas || '-'}</td>
-                    <td className="px-6 py-4 border-r-2 border-slate-900 text-center font-black text-slate-900">{d.nomor_isi_berkas || '-'}</td>
-                    <td className="px-6 py-4 border-r-2 border-slate-900 text-center font-black text-slate-900">{d.nomor_item || '-'}</td>
-                    <td className="px-4 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-sm min-w-[80px]">{d.kode_klasifikasi_1 || '-'}</td>
-                    <td className="px-4 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-sm min-w-[80px]">{d.kode_klasifikasi_2 || '-'}</td>
-                    <td className="px-4 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-sm min-w-[80px]">{d.kode_klasifikasi_3 || '-'}</td>
-                    <td className="px-4 py-4 border-r-2 border-slate-900 text-center font-bold text-slate-700 text-sm min-w-[80px]">{d.kode_klasifikasi_4 || '-'}</td>
-                    <td className="px-6 py-4 border-r-2 border-slate-900">
-                      <p className="font-bold text-slate-700 text-[10px] uppercase mb-1">Dari: {d.asal_surat}</p>
-                      <p className="font-black text-slate-900 text-sm uppercase">{d.perihal}</p>
+                    <td className="px-6 py-4 border-r border-outline-variant text-center font-bold text-on-surface">{d.nomor_berkas || '-'}</td>
+                    <td className="px-6 py-4 border-r border-outline-variant text-center font-bold text-on-surface">{d.nomor_isi_berkas || '-'}</td>
+                    <td className="px-6 py-4 border-r border-outline-variant text-center font-bold text-on-surface">{d.nomor_item || '-'}</td>
+                    <td className="px-4 py-4 border-r border-outline-variant text-center font-bold text-on-surface-variant text-sm min-w-[80px]">{d.kode_klasifikasi_1 || '-'}</td>
+                    <td className="px-4 py-4 border-r border-outline-variant text-center font-bold text-on-surface-variant text-sm min-w-[80px]">{d.kode_klasifikasi_2 || '-'}</td>
+                    <td className="px-4 py-4 border-r border-outline-variant text-center font-bold text-on-surface-variant text-sm min-w-[80px]">{d.kode_klasifikasi_3 || '-'}</td>
+                    <td className="px-4 py-4 border-r border-outline-variant text-center font-bold text-on-surface-variant text-sm min-w-[80px]">{d.kode_klasifikasi_4 || '-'}</td>
+                    <td className="px-6 py-4 border-r border-outline-variant">
+                      <p className="font-bold text-on-surface-variant text-[10px] uppercase mb-1">Dari: {d.asal_surat}</p>
+                      <p className="font-bold text-on-surface text-sm uppercase">{d.perihal}</p>
                     </td>
-                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-900">
+                    <td className="px-6 py-4 font-bold text-on-surface-variant text-sm border-r border-outline-variant">
                       <div>Surat: {d.tanggal_surat}</div>
-                      <div className="text-xs text-slate-500">Terima: {d.tanggal_terima}</div>
+                      <div className="text-xs text-on-surface-variant">Terima: {d.tanggal_terima}</div>
                     </td>
-                    <td className="px-6 py-4 font-bold text-slate-700 text-sm">
+                    <td className="px-6 py-4 font-bold text-on-surface-variant text-sm">
                       {d.file_url ? (
                         <a href={d.file_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline flex items-center gap-1">
                            <FileText size={16} /> Lihat
@@ -206,7 +206,7 @@ export default function DaftarArsipMasukPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={10} className="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">
+                  <td colSpan={10} className="px-6 py-12 text-center text-on-surface-variant font-bold bg-surface-container-lowest">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <Inbox size={32} className="text-slate-300" />
                       <p className="uppercase tracking-widest">TIDAK ADA DATA SURAT MASUK.</p>
@@ -220,22 +220,22 @@ export default function DaftarArsipMasukPage() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="bg-slate-100 border-t-4 border-slate-900 p-6 flex items-center justify-between">
-            <span className="text-sm font-black text-slate-700 uppercase">
+          <div className="bg-surface-container-low border-t border-outline-variant p-6 flex items-center justify-between">
+            <span className="text-sm font-bold text-on-surface-variant uppercase">
               Halaman {currentPage} dari {totalPages}
             </span>
             <div className="flex gap-4">
               <button 
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-5 py-2.5 bg-white border-2 border-slate-900 rounded-xl text-sm font-black uppercase shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_0_#0f172a] transition-all"
+                className="px-5 py-2.5 bg-surface border border-outline-variant rounded-xl text-sm font-bold uppercase shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm hover:shadow-md transition-shadow transition-all"
               >
                 Sebelumnya
               </button>
               <button 
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-5 py-2.5 bg-blue-400 border-2 border-slate-900 rounded-xl text-sm font-black text-slate-900 uppercase shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_0_#0f172a] transition-all"
+                className="px-5 py-2.5 bg-blue-400 border border-outline-variant rounded-xl text-sm font-bold text-on-surface uppercase shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm hover:shadow-md transition-shadow transition-all"
               >
                 Selanjutnya
               </button>

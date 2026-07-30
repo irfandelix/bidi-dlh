@@ -85,86 +85,86 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
   };
 
   if (loading) return <LottieLoader size={150} text="MEMUAT DATA..." />;
-  if (!doc) return <div className="text-center py-20 text-rose-600 font-black bg-rose-100 border-4 border-slate-900 m-8 rounded-2xl shadow-[4px_4px_0_0_#0f172a]">DATA TIDAK DITEMUKAN!</div>;
+  if (!doc) return <div className="text-center py-20 text-error font-bold bg-error-container text-on-error-container border border-outline-variant m-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">DATA TIDAK DITEMUKAN!</div>;
 
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-8 pb-20">
-      <Link href="/perizinan/daftar" className="inline-flex items-center gap-2 text-sm text-slate-900 font-black transition-all bg-white border-2 border-slate-900 px-4 py-2 rounded-xl shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] uppercase tracking-wide">
+      <Link href="/perizinan/daftar" className="inline-flex items-center gap-2 text-sm text-on-surface font-bold transition-all bg-surface border border-outline-variant px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow uppercase tracking-wide">
         <ArrowLeft size={16} /> Kembali ke Dashboard
       </Link>
 
       {message && (
-        <div className="p-4 bg-emerald-200 text-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] border-2 border-slate-900 font-black uppercase tracking-wide">
+        <div className="p-4 bg-emerald-200 text-on-surface rounded-xl shadow-sm hover:shadow-md transition-shadow border border-outline-variant font-bold uppercase tracking-wide">
           {message}
         </div>
       )}
 
       {/* Header NeoBrutalism */}
-      <div className="flex items-center gap-4 bg-white p-6 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a]">
-        <div className="w-14 h-14 rounded-xl bg-amber-400 border-2 border-slate-900 flex items-center justify-center shadow-[4px_4px_0_0_#0f172a]">
-          <MapPinned size={28} className="text-slate-900" />
+      <div className="flex items-center gap-4 bg-surface p-6 rounded-3xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+        <div className="w-14 h-14 rounded-xl bg-tertiary text-on-tertiary border border-outline-variant flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+          <MapPinned size={28} className="text-on-surface" />
         </div>
         <div>
-          <h2 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 uppercase">Input Verifikasi Lapangan</h2>
-          <p className="text-sm font-bold text-slate-600 mt-1 uppercase">TAHUN {doc.tahun || '2026'} | TAHAP 3: VERLAP</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface uppercase">Input Verifikasi Lapangan</h2>
+          <p className="text-sm font-bold text-on-surface-variant mt-1 uppercase">TAHUN {doc.tahun || '2026'} | TAHAP 3: VERLAP</p>
         </div>
       </div>
       
-      <div className="bg-white border-4 border-slate-900 rounded-3xl p-8 shadow-[8px_8px_0_0_#0f172a]">
+      <div className="bg-surface border border-outline-variant rounded-3xl p-8 shadow-sm hover:shadow-md transition-shadow">
         {/* Info Box NeoBrutalism */}
-        <div className="bg-slate-100 border-4 border-slate-900 rounded-2xl p-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 shadow-[4px_4px_0_0_#0f172a]">
+        <div className="bg-surface-container-low border border-outline-variant rounded-2xl p-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 shadow-sm hover:shadow-md transition-shadow">
           <div>
-            <span className="font-black text-slate-500 text-xs uppercase tracking-wider">Nama Kegiatan</span>
-            <p className="font-black text-slate-900 mt-1 uppercase text-sm md:text-base">{doc.nama_kegiatan}</p>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Nama Kegiatan</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm md:text-base">{doc.nama_kegiatan}</p>
           </div>
           <div>
-            <div className="font-black text-slate-500 text-xs uppercase tracking-wider">No Urut / Tahun</div>
-            <p className="font-black bg-amber-300 text-slate-900 px-3 py-1 rounded border-2 border-slate-900 inline-block mt-1 text-sm shadow-[2px_2px_0_0_#0f172a]">
+            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No Urut / Tahun</div>
+            <p className="font-bold bg-amber-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block mt-1 text-sm shadow-sm hover:shadow-md transition-shadow">
               #{String(doc.no_urut || doc.id).padStart(3, '0')} / {doc.tahun || '2026'}
             </p>
           </div>
-          <div className="md:col-span-2 border-t-4 border-slate-900 pt-4 mt-2">
-            <span className="font-black text-slate-500 text-xs uppercase tracking-wider">Pemrakarsa</span>
-            <p className="font-black text-slate-900 mt-1 uppercase text-sm">{doc.nama_pemrakarsa || '-'}</p>
+          <div className="md:col-span-2 border-t border-outline-variant pt-4 mt-2">
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pemrakarsa</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.nama_pemrakarsa || '-'}</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <label className="block text-sm font-black text-slate-900 mb-2 uppercase">Tanggal Verifikasi Lapangan <span className="text-rose-500">*</span></label>
+              <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Verifikasi Lapangan <span className="text-error">*</span></label>
               <input type="date" name="tanggal_verlap" required defaultValue={new Date().toISOString().split('T')[0]}
-                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 font-bold text-sm rounded-xl px-4 py-3 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none cursor-pointer" />
+                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
             </div>
 
             {/* Tambahan Data Pemrakarsa */}
-            <div className="md:col-span-2 pt-4 border-t-4 border-slate-900">
-              <h4 className="text-sm font-black text-slate-900 mb-4 uppercase bg-blue-200 inline-block px-3 py-1 rounded border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a]">Lengkapi Data Pemrakarsa (Untuk BA)</h4>
+            <div className="md:col-span-2 pt-4 border-t border-outline-variant">
+              <h4 className="text-sm font-bold text-on-surface mb-4 uppercase bg-blue-200 inline-block px-3 py-1 rounded border border-outline-variant shadow-sm hover:shadow-md transition-shadow">Lengkapi Data Pemrakarsa (Untuk BA)</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-black text-slate-900 mb-2 uppercase">Email Pemrakarsa</label>
+                  <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Email Pemrakarsa</label>
                   <input type="email" name="email_pemrakarsa" placeholder="Contoh: info@pt-abc.com"
-                    className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 font-bold text-sm rounded-xl px-4 py-3 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
+                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
                 </div>
                 <div>
-                  <label className="block text-sm font-black text-slate-900 mb-2 uppercase">Jabatan Pemrakarsa <span className="text-rose-500">*</span></label>
+                  <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Jabatan Pemrakarsa <span className="text-error">*</span></label>
                   <input type="text" name="jabatan_pemrakarsa" required defaultValue="Penanggungjawab Kegiatan" placeholder="Contoh: Direktur Utama"
-                    className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 font-bold text-sm rounded-xl px-4 py-3 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
+                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
                 </div>
               </div>
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-black text-slate-900 mb-4 uppercase bg-amber-200 inline-block px-4 py-2 rounded-lg border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a]">
-                Tim Verifikasi Lapangan (Pilih Petugas) <span className="text-rose-500">*</span>
+              <label className="block text-sm font-bold text-on-surface mb-4 uppercase bg-amber-200 inline-block px-4 py-2 rounded-lg border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+                Tim Verifikasi Lapangan (Pilih Petugas) <span className="text-error">*</span>
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-slate-50 border-4 border-slate-900 rounded-2xl p-6 shadow-inner">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-inner">
                 {daftarPegawai.map((pegawai) => (
-                  <label key={pegawai.id} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-amber-100 border-2 border-transparent hover:border-slate-900 hover:shadow-[2px_2px_0_0_#0f172a] transition-all cursor-pointer group bg-white">
+                  <label key={pegawai.id} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-tertiary-container text-on-tertiary-container border-2 border-transparent hover:border-outline-variant hover:shadow-sm hover:shadow-md transition-shadow transition-all cursor-pointer group bg-surface">
                     <input type="checkbox" name="penandatangan[]" value={pegawai.id}
-                           className="w-5 h-5 rounded border-2 border-slate-900 text-amber-500 focus:ring-amber-500 cursor-pointer shadow-[1px_1px_0_0_#0f172a]" />
+                           className="w-5 h-5 rounded border border-outline-variant text-amber-500 focus:ring-amber-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
                     <div className="flex flex-col">
-                      <span className="text-sm text-slate-900 group-hover:text-amber-700 font-black">{pegawai.nama}</span>
+                      <span className="text-sm text-on-surface group-hover:text-amber-700 font-bold">{pegawai.nama}</span>
                       
                     </div>
                   </label>
@@ -173,8 +173,8 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
             </div>
           </div>
 
-          <div className="flex justify-end pt-8 border-t-4 border-slate-900 mt-8">
-            <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-amber-400 hover:bg-amber-300 text-slate-900 font-black rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70 disabled:hover:translate-y-0">
+          <div className="flex justify-end pt-8 border-t border-outline-variant mt-8">
+            <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-tertiary text-on-tertiary hover:bg-amber-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70 disabled:hover:translate-y-0">
               {submitting ? <LottieLoader size={24} /> : <Send size={18} />}
               Simpan & Generate BA Verlap
             </button>

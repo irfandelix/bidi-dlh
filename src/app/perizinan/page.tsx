@@ -14,7 +14,7 @@ export default function PerizinanPage() {
       <div className="grid sm:grid-cols-2 gap-6 w-full max-w-3xl">
         <Link 
           href="/perizinan/registrasi"
-          className="flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-2xl hover:border-green-500 hover:shadow-lg transition-all"
+          className="flex items-start gap-4 p-6 bg-surface border border-gray-200 rounded-2xl hover:border-green-500 hover:shadow-lg transition-all"
         >
           <div className="bg-green-100 text-green-600 p-3 rounded-xl">
             <FilePlus size={28} />
@@ -27,7 +27,7 @@ export default function PerizinanPage() {
 
         <Link 
           href="/perizinan/daftar"
-          className="flex items-start gap-4 p-6 bg-white border border-gray-200 rounded-2xl hover:border-green-500 hover:shadow-lg transition-all"
+          className="flex items-start gap-4 p-6 bg-surface border border-gray-200 rounded-2xl hover:border-green-500 hover:shadow-lg transition-all"
         >
           <div className="bg-blue-100 text-blue-600 p-3 rounded-xl">
             <List size={28} />

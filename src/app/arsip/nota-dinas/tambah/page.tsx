@@ -111,62 +111,62 @@ export default function TambahNotaDinasPage() {
   return (
     <div className="max-w-3xl mx-auto py-8 space-y-8 pb-20">
       
-      <Link href="/arsip/nota-dinas" className="inline-flex items-center gap-2 text-sm text-slate-900 font-black transition-all bg-white border-2 border-slate-900 px-4 py-2 rounded-xl shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] uppercase tracking-wide">
+      <Link href="/arsip/nota-dinas" className="inline-flex items-center gap-2 text-sm text-on-surface font-bold transition-all bg-surface border border-outline-variant px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow uppercase tracking-wide">
         <ArrowLeft size={16} /> Kembali ke Buku Register
       </Link>
 
-      <div className="flex items-center gap-4 bg-white p-6 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a]">
-        <div className="w-14 h-14 rounded-xl bg-fuchsia-400 border-2 border-slate-900 flex items-center justify-center shadow-[4px_4px_0_0_#0f172a]">
-          <PenTool size={28} className="text-slate-900" />
+      <div className="flex items-center gap-4 bg-surface p-6 rounded-3xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
+        <div className="w-14 h-14 rounded-xl bg-fuchsia-400 border border-outline-variant flex items-center justify-center shadow-sm hover:shadow-md transition-shadow">
+          <PenTool size={28} className="text-on-surface" />
         </div>
         <div>
-          <h2 className="text-2xl font-black tracking-tight text-slate-900 uppercase">Registrasi Nota Dinas</h2>
-          <p className="text-sm font-bold text-slate-600 mt-1 uppercase">Catat Nota Dinas Baru Untuk Mendapatkan Nomor Urut</p>
+          <h2 className="text-2xl font-bold tracking-tight text-on-surface uppercase">Registrasi Nota Dinas</h2>
+          <p className="text-sm font-bold text-on-surface-variant mt-1 uppercase">Catat Nota Dinas Baru Untuk Mendapatkan Nomor Urut</p>
         </div>
       </div>
 
       {errorMsg && (
-        <div className="bg-rose-200 text-slate-900 p-4 rounded-xl text-sm font-bold border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a]">
+        <div className="bg-rose-200 text-on-surface p-4 rounded-xl text-sm font-bold border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
           {errorMsg}
         </div>
       )}
 
       {successMsg ? (
-        <div className="bg-emerald-50 border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] rounded-3xl p-8 text-center space-y-6">
-          <div className="w-20 h-20 bg-emerald-400 border-4 border-slate-900 rounded-full flex items-center justify-center mx-auto shadow-[4px_4px_0_0_#0f172a]">
-            <Save size={40} className="text-slate-900" />
+        <div className="bg-secondary-container border border-outline-variant shadow-sm hover:shadow-md transition-shadow rounded-3xl p-8 text-center space-y-6">
+          <div className="w-20 h-20 bg-secondary text-on-secondary border border-outline-variant rounded-full flex items-center justify-center mx-auto shadow-sm hover:shadow-md transition-shadow">
+            <Save size={40} className="text-on-surface" />
           </div>
           <div>
-            <h3 className="text-xl font-black uppercase text-slate-900">{successMsg}</h3>
-            <p className="text-sm font-bold text-slate-600 mt-2 uppercase tracking-wide">Nomor Register Nota Dinas Anda:</p>
+            <h3 className="text-xl font-bold uppercase text-on-surface">{successMsg}</h3>
+            <p className="text-sm font-bold text-on-surface-variant mt-2 uppercase tracking-wide">Nomor Register Nota Dinas Anda:</p>
           </div>
           
-          <div className="bg-white border-4 border-slate-900 p-6 rounded-2xl shadow-[4px_4px_0_0_#0f172a] inline-block mx-auto">
-            <span className="text-3xl font-black text-slate-900 tracking-wider">
+          <div className="bg-surface border border-outline-variant p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow inline-block mx-auto">
+            <span className="text-3xl font-bold text-on-surface tracking-wider">
               {generatedNo}
             </span>
           </div>
 
-          <div className="pt-6 border-t-4 border-slate-900 mt-6">
+          <div className="pt-6 border-t border-outline-variant mt-6">
             <button 
               type="button"
               onClick={() => router.push('/arsip/nota-dinas')}
-              className="px-8 py-4 bg-slate-900 text-white font-black rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all uppercase tracking-widest text-sm"
+              className="px-8 py-4 bg-primary text-on-primary text-on-primary font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all uppercase tracking-widest text-sm"
             >
               Kembali ke Buku Register
             </button>
           </div>
         </div>
       ) : (
-        <div className="bg-white border-4 border-slate-900 rounded-3xl p-8 shadow-[8px_8px_0_0_#0f172a]">
+        <div className="bg-surface border border-outline-variant rounded-3xl p-8 shadow-sm hover:shadow-md transition-shadow">
           <form onSubmit={handleSubmit} className="space-y-6">
             
             <div>
-              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                1. Pemohon (Anggota Bidang) <span className="text-rose-500">*</span>
+              <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                1. Pemohon (Anggota Bidang) <span className="text-error">*</span>
               </label>
               <select name="pemohon_id" required 
-                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none cursor-pointer">
+                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer">
                 <option value="">- Pilih Pemohon -</option>
                 {anggota.map((a) => (
                   <option key={a.id} value={a.id}>
@@ -177,32 +177,32 @@ export default function TambahNotaDinasPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                2. Isi Nota Dinas (Subjek) <span className="text-rose-500">*</span>
+              <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                2. Isi Nota Dinas (Subjek) <span className="text-error">*</span>
               </label>
               <textarea name="nama_nota" required placeholder="Contoh: Permohonan izin pelaksanaan rapat..." rows={3}
-                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none resize-none" />
+                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                  2. Tanggal Nota <span className="text-rose-500">*</span>
+                <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                  2. Tanggal Nota <span className="text-error">*</span>
                 </label>
                 <input type="date" name="tanggal_nota" required value={tanggalNota} onChange={handleTanggalChange}
-                  className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none cursor-pointer" />
+                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
               </div>
 
               <div>
-                <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                  3. Asal Bagian <span className="text-rose-500">*</span>
+                <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                  3. Asal Bagian <span className="text-error">*</span>
                 </label>
                 <select 
                   name="dari_bagian" 
                   required 
                   value={dariBagian}
                   onChange={(e) => setDariBagian(e.target.value)}
-                  className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-black rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none cursor-pointer uppercase">
+                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer uppercase">
                   <option value="Umum">Umum</option>
                   <option value="Perizinan">Perizinan</option>
                   <option value="Pengaduan">Pengaduan</option>
@@ -212,42 +212,42 @@ export default function TambahNotaDinasPage() {
             </div>
 
             {/* SISIPAN BLOCK */}
-            <div className="bg-sky-50 border-4 border-sky-200 p-6 rounded-2xl space-y-4">
+            <div className="bg-sky-50 border border-sky-200 p-6 rounded-2xl space-y-4">
               <label className="flex items-center gap-3 cursor-pointer group">
-                <div className="relative flex items-center justify-center w-6 h-6 border-2 border-slate-900 rounded bg-white group-hover:bg-sky-100 transition-colors">
+                <div className="relative flex items-center justify-center w-6 h-6 border border-outline-variant rounded bg-surface group-hover:bg-sky-100 transition-colors">
                   <input 
                     type="checkbox" 
                     checked={isSisipan}
                     onChange={(e) => setIsSisipan(e.target.checked)}
                     className="absolute inset-0 opacity-0 cursor-pointer"
                   />
-                  {isSisipan && <div className="w-3 h-3 bg-slate-900 rounded-sm"></div>}
+                  {isSisipan && <div className="w-3 h-3 bg-primary text-on-primary rounded-sm"></div>}
                 </div>
-                <span className="text-sm font-black text-slate-900 uppercase tracking-wider">
+                <span className="text-sm font-bold text-on-surface uppercase tracking-wider">
                   Gunakan Nomor Sisipan (Manual Backdate)
                 </span>
               </label>
 
               {isSisipan && (
                 <div className="pt-2 pl-9 animate-in slide-in-from-top-2">
-                  <label className="block text-xs font-black text-slate-900 mb-2 uppercase tracking-wider">
-                    Ketik Nomor Urut Sisipan <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-bold text-on-surface mb-2 uppercase tracking-wider">
+                    Ketik Nomor Urut Sisipan <span className="text-error">*</span>
                   </label>
                   <input 
                     type="text" 
                     name="nomor_sisipan"
                     required={isSisipan}
                     placeholder="Misal: 015.1 atau 001.1.1" 
-                    className="w-full bg-white border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-3 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" 
+                    className="w-full bg-surface border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" 
                   />
                   <p className="text-xs font-bold text-sky-700 mt-2">
                     Nomor ini akan langsung dirangkai dengan klasifikasi dan tahun. Pastikan ketikannya sesuai urutan yang Anda inginkan.
                   </p>
-                  <div className="mt-3 p-3 bg-amber-100 border-2 border-amber-500 rounded-lg">
-                    <p className="text-xs font-black text-amber-900 uppercase">
+                  <div className="mt-3 p-3 bg-tertiary-container text-on-tertiary-container border border-amber-200 rounded-lg">
+                    <p className="text-xs font-bold text-amber-900 uppercase">
                       ⚠️ Peringatan Penting
                     </p>
-                    <p className="text-xs font-bold text-amber-800 mt-1">
+                    <p className="text-xs font-bold text-on-tertiary-container mt-1">
                       Saat membuat nomor sisipan, harap **periksa kembali isian Tanggal Nota** di atas agar sesuai dengan tanggal sisipan (mundur) yang Anda maksud, bukan tanggal hari ini.
                     </p>
                   </div>
@@ -256,9 +256,9 @@ export default function TambahNotaDinasPage() {
             </div>
 
             {dariBagian === 'Umum' && (
-              <div className="bg-fuchsia-50 border-4 border-fuchsia-200 p-6 rounded-2xl">
-                <label className="block text-sm font-black text-fuchsia-900 mb-2 uppercase tracking-wider">
-                  3b. Kode Klasifikasi Surat (Pencarian Pintar) <span className="text-rose-500">*</span>
+              <div className="bg-fuchsia-50 border border-fuchsia-200 p-6 rounded-2xl">
+                <label className="block text-sm font-bold text-fuchsia-900 mb-2 uppercase tracking-wider">
+                  3b. Kode Klasifikasi Surat (Pencarian Pintar) <span className="text-error">*</span>
                 </label>
                 <input 
                   type="text" 
@@ -266,7 +266,7 @@ export default function TambahNotaDinasPage() {
                   required 
                   list="kode-klasifikasi-list"
                   placeholder="Ketik kode (misal: 005) atau cari..." 
-                  className="w-full bg-white border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" 
+                  className="w-full bg-surface border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" 
                 />
                 <p className="text-xs font-bold text-fuchsia-700 mt-2">
                   Ketik kode atau nama klasifikasi. Jika tidak ada di daftar, Anda tetap bisa mengetik kode kustom.
@@ -291,29 +291,29 @@ export default function TambahNotaDinasPage() {
 
             {/* UPLOAD FILE NOTA DINAS */}
             <div>
-              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
+              <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                 4. Lampiran Nota Dinas (Opsional)
               </label>
-              <div className="relative overflow-hidden w-full bg-slate-50 border-2 border-dashed border-slate-900 rounded-xl p-6 text-center hover:bg-slate-100 transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
+              <div className="relative overflow-hidden w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
                 <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                <Upload size={32} className="text-slate-400 group-hover:text-slate-900 transition-colors" />
-                <p className="text-sm font-bold text-slate-600">
+                <Upload size={32} className="text-slate-400 group-hover:text-on-surface transition-colors" />
+                <p className="text-sm font-bold text-on-surface-variant">
                   {file ? <span className="text-fuchsia-600">File terpilih: {file.name}</span> : 'Klik atau seret file ke sini (PDF/Word/Images)'}
                 </p>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
+              <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                 5. Keterangan (Opsional)
               </label>
               <textarea name="keterangan" placeholder="Tambahkan catatan khusus jika ada..." rows={2}
-                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 text-sm font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none resize-none" />
+                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
             </div>
 
-            <div className="pt-8 border-t-4 border-slate-900 mt-8 flex justify-end">
+            <div className="pt-8 border-t border-outline-variant mt-8 flex justify-end">
               <button type="submit" disabled={loading} 
-                className="w-full md:w-auto px-10 py-4 bg-fuchsia-400 hover:bg-fuchsia-300 text-slate-900 font-black rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70 disabled:hover:translate-y-0">
+                className="w-full md:w-auto px-10 py-4 bg-fuchsia-400 hover:bg-fuchsia-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70 disabled:hover:translate-y-0">
                 {loading ? <LottieLoader size={24} /> : <Save size={18} />}
                 Generate Nomor Nota
               </button>

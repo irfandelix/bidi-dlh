@@ -140,7 +140,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <LottieLoader size={24} />
-        <h2 className="text-xl font-black text-slate-900 uppercase">Memuat Data...</h2>
+        <h2 className="text-xl font-bold text-on-surface uppercase">Memuat Data...</h2>
       </div>
     );
   }
@@ -148,50 +148,50 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
   if (errorMsg || !data) {
     return (
       <div className="max-w-2xl mx-auto py-12 px-4 text-center">
-        <h2 className="text-2xl font-black text-rose-900 uppercase mb-4">Error</h2>
-        <p className="font-bold text-rose-800">{errorMsg}</p>
-        <Link href="/pengaduan" className="mt-8 inline-block px-6 py-3 bg-slate-900 text-white font-black rounded-xl uppercase">Kembali</Link>
+        <h2 className="text-2xl font-bold text-rose-900 uppercase mb-4">Error</h2>
+        <p className="font-bold text-on-error-container">{errorMsg}</p>
+        <Link href="/pengaduan" className="mt-8 inline-block px-6 py-3 bg-primary text-on-primary text-on-primary font-bold rounded-xl uppercase">Kembali</Link>
       </div>
     );
   }
 
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-8 px-4 pb-20">
-      <Link href="/pengaduan" className="inline-flex items-center gap-2 text-sm text-slate-900 font-black transition-all bg-white border-2 border-slate-900 px-4 py-2 rounded-xl shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] uppercase tracking-wide">
+      <Link href="/pengaduan" className="inline-flex items-center gap-2 text-sm text-on-surface font-bold transition-all bg-surface border border-outline-variant px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow uppercase tracking-wide">
         <ArrowLeft size={16} /> Kembali ke Daftar
       </Link>
 
-      <div className="bg-white border-4 border-slate-900 rounded-3xl overflow-hidden shadow-[12px_12px_0_0_#0f172a]">
+      <div className="bg-surface border border-outline-variant rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
         
         {/* HEADER */}
-        <div className="bg-slate-900 p-8 text-white relative">
+        <div className="bg-primary text-on-primary p-8 text-on-primary relative">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <span className="bg-purple-500 text-white font-black text-xs px-3 py-1 rounded-full uppercase tracking-widest border-2 border-purple-300">
+                <span className="bg-purple-500 text-on-primary font-bold text-xs px-3 py-1 rounded-full uppercase tracking-widest border border-purple-200">
                   TIKET PENGADUAN
                 </span>
-                <span className="bg-slate-800 text-slate-300 font-black text-xs px-3 py-1 rounded-full uppercase tracking-widest border-2 border-slate-700 flex items-center gap-1">
+                <span className="bg-slate-800 text-slate-300 font-bold text-xs px-3 py-1 rounded-full uppercase tracking-widest border border-slate-200 flex items-center gap-1">
                   <Clock size={12} /> {new Date(data.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-black uppercase leading-tight mb-1">{data.perihal}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold uppercase leading-tight mb-1">{data.perihal}</h1>
               <p className="text-slate-400 font-bold uppercase tracking-widest text-sm flex items-center gap-2 mt-2">
-                Token Akses: <span className="text-white bg-slate-800 px-2 py-1 rounded font-mono">{data.token}</span>
+                Token Akses: <span className="text-on-primary bg-slate-800 px-2 py-1 rounded font-mono">{data.token}</span>
               </p>
             </div>
 
-            <div className="bg-white text-slate-900 p-6 rounded-2xl border-4 border-slate-200 shrink-0 text-center shadow-[4px_4px_0_0_#cbd5e1] transform md:rotate-2">
-              <p className="text-xs font-black uppercase tracking-widest text-slate-500 mb-1">Status Saat Ini</p>
+            <div className="bg-surface text-on-surface p-6 rounded-2xl border border-outline-variant shrink-0 text-center shadow-sm transform md:rotate-2">
+              <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Status Saat Ini</p>
               {data.status_tahapan === 'Menunggu Isian' ? (
-                <div className="flex items-center gap-2 justify-center text-amber-600">
+                <div className="flex items-center gap-2 justify-center text-tertiary">
                   <Clock size={24} />
-                  <span className="font-black text-lg uppercase">Menunggu Pelapor</span>
+                  <span className="font-bold text-lg uppercase">Menunggu Pelapor</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-2 justify-center text-emerald-600">
+                <div className="flex items-center gap-2 justify-center text-secondary">
                   <CheckCircle2 size={24} />
-                  <span className="font-black text-lg uppercase">Formulir Terisi</span>
+                  <span className="font-bold text-lg uppercase">Formulir Terisi</span>
                 </div>
               )}
             </div>
@@ -206,37 +206,37 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
             {/* KOLOM KIRI */}
             <div className="space-y-8">
               <section>
-                <h3 className="flex items-center gap-2 text-lg font-black text-slate-900 border-b-4 border-slate-900 pb-2 uppercase tracking-tight mb-4">
+                <h3 className="flex items-center gap-2 text-lg font-bold text-on-surface border-b-4 border-outline-variant pb-2 uppercase tracking-tight mb-4">
                   <User size={20} className="text-purple-600" /> Identitas Pelapor
                 </h3>
-                <div className="bg-slate-50 border-2 border-slate-200 rounded-xl p-5 space-y-4">
+                <div className="bg-surface-container-lowest border-2 border-outline-variant rounded-xl p-5 space-y-4">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-500">Nama Pelapor</p>
-                    <p className="font-bold text-slate-900 text-lg">{data.nama_pelapor || '-'}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Nama Pelapor</p>
+                    <p className="font-bold text-on-surface text-lg">{data.nama_pelapor || '-'}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-500">Kontak (Telp/WA)</p>
-                    <p className="font-bold text-slate-900 text-lg">{data.telp_pelapor || '-'}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Kontak (Telp/WA)</p>
+                    <p className="font-bold text-on-surface text-lg">{data.telp_pelapor || '-'}</p>
                   </div>
                 </div>
               </section>
 
               <section>
-                <h3 className="flex items-center gap-2 text-lg font-black text-slate-900 border-b-4 border-slate-900 pb-2 uppercase tracking-tight mb-4">
+                <h3 className="flex items-center gap-2 text-lg font-bold text-on-surface border-b-4 border-outline-variant pb-2 uppercase tracking-tight mb-4">
                   <MapPin size={20} className="text-purple-600" /> Detail Kasus
                 </h3>
-                <div className="bg-slate-50 border-2 border-slate-200 rounded-xl p-5 space-y-4">
+                <div className="bg-surface-container-lowest border-2 border-outline-variant rounded-xl p-5 space-y-4">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-500">Pihak Terlapor</p>
-                    <p className="font-bold text-slate-900 text-lg">{data.nama_terlapor || '-'}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Pihak Terlapor</p>
+                    <p className="font-bold text-on-surface text-lg">{data.nama_terlapor || '-'}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-500">Lokasi Kejadian</p>
-                    <p className="font-bold text-slate-900 text-base">{data.lokasi_aduan || '-'}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Lokasi Kejadian</p>
+                    <p className="font-bold text-on-surface text-base">{data.lokasi_aduan || '-'}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-slate-500">Deskripsi / Kronologi</p>
-                    <p className="font-bold text-slate-900 text-sm whitespace-pre-wrap leading-relaxed border-l-4 border-purple-400 pl-4 py-1 mt-1 bg-white">{data.deskripsi || '-'}</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Deskripsi / Kronologi</p>
+                    <p className="font-bold text-on-surface text-sm whitespace-pre-wrap leading-relaxed border-l-4 border-purple-400 pl-4 py-1 mt-1 bg-surface">{data.deskripsi || '-'}</p>
                   </div>
                 </div>
               </section>
@@ -245,53 +245,53 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
             {/* KOLOM KANAN */}
             <div className="space-y-8">
               <section>
-                <h3 className="flex items-center gap-2 text-lg font-black text-slate-900 border-b-4 border-slate-900 pb-2 uppercase tracking-tight mb-4">
+                <h3 className="flex items-center gap-2 text-lg font-bold text-on-surface border-b-4 border-outline-variant pb-2 uppercase tracking-tight mb-4">
                   <FileText size={20} className="text-purple-600" /> Dokumen & Lampiran
                 </h3>
                 <div className="space-y-4">
                   
-                  <div className="border-2 border-slate-200 rounded-xl p-4 flex items-center justify-between bg-slate-50">
+                  <div className="border-2 border-outline-variant rounded-xl p-4 flex items-center justify-between bg-surface-container-lowest">
                     <div>
-                      <p className="font-black text-slate-900 uppercase">Dokumentasi Pelapor</p>
-                      <p className="text-xs font-bold text-slate-500">Diunggah saat mengisi form</p>
+                      <p className="font-bold text-on-surface uppercase">Dokumentasi Pelapor</p>
+                      <p className="text-xs font-bold text-on-surface-variant">Diunggah saat mengisi form</p>
                     </div>
                     {data.dokumentasi_url ? (
-                      <a href={data.dokumentasi_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 hover:text-purple-900 font-black text-xs uppercase tracking-widest rounded-lg transition-colors border-2 border-purple-300">
+                      <a href={data.dokumentasi_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 hover:text-purple-900 font-bold text-xs uppercase tracking-widest rounded-lg transition-colors border border-purple-200">
                         Lihat <ExternalLink size={14} />
                       </a>
                     ) : (
-                      <span className="text-xs font-black text-slate-400 bg-slate-200 px-3 py-1 rounded-lg">Belum Ada</span>
+                      <span className="text-xs font-bold text-slate-400 bg-surface-container px-3 py-1 rounded-lg">Belum Ada</span>
                     )}
                   </div>
 
-                  <div className="border-2 border-slate-200 rounded-xl p-4 flex items-center justify-between bg-slate-50">
+                  <div className="border-2 border-outline-variant rounded-xl p-4 flex items-center justify-between bg-surface-container-lowest">
                     <div>
-                      <p className="font-black text-slate-900 uppercase">Berita Acara (BA)</p>
-                      <p className="text-xs font-bold text-slate-500">Arsip akhir penanganan aduan</p>
+                      <p className="font-bold text-on-surface uppercase">Berita Acara (BA)</p>
+                      <p className="text-xs font-bold text-on-surface-variant">Arsip akhir penanganan aduan</p>
                     </div>
                     {data.ba_url ? (
-                      <a href={data.ba_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-900 font-black text-xs uppercase tracking-widest rounded-lg transition-colors border-2 border-blue-300">
+                      <a href={data.ba_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 hover:bg-blue-200 hover:text-blue-900 font-bold text-xs uppercase tracking-widest rounded-lg transition-colors border border-blue-200">
                         Lihat <ExternalLink size={14} />
                       </a>
                     ) : (
-                      <span className="text-xs font-black text-slate-400 bg-slate-200 px-3 py-1 rounded-lg">Belum Ada</span>
+                      <span className="text-xs font-bold text-slate-400 bg-surface-container px-3 py-1 rounded-lg">Belum Ada</span>
                     )}
                   </div>
 
                 </div>
               </section>
 
-              <section className="bg-purple-50 border-4 border-purple-200 rounded-2xl p-6 text-center space-y-4 shadow-[4px_4px_0_0_#d8b4fe]">
+              <section className="bg-purple-50 border border-purple-200 rounded-2xl p-6 text-center space-y-4 shadow-sm">
                 <div className="w-16 h-16 bg-purple-200 rounded-full flex items-center justify-center mx-auto text-purple-600 border-4 border-white shadow-inner">
                   <Download size={28} />
                 </div>
                 <div>
-                  <h4 className="font-black text-lg text-purple-900 uppercase">Generate Surat Tugas</h4>
+                  <h4 className="font-bold text-lg text-purple-900 uppercase">Generate Surat Tugas</h4>
                   <p className="text-xs font-bold text-purple-700 mt-1 px-4">Buat dokumen tindak lanjut dengan penomoran otomatis dari Buku Register Nota Dinas.</p>
                 </div>
                 <button 
                   onClick={() => setShowGenerateModal(true)}
-                  className="w-full py-4 bg-purple-500 hover:bg-purple-600 hover:-translate-y-1 transition-all text-white font-black uppercase tracking-widest text-sm rounded-xl border-4 border-purple-700 shadow-[4px_4px_0_0_#581c87] hover:shadow-[2px_2px_0_0_#581c87]"
+                  className="w-full py-4 bg-purple-500 hover:bg-purple-600 hover:-translate-y-1 transition-all text-on-primary font-bold uppercase tracking-widest text-sm rounded-xl border border-purple-200 shadow-sm hover:shadow-sm"
                 >
                   Generate Surat
                 </button>
@@ -305,18 +305,18 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
 
       {/* Generate Surat Modal */}
       {showGenerateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <div className="bg-white border-4 border-slate-900 rounded-2xl p-0 shadow-[8px_8px_0_0_#0f172a] max-w-2xl w-full flex flex-col max-h-[90vh]">
-            <div className="flex items-center justify-between p-6 border-b-4 border-slate-900 bg-purple-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary text-on-primary/50 backdrop-blur-sm">
+          <div className="bg-surface border border-outline-variant rounded-2xl p-0 shadow-sm hover:shadow-md transition-shadow max-w-2xl w-full flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between p-6 border-b-4 border-outline-variant bg-purple-100">
               <div>
-                <h3 className="text-2xl font-black text-slate-900 uppercase">Generate Surat Tindak Lanjut</h3>
-                <p className="text-xs font-bold text-slate-600 uppercase mt-1">Nomor otomatis akan ditarik dari Arsip Nota Dinas</p>
+                <h3 className="text-2xl font-bold text-on-surface uppercase">Generate Surat Tindak Lanjut</h3>
+                <p className="text-xs font-bold text-on-surface-variant uppercase mt-1">Nomor otomatis akan ditarik dari Arsip Nota Dinas</p>
               </div>
               <button 
                 onClick={() => setShowGenerateModal(false)}
-                className="w-10 h-10 bg-white border-2 border-slate-900 rounded-xl flex items-center justify-center hover:bg-rose-100 hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0f172a] transition-all"
+                className="w-10 h-10 bg-surface border border-outline-variant rounded-xl flex items-center justify-center hover:bg-error-container text-on-error-container hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all"
               >
-                <X size={20} className="text-slate-900" />
+                <X size={20} className="text-on-surface" />
               </button>
             </div>
             
@@ -324,11 +324,11 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-900 uppercase tracking-widest">Sifat Surat</label>
+                  <label className="text-xs font-bold text-on-surface uppercase tracking-widest">Sifat Surat</label>
                   <select 
                     value={suratData.sifat}
                     onChange={(e) => setSuratData({...suratData, sifat: e.target.value})}
-                    className="w-full bg-slate-50 border-2 border-slate-900 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-purple-500/20"
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20"
                   >
                     <option value="Biasa">Biasa</option>
                     <option value="Terbatas">Terbatas</option>
@@ -338,69 +338,69 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-900 uppercase tracking-widest">Lampiran</label>
+                  <label className="text-xs font-bold text-on-surface uppercase tracking-widest">Lampiran</label>
                   <input 
                     type="text" 
                     value={suratData.lampiran}
                     onChange={(e) => setSuratData({...suratData, lampiran: e.target.value})}
-                    className="w-full bg-white border-2 border-slate-900 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-purple-500/20"
+                    className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20"
                     placeholder="Contoh: 1 (satu) berkas"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-widest">Tujuan (Yth.)</label>
+                <label className="text-xs font-bold text-on-surface uppercase tracking-widest">Tujuan (Yth.)</label>
                 <input 
                   type="text" 
                   value={suratData.yth}
                   onChange={(e) => setSuratData({...suratData, yth: e.target.value})}
                   required
-                  className="w-full bg-white border-2 border-slate-900 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-purple-500/20"
+                  className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20"
                   placeholder="Contoh: Asisten II (Perekonomian dan Pembangunan)"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-widest">Dari</label>
+                <label className="text-xs font-bold text-on-surface uppercase tracking-widest">Dari</label>
                 <input 
                   type="text" 
                   value={suratData.dari}
                   onChange={(e) => setSuratData({...suratData, dari: e.target.value})}
                   required
-                  className="w-full bg-white border-2 border-slate-900 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-purple-500/20"
+                  className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-widest">Perihal (Hal)</label>
+                <label className="text-xs font-bold text-on-surface uppercase tracking-widest">Perihal (Hal)</label>
                 <textarea 
                   value={suratData.hal}
                   onChange={(e) => setSuratData({...suratData, hal: e.target.value})}
                   required
                   rows={2}
-                  className="w-full bg-white border-2 border-slate-900 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-purple-500/20"
+                  className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-black text-slate-900 uppercase tracking-widest">Tembusan</label>
+                <label className="text-xs font-bold text-on-surface uppercase tracking-widest">Tembusan</label>
                 <textarea 
                   value={suratData.tembusan}
                   onChange={(e) => setSuratData({...suratData, tembusan: e.target.value})}
                   rows={2}
-                  className="w-full bg-white border-2 border-slate-900 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-purple-500/20"
+                  className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20"
                   placeholder="Contoh: Kepala Kepolisian Resor Sragen Polda Jateng"
                 />
               </div>
 
               {/* TIM PETUGAS */}
-              <div className="pt-4 border-t-4 border-dashed border-slate-200">
-                <label className="text-sm font-black text-slate-900 uppercase tracking-widest mb-3 block">Yang Melaksanakan Tugas</label>
+              <div className="pt-4 border-t-4 border-dashed border-outline-variant">
+                <label className="text-sm font-bold text-on-surface uppercase tracking-widest mb-3 block">Yang Melaksanakan Tugas</label>
                 <div className="space-y-3">
                   {petugas.map((p, index) => (
                     <div key={index} className="flex gap-2">
-                      <div className="w-10 h-10 bg-slate-100 border-2 border-slate-900 rounded-xl flex items-center justify-center font-black text-slate-500 shrink-0">
+                      <div className="w-10 h-10 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-center font-bold text-on-surface-variant shrink-0">
                         {index + 1}
                       </div>
                       <input 
@@ -411,31 +411,31 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                           newPetugas[index] = e.target.value;
                           setPetugas(newPetugas);
                         }}
-                        className="flex-1 bg-white border-2 border-slate-900 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-purple-500/20"
+                        className="flex-1 bg-surface border border-outline-variant rounded-xl px-4 py-2 text-sm font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20"
                         placeholder="Nama Petugas"
                       />
                       {petugas.length > 1 && (
-                        <button type="button" onClick={() => setPetugas(petugas.filter((_, i) => i !== index))} className="w-10 h-10 bg-rose-100 text-rose-600 border-2 border-slate-900 rounded-xl flex items-center justify-center hover:bg-rose-200 transition-colors">
+                        <button type="button" onClick={() => setPetugas(petugas.filter((_, i) => i !== index))} className="w-10 h-10 bg-error-container text-on-error-container text-error border border-outline-variant rounded-xl flex items-center justify-center hover:bg-rose-200 transition-colors">
                           <X size={16} />
                         </button>
                       )}
                     </div>
                   ))}
-                  <button type="button" onClick={() => setPetugas([...petugas, ''])} className="w-full py-2 bg-slate-100 border-2 border-dashed border-slate-900 rounded-xl text-xs font-black text-slate-600 uppercase hover:bg-slate-200 transition-colors">
+                  <button type="button" onClick={() => setPetugas([...petugas, ''])} className="w-full py-2 bg-surface-container-low border-2 border-dashed border-outline-variant rounded-xl text-xs font-bold text-on-surface-variant uppercase hover:bg-surface-container transition-colors">
                     + Tambah Petugas
                   </button>
                 </div>
               </div>
 
               {/* DOKUMENTASI FOTO */}
-              <div className="pt-4 border-t-4 border-dashed border-slate-200">
-                <label className="text-sm font-black text-slate-900 uppercase tracking-widest mb-3 block">Dokumentasi Lapangan</label>
+              <div className="pt-4 border-t-4 border-dashed border-outline-variant">
+                <label className="text-sm font-bold text-on-surface uppercase tracking-widest mb-3 block">Dokumentasi Lapangan</label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   
                   {/* Foto 1 */}
-                  <div className="bg-slate-50 p-4 border-2 border-slate-900 rounded-xl space-y-3">
-                    <p className="text-xs font-bold text-slate-500 uppercase text-center">Foto 1</p>
-                    <label className="block w-full border-2 border-dashed border-slate-400 bg-white rounded-lg p-4 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-colors">
+                  <div className="bg-surface-container-lowest p-4 border border-outline-variant rounded-xl space-y-3">
+                    <p className="text-xs font-bold text-on-surface-variant uppercase text-center">Foto 1</p>
+                    <label className="block w-full border-2 border-dashed border-slate-400 bg-surface rounded-lg p-4 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-colors">
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => setFoto1(e.target.files?.[0] || null)} />
                       {foto1 ? (
                         <div className="text-xs font-bold text-purple-600 truncate">{foto1.name}</div>
@@ -448,14 +448,14 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                       value={ketFoto1}
                       onChange={(e) => setKetFoto1(e.target.value)}
                       placeholder="Keterangan Foto 1"
-                      className="w-full bg-white border-2 border-slate-900 rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                      className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                     />
                   </div>
 
                   {/* Foto 2 */}
-                  <div className="bg-slate-50 p-4 border-2 border-slate-900 rounded-xl space-y-3">
-                    <p className="text-xs font-bold text-slate-500 uppercase text-center">Foto 2</p>
-                    <label className="block w-full border-2 border-dashed border-slate-400 bg-white rounded-lg p-4 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-colors">
+                  <div className="bg-surface-container-lowest p-4 border border-outline-variant rounded-xl space-y-3">
+                    <p className="text-xs font-bold text-on-surface-variant uppercase text-center">Foto 2</p>
+                    <label className="block w-full border-2 border-dashed border-slate-400 bg-surface rounded-lg p-4 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-colors">
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => setFoto2(e.target.files?.[0] || null)} />
                       {foto2 ? (
                         <div className="text-xs font-bold text-purple-600 truncate">{foto2.name}</div>
@@ -468,25 +468,25 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                       value={ketFoto2}
                       onChange={(e) => setKetFoto2(e.target.value)}
                       placeholder="Keterangan Foto 2"
-                      className="w-full bg-white border-2 border-slate-900 rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                      className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-purple-500/20"
                     />
                   </div>
 
                 </div>
               </div>
 
-              <div className="pt-4 border-t-2 border-slate-200 flex gap-4">
+              <div className="pt-4 border-t-2 border-outline-variant flex gap-4">
                 <button 
                   type="button"
                   onClick={() => setShowGenerateModal(false)}
-                  className="flex-1 px-5 py-4 bg-slate-100 border-2 border-slate-900 rounded-xl text-sm font-black text-slate-900 uppercase hover:bg-slate-200 transition-colors"
+                  className="flex-1 px-5 py-4 bg-surface-container-low border border-outline-variant rounded-xl text-sm font-bold text-on-surface uppercase hover:bg-surface-container transition-colors"
                 >
                   Batal
                 </button>
                 <button 
                   type="submit"
                   disabled={isGenerating}
-                  className="flex-[2] px-5 py-4 bg-purple-400 border-2 border-slate-900 rounded-xl text-sm font-black text-slate-900 uppercase shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_0_#0f172a] flex items-center justify-center gap-2"
+                  className="flex-[2] px-5 py-4 bg-purple-400 border border-outline-variant rounded-xl text-sm font-bold text-on-surface uppercase shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm hover:shadow-md transition-shadow flex items-center justify-center gap-2"
                 >
                   {isGenerating ? (
                     <><LottieLoader size={24} /> Memproses...</>

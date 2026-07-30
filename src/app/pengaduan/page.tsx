@@ -20,13 +20,13 @@ export default function PengaduanListPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-8 space-y-8 px-4">
-      <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-900 font-black transition-all bg-white border-2 border-slate-900 px-4 py-2 rounded-xl shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] uppercase tracking-wide">
+      <Link href="/" className="inline-flex items-center gap-2 text-sm text-slate-900 font-black transition-all bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-md hover:-translate-y-1 hover:shadow-md uppercase tracking-wide">
         <ArrowLeft size={16} /> Kembali ke Beranda
       </Link>
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-4 bg-white p-6 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] flex-1 w-full">
-          <div className="w-14 h-14 rounded-xl bg-purple-400 border-2 border-slate-900 flex items-center justify-center shadow-[4px_4px_0_0_#0f172a] shrink-0">
+        <div className="flex items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-lg flex-1 w-full">
+          <div className="w-14 h-14 rounded-xl bg-purple-400 border border-slate-200 flex items-center justify-center shadow-md shrink-0">
             <AlertTriangle size={28} className="text-slate-900" />
           </div>
           <div>
@@ -35,7 +35,7 @@ export default function PengaduanListPage() {
           </div>
         </div>
 
-        <Link href="/pengaduan/tambah" className="w-full md:w-auto px-8 py-6 bg-slate-900 text-white font-black rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[10px_10px_0_0_#0f172a] transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm shrink-0 whitespace-nowrap group">
+        <Link href="/pengaduan/tambah" className="w-full md:w-auto px-8 py-6 bg-slate-900 text-white font-black rounded-3xl border border-slate-200 shadow-lg hover:-translate-y-1 hover:shadow-md transition-all flex items-center justify-center gap-3 uppercase tracking-widest text-sm shrink-0 whitespace-nowrap group">
           <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
             <Plus size={20} className="text-white" />
           </div>
@@ -43,11 +43,11 @@ export default function PengaduanListPage() {
         </Link>
       </div>
 
-      <div className="bg-white border-4 border-slate-900 rounded-3xl overflow-hidden shadow-[8px_8px_0_0_#0f172a]">
+      <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-lg">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-100 border-b-4 border-slate-900">
+              <tr className="bg-slate-100 border-b-4 border-slate-200">
                 <th className="p-4 text-xs font-black text-slate-900 uppercase tracking-widest border-r-2 border-slate-200">No</th>
                 <th className="p-4 text-xs font-black text-slate-900 uppercase tracking-widest border-r-2 border-slate-200">Perihal / Nama Kegiatan</th>
                 <th className="p-4 text-xs font-black text-slate-900 uppercase tracking-widest border-r-2 border-slate-200">Tanggal</th>
@@ -78,13 +78,13 @@ export default function PengaduanListPage() {
                     </td>
                     <td className="p-4 text-xs font-black text-slate-600 whitespace-nowrap border-r-2 border-slate-100">
                       {item.status_tahapan === 'Menunggu Isian' ? (
-                        <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full border-2 border-amber-300">Menunggu Pelapor</span>
+                        <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full border border-amber-200">Menunggu Pelapor</span>
                       ) : (
-                        <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full border-2 border-emerald-300">Form Terisi</span>
+                        <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200">Form Terisi</span>
                       )}
                     </td>
                     <td className="p-4 text-xs font-black text-slate-600 whitespace-nowrap">
-                      <Link href={`/pengaduan/detail/${item.id}`} className="flex items-center gap-2 text-slate-900 bg-white hover:bg-slate-100 border-2 border-slate-900 px-4 py-2 rounded-xl transition-colors w-fit shadow-[2px_2px_0_0_#0f172a] hover:shadow-[4px_4px_0_0_#0f172a]">
+                      <Link href={`/pengaduan/detail/${item.id}`} className="flex items-center gap-2 text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 px-4 py-2 rounded-xl transition-colors w-fit shadow-sm hover:shadow-md">
                         <ExternalLink size={14} /> Lihat Detail
                       </Link>
                     </td>

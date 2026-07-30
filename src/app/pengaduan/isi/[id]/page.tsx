@@ -105,7 +105,7 @@ export default function IsiFormPengaduanPage({ params }: { params: Promise<{ id:
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <LottieLoader size={24} />
-        <h2 className="text-xl font-black text-slate-900 uppercase">Memuat Form...</h2>
+        <h2 className="text-xl font-bold text-on-surface uppercase">Memuat Form...</h2>
       </div>
     );
   }
@@ -113,9 +113,9 @@ export default function IsiFormPengaduanPage({ params }: { params: Promise<{ id:
   if (errorMsg && !pengaduan) {
     return (
       <div className="max-w-2xl mx-auto py-12 px-4">
-        <div className="bg-rose-100 border-4 border-rose-900 p-8 rounded-3xl text-center shadow-[8px_8px_0_0_#881337]">
-          <h2 className="text-2xl font-black text-rose-900 uppercase mb-4">Akses Ditolak</h2>
-          <p className="font-bold text-rose-800">{errorMsg}</p>
+        <div className="bg-error-container text-on-error-container border border-rose-200 p-8 rounded-3xl text-center shadow-sm">
+          <h2 className="text-2xl font-bold text-rose-900 uppercase mb-4">Akses Ditolak</h2>
+          <p className="font-bold text-on-error-container">{errorMsg}</p>
         </div>
       </div>
     );
@@ -125,127 +125,127 @@ export default function IsiFormPengaduanPage({ params }: { params: Promise<{ id:
     <div className="max-w-4xl mx-auto py-8 space-y-8 px-4 pb-20">
       
       {/* HEADER TIKET INFO */}
-      <div className="bg-purple-900 text-white p-8 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] relative overflow-hidden">
+      <div className="bg-purple-900 text-on-primary p-8 rounded-3xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
         <div className="absolute top-0 right-0 p-8 opacity-10">
           <ShieldCheck size={120} />
         </div>
         <div className="relative z-10">
-          <div className="inline-block bg-white text-purple-900 font-black px-4 py-1 rounded-full text-xs uppercase tracking-widest mb-4">
+          <div className="inline-block bg-surface text-purple-900 font-bold px-4 py-1 rounded-full text-xs uppercase tracking-widest mb-4">
             FORMULIR ISIAN PELAPOR
           </div>
-          <h1 className="text-3xl font-black uppercase mb-2">Formulir Pengaduan</h1>
+          <h1 className="text-3xl font-bold uppercase mb-2">Formulir Pengaduan</h1>
           <p className="text-purple-200 font-bold max-w-xl">
             Silakan lengkapi formulir di bawah ini dengan data yang valid dan dapat dipertanggungjawabkan.
           </p>
           
-          <div className="mt-6 bg-purple-950 p-6 rounded-2xl border-2 border-purple-800 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mt-6 bg-purple-950 p-6 rounded-2xl border border-purple-200 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-purple-300 text-xs font-black uppercase tracking-widest">KODE TOKEN TIKET</p>
-              <p className="text-2xl font-mono font-black text-white">{pengaduan.token}</p>
+              <p className="text-purple-300 text-xs font-bold uppercase tracking-widest">KODE TOKEN TIKET</p>
+              <p className="text-2xl font-mono font-bold text-on-primary">{pengaduan.token}</p>
             </div>
             <div>
-              <p className="text-purple-300 text-xs font-black uppercase tracking-widest">PERIHAL / INDIKASI KASUS</p>
-              <p className="text-lg font-bold text-white leading-tight">{pengaduan.perihal}</p>
+              <p className="text-purple-300 text-xs font-bold uppercase tracking-widest">PERIHAL / INDIKASI KASUS</p>
+              <p className="text-lg font-bold text-on-primary leading-tight">{pengaduan.perihal}</p>
             </div>
           </div>
         </div>
       </div>
 
       {errorMsg && (
-        <div className="bg-rose-200 text-slate-900 p-4 rounded-xl text-sm font-bold border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a]">
+        <div className="bg-rose-200 text-on-surface p-4 rounded-xl text-sm font-bold border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
           {errorMsg}
         </div>
       )}
 
       {successMsg ? (
-        <div className="bg-emerald-50 border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] rounded-3xl p-10 text-center space-y-6">
-          <div className="w-24 h-24 bg-emerald-400 border-4 border-slate-900 rounded-full flex items-center justify-center mx-auto shadow-[4px_4px_0_0_#0f172a]">
-            <ShieldCheck size={48} className="text-slate-900" />
+        <div className="bg-secondary-container border border-outline-variant shadow-sm hover:shadow-md transition-shadow rounded-3xl p-10 text-center space-y-6">
+          <div className="w-24 h-24 bg-secondary text-on-secondary border border-outline-variant rounded-full flex items-center justify-center mx-auto shadow-sm hover:shadow-md transition-shadow">
+            <ShieldCheck size={48} className="text-on-surface" />
           </div>
           <div>
-            <h3 className="text-2xl font-black uppercase text-slate-900">{successMsg}</h3>
-            <p className="text-base font-bold text-slate-600 mt-2">Data pengaduan Anda beserta lampiran dokumentasi telah diamankan di dalam sistem Dinas Lingkungan Hidup.</p>
+            <h3 className="text-2xl font-bold uppercase text-on-surface">{successMsg}</h3>
+            <p className="text-base font-bold text-on-surface-variant mt-2">Data pengaduan Anda beserta lampiran dokumentasi telah diamankan di dalam sistem Dinas Lingkungan Hidup.</p>
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white border-4 border-slate-900 rounded-3xl p-6 md:p-10 shadow-[8px_8px_0_0_#0f172a] space-y-8">
+        <form onSubmit={handleSubmit} className="bg-surface border border-outline-variant rounded-3xl p-6 md:p-10 shadow-sm hover:shadow-md transition-shadow space-y-8">
           
           {/* IDENTITAS PELAPOR */}
           <div className="space-y-6">
-            <h3 className="flex items-center gap-2 text-xl font-black text-slate-900 border-b-4 border-slate-900 pb-2 uppercase tracking-tight">
+            <h3 className="flex items-center gap-2 text-xl font-bold text-on-surface border-b-4 border-outline-variant pb-2 uppercase tracking-tight">
               <User size={24} className="text-purple-600" /> A. Identitas Pelapor
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                  Nama Lengkap Pelapor <span className="text-rose-500">*</span>
+                <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                  Nama Lengkap Pelapor <span className="text-error">*</span>
                 </label>
                 <input type="text" name="nama_pelapor" required defaultValue={pengaduan.nama_pelapor}
-                  className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
+                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
               <div>
-                <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                  No. Telepon / WhatsApp <span className="text-rose-500">*</span>
+                <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                  No. Telepon / WhatsApp <span className="text-error">*</span>
                 </label>
                 <input type="tel" name="telp_pelapor" required defaultValue={pengaduan.telp_pelapor}
-                  className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
+                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
             </div>
           </div>
 
           {/* DETAIL KASUS */}
           <div className="space-y-6 pt-6">
-            <h3 className="flex items-center gap-2 text-xl font-black text-slate-900 border-b-4 border-slate-900 pb-2 uppercase tracking-tight">
+            <h3 className="flex items-center gap-2 text-xl font-bold text-on-surface border-b-4 border-outline-variant pb-2 uppercase tracking-tight">
               <MapPin size={24} className="text-purple-600" /> B. Detail Kasus & Terlapor
             </h3>
             <div>
-              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                Nama Perusahaan / Pihak Terlapor <span className="text-rose-500">*</span>
+              <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                Nama Perusahaan / Pihak Terlapor <span className="text-error">*</span>
               </label>
               <input type="text" name="nama_terlapor" required defaultValue={pengaduan.nama_terlapor}
-                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none" />
+                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                Lokasi Kejadian / Alamat Terlapor <span className="text-rose-500">*</span>
+              <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                Lokasi Kejadian / Alamat Terlapor <span className="text-error">*</span>
               </label>
               <textarea name="lokasi_aduan" required rows={3} defaultValue={pengaduan.lokasi_aduan}
-                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none resize-none" />
+                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
             </div>
             <div>
-              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
-                Deskripsi / Kronologi Kejadian <span className="text-rose-500">*</span>
+              <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                Deskripsi / Kronologi Kejadian <span className="text-error">*</span>
               </label>
               <textarea name="deskripsi" required rows={5} defaultValue={pengaduan.deskripsi}
-                className="w-full bg-slate-50 border-2 border-slate-900 text-slate-900 font-bold rounded-xl px-4 py-4 focus:bg-white focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none resize-none" />
+                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
             </div>
           </div>
 
           {/* DOKUMENTASI */}
           <div className="space-y-6 pt-6">
-            <h3 className="flex items-center gap-2 text-xl font-black text-slate-900 border-b-4 border-slate-900 pb-2 uppercase tracking-tight">
+            <h3 className="flex items-center gap-2 text-xl font-bold text-on-surface border-b-4 border-outline-variant pb-2 uppercase tracking-tight">
               <FileText size={24} className="text-purple-600" /> C. Bukti Lampiran
             </h3>
             
             {pengaduan.dokumentasi_url && (
-              <div className="bg-emerald-50 border-2 border-emerald-500 p-4 rounded-xl flex items-center justify-between">
+              <div className="bg-secondary-container border border-emerald-200 p-4 rounded-xl flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-black text-emerald-900 uppercase">Dokumentasi Sudah Diunggah</p>
+                  <p className="text-sm font-bold text-emerald-900 uppercase">Dokumentasi Sudah Diunggah</p>
                   <p className="text-xs font-bold text-emerald-700">Anda dapat menimpanya dengan mengunggah file baru di bawah ini jika diperlukan.</p>
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-black text-slate-900 mb-2 uppercase tracking-wider">
+              <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                 Unggah File Dokumentasi / Bukti (PDF, Gambar)
               </label>
-              <div className="relative overflow-hidden w-full bg-slate-50 border-2 border-dashed border-slate-900 rounded-xl p-8 text-center hover:bg-slate-100 transition-colors cursor-pointer flex flex-col items-center justify-center gap-3 group">
+              <div className="relative overflow-hidden w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-xl p-8 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-3 group">
                 <input type="file" onChange={(e) => setFileDokumentasi(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
-                <Upload size={32} className="text-slate-400 group-hover:text-slate-900 transition-colors" />
+                <Upload size={32} className="text-slate-400 group-hover:text-on-surface transition-colors" />
                 <div>
-                  <p className="text-sm font-bold text-slate-600">
-                    {fileDokumentasi ? <span className="text-purple-600 font-black">File Terpilih: {fileDokumentasi.name}</span> : 'Klik atau tarik file bukti/dokumentasi ke sini'}
+                  <p className="text-sm font-bold text-on-surface-variant">
+                    {fileDokumentasi ? <span className="text-purple-600 font-bold">File Terpilih: {fileDokumentasi.name}</span> : 'Klik atau tarik file bukti/dokumentasi ke sini'}
                   </p>
                   <p className="text-xs font-bold text-slate-400 mt-1 uppercase">Maks 10MB</p>
                 </div>
@@ -255,7 +255,7 @@ export default function IsiFormPengaduanPage({ params }: { params: Promise<{ id:
 
           <div className="pt-10 flex justify-end">
             <button type="submit" disabled={submitting} 
-              className="w-full md:w-auto px-10 py-5 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-xl border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[8px_8px_0_0_#0f172a] transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70 disabled:hover:translate-y-0 disabled:shadow-[4px_4px_0_0_#0f172a]">
+              className="w-full md:w-auto px-10 py-5 bg-primary text-on-primary hover:bg-primary-container text-on-primary font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70 disabled:hover:translate-y-0 disabled:shadow-sm hover:shadow-md transition-shadow">
               {submitting ? <LottieLoader size={24} /> : <Save size={20} />}
               Simpan & Kirim Formulir
             </button>

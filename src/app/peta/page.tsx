@@ -96,50 +96,50 @@ export default function PetaPengawasan() {
         if (item.status_ketaatan === 'Kurang Taat' || item.status_ketaatan === 'Taat Bersyarat') {
           markerColor = '#f59e0b'; // Amber
         } else if (item.status_ketaatan === 'Tidak Taat') {
-          markerColor = '#ef4444'; // Rose
+          markerColor = '#f43f5e'; // Rose
         } else if (!item.status_ketaatan) {
-          markerColor = '#64748b'; // Slate (Belum Dinilai)
+          markerColor = '#94a3b8'; // Slate (Belum Dinilai)
         }
       } else if (item.isPengaduan) {
         // Pengaduan marker
         markerColor = '#a855f7'; // Purple for Pengaduan
       } else {
         // Perizinan marker
-        markerColor = '#3b82f6'; // Blue for Perizinan
+        markerColor = '#4f46e5'; // Indigo for Perizinan
       }
 
       const customIcon = L.divIcon({
         className: 'custom-div-icon',
-        html: `<div style="background-color:${markerColor}; width:18px; height:18px; border-radius:50%; border:3px solid #0f172a; box-shadow: 4px 4px 0px rgba(15, 23, 42, 1);"></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9]
+        html: `<div style="background-color:${markerColor}; width:16px; height:16px; border-radius:50%; border:2px solid #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
       });
 
-      const bapLink = item.file_bap ? `<a href="${item.file_bap}" target="_blank" style="display:inline-block; margin-top:12px; padding:6px 12px; background:#14b8a6; color:#0f172a; font-weight:900; text-decoration:none; border:2px solid #0f172a; border-radius:8px; text-transform:uppercase; font-size:10px; box-shadow: 2px 2px 0 0 #0f172a;">Lihat File BAP &rarr;</a>` : '';
+      const bapLink = item.file_bap ? `<a href="${item.file_bap}" target="_blank" style="display:inline-block; margin-top:12px; padding:6px 12px; background:#10b981; color:#ffffff; font-weight:700; text-decoration:none; border-radius:6px; text-transform:uppercase; font-size:10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">Lihat File BAP &rarr;</a>` : '';
 
       let popupContent = '';
       
       if (item.isPengaduan) {
         popupContent = `
         <div style="font-family: inherit; max-width: 200px; padding: 4px;">
-          <div style="font-size: 10px; font-weight: 900; background: #f3e8ff; color: #7e22ce; padding: 2px 6px; border: 2px solid #7e22ce; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PENGADUAN LINGKUNGAN</div>
-          <h4 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan || item.perihal || 'DETAIL PENGADUAN'}</h4>
-          <p style="font-size: 10px; font-weight: 800; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.lokasi_kegiatan || 'LOKASI BELUM DITENTUKAN'}</p>
-          <div style="background: #f8fafc; border: 2px solid #0f172a; padding: 8px; border-radius: 8px;">
-            <div style="font-size: 10px; margin-bottom: 4px;"><strong>PELAPOR:</strong><br/>${item.pelapor || item.nama_pemrakarsa || '-'}</div>
-            <div style="font-size: 10px;"><strong>STATUS:</strong><br/><span style="color:${markerColor}; font-weight:900;">${(item.status || item.status_ketaatan || 'BELUM DIPROSES').toUpperCase()}</span></div>
+          <div style="font-size: 10px; font-weight: 700; background: #f3e8ff; color: #7e22ce; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PENGADUAN LINGKUNGAN</div>
+          <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan || item.perihal || 'DETAIL PENGADUAN'}</h4>
+          <p style="font-size: 10px; font-weight: 600; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.lokasi_kegiatan || 'LOKASI BELUM DITENTUKAN'}</p>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px;">
+            <div style="font-size: 10px; margin-bottom: 4px; color:#475569"><strong>PELAPOR:</strong><br/><span style="color:#0f172a">${item.pelapor || item.nama_pemrakarsa || '-'}</span></div>
+            <div style="font-size: 10px; color:#475569"><strong>STATUS:</strong><br/><span style="color:${markerColor}; font-weight:700;">${(item.status || item.status_ketaatan || 'BELUM DIPROSES').toUpperCase()}</span></div>
           </div>
         </div>
         `;
       } else if (item.isPengawasan) {
         popupContent = `
         <div style="font-family: inherit; max-width: 200px; padding: 4px;">
-          <div style="font-size: 10px; font-weight: 900; background: #f1f5f9; padding: 2px 6px; border: 2px solid #0f172a; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PENGAWASAN • ${item.token || '-'}</div>
-          <h4 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan}</h4>
-          <p style="font-size: 10px; font-weight: 800; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.kategori || 'Umum'}</p>
-          <div style="background: #f8fafc; border: 2px solid #0f172a; padding: 8px; border-radius: 8px;">
-            <div style="font-size: 10px; margin-bottom: 4px;"><strong>PEMRAKARSA:</strong><br/>${item.nama_pemrakarsa}</div>
-            <div style="font-size: 10px;"><strong>STATUS:</strong><br/><span style="color:${markerColor}; font-weight:900;">${(item.status_ketaatan || 'BELUM DINILAI').toUpperCase()}</span></div>
+          <div style="font-size: 10px; font-weight: 700; background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PENGAWASAN • ${item.token || '-'}</div>
+          <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan}</h4>
+          <p style="font-size: 10px; font-weight: 600; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.kategori || 'Umum'}</p>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px;">
+            <div style="font-size: 10px; margin-bottom: 4px; color:#475569"><strong>PEMRAKARSA:</strong><br/><span style="color:#0f172a">${item.nama_pemrakarsa}</span></div>
+            <div style="font-size: 10px; color:#475569"><strong>STATUS:</strong><br/><span style="color:${markerColor}; font-weight:700;">${(item.status_ketaatan || 'BELUM DINILAI').toUpperCase()}</span></div>
           </div>
           ${bapLink}
         </div>
@@ -147,15 +147,15 @@ export default function PetaPengawasan() {
       } else {
         popupContent = `
         <div style="font-family: inherit; max-width: 200px; padding: 4px;">
-          <div style="font-size: 10px; font-weight: 900; background: #dbeafe; color: #1e3a8a; padding: 2px 6px; border: 2px solid #1e3a8a; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PERIZINAN TERBIT</div>
-          <h4 style="font-size: 14px; font-weight: 900; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan || '-'}</h4>
-          <p style="font-size: 10px; font-weight: 800; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.lokasi_kegiatan || 'LOKASI BELUM DIISI'}</p>
-          <div style="background: #f8fafc; border: 2px solid #0f172a; padding: 8px; border-radius: 8px;">
-            <div style="font-size: 10px; margin-bottom: 4px;"><strong>SK / PKPLH:</strong><br/>${item.nomor_sk || 'BELUM TERBIT'}</div>
-            <div style="font-size: 10px; margin-bottom: 4px;"><strong>TAHUN TERBIT:</strong><br/>${item.tahun || '-'}</div>
-            <div style="font-size: 10px;"><strong>STATUS:</strong><br/><span style="color:${markerColor}; font-weight:900;">DIARSIPKAN</span></div>
+          <div style="font-size: 10px; font-weight: 700; background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 8px;">PERIZINAN TERBIT</div>
+          <h4 style="font-size: 14px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0; text-transform: uppercase;">${item.nama_kegiatan || '-'}</h4>
+          <p style="font-size: 10px; font-weight: 600; color: #64748b; margin: 0 0 12px 0; text-transform: uppercase;">${item.lokasi_kegiatan || 'LOKASI BELUM DIISI'}</p>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px;">
+            <div style="font-size: 10px; margin-bottom: 4px; color:#475569"><strong>SK / PKPLH:</strong><br/><span style="color:#0f172a">${item.nomor_sk || 'BELUM TERBIT'}</span></div>
+            <div style="font-size: 10px; margin-bottom: 4px; color:#475569"><strong>TAHUN TERBIT:</strong><br/><span style="color:#0f172a">${item.tahun || '-'}</span></div>
+            <div style="font-size: 10px; color:#475569"><strong>STATUS:</strong><br/><span style="color:${markerColor}; font-weight:700;">DIARSIPKAN</span></div>
           </div>
-          <a href="/perizinan/arsip/${item.id}" target="_blank" style="display:inline-block; margin-top:12px; padding:6px 12px; background:#3b82f6; color:#ffffff; font-weight:900; text-decoration:none; border:2px solid #0f172a; border-radius:8px; text-transform:uppercase; font-size:10px; box-shadow: 2px 2px 0 0 #0f172a;">Lihat Detail Arsip &rarr;</a>
+          <a href="/perizinan/arsip/${item.id}" target="_blank" style="display:inline-block; margin-top:12px; padding:6px 12px; background:#4f46e5; color:#ffffff; font-weight:700; text-decoration:none; border-radius:6px; text-transform:uppercase; font-size:10px; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">Lihat Detail Arsip &rarr;</a>
         </div>
         `;
       }
@@ -188,13 +188,12 @@ export default function PetaPengawasan() {
 
       <style dangerouslySetInnerHTML={{__html: `
         .leaflet-popup-content-wrapper {
-          border: 4px solid #0f172a;
-          border-radius: 16px;
-          box-shadow: 6px 6px 0 0 #0f172a;
+          border: none;
+          border-radius: 12px;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
         .leaflet-popup-tip {
-          border-top: 4px solid #0f172a;
-          border-left: 4px solid #0f172a;
+          /* Default leafleft tip is fine */
         }
         /* Styling Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
@@ -214,71 +213,71 @@ export default function PetaPengawasan() {
       <div className="w-full flex-1 flex flex-col mx-auto space-y-4 min-h-0">
         
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 shrink-0">
-          <Link href="/" className="w-12 h-12 rounded-xl bg-white text-slate-900 border-4 border-slate-900 flex items-center justify-center hover:bg-sky-400 hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0f172a] transition-all shrink-0">
+          <Link href="/" className="w-12 h-12 rounded-xl bg-surface text-on-surface border border-outline-variant flex items-center justify-center hover:bg-sky-400 hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all shrink-0">
             <ArrowLeft size={24} />
           </Link>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-sky-400 border-4 border-slate-900 flex items-center justify-center text-slate-900 shadow-[4px_4px_0_0_#0f172a] shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-sky-400 border border-outline-variant flex items-center justify-center text-on-surface shadow-sm hover:shadow-md transition-shadow shrink-0">
               <MapIcon size={24} />
             </div>
             <div>
-              <h2 className="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 uppercase">Peta Sebaran Ketaatan</h2>
-              <p className="text-sm font-bold text-slate-600 mt-1">Visualisasi spasial titik lokasi pengawasan dan perizinan.</p>
+              <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-on-surface uppercase">Peta Sebaran Ketaatan</h2>
+              <p className="text-sm font-bold text-on-surface-variant mt-1">Visualisasi spasial titik lokasi pengawasan dan perizinan.</p>
             </div>
           </div>
         </div>
 
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-6 min-h-0">
           
-          <div className="lg:col-span-1 bg-white p-4 lg:p-5 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] flex flex-col gap-4 min-h-0">
+          <div className="lg:col-span-1 bg-surface p-4 lg:p-5 rounded-3xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col gap-4 min-h-0">
             
             <div className="shrink-0">
-              <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest border-b-4 border-slate-900 pb-2 mb-4">Indikator Ketaatan</h4>
+              <h4 className="text-xs font-bold text-on-surface uppercase tracking-widest border-b-4 border-outline-variant pb-2 mb-4">Indikator Ketaatan</h4>
               <div className="space-y-4">
-                <div className="flex items-center gap-3 pb-4 mb-4 border-b-4 border-slate-900">
-                  <span className="w-5 h-5 rounded-full bg-purple-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
-                  <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Pengaduan</div>
+                <div className="flex items-center gap-3 pb-4 mb-4 border-b-4 border-outline-variant">
+                  <span className="w-5 h-5 rounded-full bg-purple-500 border border-outline-variant shadow-sm hover:shadow-md transition-shadow inline-block"></span>
+                  <div className="text-xs font-bold text-on-surface uppercase tracking-widest">Pengaduan</div>
                 </div>
-                <div className="flex items-center gap-3 pb-4 mb-4 border-b-4 border-slate-900">
-                  <span className="w-5 h-5 rounded-full bg-blue-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
-                  <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Perizinan Terbit</div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-emerald-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
-                  <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Taat</div>
+                <div className="flex items-center gap-3 pb-4 mb-4 border-b-4 border-outline-variant">
+                  <span className="w-5 h-5 rounded-full bg-blue-500 border border-outline-variant shadow-sm hover:shadow-md transition-shadow inline-block"></span>
+                  <div className="text-xs font-bold text-on-surface uppercase tracking-widest">Perizinan Terbit</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-amber-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
-                  <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Kurang Taat</div>
+                  <span className="w-5 h-5 rounded-full bg-secondary text-on-secondary border border-outline-variant shadow-sm hover:shadow-md transition-shadow inline-block"></span>
+                  <div className="text-xs font-bold text-on-surface uppercase tracking-widest">Taat</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-rose-500 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
-                  <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Tidak Taat</div>
+                  <span className="w-5 h-5 rounded-full bg-amber-500 border border-outline-variant shadow-sm hover:shadow-md transition-shadow inline-block"></span>
+                  <div className="text-xs font-bold text-on-surface uppercase tracking-widest">Kurang Taat</div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="w-5 h-5 rounded-full bg-slate-400 border-4 border-slate-900 shadow-[2px_2px_0_0_#0f172a] inline-block"></span>
-                  <div className="text-xs font-black text-slate-900 uppercase tracking-widest">Belum Dinilai</div>
+                  <span className="w-5 h-5 rounded-full bg-rose-500 border border-outline-variant shadow-sm hover:shadow-md transition-shadow inline-block"></span>
+                  <div className="text-xs font-bold text-on-surface uppercase tracking-widest">Tidak Taat</div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="w-5 h-5 rounded-full bg-slate-400 border border-outline-variant shadow-sm hover:shadow-md transition-shadow inline-block"></span>
+                  <div className="text-xs font-bold text-on-surface uppercase tracking-widest">Belum Dinilai</div>
                 </div>
               </div>
             </div>
             
             <div className="flex-1 flex flex-col min-h-0">
-              <h4 className="shrink-0 text-xs font-black text-slate-900 uppercase tracking-widest border-b-4 border-slate-900 pb-2 mb-4">Daftar Lokasi (Berkoordinat)</h4>
+              <h4 className="shrink-0 text-xs font-bold text-on-surface uppercase tracking-widest border-b-4 border-outline-variant pb-2 mb-4">Daftar Lokasi (Berkoordinat)</h4>
               
               <div className="h-64 lg:h-auto lg:flex-1 overflow-y-auto pr-3 space-y-3 custom-scrollbar">
                 {loading ? (
                   <div className="text-center py-6">
-                    <p className="text-xs font-black text-slate-500 uppercase animate-pulse">Memuat data...</p>
+                    <p className="text-xs font-bold text-on-surface-variant uppercase animate-pulse">Memuat data...</p>
                   </div>
                 ) : lokasi.length === 0 ? (
-                  <div className="text-center py-6 border-4 border-dashed border-slate-300 rounded-xl bg-slate-50">
-                    <p className="text-xs font-black text-slate-500 uppercase">Belum ada koordinat tersimpan.</p>
+                  <div className="text-center py-6 border-4 border-dashed border-outline-variant rounded-xl bg-surface-container-lowest">
+                    <p className="text-xs font-bold text-on-surface-variant uppercase">Belum ada koordinat tersimpan.</p>
                   </div>
                 ) : (
                   lokasi.map(lok => {
                     let warnaTitik = lok.isPengaduan ? 'bg-purple-500' : (lok.isPengawasan ? 'bg-slate-400' : 'bg-blue-500');
                     if (lok.isPengawasan) {
-                      if (lok.status_ketaatan === 'Taat') warnaTitik = 'bg-emerald-500';
+                      if (lok.status_ketaatan === 'Taat') warnaTitik = 'bg-secondary text-on-secondary';
                       else if (lok.status_ketaatan === 'Kurang Taat' || lok.status_ketaatan === 'Taat Bersyarat') warnaTitik = 'bg-amber-500';
                       else if (lok.status_ketaatan === 'Tidak Taat') warnaTitik = 'bg-rose-500';
                     }
@@ -293,17 +292,17 @@ export default function PetaPengawasan() {
                             marker.openPopup();
                           }
                         }}
-                        className="group flex flex-col p-3 border-2 border-slate-900 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors bg-white shadow-[2px_2px_0_0_#0f172a]"
+                        className="group flex flex-col p-3 border border-outline-variant rounded-xl cursor-pointer hover:bg-surface-container-low transition-colors bg-surface shadow-sm hover:shadow-md transition-shadow"
                       >
                         <div className="flex items-center gap-3">
-                          <span className={`w-3 h-3 rounded-full ${warnaTitik} border-2 border-slate-900 shrink-0`}></span>
-                          <span className="text-[10px] font-black text-slate-900 truncate uppercase flex-1">
+                          <span className={`w-3 h-3 rounded-full ${warnaTitik} border border-outline-variant shrink-0`}></span>
+                          <span className="text-[10px] font-bold text-on-surface truncate uppercase flex-1">
                             {lok.isPengaduan ? (lok.nama_kegiatan || lok.perihal || 'Pengaduan') : (lok.nama_kegiatan || 'Tanpa Nama')}
                           </span>
                         </div>
                         <div className="flex items-center justify-between mt-2 pl-6">
-                          <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">{lok.kategori || 'UMUM'}</span>
-                          <span className="text-[8px] font-black text-slate-900 uppercase">
+                          <span className="text-[8px] font-bold text-on-surface-variant uppercase tracking-widest">{lok.kategori || 'UMUM'}</span>
+                          <span className="text-[8px] font-bold text-on-surface uppercase">
                             {lok.isPengaduan ? (lok.status || lok.status_ketaatan || 'BELUM DIPROSES') : (lok.isPengawasan ? (lok.status_ketaatan || 'BELUM DINILAI') : 'DIARSIPKAN')}
                           </span>
                         </div>
@@ -314,8 +313,8 @@ export default function PetaPengawasan() {
               </div>
             </div>
 
-            <div className="hidden lg:block shrink-0 bg-sky-200 border-4 border-slate-900 p-4 rounded-2xl shadow-[4px_4px_0_0_#0f172a] mt-4 mb-2">
-              <p className="text-xs text-slate-900 font-bold flex items-start gap-2">
+            <div className="hidden lg:block shrink-0 bg-sky-200 border border-outline-variant p-4 rounded-2xl shadow-sm hover:shadow-md transition-shadow mt-4 mb-2">
+              <p className="text-xs text-on-surface font-bold flex items-start gap-2">
                 <Info size={16} className="shrink-0 mt-0.5" /> 
                 Klik titik pada peta untuk melihat hasil pengawasan dan file BAP.
               </p>
@@ -323,13 +322,13 @@ export default function PetaPengawasan() {
           </div>
 
           <div className="lg:col-span-3 flex flex-col gap-4 min-h-0">
-            <div className="lg:hidden shrink-0 bg-sky-200 border-4 border-slate-900 p-4 rounded-2xl shadow-[4px_4px_0_0_#0f172a] mb-2 mt-2">
-              <p className="text-xs text-slate-900 font-bold flex items-start gap-2">
+            <div className="lg:hidden shrink-0 bg-sky-200 border border-outline-variant p-4 rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-2 mt-2">
+              <p className="text-xs text-on-surface font-bold flex items-start gap-2">
                 <Info size={16} className="shrink-0 mt-0.5" /> 
                 Klik titik pada peta untuk melihat hasil pengawasan dan file BAP.
               </p>
             </div>
-            <div className="flex-1 bg-white p-2 rounded-3xl border-4 border-slate-900 shadow-[12px_12px_0_0_#0f172a] overflow-hidden flex flex-col min-h-0">
+            <div className="flex-1 bg-surface p-2 rounded-3xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col min-h-0">
               <div id="map" className="w-full flex-1 rounded-2xl z-0 min-h-[300px]"></div>
             </div>
           </div>

@@ -31,21 +31,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex-1 w-full flex items-center justify-center bg-emerald-50 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] rounded-3xl p-8 sm:p-12">
+    <div className="flex-1 w-full flex items-center justify-center bg-secondary-container px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full bg-surface border border-outline-variant shadow-sm hover:shadow-md transition-shadow rounded-3xl p-8 sm:p-12">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center gap-2 mb-4">
-            <span className="bg-emerald-400 text-slate-900 px-3 py-1 font-black text-2xl border-2 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a]">BIDI</span> 
-            <span className="font-black text-3xl text-slate-900 tracking-tight">DLH</span>
+            <span className="bg-secondary text-on-secondary text-on-surface px-3 py-1 font-bold text-2xl border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-shadow">BIDI</span> 
+            <span className="font-bold text-3xl text-on-surface tracking-tight">DLH</span>
           </div>
-          <h2 className="text-xl font-bold text-slate-800 uppercase tracking-widest mt-4">
+          <h2 className="text-xl font-bold text-on-surface uppercase tracking-widest mt-4">
             Masuk ke Sistem
           </h2>
         </div>
         
         {error && (
-          <div className="bg-rose-300 border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] rounded-xl p-4 mb-8">
-            <p className="text-sm text-slate-900 font-bold text-center">
+          <div className="bg-error-container border border-outline-variant shadow-sm hover:shadow-md transition-shadow rounded-xl p-4 mb-8">
+            <p className="text-sm text-on-surface font-bold text-center">
               ⚠️ {error}
             </p>
           </div>
@@ -54,7 +54,7 @@ export default function LoginPage() {
         <form className="space-y-6" onSubmit={onSubmit}>
           <div className="space-y-5">
             <div>
-              <label htmlFor="name" className="block text-sm font-black text-slate-900 uppercase tracking-wider mb-2">
+              <label htmlFor="name" className="block text-sm font-bold text-on-surface uppercase tracking-wider mb-2">
                 Nama Pengguna
               </label>
               <input
@@ -62,13 +62,13 @@ export default function LoginPage() {
                 name="name"
                 type="text"
                 required
-                className="appearance-none block w-full px-4 py-3 bg-amber-50 border-2 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] text-slate-900 font-bold placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/50 transition-all"
+                className="appearance-none block w-full px-4 py-3 bg-tertiary-container border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-shadow text-on-surface font-bold placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/50 transition-all"
                 placeholder="Admin Bidi"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-black text-slate-900 uppercase tracking-wider mb-2">
+              <label htmlFor="password" className="block text-sm font-bold text-on-surface uppercase tracking-wider mb-2">
                 Kata Sandi
               </label>
               <input
@@ -76,7 +76,7 @@ export default function LoginPage() {
                 name="password"
                 type="password"
                 required
-                className="appearance-none block w-full px-4 py-3 bg-blue-50 border-2 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] text-slate-900 font-bold placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/50 transition-all"
+                className="appearance-none block w-full px-4 py-3 bg-blue-50 border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-shadow text-on-surface font-bold placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-400/50 transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -86,13 +86,13 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center items-center py-4 px-4 border-2 border-slate-900 text-lg font-black uppercase tracking-widest rounded-xl text-slate-900 ${
-                loading ? 'bg-emerald-300 translate-y-1 shadow-[2px_2px_0_0_#0f172a] cursor-not-allowed' : 'bg-emerald-400 hover:bg-emerald-300 hover:translate-y-1 hover:shadow-[2px_2px_0_0_#0f172a] shadow-[6px_6px_0_0_#0f172a]'
+              className={`w-full flex justify-center items-center py-4 px-4 border border-outline-variant text-lg font-bold uppercase tracking-widest rounded-xl text-on-surface ${
+                loading ? 'bg-emerald-300 translate-y-1 shadow-sm hover:shadow-md transition-shadow cursor-not-allowed' : 'bg-secondary text-on-secondary hover:bg-emerald-300 hover:translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow shadow-sm hover:shadow-md transition-shadow'
               } transition-all`}
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <svg className="animate-spin h-5 w-5 text-slate-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-5 w-5 text-on-surface" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>

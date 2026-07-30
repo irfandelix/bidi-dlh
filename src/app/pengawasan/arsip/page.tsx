@@ -71,20 +71,20 @@ export default function ArsipPengawasan() {
   const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 lg:p-12">
+    <div className="min-h-screen bg-surface-container-lowest p-6 lg:p-12">
       <div className="max-w-7xl mx-auto">
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <Link href="/pengawasan" className="inline-flex items-center gap-2 font-bold text-slate-700 hover:text-slate-900 bg-white px-4 py-2 rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-[2px] transition-all mb-4">
+            <Link href="/pengawasan" className="inline-flex items-center gap-2 font-bold text-on-surface-variant hover:text-on-surface bg-surface px-4 py-2 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow hover:translate-y-[2px] transition-all mb-4">
               <ArrowLeft size={20} /> Hub Pengawasan
             </Link>
-            <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight">Arsip BAP Pengawasan</h1>
-            <p className="text-slate-600 font-bold">Daftar kunjungan lapangan yang sudah selesai dan memiliki Berita Acara.</p>
+            <h1 className="text-3xl font-bold text-on-surface uppercase tracking-tight">Arsip BAP Pengawasan</h1>
+            <p className="text-on-surface-variant font-bold">Daftar kunjungan lapangan yang sudah selesai dan memiliki Berita Acara.</p>
           </div>
         </div>
 
-        <div className="bg-white border-4 border-slate-900 rounded-3xl p-6 lg:p-8 shadow-[12px_12px_0_0_#0f172a]">
+        <div className="bg-surface border border-outline-variant rounded-3xl p-6 lg:p-8 shadow-sm hover:shadow-md transition-shadow">
           
           <div className="flex flex-col lg:flex-row justify-between items-center gap-4 mb-8">
             <div className="relative w-full lg:w-96">
@@ -94,12 +94,12 @@ export default function ArsipPengawasan() {
                 placeholder="Cari kegiatan, pemrakarsa, kategori..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full bg-slate-50 border-2 border-slate-900 rounded-xl pl-12 pr-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-200"
+                className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-emerald-200"
               />
             </div>
             
             <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto justify-between lg:justify-end">
-              <div className="text-sm font-black text-slate-900 uppercase bg-emerald-100 border-2 border-slate-900 px-4 py-3 rounded-xl flex items-center gap-2 shadow-[2px_2px_0_0_#0f172a]">
+              <div className="text-sm font-bold text-on-surface uppercase bg-secondary-container text-on-secondary-container border border-outline-variant px-4 py-3 rounded-xl flex items-center gap-2 shadow-sm hover:shadow-md transition-shadow">
                 <CheckCircle size={18} className="text-emerald-700" />
                 Total: {filtered.length} Arsip
               </div>
@@ -107,21 +107,21 @@ export default function ArsipPengawasan() {
               {/* Pagination Controls */}
               {!loading && filtered.length > 0 && (
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider hidden sm:inline">
+                  <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider hidden sm:inline">
                     Hal {currentPage} / {totalPages}
                   </span>
                   <div className="flex gap-2">
                     <button 
                       onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                       disabled={currentPage === 1}
-                      className="w-12 h-12 flex items-center justify-center bg-white border-4 border-slate-900 rounded-xl text-slate-900 shadow-[2px_2px_0_0_#0f172a] disabled:opacity-50 disabled:shadow-none hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none"
+                      className="w-12 h-12 flex items-center justify-center bg-surface border border-outline-variant rounded-xl text-on-surface shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:shadow-none hover:bg-surface-container transition-all active:translate-y-1 active:shadow-none"
                     >
                       <ChevronLeft size={24} strokeWidth={3} />
                     </button>
                     <button 
                       onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
-                      className="w-12 h-12 flex items-center justify-center bg-white border-4 border-slate-900 rounded-xl text-slate-900 shadow-[2px_2px_0_0_#0f172a] disabled:opacity-50 disabled:shadow-none hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none"
+                      className="w-12 h-12 flex items-center justify-center bg-surface border border-outline-variant rounded-xl text-on-surface shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:shadow-none hover:bg-surface-container transition-all active:translate-y-1 active:shadow-none"
                     >
                       <ChevronRight size={24} strokeWidth={3} />
                     </button>
@@ -134,52 +134,52 @@ export default function ArsipPengawasan() {
           {loading ? (
             <LottieLoader size={150} text="MEMUAT DATA..." />
           ) : paginated.length === 0 ? (
-            <div className="py-20 text-center font-bold text-slate-500 border-4 border-dashed border-slate-300 rounded-2xl bg-slate-50">
+            <div className="py-20 text-center font-bold text-on-surface-variant border-4 border-dashed border-outline-variant rounded-2xl bg-surface-container-lowest">
               Tidak ada arsip yang ditemukan.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {paginated.map(agenda => (
-                <div key={agenda.id} className="group bg-white border-4 border-slate-900 rounded-2xl p-6 shadow-[6px_6px_0_0_#0f172a] hover:shadow-[3px_3px_0_0_#0f172a] hover:translate-y-1 transition-all relative overflow-hidden flex flex-col justify-between">
+                <div key={agenda.id} className="group bg-surface border border-outline-variant rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow hover:translate-y-1 transition-all relative overflow-hidden flex flex-col justify-between">
                   
                   <div>
                     <div className="flex justify-between items-start mb-4">
-                      <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-lg border-2 border-emerald-800 text-xs font-black uppercase tracking-widest">
+                      <span className="bg-secondary-container text-on-secondary-container text-on-secondary-container px-3 py-1 rounded-lg border border-emerald-200 text-xs font-bold uppercase tracking-widest">
                         {agenda.kategori}
                       </span>
-                      <span className={`text-xs font-black uppercase px-2 py-1 rounded border-2 ${
+                      <span className={`text-xs font-bold uppercase px-2 py-1 rounded border-2 ${
                         agenda.status_ketaatan === 'Taat' 
                           ? 'bg-green-100 text-green-800 border-green-800' 
                           : agenda.status_ketaatan === 'Tidak Taat'
-                          ? 'bg-rose-100 text-rose-800 border-rose-800'
-                          : 'bg-slate-100 text-slate-800 border-slate-800'
+                          ? 'bg-error-container text-on-error-container text-on-error-container border-rose-800'
+                          : 'bg-surface-container-low text-on-surface border-slate-800'
                       }`}>
                         {agenda.status_ketaatan || 'Selesai'}
                       </span>
                     </div>
                     
-                    <h3 className="text-xl font-black text-slate-900 mb-1 line-clamp-2">{agenda.nama_kegiatan}</h3>
-                    <p className="text-sm font-bold text-slate-600 mb-4 line-clamp-1">{agenda.nama_pemrakarsa}</p>
+                    <h3 className="text-xl font-bold text-on-surface mb-1 line-clamp-2">{agenda.nama_kegiatan}</h3>
+                    <p className="text-sm font-bold text-on-surface-variant mb-4 line-clamp-1">{agenda.nama_pemrakarsa}</p>
                     
                     <div className="space-y-2 mb-6">
-                      <div className="flex items-center gap-2 text-sm text-slate-700 font-bold">
-                        <Calendar size={16} className="text-emerald-600" />
+                      <div className="flex items-center gap-2 text-sm text-on-surface-variant font-bold">
+                        <Calendar size={16} className="text-secondary" />
                         <span>{new Date(agenda.tanggal_kunjungan).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="flex gap-2 mt-2">
-                    <Link href={`/pengawasan/detail/${encodeURIComponent(agenda.kategori)}/${agenda.id}`} className="flex-1 flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 font-black uppercase tracking-widest p-3 rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-[2px] transition-all">
+                    <Link href={`/pengawasan/detail/${encodeURIComponent(agenda.kategori)}/${agenda.id}`} className="flex-1 flex items-center justify-center gap-2 bg-surface-container-low hover:bg-surface-container text-on-surface font-bold uppercase tracking-widest p-3 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow hover:translate-y-[2px] transition-all">
                       Detail
                     </Link>
-                    <a href={`/api/pengawasan/bap/${agenda.id}/generate`} target="_blank" rel="noreferrer" title="Cetak BAP (Word)" className="flex items-center justify-center bg-indigo-400 hover:bg-indigo-500 text-slate-900 p-3 rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-[2px] transition-all">
+                    <a href={`/api/pengawasan/bap/${agenda.id}/generate`} target="_blank" rel="noreferrer" title="Cetak BAP (Word)" className="flex items-center justify-center bg-indigo-400 hover:bg-indigo-500 text-on-surface p-3 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow hover:translate-y-[2px] transition-all">
                       <Printer size={20} />
                     </a>
                   </div>
                   
                   {/* Manual Upload Section */}
-                  <div className="mt-4 pt-4 border-t-2 border-slate-200">
+                  <div className="mt-4 pt-4 border-t-2 border-outline-variant">
                     {(() => {
                       let manualUrl = null;
                       if (agenda.bap_pengawasans && agenda.bap_pengawasans[0]) {
@@ -193,13 +193,13 @@ export default function ArsipPengawasan() {
                       
                       if (manualUrl) {
                         return (
-                          <a href={manualUrl} target="_blank" rel="noreferrer" className="w-full flex items-center justify-center gap-2 bg-emerald-400 hover:bg-emerald-500 text-slate-900 font-black uppercase tracking-widest p-3 rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-[2px] transition-all">
+                          <a href={manualUrl} target="_blank" rel="noreferrer" className="w-full flex items-center justify-center gap-2 bg-secondary text-on-secondary hover:bg-secondary text-on-secondary text-on-surface font-bold uppercase tracking-widest p-3 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow hover:translate-y-[2px] transition-all">
                             <FileCheck size={20} /> Lihat BAP Final
                           </a>
                         );
                       } else {
                         return (
-                          <label className="w-full flex items-center justify-center gap-2 bg-amber-300 hover:bg-amber-400 text-slate-900 font-black uppercase tracking-widest p-3 rounded-xl border-2 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-[2px] transition-all cursor-pointer">
+                          <label className="w-full flex items-center justify-center gap-2 bg-amber-300 hover:bg-tertiary text-on-tertiary text-on-surface font-bold uppercase tracking-widest p-3 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow hover:translate-y-[2px] transition-all cursor-pointer">
                             <Upload size={20} /> Unggah BAP Manual
                             <input type="file" accept="image/*,.pdf" className="hidden" onChange={(e) => handleUploadManual(e, agenda.id)} />
                           </label>

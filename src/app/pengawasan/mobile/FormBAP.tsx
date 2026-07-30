@@ -448,33 +448,33 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-emerald-50">
+    <div className="flex flex-col h-screen bg-secondary-container">
       <div className="p-6 pt-12 flex-1 flex flex-col">
         <div className="flex flex-row justify-between items-center mb-6">
           <button 
             onClick={() => step === 1 ? setScreen('info') : prevStep()} 
-            className="bg-white border-2 border-slate-900 px-4 py-2 rounded-lg shadow-[2px_2px_0_0_#0f172a]"
+            className="bg-surface border border-outline-variant px-4 py-2 rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
-            <span className="text-slate-900 font-black uppercase text-xs tracking-wider">← {step === 1 ? 'Info' : 'Kembali'}</span>
+            <span className="text-on-surface font-bold uppercase text-xs tracking-wider">← {step === 1 ? 'Info' : 'Kembali'}</span>
           </button>
-          <span className="font-black text-slate-900">Langkah {step} dari {totalSteps}</span>
+          <span className="font-bold text-on-surface">Langkah {step} dari {totalSteps}</span>
         </div>
         
         {/* Progress Bar */}
-        <div className="w-full bg-slate-200 h-3 rounded-full mb-6 border-2 border-slate-900 overflow-hidden">
-          <div className="bg-emerald-400 h-full w-[${(step/totalSteps)*100}%] border-r-2 border-slate-900" />
+        <div className="w-full bg-surface-container h-3 rounded-full mb-6 border border-outline-variant overflow-hidden">
+          <div className="bg-secondary text-on-secondary h-full w-[${(step/totalSteps)*100}%] border-r border-outline-variant" />
         </div>
 
         <div className="flex-1 flex flex-col overflow-y-auto pb-64">
           {step === 1 && (
-            <div className="bg-white p-6 border-4 border-slate-900 rounded-2xl shadow-[6px_6px_0_0_#0f172a] mb-6">
-              <span className="text-2xl font-black text-slate-900 mb-6 uppercase">A. Identitas Lokasi</span>
+            <div className="bg-surface p-6 border border-outline-variant rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-6">
+              <span className="text-2xl font-bold text-on-surface mb-6 uppercase">A. Identitas Lokasi</span>
               
               <div className="mb-4">
-                <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">Waktu Pengawasan (Misal: 09.00)</span>
+                <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">Waktu Pengawasan (Misal: 09.00)</span>
                 <div className="flex flex-row gap-2">
                   <input
-                    className="flex-1 bg-white border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold shadow-[4px_4px_0_0_#0f172a]"
+                    className="flex-1 bg-surface border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold shadow-sm hover:shadow-md transition-shadow"
                     placeholder="Isi Waktu..."
                     
                     value={formData.waktu_pengawasan || ''}
@@ -482,9 +482,9 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   />
                   <button 
                     onClick={getCurrentTime}
-                    className="bg-emerald-400 justify-center px-4 rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] active:shadow-[0px_0px_0_0_#0f172a] active:translate-y-1 active:translate-x-1"
+                    className="bg-secondary text-on-secondary justify-center px-4 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow active:shadow-sm hover:shadow-md transition-shadow active:translate-y-1 active:translate-x-1"
                   >
-                    <span className="text-slate-900 font-black uppercase text-xs tracking-wider">Saat Ini</span>
+                    <span className="text-on-surface font-bold uppercase text-xs tracking-wider">Saat Ini</span>
                   </button>
                 </div>
               </div>
@@ -501,9 +501,9 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                 { label: 'No. Telepon / Fax', key: 'telepon' },
               ].map((field) => (
                 <div key={field.key} className="mb-4">
-                  <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">{field.label}</span>
+                  <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
                   <input
-                    className="w-full bg-white border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold shadow-[4px_4px_0_0_#0f172a]"
+                    className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold shadow-sm hover:shadow-md transition-shadow"
                     placeholder={`Isi ${field.label}...`}
                     
                     value={formData[field.key] || ''}
@@ -513,10 +513,10 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
               ))}
 
               <div className="mb-4">
-                <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">Koordinat Lokasi (Lat, Long)</span>
+                <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">Koordinat Lokasi (Lat, Long)</span>
                 <div className="flex flex-row gap-2">
                   <input
-                    className="flex-1 bg-white border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold shadow-[4px_4px_0_0_#0f172a]"
+                    className="flex-1 bg-surface border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold shadow-sm hover:shadow-md transition-shadow"
                     placeholder="Isi Koordinat..."
                     
                     value={formData.koordinat || ''}
@@ -524,15 +524,15 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   />
                   <button 
                     onClick={getLocation}
-                    className="bg-indigo-400 justify-center px-4 rounded-xl border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] active:shadow-[0px_0px_0_0_#0f172a] active:translate-y-1 active:translate-x-1"
+                    className="bg-indigo-400 justify-center px-4 rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow active:shadow-sm hover:shadow-md transition-shadow active:translate-y-1 active:translate-x-1"
                   >
-                    <span className="text-slate-900 font-black uppercase text-xs tracking-wider">Ambil</span>
+                    <span className="text-on-surface font-bold uppercase text-xs tracking-wider">Ambil</span>
                   </button>
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t-4 border-slate-900 border-dashed">
-                <span className="text-lg font-black text-slate-900 mb-4 uppercase">Batas Wilayah</span>
+              <div className="mt-4 pt-4 border-t border-outline-variant border-dashed">
+                <span className="text-lg font-bold text-on-surface mb-4 uppercase">Batas Wilayah</span>
                 {[
                   { label: 'Batas Utara', key: 'batas_utara' },
                   { label: 'Batas Selatan', key: 'batas_selatan' },
@@ -540,22 +540,22 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   { label: 'Batas Timur', key: 'batas_timur' },
                 ].map((field) => (
                   <div key={field.key} className="mb-4">
-                    <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                    <input className="w-full bg-slate-50 border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                    <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
+                    <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                   </div>
                 ))}
               </div>
 
-              <div className="mt-4 pt-4 border-t-4 border-slate-900 border-dashed">
-                <span className="text-lg font-black text-slate-900 mb-4 uppercase">Luas Lahan & Bangunan (m2)</span>
+              <div className="mt-4 pt-4 border-t border-outline-variant border-dashed">
+                <span className="text-lg font-bold text-on-surface mb-4 uppercase">Luas Lahan & Bangunan (m2)</span>
                 {[
                   { label: 'Luas Total Lahan', key: 'luas_total' },
                   { label: 'Luas Bangunan / Terbangun', key: 'luas_bangunan' },
                   { label: 'Luas Terbuka Hijau', key: 'luas_terbuka' },
                 ].map((field) => (
                   <div key={field.key} className="mb-4">
-                    <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                    <input className="w-full bg-slate-50 border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                    <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
+                    <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                   </div>
                 ))}
               </div>
@@ -563,8 +563,8 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
           )}
 
           {step === 2 && (
-            <div className="bg-white p-6 border-4 border-slate-900 rounded-2xl shadow-[6px_6px_0_0_#0f172a] mb-6">
-              <span className="text-2xl font-black text-slate-900 mb-6 uppercase">B. Operasional & Utilitas</span>
+            <div className="bg-surface p-6 border border-outline-variant rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-6">
+              <span className="text-2xl font-bold text-on-surface mb-6 uppercase">B. Operasional & Utilitas</span>
               
               {isIndustri ? (
                 <>
@@ -585,8 +585,8 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                     { label: 'Pengelolaan B3 Umum', key: 'pengelolaan_b3_umum' },
                   ].map((field) => (
                     <div key={field.key} className="mb-4">
-                      <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                      <input className="w-full bg-slate-50 border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                      <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
+                      <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                     </div>
                   ))}
                 </>
@@ -608,8 +608,8 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                     { label: 'Pengelolaan B3 Umum', key: 'pengelolaan_b3_umum' },
                   ].map((field) => (
                     <div key={field.key} className="mb-4">
-                      <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                      <input className="w-full bg-slate-50 border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                      <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
+                      <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                     </div>
                   ))}
                 </>
@@ -633,17 +633,17 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                     { label: 'Sumber Air & Energi', key: 'sumber_air_bersih' },
                   ].map((field) => (
                     <div key={field.key} className="mb-4">
-                      <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                      <input className="w-full bg-slate-50 border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                      <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
+                      <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                     </div>
                   ))}
                 </>
               ) : (
-                <span className="font-bold text-slate-500">Kategori lain belum terdefinisi detil operasinya. Silakan lewati jika tidak relevan.</span>
+                <span className="font-bold text-on-surface-variant">Kategori lain belum terdefinisi detil operasinya. Silakan lewati jika tidak relevan.</span>
               )}
 
-              <div className="mt-4 pt-4 border-t-4 border-slate-900 border-dashed">
-                <span className="text-lg font-black text-slate-900 mb-4 uppercase">Dokumen & Persetujuan Lingkungan</span>
+              <div className="mt-4 pt-4 border-t border-outline-variant border-dashed">
+                <span className="text-lg font-bold text-on-surface mb-4 uppercase">Dokumen & Persetujuan Lingkungan</span>
                 {[
                   { label: 'Dokumen yang Dimiliki (Misal: UKL-UPL)', key: 'dokumen_dimiliki' },
                   { label: 'Nomor Persetujuan Lingkungan', key: 'persetujuan_lingkungan' },
@@ -651,8 +651,8 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   { label: 'Tanggal Inspeksi Terakhir', key: 'inspeksi_terakhir' },
                 ].map((field) => (
                   <div key={field.key} className="mb-4">
-                    <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                    <input className="w-full bg-slate-50 border-4 border-slate-900 rounded-xl px-4 py-3 text-slate-900 font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                    <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
+                    <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                   </div>
                 ))}
               </div>
@@ -660,18 +660,18 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
           )}
 
           {step === 3 && (
-            <div className="bg-white p-6 border-4 border-slate-900 rounded-2xl shadow-[6px_6px_0_0_#0f172a] mb-6">
-              <span className="text-2xl font-black text-slate-900 mb-6 uppercase">Hasil Pengawasan</span>
+            <div className="bg-surface p-6 border border-outline-variant rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-6">
+              <span className="text-2xl font-bold text-on-surface mb-6 uppercase">Hasil Pengawasan</span>
               
               <div className="mb-8">
-                <div className="bg-rose-200 border-2 border-slate-900 px-3 py-2 mb-4 rounded-xl shadow-[2px_2px_0_0_#0f172a]">
-                  <span className="font-black text-slate-900 uppercase text-sm">1. Dokumen Perizinan</span>
+                <div className="bg-rose-200 border border-outline-variant px-3 py-2 mb-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <span className="font-bold text-on-surface uppercase text-sm">1. Dokumen Perizinan</span>
                 </div>
                 {listDokumen.map((dok, i) => (
                   <div key={dok.id} className="flex flex-row gap-2 mb-3 items-center">
-                    <span className="font-black text-slate-400">{i + 1}.</span>
+                    <span className="font-bold text-slate-400">{i + 1}.</span>
                     <input
-                      className="flex-1 bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-2 text-slate-900 font-bold"
+                      className="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold"
                       placeholder="Nama Dokumen/Izin..."
                       
                       value={dok.value}
@@ -680,31 +680,31 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                       }}
                     />
                     {listDokumen.length > 1 && (
-                      <button onClick={() => setListDokumen(listDokumen.filter(x => x.id !== dok.id))} className="p-2 bg-rose-500 rounded-lg border-2 border-slate-900">
-                        <span className="text-white font-black">X</span>
+                      <button onClick={() => setListDokumen(listDokumen.filter(x => x.id !== dok.id))} className="p-2 bg-rose-500 rounded-lg border border-outline-variant">
+                        <span className="text-on-primary font-bold">X</span>
                       </button>
                     )}
                   </div>
                 ))}
-                <button onClick={() => setListDokumen([...listDokumen, { id: Date.now(), value: '' }])} className="py-3 border-2 border-dashed border-slate-900 rounded-lg items-center">
-                  <span className="font-black text-slate-600 text-xs uppercase tracking-widest">+ Tambah Izin</span>
+                <button onClick={() => setListDokumen([...listDokumen, { id: Date.now(), value: '' }])} className="py-3 border-2 border-dashed border-outline-variant rounded-lg items-center">
+                  <span className="font-bold text-on-surface-variant text-xs uppercase tracking-widest">+ Tambah Izin</span>
                 </button>
               </div>
 
-              {checklist.length === 0 && <span className="font-bold text-slate-500">Kategori kegiatan tidak memiliki checklist khusus.</span>}
+              {checklist.length === 0 && <span className="font-bold text-on-surface-variant">Kategori kegiatan tidak memiliki checklist khusus.</span>}
               
               {checklist.map((bab, bIndex) => (
                 <div key={bIndex} className="mb-8">
-                  <div className="bg-rose-200 border-2 border-slate-900 px-3 py-2 mb-4 rounded-xl shadow-[2px_2px_0_0_#0f172a]">
-                    <span className="font-black text-slate-900 uppercase text-sm">{bab.bab}</span>
+                  <div className="bg-rose-200 border border-outline-variant px-3 py-2 mb-4 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <span className="font-bold text-on-surface uppercase text-sm">{bab.bab}</span>
                   </div>
                   
                   {bab.items.map((item: any, iIndex: number) => (
-                    <div key={iIndex} className="mb-6 pl-2 border-l-4 border-slate-300">
-                      <span className="font-bold text-slate-800 mb-2">{item.no}. {item.point}</span>
+                    <div key={iIndex} className="mb-6 pl-2 border-l-4 border-outline-variant">
+                      <span className="font-bold text-on-surface mb-2">{item.no}. {item.point}</span>
                       
                       <input
-                        className="w-full bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-2 text-slate-900 font-bold text-sm mb-2"
+                        className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold text-sm mb-2"
                         placeholder="Kondisi Eksisting (Hasil Pengamatan)..."
                         
                         value={item.kondisi}
@@ -713,7 +713,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                       />
                       
                       <input
-                        className="w-full bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-2 text-slate-900 font-bold text-sm"
+                        className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold text-sm"
                         placeholder="Keterangan / Temuan..."
                         
                         value={item.keterangan}
@@ -727,20 +727,20 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
           )}
 
           {step === 4 && (
-            <div className="bg-white p-6 border-4 border-slate-900 rounded-2xl shadow-[6px_6px_0_0_#0f172a] mb-6">
-              <span className="text-2xl font-black text-slate-900 mb-6 uppercase">Dokumentasi Lapangan</span>
+            <div className="bg-surface p-6 border border-outline-variant rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-6">
+              <span className="text-2xl font-bold text-on-surface mb-6 uppercase">Dokumentasi Lapangan</span>
               
               {photos.map((photo, idx) => (
-                <div key={idx} className="mb-6 border-2 border-slate-300 rounded-xl p-4 bg-slate-50 relative">
+                <div key={idx} className="mb-6 border-2 border-outline-variant rounded-xl p-4 bg-surface-container-lowest relative">
                   <button 
                     onClick={() => removePhoto(idx)}
-                    className="absolute -top-3 -right-3 bg-rose-500 w-8 h-8 rounded-full border-2 border-slate-900 items-center justify-center z-10 shadow-[2px_2px_0_0_#0f172a]"
+                    className="absolute -top-3 -right-3 bg-rose-500 w-8 h-8 rounded-full border border-outline-variant items-center justify-center z-10 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <span className="text-white font-black">X</span>
+                    <span className="text-on-primary font-bold">X</span>
                   </button>
-                  <img src={photo.uri} className="w-full h-48 rounded-lg border-2 border-slate-900 mb-4" />
+                  <img src={photo.uri} className="w-full h-48 rounded-lg border border-outline-variant mb-4" />
                   <input
-                    className="w-full bg-white border-2 border-slate-900 rounded-lg px-3 py-2 text-slate-900 font-bold"
+                    className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold"
                     placeholder="Keterangan foto..."
                     value={photo.keterangan}
                     onChange={(e: any) => { const v = e.target.value; updatePhotoKeterangan(idx, v) }}
@@ -750,18 +750,18 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
 
               <button 
                 onClick={takePhoto}
-                className="bg-emerald-400 px-6 py-4 border-4 border-slate-900 rounded-xl shadow-[4px_4px_0_0_#0f172a] items-center active:shadow-[0px_0px_0_0_#0f172a] active:translate-y-1 active:translate-x-1 mb-8"
+                className="bg-secondary text-on-secondary px-6 py-4 border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-shadow items-center active:shadow-sm hover:shadow-md transition-shadow active:translate-y-1 active:translate-x-1 mb-8"
               >
-                <span className="font-black text-slate-900 uppercase">+ Buka Kamera</span>
+                <span className="font-bold text-on-surface uppercase">+ Buka Kamera</span>
               </button>
 
               <div className="mb-8">
-                <span className="text-lg font-black text-slate-900 mb-4 uppercase">Saran / Masukan</span>
+                <span className="text-lg font-bold text-on-surface mb-4 uppercase">Saran / Masukan</span>
                 {listSaran.map((saran, i) => (
                   <div key={saran.id} className="flex flex-row gap-2 mb-3 items-center">
-                    <span className="font-black text-slate-400">{i + 1}.</span>
+                    <span className="font-bold text-slate-400">{i + 1}.</span>
                     <input
-                      className="flex-1 bg-slate-50 border-2 border-slate-900 rounded-lg px-3 py-2 text-slate-900 font-bold"
+                      className="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold"
                       placeholder="Ketik saran perbaikan kesling..."
                       
                       value={saran.value}
@@ -770,29 +770,29 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                       }}
                     />
                     {listSaran.length > 1 && (
-                      <button onClick={() => setListSaran(listSaran.filter(x => x.id !== saran.id))} className="p-2 bg-rose-500 rounded-lg border-2 border-slate-900">
-                        <span className="text-white font-black">X</span>
+                      <button onClick={() => setListSaran(listSaran.filter(x => x.id !== saran.id))} className="p-2 bg-rose-500 rounded-lg border border-outline-variant">
+                        <span className="text-on-primary font-bold">X</span>
                       </button>
                     )}
                   </div>
                 ))}
-                <button onClick={() => setListSaran([...listSaran, { id: Date.now(), value: '' }])} className="py-3 border-2 border-dashed border-slate-900 rounded-lg items-center">
-                  <span className="font-black text-slate-600 text-xs uppercase tracking-widest">+ Tambah Saran</span>
+                <button onClick={() => setListSaran([...listSaran, { id: Date.now(), value: '' }])} className="py-3 border-2 border-dashed border-outline-variant rounded-lg items-center">
+                  <span className="font-bold text-on-surface-variant text-xs uppercase tracking-widest">+ Tambah Saran</span>
                 </button>
               </div>
 
               <div className="mb-4">
-                <span className="text-lg font-black text-slate-900 mb-4 uppercase">Penilaian & Kesimpulan</span>
+                <span className="text-lg font-bold text-on-surface mb-4 uppercase">Penilaian & Kesimpulan</span>
                 {komponenPenilaian.map((komp, idx) => (
-                  <div key={komp.id} className="bg-slate-50 border-2 border-slate-900 rounded-xl p-4 mb-3 shadow-[2px_2px_0_0_#0f172a]">
+                  <div key={komp.id} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex flex-row justify-between items-center mb-2">
-                      <span className="bg-slate-900 text-white font-black px-2 py-1 rounded-md text-xs">C.{idx + 1}</span>
+                      <span className="bg-primary text-on-primary text-on-primary font-bold px-2 py-1 rounded-md text-xs">C.{idx + 1}</span>
                     </div>
-                    <span className="text-slate-900 font-black mb-3 uppercase">{komp.nama}</span>
+                    <span className="text-on-surface font-bold mb-3 uppercase">{komp.nama}</span>
                     <div className="flex flex-row items-center gap-2">
-                      <span className="text-xs font-black text-slate-500 uppercase">Skor (0-100):</span>
+                      <span className="text-xs font-bold text-on-surface-variant uppercase">Skor (0-100):</span>
                       <input
-                        className="flex-1 bg-white border-2 border-slate-900 rounded-lg px-3 py-2 text-rose-600 font-black text-center text-lg"
+                        className="flex-1 bg-surface border border-outline-variant rounded-lg px-3 py-2 text-error font-bold text-center text-lg"
                         placeholder="0"
                         
                         value={komp.nilai}
@@ -804,18 +804,18 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   </div>
                 ))}
 
-                <div className="bg-slate-900 p-4 rounded-xl border-2 border-slate-900">
+                <div className="bg-primary text-on-primary p-4 rounded-xl border border-outline-variant">
                   <div className="flex flex-row justify-between items-center mb-4 border-b-2 border-slate-700 pb-4">
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Nilai Rata-Rata</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nilai Rata-Rata</span>
                     <div className="flex flex-row items-end gap-1">
-                      <span className="text-3xl font-black ${totalSkor() > 100 ? 'text-rose-500' : 'text-teal-400'}">{totalSkor()}</span>
-                      <span className="text-sm font-bold text-slate-500 mb-1">/ 100</span>
+                      <span className="text-3xl font-bold ${totalSkor() > 100 ? 'text-error' : 'text-teal-400'}">{totalSkor()}</span>
+                      <span className="text-sm font-bold text-on-surface-variant mb-1">/ 100</span>
                     </div>
                   </div>
                   <div className="items-center">
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Status Ketaatan</span>
-                    <div className="px-6 py-2 rounded-lg border-2 border-slate-900 ${finalStatus() === 'Taat' ? 'bg-emerald-400' : finalStatus() === 'Kurang Taat' ? 'bg-amber-400' : finalStatus() === 'Tidak Taat' ? 'bg-rose-500' : 'bg-slate-200'}">
-                      <span className="font-black uppercase tracking-widest ${finalStatus() === 'Tidak Taat' ? 'text-white' : 'text-slate-900'}">{finalStatus()}</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Status Ketaatan</span>
+                    <div className="px-6 py-2 rounded-lg border border-outline-variant ${finalStatus() === 'Taat' ? 'bg-secondary text-on-secondary' : finalStatus() === 'Kurang Taat' ? 'bg-tertiary text-on-tertiary' : finalStatus() === 'Tidak Taat' ? 'bg-rose-500' : 'bg-surface-container'}">
+                      <span className="font-bold uppercase tracking-widest ${finalStatus() === 'Tidak Taat' ? 'text-on-primary' : 'text-on-surface'}">{finalStatus()}</span>
                     </div>
                   </div>
                 </div>
@@ -824,46 +824,46 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
           )}
 
           {step === 5 && (
-            <div className="bg-white p-6 border-4 border-slate-900 rounded-2xl shadow-[6px_6px_0_0_#0f172a] mb-6">
-              <span className="text-2xl font-black text-slate-900 mb-6 uppercase">Data Penandatangan</span>
+            <div className="bg-surface p-6 border border-outline-variant rounded-2xl shadow-sm hover:shadow-md transition-shadow mb-6">
+              <span className="text-2xl font-bold text-on-surface mb-6 uppercase">Data Penandatangan</span>
               
               <div className="mb-8">
-                <span className="text-lg font-black text-slate-900 mb-4 uppercase">Pihak Fasyankes / Pemrakarsa</span>
+                <span className="text-lg font-bold text-on-surface mb-4 uppercase">Pihak Fasyankes / Pemrakarsa</span>
                 {listPerwakilan.map((perw, idx) => (
-                  <div key={perw.id} className="bg-slate-50 border-2 border-slate-900 rounded-xl p-4 mb-4 shadow-[2px_2px_0_0_#0f172a]">
+                  <div key={perw.id} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 mb-4 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex flex-row justify-between mb-2">
-                      <span className="font-black text-slate-400">Perwakilan {idx + 1}</span>
+                      <span className="font-bold text-slate-400">Perwakilan {idx + 1}</span>
                       {listPerwakilan.length > 1 && (
                         <button onClick={() => setListPerwakilan(listPerwakilan.filter(x => x.id !== perw.id))}>
-                          <span className="text-rose-500 font-black text-xs uppercase">Hapus</span>
+                          <span className="text-error font-bold text-xs uppercase">Hapus</span>
                         </button>
                       )}
                     </div>
-                    <input className="w-full bg-white border-2 border-slate-900 rounded-lg px-3 py-2 text-slate-900 font-bold mb-2" placeholder="Nama Lengkap" value={perw.nama} onChange={(e: any) => { const v = e.target.value;  const l = [...listPerwakilan]; l[idx].nama = v; setListPerwakilan(l);  }} />
-                    <input className="w-full bg-white border-2 border-slate-900 rounded-lg px-3 py-2 text-slate-900 font-bold mb-2" placeholder="Jabatan" value={perw.jabatan} onChange={(e: any) => { const v = e.target.value;  const l = [...listPerwakilan]; l[idx].jabatan = v; setListPerwakilan(l);  }} />
-                    <input className="w-full bg-white border-2 border-slate-900 rounded-lg px-3 py-2 text-slate-900 font-bold" placeholder="No. HP"  value={perw.telepon} onChange={(e: any) => { const v = e.target.value;  const l = [...listPerwakilan]; l[idx].telepon = v; setListPerwakilan(l);  }} />
+                    <input className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold mb-2" placeholder="Nama Lengkap" value={perw.nama} onChange={(e: any) => { const v = e.target.value;  const l = [...listPerwakilan]; l[idx].nama = v; setListPerwakilan(l);  }} />
+                    <input className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold mb-2" placeholder="Jabatan" value={perw.jabatan} onChange={(e: any) => { const v = e.target.value;  const l = [...listPerwakilan]; l[idx].jabatan = v; setListPerwakilan(l);  }} />
+                    <input className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold" placeholder="No. HP"  value={perw.telepon} onChange={(e: any) => { const v = e.target.value;  const l = [...listPerwakilan]; l[idx].telepon = v; setListPerwakilan(l);  }} />
                   </div>
                 ))}
-                <button onClick={() => setListPerwakilan([...listPerwakilan, { id: Date.now(), nama: '', jabatan: '', telepon: '', ttd: null, paraf: null }])} className="py-3 border-2 border-dashed border-slate-900 rounded-lg items-center mb-6">
-                  <span className="font-black text-slate-600 text-xs uppercase tracking-widest">+ Tambah Perwakilan</span>
+                <button onClick={() => setListPerwakilan([...listPerwakilan, { id: Date.now(), nama: '', jabatan: '', telepon: '', ttd: null, paraf: null }])} className="py-3 border-2 border-dashed border-outline-variant rounded-lg items-center mb-6">
+                  <span className="font-bold text-on-surface-variant text-xs uppercase tracking-widest">+ Tambah Perwakilan</span>
                 </button>
               </div>
 
               <div className="mb-4">
-                <span className="text-lg font-black text-slate-900 mb-4 uppercase">Tim Pengawas</span>
+                <span className="text-lg font-bold text-on-surface mb-4 uppercase">Tim Pengawas</span>
                 {timTugas.map((nama, idx) => (
-                  <div key={idx} className="bg-indigo-50 border-2 border-slate-900 rounded-xl p-4 mb-3 shadow-[2px_2px_0_0_#0f172a]">
-                    <span className="font-black text-slate-900">{idx + 1}. {nama}</span>
+                  <div key={idx} className="bg-primary-container border border-outline-variant rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
+                    <span className="font-bold text-on-surface">{idx + 1}. {nama}</span>
                   </div>
                 ))}
               </div>
 
               {saksiTugas.length > 0 && (
                 <div className="mb-4">
-                  <span className="text-lg font-black text-slate-900 mb-4 uppercase">Saksi</span>
+                  <span className="text-lg font-bold text-on-surface mb-4 uppercase">Saksi</span>
                   {saksiTugas.map((nama, idx) => (
-                    <div key={idx} className="bg-rose-50 border-2 border-slate-900 rounded-xl p-4 mb-3 shadow-[2px_2px_0_0_#0f172a]">
-                      <span className="font-black text-slate-900">{idx + 1}. {nama}</span>
+                    <div key={idx} className="bg-error-container border border-outline-variant rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
+                      <span className="font-bold text-on-surface">{idx + 1}. {nama}</span>
                     </div>
                   ))}
                 </div>
@@ -872,14 +872,14 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
           )}
 
           <button 
-            className="w-full ${step === totalSteps ? 'bg-indigo-500' : 'bg-emerald-400'} border-4 border-slate-900 rounded-xl py-4 items-center shadow-[4px_4px_0_0_#0f172a] active:shadow-[0px_0px_0_0_#0f172a] active:translate-y-1 active:translate-x-1 mt-4"
+            className="w-full ${step === totalSteps ? 'bg-indigo-500' : 'bg-secondary text-on-secondary'} border border-outline-variant rounded-xl py-4 items-center shadow-sm hover:shadow-md transition-shadow active:shadow-sm hover:shadow-md transition-shadow active:translate-y-1 active:translate-x-1 mt-4"
             onClick={step === totalSteps ? submitBAP : nextStep}
             disabled={isSaving}
           >
             {isSaving ? (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-slate-900"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-b border-outline-variant"></div>
             ) : (
-              <span className="text-slate-900 font-black text-lg uppercase tracking-wider">{step === totalSteps ? 'Simpan & Selesai' : 'Selanjutnya'}</span>
+              <span className="text-on-surface font-bold text-lg uppercase tracking-wider">{step === totalSteps ? 'Simpan & Selesai' : 'Selanjutnya'}</span>
             )}
           </button>
         </div>

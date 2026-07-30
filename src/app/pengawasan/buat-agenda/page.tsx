@@ -128,28 +128,28 @@ export default function BuatAgenda() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 lg:p-12">
+    <div className="min-h-screen bg-surface-container-lowest p-6 lg:p-12">
       <div className="max-w-4xl mx-auto">
         
         <div className="flex items-center gap-4 mb-8">
-          <Link href="/pengawasan" className="w-12 h-12 rounded-xl bg-white text-slate-900 border-4 border-slate-900 flex items-center justify-center hover:bg-teal-400 hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0f172a] transition-all">
+          <Link href="/pengawasan" className="w-12 h-12 rounded-xl bg-surface text-on-surface border border-outline-variant flex items-center justify-center hover:bg-teal-400 hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all">
             <ArrowLeft size={24} />
           </Link>
           <div>
-            <h2 className="text-3xl font-black tracking-tight text-slate-900 uppercase">Buat Agenda Pengawasan</h2>
-            <p className="text-sm font-bold text-slate-600 mt-1">Formulir pendaftaran jadwal inspeksi lapangan.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-on-surface uppercase">Buat Agenda Pengawasan</h2>
+            <p className="text-sm font-bold text-on-surface-variant mt-1">Formulir pendaftaran jadwal inspeksi lapangan.</p>
           </div>
         </div>
 
-        <div className="bg-white border-4 border-slate-900 rounded-3xl shadow-[12px_12px_0_0_#0f172a] overflow-hidden">
+        <div className="bg-surface border border-outline-variant rounded-3xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
           
-          <div className="flex border-b-4 border-slate-900 bg-slate-100">
+          <div className="flex border-b-4 border-outline-variant bg-surface-container-low">
             <button type="button" onClick={() => handleTabChange('manual')} 
-                    className={`flex-1 py-5 text-sm font-black uppercase tracking-widest transition-all flex justify-center items-center gap-2 ${tab === 'manual' ? 'bg-white border-b-4 border-teal-500 text-teal-700' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200 border-b-4 border-transparent'}`}>
+                    className={`flex-1 py-5 text-sm font-bold uppercase tracking-widest transition-all flex justify-center items-center gap-2 ${tab === 'manual' ? 'bg-surface border-b-4 border-teal-500 text-teal-700' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container border-b-4 border-transparent'}`}>
                 <Edit3 size={18} /> Input Manual (Baru)
             </button>
             <button type="button" onClick={() => handleTabChange('db')} 
-                    className={`flex-1 py-5 text-sm font-black uppercase tracking-widest transition-all flex justify-center items-center gap-2 border-l-4 border-slate-900 ${tab === 'db' ? 'bg-white border-b-4 border-indigo-500 text-indigo-700' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-200 border-b-4 border-transparent'}`}>
+                    className={`flex-1 py-5 text-sm font-bold uppercase tracking-widest transition-all flex justify-center items-center gap-2 border-l-4 border-outline-variant ${tab === 'db' ? 'bg-surface border-b-4 border-indigo-500 text-indigo-700' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container border-b-4 border-transparent'}`}>
                 <Database size={18} /> Pilih dari Database
             </button>
           </div>
@@ -157,11 +157,11 @@ export default function BuatAgenda() {
           <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6">
             
             {tab === 'db' && (
-              <div className="p-5 bg-indigo-100 border-4 border-indigo-900 rounded-2xl mb-8 shadow-[4px_4px_0_0_#312e81]">
-                <label className="block text-xs font-black text-indigo-900 uppercase tracking-widest mb-2">Pilih Dokumen Perizinan <span className="text-rose-600">*</span></label>
+              <div className="p-5 bg-primary-container text-on-primary-container border border-indigo-200 rounded-2xl mb-8 shadow-sm">
+                <label className="block text-xs font-bold text-indigo-900 uppercase tracking-widest mb-2">Pilih Dokumen Perizinan <span className="text-error">*</span></label>
                 <select 
                   onChange={handleDokumenSelect}
-                  className="w-full bg-white border-4 border-slate-900 rounded-xl px-4 py-3 font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+                  className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-indigo-300"
                 >
                   <option value="">-- Cari Nama Perusahaan / Kegiatan --</option>
                   {dokumens.map(d => (
@@ -174,26 +174,26 @@ export default function BuatAgenda() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-black text-slate-900 uppercase tracking-widest mb-2">Tanggal Kunjungan <span className="text-rose-600">*</span></label>
+                <label className="block text-xs font-bold text-on-surface uppercase tracking-widest mb-2">Tanggal Kunjungan <span className="text-error">*</span></label>
                 <div className="relative">
-                  <Calendar className="absolute left-4 top-3.5 text-slate-900" size={20} />
+                  <Calendar className="absolute left-4 top-3.5 text-on-surface" size={20} />
                   <input 
                     type="date"
                     required
                     value={formData.tanggal_kunjungan}
                     onChange={e => setFormData({...formData, tanggal_kunjungan: e.target.value})}
-                    className="w-full bg-slate-50 border-4 border-slate-900 rounded-xl pl-12 pr-4 py-3 font-black text-slate-900 focus:outline-none focus:ring-4 focus:ring-teal-300 focus:bg-white transition-colors"
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-300 focus:bg-surface transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-900 uppercase tracking-widest mb-2">Kategori Usaha <span className="text-rose-600">*</span></label>
+                <label className="block text-xs font-bold text-on-surface uppercase tracking-widest mb-2">Kategori Usaha <span className="text-error">*</span></label>
                 <select 
                   required
                   value={formData.kategori}
                   onChange={e => setFormData({...formData, kategori: e.target.value})}
-                  className="w-full bg-slate-50 border-4 border-slate-900 rounded-xl px-4 py-3 font-black text-slate-900 focus:outline-none focus:ring-4 focus:ring-teal-300 focus:bg-white transition-colors uppercase"
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-300 focus:bg-surface transition-colors uppercase"
                 >
                   <option value="" disabled>-- Pilih Kategori --</option>
                   <option value="Fasyankes">Fasyankes</option>
@@ -207,32 +207,32 @@ export default function BuatAgenda() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-xs font-black text-slate-900 uppercase tracking-widest mb-2">Nama Kegiatan/Usaha <span className="text-rose-600">*</span></label>
+                <label className="block text-xs font-bold text-on-surface uppercase tracking-widest mb-2">Nama Kegiatan/Usaha <span className="text-error">*</span></label>
                 <div className="relative">
-                  <Building2 className="absolute left-4 top-3.5 text-slate-900" size={20} />
+                  <Building2 className="absolute left-4 top-3.5 text-on-surface" size={20} />
                   <input 
                     type="text"
                     required
                     readOnly={tab === 'db'}
                     value={formData.nama_kegiatan}
                     onChange={e => setFormData({...formData, nama_kegiatan: e.target.value})}
-                    className={`w-full border-4 border-slate-900 rounded-xl pl-12 pr-4 py-3 font-black text-slate-900 focus:outline-none transition-colors uppercase ${tab === 'db' ? 'bg-indigo-50 focus:ring-0 text-indigo-900' : 'bg-slate-50 focus:ring-4 focus:ring-teal-300 focus:bg-white'}`}
+                    className={`w-full border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none transition-colors uppercase ${tab === 'db' ? 'bg-primary-container focus:ring-0 text-indigo-900' : 'bg-surface-container-lowest focus:ring-4 focus:ring-teal-300 focus:bg-surface'}`}
                     placeholder="Contoh: PEMBANGUNAN KLINIK SEHAT"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-900 uppercase tracking-widest mb-2">Nama Pemrakarsa <span className="text-rose-600">*</span></label>
+                <label className="block text-xs font-bold text-on-surface uppercase tracking-widest mb-2">Nama Pemrakarsa <span className="text-error">*</span></label>
                 <div className="relative">
-                  <User className="absolute left-4 top-3.5 text-slate-900" size={20} />
+                  <User className="absolute left-4 top-3.5 text-on-surface" size={20} />
                   <input 
                     type="text"
                     required
                     readOnly={tab === 'db'}
                     value={formData.nama_pemrakarsa}
                     onChange={e => setFormData({...formData, nama_pemrakarsa: e.target.value})}
-                    className={`w-full border-4 border-slate-900 rounded-xl pl-12 pr-4 py-3 font-black text-slate-900 focus:outline-none transition-colors uppercase ${tab === 'db' ? 'bg-indigo-50 focus:ring-0 text-indigo-900' : 'bg-slate-50 focus:ring-4 focus:ring-teal-300 focus:bg-white'}`}
+                    className={`w-full border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none transition-colors uppercase ${tab === 'db' ? 'bg-primary-container focus:ring-0 text-indigo-900' : 'bg-surface-container-lowest focus:ring-4 focus:ring-teal-300 focus:bg-surface'}`}
                     placeholder="Contoh: PT. MEDIKA KARYA"
                   />
                 </div>
@@ -240,85 +240,85 @@ export default function BuatAgenda() {
             </div>
 
             <div>
-              <label className="block text-xs font-black text-slate-900 uppercase tracking-widest mb-2">Alamat Lokasi</label>
+              <label className="block text-xs font-bold text-on-surface uppercase tracking-widest mb-2">Alamat Lokasi</label>
               <div className="relative">
-                <MapPin className="absolute left-4 top-4 text-slate-900" size={20} />
+                <MapPin className="absolute left-4 top-4 text-on-surface" size={20} />
                 <textarea 
                   required
                   readOnly={tab === 'db'}
                   rows={2}
                   value={formData.alamat_lokasi}
                   onChange={e => setFormData({...formData, alamat_lokasi: e.target.value})}
-                  className={`w-full border-4 border-slate-900 rounded-xl pl-12 pr-4 py-3 font-bold text-slate-900 focus:outline-none transition-colors ${tab === 'db' ? 'bg-indigo-50 focus:ring-0 text-indigo-900' : 'bg-slate-50 focus:ring-4 focus:ring-teal-300 focus:bg-white'}`}
+                  className={`w-full border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none transition-colors ${tab === 'db' ? 'bg-primary-container focus:ring-0 text-indigo-900' : 'bg-surface-container-lowest focus:ring-4 focus:ring-teal-300 focus:bg-surface'}`}
                   placeholder="Detail alamat lapangan..."
                 ></textarea>
               </div>
             </div>
 
-            <div className="border-t-4 border-slate-900 pt-6 mt-2">
-              <label className="block text-xs font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <div className="border-t border-outline-variant pt-6 mt-2">
+              <label className="block text-xs font-bold text-on-surface uppercase tracking-widest mb-4 flex items-center gap-2">
                 <User size={18} className="text-teal-600" /> Pilih Tim Bertugas (Pengawas)
               </label>
               
               {pegawai.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {pegawai.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').map(p => (
-                    <label key={`tim-${p.nama}`} className={`flex items-center gap-3 p-4 rounded-xl border-4 cursor-pointer transition-all ${formData.tim_tugas.includes(p.nama) ? 'bg-teal-300 border-slate-900 shadow-[4px_4px_0_0_#0f172a]' : 'bg-slate-50 border-slate-900 hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0f172a]'}`}>
+                    <label key={`tim-${p.nama}`} className={`flex items-center gap-3 p-4 rounded-xl border-4 cursor-pointer transition-all ${formData.tim_tugas.includes(p.nama) ? 'bg-teal-300 border-outline-variant shadow-sm hover:shadow-md transition-shadow' : 'bg-surface-container-lowest border-outline-variant hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow'}`}>
                       <input 
                         type="checkbox" 
-                        className="w-5 h-5 accent-teal-600 rounded border-2 border-slate-900" 
+                        className="w-5 h-5 accent-teal-600 rounded border border-outline-variant" 
                         checked={formData.tim_tugas.includes(p.nama)}
                         onChange={() => handleTimChange(p.nama)}
                       />
                       <div className="flex flex-col">
-                        <span className="block font-black text-sm text-slate-900 leading-tight line-clamp-1 uppercase">{p.nama}</span>
-                        <span className="block text-[10px] uppercase font-black text-slate-500 mt-0.5">{p.jabatan_dinas || p.kategori || 'Pengawas'}</span>
+                        <span className="block font-bold text-sm text-on-surface leading-tight line-clamp-1 uppercase">{p.nama}</span>
+                        <span className="block text-[10px] uppercase font-bold text-on-surface-variant mt-0.5">{p.jabatan_dinas || p.kategori || 'Pengawas'}</span>
                       </div>
                     </label>
                   ))}
                 </div>
               ) : (
-                <div className="p-4 bg-amber-200 rounded-xl border-4 border-slate-900 text-slate-900 font-black flex items-center gap-2 uppercase tracking-wide text-xs">
+                <div className="p-4 bg-amber-200 rounded-xl border border-outline-variant text-on-surface font-bold flex items-center gap-2 uppercase tracking-wide text-xs">
                   Belum ada data pegawai di database Tim Pengawas.
                 </div>
               )}
             </div>
 
-            <div className="border-t-4 border-slate-900 pt-6 mt-2">
-              <label className="block text-xs font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <User size={18} className="text-indigo-600" /> Pilih Saksi
+            <div className="border-t border-outline-variant pt-6 mt-2">
+              <label className="block text-xs font-bold text-on-surface uppercase tracking-widest mb-4 flex items-center gap-2">
+                <User size={18} className="text-primary" /> Pilih Saksi
               </label>
-              <p className="text-xs text-slate-500 mb-4 font-bold">*Opsional. Anda bisa memilih staf dari daftar di bawah ini untuk bertugas sebagai Saksi.</p>
+              <p className="text-xs text-on-surface-variant mb-4 font-bold">*Opsional. Anda bisa memilih staf dari daftar di bawah ini untuk bertugas sebagai Saksi.</p>
               
               {pegawai.filter(p => p.kategori === 'Saksi').length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {pegawai.filter(p => p.kategori === 'Saksi').map(p => (
-                    <label key={`saksi-${p.nama}`} className={`flex items-center gap-3 p-4 rounded-xl border-4 cursor-pointer transition-all ${formData.saksi.includes(p.nama) ? 'bg-indigo-300 border-slate-900 shadow-[4px_4px_0_0_#0f172a]' : 'bg-slate-50 border-slate-900 hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0f172a]'}`}>
+                    <label key={`saksi-${p.nama}`} className={`flex items-center gap-3 p-4 rounded-xl border-4 cursor-pointer transition-all ${formData.saksi.includes(p.nama) ? 'bg-indigo-300 border-outline-variant shadow-sm hover:shadow-md transition-shadow' : 'bg-surface-container-lowest border-outline-variant hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow'}`}>
                       <input 
                         type="checkbox" 
-                        className="w-5 h-5 accent-indigo-600 rounded border-2 border-slate-900" 
+                        className="w-5 h-5 accent-indigo-600 rounded border border-outline-variant" 
                         checked={formData.saksi.includes(p.nama)}
                         onChange={() => handleSaksiChange(p.nama)}
                       />
                       <div className="flex flex-col">
-                        <span className="block font-black text-sm text-slate-900 leading-tight line-clamp-1 uppercase">{p.nama}</span>
-                        <span className="block text-[10px] uppercase font-black text-slate-500 mt-0.5">{p.jabatan_dinas || p.kategori}</span>
+                        <span className="block font-bold text-sm text-on-surface leading-tight line-clamp-1 uppercase">{p.nama}</span>
+                        <span className="block text-[10px] uppercase font-bold text-on-surface-variant mt-0.5">{p.jabatan_dinas || p.kategori}</span>
                       </div>
                     </label>
                   ))}
                 </div>
               ) : (
-                <div className="p-4 bg-amber-200 rounded-xl border-4 border-slate-900 text-slate-900 font-black flex items-center gap-2 uppercase tracking-wide text-xs">
+                <div className="p-4 bg-amber-200 rounded-xl border border-outline-variant text-on-surface font-bold flex items-center gap-2 uppercase tracking-wide text-xs">
                   Belum ada data saksi terdaftar. Tambahkan di menu Manajemen Tim.
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end pt-6 border-t-4 border-slate-900">
+            <div className="flex justify-end pt-6 border-t border-outline-variant">
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full md:w-auto bg-teal-400 hover:bg-teal-500 text-slate-900 px-10 py-4 rounded-full text-sm font-black uppercase tracking-widest border-4 border-slate-900 shadow-[6px_6px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] hover:translate-y-1 transition-all disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-[6px_6px_0_0_#0f172a] flex items-center justify-center gap-2"
+                className="w-full md:w-auto bg-teal-400 hover:bg-teal-500 text-on-surface px-10 py-4 rounded-full text-sm font-bold uppercase tracking-widest border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow hover:translate-y-1 transition-all disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-sm hover:shadow-md transition-shadow flex items-center justify-center gap-2"
               >
                 {loading ? <LottieLoader size={24} /> : <Save size={20} />}
                 {loading ? 'Menyimpan...' : 'Simpan Agenda'}

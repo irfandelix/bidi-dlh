@@ -101,10 +101,10 @@ export default function DaftarPerizinanPage() {
     <div className="max-w-7xl mx-auto py-8 space-y-8 pb-20">
       
       {/* Header Neobrutalism Style (Light Variant) */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-white p-6 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] text-slate-900 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-200 rounded-full border-4 border-slate-900 opacity-30"></div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-lg text-slate-900 relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-indigo-200 rounded-full border border-slate-200 opacity-30"></div>
         <div className="flex items-center gap-4 relative z-10">
-          <div className="w-14 h-14 shrink-0 rounded-2xl bg-indigo-400 border-2 border-slate-900 flex items-center justify-center text-slate-900 shadow-[4px_4px_0_0_#0f172a]">
+          <div className="w-14 h-14 shrink-0 rounded-2xl bg-indigo-400 border border-slate-200 flex items-center justify-center text-slate-900 shadow-md">
             <LayoutDashboard size={28} />
           </div>
           <div>
@@ -114,11 +114,11 @@ export default function DaftarPerizinanPage() {
         </div>
         
         <div className="flex items-center flex-wrap gap-3 relative z-10">
-          <div className="bg-emerald-50 px-5 py-3 rounded-xl border-2 border-slate-900 flex items-center gap-3 text-sm font-black text-slate-900 shadow-[4px_4px_0_0_#0f172a]">
+          <div className="bg-emerald-50 px-5 py-3 rounded-xl border border-slate-200 flex items-center gap-3 text-sm font-black text-slate-900 shadow-md">
             <Zap size={18} className="text-emerald-500 fill-emerald-500" />
             Total {stats.total} Dokumen
           </div>
-          <Link href="/perizinan/registrasi" className="bg-indigo-400 hover:bg-indigo-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2">
+          <Link href="/perizinan/registrasi" className="bg-indigo-400 hover:bg-indigo-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-md hover:shadow-sm border border-slate-200 transition-all flex items-center gap-2">
             <Plus size={18} /> Berkas Baru
           </Link>
         </div>
@@ -136,9 +136,9 @@ export default function DaftarPerizinanPage() {
               <Link 
                 href={stage.link}
                 key={stage.id} 
-                className={`text-left p-4 rounded-xl border-2 border-slate-900 transition-all group flex items-center gap-4 cursor-pointer bg-white shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a]`}
+                className={`text-left p-4 rounded-xl border border-slate-200 transition-all group flex items-center gap-4 cursor-pointer bg-white shadow-md hover:-translate-y-1 hover:shadow-md`}
               >
-                <div className={`w-12 h-12 shrink-0 rounded-xl border-2 border-slate-900 flex items-center justify-center shadow-[2px_2px_0_0_#0f172a] transition-transform ${theme.cardBg} ${theme.cardText} group-hover:scale-110`}>
+                <div className={`w-12 h-12 shrink-0 rounded-xl border border-slate-200 flex items-center justify-center shadow-sm transition-transform ${theme.cardBg} ${theme.cardText} group-hover:scale-110`}>
                   <Icon size={20} />
                 </div>
                 <p className="text-sm font-black tracking-wide uppercase text-slate-800">
@@ -152,13 +152,13 @@ export default function DaftarPerizinanPage() {
             <button 
               onClick={() => { setActiveStage(stage); setCurrentPage(1); }}
               key={stage.id} 
-              className={`text-left p-4 rounded-xl border-2 border-slate-900 transition-all group flex items-center gap-4 cursor-pointer ${
+              className={`text-left p-4 rounded-xl border border-slate-200 transition-all group flex items-center gap-4 cursor-pointer ${
                 isActive 
-                  ? 'bg-slate-900 text-white shadow-[2px_2px_0_0_#0f172a] translate-y-1' 
-                  : 'bg-white shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a]'
+                  ? 'bg-slate-900 text-white shadow-sm translate-y-1' 
+                  : 'bg-white shadow-md hover:-translate-y-1 hover:shadow-md'
               }`}
             >
-              <div className={`w-12 h-12 shrink-0 rounded-xl border-2 border-slate-900 flex items-center justify-center shadow-[2px_2px_0_0_#0f172a] transition-transform ${
+              <div className={`w-12 h-12 shrink-0 rounded-xl border border-slate-200 flex items-center justify-center shadow-sm transition-transform ${
                 isActive ? 'bg-white text-slate-900 scale-110' : `${theme.cardBg} ${theme.cardText} group-hover:scale-110`
               }`}>
                 <Icon size={20} />
@@ -172,10 +172,10 @@ export default function DaftarPerizinanPage() {
       </div>
 
       {/* Dynamic Data Table (NeoBrutalism) */}
-      <div className="bg-white border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] rounded-3xl overflow-hidden mt-8">
-        <div className="bg-slate-100 border-b-4 border-slate-900 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="bg-white border border-slate-200 shadow-lg rounded-3xl overflow-hidden mt-8">
+        <div className="bg-slate-100 border-b-4 border-slate-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white rounded-xl border-2 border-slate-900 flex items-center justify-center shadow-[2px_2px_0_0_#0f172a]">
+            <div className="w-12 h-12 bg-white rounded-xl border border-slate-200 flex items-center justify-center shadow-sm">
               {(() => {
                 const ActiveIcon = activeStage.icon;
                 return <ActiveIcon size={20} className="text-slate-900" />;
@@ -187,7 +187,7 @@ export default function DaftarPerizinanPage() {
             </div>
           </div>
           {activeStage.id !== 0 && (
-            <button onClick={() => { setActiveStage(allStage); setCurrentPage(1); }} className="bg-slate-900 text-white px-4 py-2 rounded-xl border-2 border-slate-900 text-xs font-black uppercase shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all">
+            <button onClick={() => { setActiveStage(allStage); setCurrentPage(1); }} className="bg-slate-900 text-white px-4 py-2 rounded-xl border border-slate-200 text-xs font-black uppercase shadow-md hover:-translate-y-1 hover:shadow-md transition-all">
               Lihat Semua Dokumen
             </button>
           )}
@@ -195,12 +195,12 @@ export default function DaftarPerizinanPage() {
         
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-white border-b-4 border-slate-900">
+            <thead className="bg-white border-b-4 border-slate-200">
               <tr>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">NO URUT / THN</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Nama Kegiatan</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Pemrakarsa</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Tanggal Masuk</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">NO URUT / THN</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Nama Kegiatan</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Pemrakarsa</th>
+                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Tanggal Masuk</th>
                 <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs text-center w-32">Aksi</th>
               </tr>
             </thead>
@@ -208,32 +208,32 @@ export default function DaftarPerizinanPage() {
               {activeDocs.length > 0 ? (
                 paginatedDocs.map((d) => (
                   <tr key={d.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 border-r-2 border-slate-900">
-                      <span className="bg-slate-200 text-slate-900 font-black px-2 py-1 rounded border-2 border-slate-900 text-xs shadow-[2px_2px_0_0_#0f172a]">
+                    <td className="px-6 py-4 border-r-2 border-slate-200">
+                      <span className="bg-slate-200 text-slate-900 font-black px-2 py-1 rounded border border-slate-200 text-xs shadow-sm">
                         #{d.no_urut || d.id}
                       </span>
                     </td>
-                    <td className="px-6 py-4 border-r-2 border-slate-900">
+                    <td className="px-6 py-4 border-r-2 border-slate-200">
                       <p className="font-bold text-slate-900 text-sm uppercase">{d.nama_kegiatan}</p>
                       <p className="text-xs font-bold text-slate-500">{d.jenis_dokumen}</p>
                     </td>
-                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-900">
+                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
                       {d.nama_pemrakarsa}
                     </td>
-                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-900">
+                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
                       {d.tanggal_masuk_dokumen}
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex justify-center gap-2">
                         <Link 
                           href={activeStage.id !== 0 && activeStage.id !== 1 ? `${activeStage.link}/${d.id}` : `${getStageForStatus(d.status_tahapan, d).link}/${d.id}`}
-                          className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#0f172a] transition-all uppercase"
+                          className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all uppercase"
                         >
                           {activeStage.id !== 0 && activeStage.id !== 1 ? `Buka ${activeStage.shortTitle}` : 'Buka'}
                         </Link>
                         <Link 
                           href={`/perizinan/cetak/${d.id}`}
-                          className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#0f172a] transition-all flex items-center gap-1 uppercase"
+                          className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center gap-1 uppercase"
                           title="Pusat Cetak Dokumen"
                         >
                           <Printer size={14} /> Cetak
@@ -258,7 +258,7 @@ export default function DaftarPerizinanPage() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="bg-slate-100 border-t-4 border-slate-900 p-6 flex items-center justify-between">
+          <div className="bg-slate-100 border-t-4 border-slate-200 p-6 flex items-center justify-between">
             <span className="text-sm font-black text-slate-700 uppercase">
               Halaman {currentPage} dari {totalPages}
             </span>
@@ -266,14 +266,14 @@ export default function DaftarPerizinanPage() {
               <button 
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-5 py-2.5 bg-white border-2 border-slate-900 rounded-xl text-sm font-black uppercase shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_0_#0f172a] transition-all"
+                className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-black uppercase shadow-md hover:-translate-y-1 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-md transition-all"
               >
                 Sebelumnya
               </button>
               <button 
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-5 py-2.5 bg-indigo-400 border-2 border-slate-900 rounded-xl text-sm font-black text-slate-900 uppercase shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_0_#0f172a] transition-all"
+                className="px-5 py-2.5 bg-indigo-400 border border-slate-200 rounded-xl text-sm font-black text-slate-900 uppercase shadow-md hover:-translate-y-1 hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-md transition-all"
               >
                 Selanjutnya
               </button>

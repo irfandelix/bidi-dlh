@@ -49,27 +49,27 @@ export default function DaftarArsipPerizinanPage() {
     <div className="max-w-7xl mx-auto py-8 space-y-8 pb-20">
       
       {/* Header Neobrutalism */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-white p-6 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] text-slate-900 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-200 rounded-full border-4 border-slate-900 opacity-30"></div>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-surface p-6 rounded-3xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow text-on-surface relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-200 rounded-full border border-outline-variant opacity-30"></div>
         <div className="flex items-center gap-4 relative z-10">
-          <Link href="/arsip" className="w-12 h-12 rounded-xl bg-white text-slate-900 border-4 border-slate-900 flex items-center justify-center hover:bg-slate-200 hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#0f172a] transition-all shrink-0">
+          <Link href="/arsip" className="w-12 h-12 rounded-xl bg-surface text-on-surface border border-outline-variant flex items-center justify-center hover:bg-surface-container hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all shrink-0">
             <ArrowLeft size={24} />
           </Link>
-          <div className="w-14 h-14 shrink-0 rounded-2xl bg-blue-400 border-2 border-slate-900 flex items-center justify-center text-slate-900 shadow-[4px_4px_0_0_#0f172a]">
+          <div className="w-14 h-14 shrink-0 rounded-2xl bg-blue-400 border border-outline-variant flex items-center justify-center text-on-surface shadow-sm hover:shadow-md transition-shadow">
             <Archive size={28} />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 leading-tight uppercase">Arsip Perizinan</h2>
-            <p className="text-sm text-slate-600 font-bold mt-1 uppercase">Daftar Dokumen Lingkungan Yang Selesai Terbit.</p>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface leading-tight uppercase">Arsip Perizinan</h2>
+            <p className="text-sm text-on-surface-variant font-bold mt-1 uppercase">Daftar Dokumen Lingkungan Yang Selesai Terbit.</p>
           </div>
         </div>
         
         <div className="flex items-center flex-wrap gap-3 relative z-10">
-          <div className="bg-emerald-50 px-5 py-3 rounded-xl border-2 border-slate-900 flex items-center gap-3 text-sm font-black text-slate-900 shadow-[4px_4px_0_0_#0f172a] uppercase">
-            <FileText size={18} className="text-emerald-500 fill-emerald-500" />
+          <div className="bg-secondary-container px-5 py-3 rounded-xl border border-outline-variant flex items-center gap-3 text-sm font-bold text-on-surface shadow-sm hover:shadow-md transition-shadow uppercase">
+            <FileText size={18} className="text-secondary fill-emerald-500" />
             Total {docs.length} Arsip
           </div>
-          <Link href="/peta" className="bg-blue-400 hover:bg-blue-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-[4px_4px_0_0_#0f172a] hover:shadow-[2px_2px_0_0_#0f172a] border-2 border-slate-900 transition-all flex items-center gap-2 uppercase tracking-widest">
+          <Link href="/peta" className="bg-blue-400 hover:bg-blue-300 hover:-translate-y-1 text-on-surface px-5 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow border border-outline-variant transition-all flex items-center gap-2 uppercase tracking-widest">
             <Map size={18} /> Peta Lokasi
           </Link>
         </div>
@@ -86,13 +86,13 @@ export default function DaftarArsipPerizinanPage() {
             placeholder="CARI NAMA KEGIATAN ATAU PEMRAKARSA..." 
             value={search}
             onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-white border-4 border-slate-900 text-slate-900 text-sm font-black uppercase rounded-2xl pl-12 pr-4 py-4 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none placeholder:text-slate-400"
+            className="w-full bg-surface border border-outline-variant text-on-surface text-sm font-bold uppercase rounded-2xl pl-12 pr-4 py-4 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none placeholder:text-slate-400"
           />
         </div>
         <select 
           value={filterJenis}
           onChange={e => { setFilterJenis(e.target.value); setCurrentPage(1); }}
-          className="bg-white border-4 border-slate-900 text-slate-900 text-sm font-black uppercase tracking-wider rounded-2xl px-6 py-4 focus:shadow-[4px_4px_0_0_#0f172a] transition-all outline-none cursor-pointer w-full md:w-auto"
+          className="bg-surface border border-outline-variant text-on-surface text-sm font-bold uppercase tracking-wider rounded-2xl px-6 py-4 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer w-full md:w-auto"
         >
           <option value="Semua">SEMUA JENIS DOKUMEN</option>
           <option value="SPPL">SPPL</option>
@@ -102,37 +102,37 @@ export default function DaftarArsipPerizinanPage() {
       </div>
 
       {/* Dynamic Data Table (NeoBrutalism) */}
-      <div className="bg-white border-4 border-slate-900 shadow-[8px_8px_0_0_#0f172a] rounded-3xl overflow-hidden mt-8">
+      <div className="bg-surface border border-outline-variant shadow-sm hover:shadow-md transition-shadow rounded-3xl overflow-hidden mt-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-100 border-b-4 border-slate-900">
+            <thead className="bg-surface-container-low border-b-4 border-outline-variant">
               <tr>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">URUT / THN</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Nama Kegiatan</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Pemrakarsa</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-900">Letak Lemari/Rak</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs text-center w-32">Aksi</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-xs border-r border-outline-variant">URUT / THN</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-xs border-r border-outline-variant">Nama Kegiatan</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-xs border-r border-outline-variant">Pemrakarsa</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-xs border-r border-outline-variant">Letak Lemari/Rak</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-xs text-center w-32">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-900">
               {filteredDocs.length > 0 ? (
                 paginatedDocs.map((d) => (
                   <tr key={d.id} className="hover:bg-blue-50 transition-colors">
-                    <td className="px-6 py-4 border-r-2 border-slate-900">
-                      <span className="bg-slate-200 text-slate-900 font-black px-2 py-1 rounded border-2 border-slate-900 text-xs shadow-[2px_2px_0_0_#0f172a]">
+                    <td className="px-6 py-4 border-r border-outline-variant">
+                      <span className="bg-surface-container text-on-surface font-bold px-2 py-1 rounded border border-outline-variant text-xs shadow-sm hover:shadow-md transition-shadow">
                         #{String(d.no_urut || d.id).padStart(3, '0')} / {d.tahun || '2026'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 border-r-2 border-slate-900">
-                      <p className="font-black text-slate-900 text-sm uppercase">{d.nama_kegiatan}</p>
-                      <p className="text-xs font-bold text-slate-500 uppercase mt-1 bg-amber-100 inline-block px-2 py-0.5 rounded border border-slate-900">{d.jenis_dokumen}</p>
+                    <td className="px-6 py-4 border-r border-outline-variant">
+                      <p className="font-bold text-on-surface text-sm uppercase">{d.nama_kegiatan}</p>
+                      <p className="text-xs font-bold text-on-surface-variant uppercase mt-1 bg-tertiary-container text-on-tertiary-container inline-block px-2 py-0.5 rounded border border-outline-variant">{d.jenis_dokumen}</p>
                     </td>
-                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-900 uppercase">
+                    <td className="px-6 py-4 font-bold text-on-surface-variant text-sm border-r border-outline-variant uppercase">
                       {d.nama_pemrakarsa}
                     </td>
-                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-900 uppercase">
+                    <td className="px-6 py-4 font-bold text-on-surface-variant text-sm border-r border-outline-variant uppercase">
                       {d.lokasi_arsip ? (
-                        <span className="bg-indigo-100 text-indigo-900 px-3 py-1 rounded-lg border-2 border-slate-900 font-black shadow-[2px_2px_0_0_#0f172a]">
+                        <span className="bg-primary-container text-on-primary-container text-indigo-900 px-3 py-1 rounded-lg border border-outline-variant font-bold shadow-sm hover:shadow-md transition-shadow">
                           {d.lokasi_arsip}
                         </span>
                       ) : (
@@ -143,14 +143,14 @@ export default function DaftarArsipPerizinanPage() {
                       <div className="flex justify-center gap-2">
                         <Link 
                           href={`/perizinan/arsip/${d.id}`}
-                          className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#0f172a] transition-all flex items-center gap-1 uppercase"
+                          className="bg-secondary text-on-secondary hover:bg-emerald-300 text-on-surface text-xs font-bold px-4 py-2 rounded-lg border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-0.5 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center gap-1 uppercase"
                           title="Buka Detail Arsip"
                         >
                           <Info size={14} /> Detail
                         </Link>
                         <Link 
                           href={`/perizinan/cetak/${d.id}`}
-                          className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border-2 border-slate-900 shadow-[2px_2px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#0f172a] transition-all flex items-center gap-1 uppercase"
+                          className="bg-tertiary text-on-tertiary hover:bg-amber-300 text-on-surface text-xs font-bold px-4 py-2 rounded-lg border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-0.5 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center gap-1 uppercase"
                           title="Pusat Cetak Dokumen"
                         >
                           <Printer size={14} /> Cetak
@@ -161,7 +161,7 @@ export default function DaftarArsipPerizinanPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">
+                  <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant font-bold bg-surface-container-lowest">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <Archive size={32} className="text-slate-300" />
                       <p className="uppercase tracking-widest">TIDAK ADA DATA ARSIP YANG DITEMUKAN.</p>
@@ -175,22 +175,22 @@ export default function DaftarArsipPerizinanPage() {
 
         {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="bg-slate-100 border-t-4 border-slate-900 p-6 flex items-center justify-between">
-            <span className="text-sm font-black text-slate-700 uppercase">
+          <div className="bg-surface-container-low border-t border-outline-variant p-6 flex items-center justify-between">
+            <span className="text-sm font-bold text-on-surface-variant uppercase">
               Halaman {currentPage} dari {totalPages}
             </span>
             <div className="flex gap-4">
               <button 
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-5 py-2.5 bg-white border-2 border-slate-900 rounded-xl text-sm font-black uppercase shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_0_#0f172a] transition-all"
+                className="px-5 py-2.5 bg-surface border border-outline-variant rounded-xl text-sm font-bold uppercase shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm hover:shadow-md transition-shadow transition-all"
               >
                 Sebelumnya
               </button>
               <button 
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-5 py-2.5 bg-indigo-400 border-2 border-slate-900 rounded-xl text-sm font-black text-slate-900 uppercase shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-[4px_4px_0_0_#0f172a] transition-all"
+                className="px-5 py-2.5 bg-indigo-400 border border-outline-variant rounded-xl text-sm font-bold text-on-surface uppercase shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm hover:shadow-md transition-shadow transition-all"
               >
                 Selanjutnya
               </button>
