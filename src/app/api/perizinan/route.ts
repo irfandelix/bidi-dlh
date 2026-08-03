@@ -8,8 +8,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const tahun = searchParams.get('tahun');
 
-    // Ambil data dari tabel dokumens, diurutkan dari yang terbaru
-    let query = supabase.from('dokumens').select('*').order('created_at', { ascending: false });
+    // Ambil data dari tabel dokumens, diurutkan berdasarkan no_urut terbaru
+    let query = supabase.from('dokumens').select('*').order('tahun', { ascending: false }).order('no_urut', { ascending: false });
     
     if (tahun) {
       query = query.eq('tahun', tahun);
