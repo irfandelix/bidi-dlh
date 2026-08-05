@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     
     try {
       let pIdsStr = '';
-      if (stage === 'uji-administrasi') pIdsStr = doc.penandatangan_uji_admin;
+      if (stage === 'uji-administrasi' || stage === 'registrasi') pIdsStr = doc.penandatangan_uji_admin;
       else if (stage === 'verifikasi-lapangan') pIdsStr = doc.penandatangan_verlap;
       else if (stage === 'pemeriksaan-revisi') pIdsStr = doc.penandatangan_revisi;
       else pIdsStr = doc.penandatangan_pemeriksaan;
