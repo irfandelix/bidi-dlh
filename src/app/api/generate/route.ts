@@ -132,7 +132,7 @@ export async function POST(request: Request) {
     const actualKetuaIndex = ketuaIndex !== -1 ? ketuaIndex : (tim_penilai.length > 0 ? 0 : -1);
 
     const tim_penilai_anggota = tim_penilai
-        .filter((_, idx) => idx !== actualKetuaIndex)
+        .filter((_, idx) => type === 'template_ba_uji_admin' ? true : idx !== actualKetuaIndex)
         .map((item, idx) => ({ 
             ...item, 
             nomor_urut: idx + 1, 
