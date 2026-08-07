@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase
       .from('pengaduans')
-      .update(payload)
+      .update(payload as any)
       .eq('token', token)
       .select();
 
