@@ -44,6 +44,8 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
     } else {
       setData(fetch);
       setSuratData(prev => ({ ...prev, hal: `Hasil Tindak Lanjut Aduan Masyarakat terkait ${(fetch as any).perihal}` }));
+      if ((fetch as any).ket_foto1) setKetFoto1((fetch as any).ket_foto1);
+      if ((fetch as any).ket_foto2) setKetFoto2((fetch as any).ket_foto2);
     }
   }
 
@@ -84,6 +86,10 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
         foto2_url = d2.url;
       }
 
+      let fotosToPass = Array.isArray(data.foto_verlap_list) ? [...data.foto_verlap_list] : [];
+      if (foto1_url) fotosToPass.push({ url: foto1_url, keterangan: ketFoto1 });
+      if (foto2_url) fotosToPass.push({ url: foto2_url, keterangan: ketFoto2 });
+
       const response = await fetch('/api/pengaduan/generate-surat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,10 +101,9 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
           lokasi_aduan: data.lokasi_aduan || '',
           deskripsi_aduan: data.deskripsi || '',
           petugas: petugas.filter(p => p.trim() !== ''),
-          foto1_url,
-          foto2_url,
-          ket1: ketFoto1,
-          ket2: ketFoto2
+          fotos: fotosToPass,
+          catatan_verlap: data.catatan_verlap || '',
+          hasil_verlap: data.hasil_verlap || ''
         })
       });
 
