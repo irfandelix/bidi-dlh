@@ -27,7 +27,11 @@ export async function POST(request: Request) {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { perihal, tanggal, dokumentasi_url, ba_url } = body;
+    const { 
+      perihal, tanggal, dokumentasi_url, ba_url,
+      nama_pelapor, telp_pelapor, nama_terlapor, 
+      lokasi_aduan, deskripsi, status_tahapan
+    } = body;
     
     if (!perihal) {
       return NextResponse.json({ error: 'Perihal/Judul pengaduan wajib diisi' }, { status: 400 });
@@ -37,7 +41,13 @@ export async function POST(request: Request) {
       perihal,
       tanggal: tanggal || new Date().toISOString().split('T')[0],
       dokumentasi_url: dokumentasi_url || null,
-      ba_url: ba_url || null
+      ba_url: ba_url || null,
+      nama_pelapor: nama_pelapor || null,
+      telp_pelapor: telp_pelapor || null,
+      nama_terlapor: nama_terlapor || null,
+      lokasi_aduan: lokasi_aduan || null,
+      deskripsi: deskripsi || null,
+      status_tahapan: status_tahapan || 'Form Terisi'
     };
 
     const { data, error } = await supabase
