@@ -11,6 +11,11 @@ export interface Database {
     Tables: {
       // Catatan: Nama tabel sementara diset "permohonan", 
       // bisa disesuaikan dengan nama asli di Supabase Anda jika berbeda.
+      pengaduans: {
+        Row: { [key: string]: any }
+        Insert: { [key: string]: any }
+        Update: { [key: string]: any }
+      }
       users: {
         Row: {
           id: number
