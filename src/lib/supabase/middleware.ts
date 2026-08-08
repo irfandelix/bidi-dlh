@@ -11,10 +11,12 @@ export async function updateSession(request: NextRequest) {
 
   const isLoginPage = request.nextUrl.pathname.startsWith('/login')
   const isApiRoute = request.nextUrl.pathname.startsWith('/api')
-  const isRootPath = request.nextUrl.pathname === '/'
+  const isPublicRoute = request.nextUrl.pathname.startsWith('/pengawasan/link/') || 
+                        request.nextUrl.pathname.startsWith('/pengaduan/hasil/') || 
+                        request.nextUrl.pathname.startsWith('/pengaduan/token')
 
-  // Jika belum login dan mencoba mengakses halaman selain login atau api
-  if (!bidiSession && !isLoginPage && !isApiRoute) {
+  // Jika belum login dan mencoba mengakses halaman selain login, api, atau public route
+  if (!bidiSession && !isLoginPage && !isApiRoute && !isPublicRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 

@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
+    const cookieStore = await cookies();
+    if (!cookieStore.get('bidi_session')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type'); // 'agenda', 'arsip', 'dashboard'
@@ -84,6 +90,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies();
+    if (!cookieStore.get('bidi_session')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const supabase = await createClient();
     const body = await request.json();
     
