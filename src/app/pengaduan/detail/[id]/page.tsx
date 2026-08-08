@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FileText, CheckCircle2, Clock, User, MapPin, ExternalLink, Download, X } from 'lucide-react';
+import { ArrowLeft, Loader2, FileText, CheckCircle2, Clock, User, MapPin, ExternalLink, Download, X, Copy, Share2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { use } from 'react';
 import LottieLoader from '@/components/LottieLoader';
@@ -299,6 +299,26 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                   className="w-full py-4 bg-purple-500 hover:bg-purple-600 hover:-translate-y-1 transition-all text-on-primary font-bold uppercase tracking-widest text-sm rounded-xl border border-purple-200 shadow-sm hover:shadow-sm"
                 >
                   Generate Surat
+                </button>
+              </section>
+
+              <section className="bg-teal-50 border border-teal-200 rounded-2xl p-6 text-center space-y-4 shadow-sm">
+                <div className="w-16 h-16 bg-teal-200 rounded-full flex items-center justify-center mx-auto text-teal-600 border-4 border-white shadow-inner">
+                  <Share2 size={28} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-lg text-teal-900 uppercase">Bagikan ke Pimpinan</h4>
+                  <p className="text-xs font-bold text-teal-700 mt-1 px-4">Salin link hasil verifikasi lapangan ini untuk dikirimkan via WhatsApp.</p>
+                </div>
+                <button 
+                  onClick={() => {
+                    const url = `${window.location.origin}/pengaduan/hasil/${data.token}`;
+                    navigator.clipboard.writeText(url);
+                    alert('Link publik berhasil disalin: ' + url);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-4 bg-teal-500 hover:bg-teal-600 hover:-translate-y-1 transition-all text-on-primary font-bold uppercase tracking-widest text-sm rounded-xl border border-teal-200 shadow-sm hover:shadow-sm"
+                >
+                  <Copy size={16} /> Salin Link Publik
                 </button>
               </section>
 
