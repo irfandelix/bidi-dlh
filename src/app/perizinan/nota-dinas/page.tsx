@@ -10,7 +10,6 @@ export default function NotaDinasPerizinanPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [petugasList, setPetugasList] = useState<string[]>(['']);
-  const [kegiatanList, setKegiatanList] = useState([{ nama_usaha: '', deskripsi: '' }]);
 
   const addPetugas = () => setPetugasList([...petugasList, '']);
   const removePetugas = (idx: number) => {
@@ -22,18 +21,6 @@ export default function NotaDinasPerizinanPage() {
     const newArr = [...petugasList];
     newArr[idx] = val;
     setPetugasList(newArr);
-  };
-
-  const addKegiatan = () => setKegiatanList([...kegiatanList, { nama_usaha: '', deskripsi: '' }]);
-  const removeKegiatan = (idx: number) => {
-    const newArr = [...kegiatanList];
-    newArr.splice(idx, 1);
-    setKegiatanList(newArr);
-  };
-  const updateKegiatan = (idx: number, field: 'nama_usaha' | 'deskripsi', val: string) => {
-    const newArr = [...kegiatanList];
-    newArr[idx][field] = val;
-    setKegiatanList(newArr);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -49,7 +36,6 @@ export default function NotaDinasPerizinanPage() {
       dari: formData.get('dari'),
       sifat: formData.get('sifat'),
       lampiran: formData.get('lampiran'),
-      kegiatan: kegiatanList.filter(k => k.nama_usaha.trim() !== '' || k.deskripsi.trim() !== ''),
       petugas: petugasList.filter(p => p.trim() !== '')
     };
 
@@ -86,7 +72,6 @@ export default function NotaDinasPerizinanPage() {
       setSuccessMsg('Nota Dinas berhasil dibuat dan diunduh. Tersimpan otomatis di Arsip Nota Dinas!');
       e.currentTarget.reset();
       setPetugasList(['']);
-      setKegiatanList([{ nama_usaha: '', deskripsi: '' }]);
     } catch (err: any) {
       setErrorMsg(err.message);
     } finally {
@@ -159,34 +144,6 @@ export default function NotaDinasPerizinanPage() {
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Isi Kegiatan */}
-            <div className="space-y-4">
-              <h3 className="font-black text-slate-900 uppercase tracking-widest border-b-2 border-slate-100 pb-2">Kegiatan Perizinan</h3>
-              
-              {kegiatanList.map((keg, idx) => (
-                <div key={idx} className="bg-slate-100 p-4 rounded-xl border border-slate-200 relative space-y-4">
-                  {kegiatanList.length > 1 && (
-                    <button type="button" onClick={() => removeKegiatan(idx)} className="absolute -top-3 -right-3 bg-rose-500 text-white p-1.5 rounded-lg shadow-sm hover:bg-rose-600 transition-all">
-                      <X size={16} />
-                    </button>
-                  )}
-                  
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2"><Building2 size={16} /> Nama Perusahaan / Objek {idx + 1}</label>
-                    <input type="text" required value={keg.nama_usaha} onChange={(e) => updateKegiatan(idx, 'nama_usaha', e.target.value)} className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:border-purple-500 outline-none transition-all" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2"><FileText size={16} /> Deskripsi Kegiatan / Hasil {idx + 1}</label>
-                    <textarea required rows={4} value={keg.deskripsi} onChange={(e) => updateKegiatan(idx, 'deskripsi', e.target.value)} className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:border-purple-500 outline-none transition-all resize-y"></textarea>
-                  </div>
-                </div>
-              ))}
-              
-              <button type="button" onClick={addKegiatan} className="flex items-center gap-2 text-sm font-black text-purple-600 hover:text-purple-700 bg-purple-50 px-4 py-2 rounded-xl transition-all uppercase tracking-widest">
-                <Plus size={16} /> Tambah Objek Perizinan
-              </button>
             </div>
 
             {/* Tim Petugas */}
