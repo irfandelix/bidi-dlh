@@ -49,7 +49,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   'INTERGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
   'Permohonan Integrasi RINTEK LB3': 'INT.LB3',
   'Permohonan Intergrasi RINTEK LB3': 'INT.LB3',
-  'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
 
     // Auto-generate nomor_ba_verlap if "AUTO"
@@ -75,7 +74,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       }
       
       const seqPadded = String(currentSeq).padStart(3, '0');
-      body.nomor_ba_verlap = `600.4/${seqPadded}.${bulan}/17/BA.V.${jenisAcronym}/${tahun}`;
+      body.nomor_ba_verlap = `600.4.5/${seqPadded}.${bulan}/17/BA.V.${jenisAcronym}/${tahun}`;
       body.seq_verlap = currentSeq;
     }
 
@@ -103,7 +102,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       
       const seqPadded = String(currentSeq).padStart(3, '0');
       // Format based on Laravel assumption
-      body.nomor_ba_pemeriksaan = `600.4/${seqPadded}.${bulan}/17/BA.P.${jenisAcronym}/${tahun}`;
+      body.nomor_ba_pemeriksaan = `600.4.5/${seqPadded}.${bulan}/17/BA.P.${jenisAcronym}/${tahun}`;
       body.seq_pemeriksaan = currentSeq;
     }
 

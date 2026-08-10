@@ -111,7 +111,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
       const noUrutPadded = String(doc.no_urut || doc.id).padStart(3, '0');
       const bulan = new Date().getMonth() + 1;
       const tahun = new Date().getFullYear();
-      const nomorUji = `600.4/${noUrutPadded}.${bulan}/17/BA.HUA.${jenisAcronym}/${tahun}`;
+      const nomorUji = `600.4.5/${noUrutPadded}.${bulan}/17/BA.HUA.${jenisAcronym}/${tahun}`;
 
       payload.nomor_uji_berkas = nomorUji;
       payload.tanggal_uji_berkas = formData.get('tanggal_uji_berkas');

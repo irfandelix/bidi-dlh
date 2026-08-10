@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       status_tahapan: 'Uji Administrasi',
       tahun: tahun,
       no_urut: nextUrut,
-      nomor_checklist: body.nomor_checklist || `600.4/${noUrutPadded}.${bulan}/17/REG.${jenisDokumen}/${tahun}`,
+      nomor_checklist: body.nomor_checklist || `600.4.5/${noUrutPadded}.${bulan}/17/REG.${jenisDokumen}/${tahun}`,
     };
 
     // Insert data to supabase (table: dokumens)

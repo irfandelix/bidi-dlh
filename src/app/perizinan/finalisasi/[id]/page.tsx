@@ -152,7 +152,7 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
   'Permohonan Intergrasi RINTEK LB3': 'INT.LB3',
   'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
-                        input.value = `600.4/${String(doc.no_urut || doc.id).padStart(3, '0')}.${bulan}/17/RPD.${jenisAcronym}/${doc.tahun || dateObj.getFullYear()}`;
+                        input.value = `600.4.5/${String(doc.no_urut || doc.id).padStart(3, '0')}.${bulan}/17/RPD.${jenisAcronym}/${doc.tahun || dateObj.getFullYear()}`;
                       }
                     }}
                     className="px-4 py-3 bg-indigo-200 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all uppercase tracking-wider text-xs whitespace-nowrap flex items-center gap-2">

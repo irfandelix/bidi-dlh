@@ -522,7 +522,7 @@ export default function RegistrasiPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                     <div className="md:col-span-2">
                       <label className="block mb-2 text-sm font-black text-slate-900 uppercase">1. Nomor Checklist (Sistem DLH)</label>
-                      <input type="text" className="w-full bg-slate-100 border border-slate-200 text-slate-500 italic rounded-xl px-4 py-3 text-sm cursor-not-allowed outline-none font-bold" value="Otomatis dibuat saat disimpan (Format: 600.4/...)" disabled />
+                      <input type="text" className="w-full bg-slate-100 border border-slate-200 text-slate-500 italic rounded-xl px-4 py-3 text-sm cursor-not-allowed outline-none font-bold" value="Otomatis dibuat saat disimpan (Format: 600.4.5/...)" disabled />
                     </div>
                     
                     <div>
