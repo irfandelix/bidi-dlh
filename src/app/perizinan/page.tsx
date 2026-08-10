@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FilePlus, List } from "lucide-react";
+import { FilePlus, List, FileText } from "lucide-react";
 
 export default function PerizinanPage() {
   return (
@@ -35,6 +35,19 @@ export default function PerizinanPage() {
           <div>
             <h2 className="text-lg font-semibold text-gray-900 mb-1">Daftar Perizinan</h2>
             <p className="text-sm text-gray-500">Lihat dan proses perizinan (Uji Admin, Verlap, Pemeriksaan, dsb).</p>
+          </div>
+        </Link>
+
+        <Link 
+          href="/perizinan/nota-dinas"
+          className="flex items-start gap-4 p-6 bg-surface border border-gray-200 rounded-2xl hover:border-purple-500 hover:shadow-lg transition-all md:col-span-2 lg:col-span-1"
+        >
+          <div className="bg-purple-100 text-purple-600 p-3 rounded-xl">
+            <FileText size={28} />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-1">Nota Dinas</h2>
+            <p className="text-sm text-gray-500">Buat Nota Dinas / Surat Tugas terkait kegiatan perizinan lingkungan.</p>
           </div>
         </Link>
       </div>
