@@ -390,16 +390,16 @@ export default function TambahNotaDinasPage() {
                       setShowKlasifikasiDropdown(true);
                     }}
                     onFocus={() => setShowKlasifikasiDropdown(true)}
-                    className="w-full bg-surface border border-outline-variant text-on-surface text-sm font-bold rounded-xl pl-12 pr-4 py-4 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none"
+                    className="w-full bg-white border border-slate-200 text-slate-800 text-sm font-bold rounded-xl pl-12 pr-4 py-4 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none"
                     required
                   />
                 </div>
                 
                 {showKlasifikasiDropdown && (
-                  <div className="absolute z-20 mt-2 w-[95%] max-h-60 overflow-y-auto bg-surface border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-center bg-surface-container-low p-2 border-b border-outline-variant sticky top-0">
-                      <span className="text-xs font-bold uppercase text-on-surface-variant px-2">Hasil Pencarian</span>
-                      <button type="button" onClick={() => setShowKlasifikasiDropdown(false)} className="text-xs font-bold text-error px-2 py-1 bg-surface border border-rose-200 rounded-lg">TUTUP</button>
+                  <div className="absolute z-50 mt-2 w-[95%] max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="flex justify-between items-center bg-slate-50 p-2 border-b border-slate-200 sticky top-0 z-50">
+                      <span className="text-xs font-bold uppercase text-slate-500 px-2">Hasil Pencarian</span>
+                      <button type="button" onClick={() => setShowKlasifikasiDropdown(false)} className="text-xs font-bold text-red-500 px-2 py-1 bg-white border border-red-200 rounded-lg">TUTUP</button>
                     </div>
                     {filteredKlasifikasi.map((k: any, i: number) => (
                       <div 
@@ -409,10 +409,10 @@ export default function TambahNotaDinasPage() {
                           setKlasifikasiSearch(`${k.code} - ${k.name}`);
                           setShowKlasifikasiDropdown(false);
                         }}
-                        className="px-4 py-3 border-b-2 border-slate-100 hover:bg-secondary-container cursor-pointer flex flex-col"
+                        className="px-4 py-3 border-b border-slate-100 hover:bg-slate-50 cursor-pointer flex flex-col bg-white"
                       >
-                        <span className="font-bold text-on-surface text-sm">{k.code}</span>
-                        <span className="font-bold text-on-surface-variant text-xs">{k.name}</span>
+                        <span className="font-bold text-slate-800 text-sm">{k.code}</span>
+                        <span className="font-bold text-slate-500 text-xs">{k.name}</span>
                       </div>
                     ))}
                     {filteredKlasifikasi.length === 0 && (
