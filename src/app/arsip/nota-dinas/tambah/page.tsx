@@ -82,6 +82,9 @@ export default function TambahNotaDinasPage() {
         kode_klasifikasi: formData.get('kode_klasifikasi'),
         pemohon_id: formData.get('pemohon_id'),
         keterangan: formData.get('keterangan'),
+        yth: formData.get('yth'),
+        sifat: formData.get('sifat'),
+        lampiran: formData.get('lampiran'),
         is_sisipan: isSisipan,
         nomor_sisipan: formData.get('nomor_sisipan'),
         file_url: fileUrl,
@@ -93,14 +96,38 @@ export default function TambahNotaDinasPage() {
         body: JSON.stringify(payload)
       });
       
-      const result = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(result.error || 'Gagal menyimpan data');
+      const contentType = res.headers.get('Content-Type');
+      if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+        // Ini respons berupa file DOCX
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        const disposition = res.headers.get('Content-Disposition');
+        let filename = 'Nota_Dinas.docx';
+        if (disposition && disposition.indexOf('filename=') !== -1) {
+          const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+          if (matches != null && matches[1]) {
+            filename = matches[1].replace(/['"]/g, '');
+          }
+        }
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        // Kita tidak tahu nomor pastinya dari JSON karena response-nya file, 
+        // tapi kita anggap sukses.
+        setSuccessMsg('Nota Dinas berhasil diregistrasi & File template otomatis diunduh!');
+        setGeneratedNo('TERDAFTAR');
+      } else {
+        // Ini respons berupa JSON biasa (mungkin template gagal atau fallback)
+        const result = await res.json();
+        setGeneratedNo(result.data?.nomor_otomatis || 'TERDAFTAR');
+        setSuccessMsg(result.message || 'Nota Dinas berhasil diregistrasi!');
       }
 
-      setGeneratedNo(result.data.nomor_otomatis);
-      setSuccessMsg('Nota Dinas berhasil diregistrasi!');
     } catch (err: any) {
       setErrorMsg(err.message);
     } finally {
@@ -178,10 +205,34 @@ export default function TambahNotaDinasPage() {
 
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
-                2. Isi Nota Dinas (Subjek) <span className="text-error">*</span>
+                2. Isi Nota Dinas (Subjek / Hal) <span className="text-error">*</span>
               </label>
               <textarea name="nama_nota" required placeholder="Contoh: Permohonan izin pelaksanaan rapat..." rows={3}
                 className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                  Yth. Tujuan (Template) <span className="text-error">*</span>
+                </label>
+                <input type="text" name="yth" required defaultValue="Kepala Dinas Lingkungan Hidup Kab. Sragen"
+                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                  Sifat (Template)
+                </label>
+                <input type="text" name="sifat" defaultValue="Biasa"
+                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
+                  Lampiran (Template)
+                </label>
+                <input type="text" name="lampiran" defaultValue="-"
+                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

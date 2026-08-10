@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import fs from 'fs';
+import path from 'path';
+import PizZip from 'pizzip';
+import Docxtemplater from 'docxtemplater';
 
 export async function GET(request: Request) {
   try {
@@ -28,7 +32,7 @@ export async function POST(request: Request) {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { nama_nota, tanggal_nota, dari_bagian, kode_klasifikasi, file_url, pemohon_id, keterangan, is_sisipan, nomor_sisipan } = body;
+    const { nama_nota, tanggal_nota, dari_bagian, kode_klasifikasi, file_url, pemohon_id, keterangan, is_sisipan, nomor_sisipan, yth, sifat, lampiran } = body;
     
     if (!nama_nota || !tanggal_nota || !dari_bagian) {
       return NextResponse.json({ error: 'Semua field wajib diisi' }, { status: 400 });
@@ -108,7 +112,57 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ data: data[0] }, { status: 201 });
+    // Generate Template Word
+    try {
+      const templatePath = path.resolve('./public/templates/template-umum.docx');
+      if (!fs.existsSync(templatePath)) {
+        // Jika template tidak ada, kembalikan JSON biasa (hanya booking nomor)
+        return NextResponse.json({ 
+          success: true, 
+          message: 'Nomor berhasil didaftarkan, namun template-umum.docx belum ada di server.',
+          data: data[0] 
+        }, { status: 201 });
+      }
+
+      const content = fs.readFileSync(templatePath, 'binary');
+      const zip = new PizZip(content);
+      const doc = new Docxtemplater(zip, {
+        paragraphLoop: true,
+        linebreaks: true,
+      });
+
+      // Format Tanggal
+      const tglObj = new Date(tanggal_nota);
+      const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+      const tanggalIndo = tglObj.toLocaleDateString('id-ID', options);
+      const hari = tglObj.toLocaleDateString('id-ID', { weekday: 'long' });
+      const tanggalFull = `${hari}, ${tanggalIndo}`;
+
+      doc.render({
+        nomor_notadinas: nomor_otomatis,
+        tanggal: tanggalFull,
+        dari_bagian: dari_bagian,
+        nama_nota: nama_nota,
+        hal: nama_nota,
+        yth: yth || '',
+        sifat: sifat || 'Biasa',
+        lampiran: lampiran || '-'
+      });
+
+      const buf = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });
+
+      return new NextResponse(new Uint8Array(buf), {
+        status: 200,
+        headers: {
+          'Content-Disposition': `attachment; filename="Nota_Dinas_${dari_bagian}_${nomor_otomatis.replace(/\//g, '_')}.docx"`,
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        },
+      });
+    } catch (docxErr) {
+      console.error('Docx generation error:', docxErr);
+      // Fallback jika gagal generate file, tetap sukses booking DB
+      return NextResponse.json({ success: true, warning: 'Gagal membuat file template', data: data[0] }, { status: 201 });
+    }
   } catch (error: any) {
     console.error('API error:', error);
     return NextResponse.json({ error: 'Terjadi kesalahan pada server' }, { status: 500 });
