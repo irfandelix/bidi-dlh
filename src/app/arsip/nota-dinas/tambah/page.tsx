@@ -110,6 +110,11 @@ export default function TambahNotaDinasPage() {
         body: JSON.stringify(payload)
       });
       
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Terjadi kesalahan saat registrasi nota dinas');
+      }
+      
       const contentType = res.headers.get('Content-Type');
       if (contentType && contentType.includes('application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
         // Ini respons berupa file DOCX

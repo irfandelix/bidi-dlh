@@ -99,7 +99,7 @@ export async function POST(request: Request) {
       dari_bagian,
       nomor_otomatis,
       file_url,
-      pemohon_id,
+      pemohon_id: pemohon_id || null,
       keterangan
     };
 
