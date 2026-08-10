@@ -118,6 +118,9 @@ export default function DaftarPerizinanPage() {
             <Zap size={18} className="text-emerald-500 fill-emerald-500" />
             Total {stats.total} Dokumen
           </div>
+          <Link href="/perizinan/nota-dinas" className="bg-amber-400 hover:bg-amber-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-md hover:shadow-sm border border-slate-200 transition-all flex items-center gap-2">
+            <FileText size={18} /> Nota Dinas
+          </Link>
           <Link href="/perizinan/registrasi" className="bg-indigo-400 hover:bg-indigo-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-md hover:shadow-sm border border-slate-200 transition-all flex items-center gap-2">
             <Plus size={18} /> Berkas Baru
           </Link>
