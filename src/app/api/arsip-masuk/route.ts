@@ -50,7 +50,8 @@ export async function POST(request: Request) {
     // Split kode_klasifikasi automatically
     let kode1 = null, kode2 = null, kode3 = null, kode4 = null;
     if (kode_klasifikasi) {
-      const parts = kode_klasifikasi.split('.');
+      const cleanKode = kode_klasifikasi.split(' - ')[0].trim();
+      const parts = cleanKode.split('.');
       kode1 = parts[0] || null;
       kode2 = parts[1] || null;
       kode3 = parts[2] || null;

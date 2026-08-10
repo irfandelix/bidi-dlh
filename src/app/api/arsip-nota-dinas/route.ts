@@ -90,7 +90,10 @@ export async function POST(request: Request) {
       nomor_otomatis = `600.4.1/${urutStr}.${bulan}/17/PL/${tahun}`;
     } else {
       // Default (Umum)
-      const kodeAwal = kode_klasifikasi && kode_klasifikasi.trim() !== '' ? kode_klasifikasi.trim() : '600.4';
+      let kodeAwal = '600.4';
+      if (kode_klasifikasi && kode_klasifikasi.trim() !== '') {
+        kodeAwal = kode_klasifikasi.split(' - ')[0].trim();
+      }
       nomor_otomatis = `${kodeAwal}/${urutStr}.${bulan}/17/${tahun}`;
     }
 
