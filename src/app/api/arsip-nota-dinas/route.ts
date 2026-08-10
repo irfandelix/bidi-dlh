@@ -14,7 +14,8 @@ export async function GET(request: Request) {
     const { data, error } = await supabase
       .from('arsip_nota_dinas')
       .select('*, pemohon:anggota_bidang(*)')
-      .order('created_at', { ascending: false });
+      .order('tanggal_nota', { ascending: false })
+      .order('no_urut', { ascending: false });
 
     if (error) {
       console.error('Supabase error:', error);
