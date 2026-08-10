@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, Save, PenTool, Upload, User, X, Plus } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, PenTool, Upload, User, X, Plus, Search } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 import klasifikasiData from '@/data/klasifikasi.json';
 
@@ -19,6 +19,18 @@ export default function TambahNotaDinasPage() {
   const [isSisipan, setIsSisipan] = useState(false);
   const [tanggalNota, setTanggalNota] = useState(new Date().toISOString().split('T')[0]);
   const [petugasList, setPetugasList] = useState<string[]>(['']);
+
+  const [klasifikasiSearch, setKlasifikasiSearch] = useState('');
+  const [selectedKlasifikasi, setSelectedKlasifikasi] = useState('');
+  const [showKlasifikasiDropdown, setShowKlasifikasiDropdown] = useState(false);
+
+  const filteredKlasifikasi = useMemo(() => {
+    if (!klasifikasiSearch) return klasifikasiData.slice(0, 50);
+    return klasifikasiData.filter((k: any) => 
+      k.name.toLowerCase().includes(klasifikasiSearch.toLowerCase()) || 
+      k.code.toLowerCase().includes(klasifikasiSearch.toLowerCase())
+    ).slice(0, 50);
+  }, [klasifikasiSearch]);
 
   const addPetugas = () => setPetugasList([...petugasList, '']);
   const removePetugas = (idx: number) => {
@@ -93,7 +105,7 @@ export default function TambahNotaDinasPage() {
         nama_nota: formData.get('nama_nota'),
         tanggal_nota: formData.get('tanggal_nota'),
         dari_bagian: dariBagian,
-        kode_klasifikasi: formData.get('kode_klasifikasi'),
+        kode_klasifikasi: selectedKlasifikasi || klasifikasiSearch,
         pemohon_id: formData.get('pemohon_id'),
         keterangan: formData.get('keterangan'),
         yth: formData.get('yth'),
@@ -363,26 +375,54 @@ export default function TambahNotaDinasPage() {
             </div>
 
             {dariBagian === 'Umum' && (
-              <div className="bg-fuchsia-50 border border-fuchsia-200 p-6 rounded-2xl">
+              <div className="bg-fuchsia-50 border border-fuchsia-200 p-6 rounded-2xl relative">
                 <label className="block text-sm font-bold text-fuchsia-900 mb-2 uppercase tracking-wider">
                   3b. Kode Klasifikasi Surat (Pencarian Pintar) <span className="text-error">*</span>
                 </label>
-                <input 
-                  type="text" 
-                  name="kode_klasifikasi" 
-                  required 
-                  list="kode-klasifikasi-list"
-                  placeholder="Ketik kode (misal: 005) atau cari..." 
-                  className="w-full bg-surface border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" 
-                />
+                <div className="relative">
+                  <Search className="absolute left-4 top-4 text-slate-400" size={18} />
+                  <input 
+                    type="text" 
+                    placeholder="Ketik untuk mencari kode (misal: 000, 800, Pegawai)" 
+                    value={klasifikasiSearch}
+                    onChange={(e) => {
+                      setKlasifikasiSearch(e.target.value);
+                      setShowKlasifikasiDropdown(true);
+                    }}
+                    onFocus={() => setShowKlasifikasiDropdown(true)}
+                    className="w-full bg-surface border border-outline-variant text-on-surface text-sm font-bold rounded-xl pl-12 pr-4 py-4 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none"
+                    required
+                  />
+                </div>
+                
+                {showKlasifikasiDropdown && (
+                  <div className="absolute z-20 mt-2 w-[95%] max-h-60 overflow-y-auto bg-surface border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-center bg-surface-container-low p-2 border-b border-outline-variant sticky top-0">
+                      <span className="text-xs font-bold uppercase text-on-surface-variant px-2">Hasil Pencarian</span>
+                      <button type="button" onClick={() => setShowKlasifikasiDropdown(false)} className="text-xs font-bold text-error px-2 py-1 bg-surface border border-rose-200 rounded-lg">TUTUP</button>
+                    </div>
+                    {filteredKlasifikasi.map((k: any, i: number) => (
+                      <div 
+                        key={i} 
+                        onClick={() => {
+                          setSelectedKlasifikasi(`${k.code} - ${k.name}`);
+                          setKlasifikasiSearch(`${k.code} - ${k.name}`);
+                          setShowKlasifikasiDropdown(false);
+                        }}
+                        className="px-4 py-3 border-b-2 border-slate-100 hover:bg-secondary-container cursor-pointer flex flex-col"
+                      >
+                        <span className="font-bold text-on-surface text-sm">{k.code}</span>
+                        <span className="font-bold text-on-surface-variant text-xs">{k.name}</span>
+                      </div>
+                    ))}
+                    {filteredKlasifikasi.length === 0 && (
+                      <div className="p-4 text-center text-sm font-bold text-on-surface-variant">Tidak ditemukan</div>
+                    )}
+                  </div>
+                )}
                 <p className="text-xs font-bold text-fuchsia-700 mt-2">
                   Ketik kode atau nama klasifikasi. Jika tidak ada di daftar, Anda tetap bisa mengetik kode kustom.
                 </p>
-                <datalist id="kode-klasifikasi-list">
-                  {klasifikasiData.map((k: any, i: number) => (
-                    <option key={i} value={`${k.code} - ${k.name}`}>{k.code} - {k.name}</option>
-                  ))}
-                </datalist>
               </div>
             )}
 
