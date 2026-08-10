@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, CalendarPlus, Calendar, Archive, Map, ShieldCheck, Zap, Plus, Factory, Building2, Home, ShoppingCart, Database, User } from "lucide-react";
+import { ArrowLeft, CalendarPlus, Calendar, Archive, Map, ShieldCheck, Zap, Plus, Factory, Building2, Home, ShoppingCart, Database, User, FileText } from "lucide-react";
 
 export default function PengawasanHub() {
   const [total, setTotal] = useState(0);
@@ -44,6 +44,13 @@ export default function PengawasanHub() {
       link: "/pengawasan/token",
       iconBg: "bg-rose-100",
       iconText: "text-rose-700",
+    },
+    {
+      title: "NOTA DINAS PENGAWASAN",
+      icon: <FileText size={20} strokeWidth={2.5} />,
+      link: "/pengawasan/nota-dinas",
+      iconBg: "bg-fuchsia-100",
+      iconText: "text-fuchsia-700",
     }
   ];
 
