@@ -33,7 +33,8 @@ for (let i = 1; i < lines.length; i++) {
   
   let code = a + b + c + d;
   if (code) {
-    results.push({ code, name: name.replace(/"/g, '').trim() });
+    let cleanName = name.replace(/"/g, '').replace(/;+$/, '').trim();
+    results.push({ code, name: cleanName });
   }
 }
 if (!fs.existsSync('src/data')) fs.mkdirSync('src/data', { recursive: true });
