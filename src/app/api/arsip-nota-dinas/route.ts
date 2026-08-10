@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { nama_nota, tanggal_nota, dari_bagian, kode_klasifikasi, file_url, pemohon_id, keterangan, is_sisipan, nomor_sisipan, yth, sifat, lampiran } = body;
+    const { nama_nota, tanggal_nota, dari_bagian, kode_klasifikasi, file_url, pemohon_id, keterangan, is_sisipan, nomor_sisipan, yth, sifat, lampiran, petugas } = body;
     
     if (!nama_nota || !tanggal_nota || !dari_bagian) {
       return NextResponse.json({ error: 'Semua field wajib diisi' }, { status: 400 });
@@ -138,6 +138,9 @@ export async function POST(request: Request) {
       const hari = tglObj.toLocaleDateString('id-ID', { weekday: 'long' });
       const tanggalFull = `${hari}, ${tanggalIndo}`;
 
+      // Format Data Petugas
+      const petugasArr = Array.isArray(petugas) ? petugas.map((p, idx) => ({ nomor: idx + 1, nama: p })) : [];
+
       doc.render({
         nomor_notadinas: nomor_otomatis,
         tanggal: tanggalFull,
@@ -146,7 +149,8 @@ export async function POST(request: Request) {
         hal: nama_nota,
         yth: yth || '',
         sifat: sifat || 'Biasa',
-        lampiran: lampiran || '-'
+        lampiran: lampiran || '-',
+        petugas: petugasArr
       });
 
       const buf = doc.getZip().generate({ type: 'nodebuffer', compression: 'DEFLATE' });

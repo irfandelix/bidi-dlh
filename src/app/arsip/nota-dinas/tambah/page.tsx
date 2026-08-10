@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, Save, PenTool, Upload } from 'lucide-react';
+import { ArrowLeft, Loader2, Save, PenTool, Upload, User, X, Plus } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function TambahNotaDinasPage() {
@@ -17,6 +17,19 @@ export default function TambahNotaDinasPage() {
   const [anggota, setAnggota] = useState<any[]>([]);
   const [isSisipan, setIsSisipan] = useState(false);
   const [tanggalNota, setTanggalNota] = useState(new Date().toISOString().split('T')[0]);
+  const [petugasList, setPetugasList] = useState<string[]>(['']);
+
+  const addPetugas = () => setPetugasList([...petugasList, '']);
+  const removePetugas = (idx: number) => {
+    const newArr = [...petugasList];
+    newArr.splice(idx, 1);
+    setPetugasList(newArr);
+  };
+  const updatePetugas = (idx: number, val: string) => {
+    const newArr = [...petugasList];
+    newArr[idx] = val;
+    setPetugasList(newArr);
+  };
 
   useEffect(() => {
     fetch('/api/pengaturan/anggota-bidang')
@@ -85,6 +98,7 @@ export default function TambahNotaDinasPage() {
         yth: formData.get('yth'),
         sifat: formData.get('sifat'),
         lampiran: formData.get('lampiran'),
+        petugas: petugasList.filter(p => p.trim() !== ''),
         is_sisipan: isSisipan,
         nomor_sisipan: formData.get('nomor_sisipan'),
         file_url: fileUrl,
@@ -121,11 +135,13 @@ export default function TambahNotaDinasPage() {
         // tapi kita anggap sukses.
         setSuccessMsg('Nota Dinas berhasil diregistrasi & File template otomatis diunduh!');
         setGeneratedNo('TERDAFTAR');
+        setPetugasList(['']);
       } else {
         // Ini respons berupa JSON biasa (mungkin template gagal atau fallback)
         const result = await res.json();
         setGeneratedNo(result.data?.nomor_otomatis || 'TERDAFTAR');
         setSuccessMsg(result.message || 'Nota Dinas berhasil diregistrasi!');
+        setPetugasList(['']);
       }
 
     } catch (err: any) {
@@ -235,7 +251,36 @@ export default function TambahNotaDinasPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Tim Petugas */}
+            <div className="space-y-4 pt-4 border-t border-outline-variant">
+              <label className="block text-sm font-bold text-on-surface uppercase tracking-wider">
+                Tim Petugas / Yang Melaksanakan Tugas (Template)
+              </label>
+              {petugasList.map((p, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <div className="flex-1 relative">
+                    <User size={16} className="absolute left-3 top-3.5 text-on-surface-variant" />
+                    <input 
+                      type="text" 
+                      value={p}
+                      onChange={(e) => updatePetugas(idx, e.target.value)}
+                      placeholder="Nama Petugas" 
+                      className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl pl-10 pr-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none" 
+                    />
+                  </div>
+                  {petugasList.length > 1 && (
+                    <button type="button" onClick={() => removePetugas(idx)} className="p-3 text-error hover:bg-error-container rounded-xl transition-all border border-transparent hover:border-error">
+                      <X size={20} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button type="button" onClick={addPetugas} className="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary-dark bg-primary-container px-4 py-2 rounded-xl transition-all uppercase tracking-widest">
+                <Plus size={16} /> Tambah Petugas
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-outline-variant">
               <div>
                 <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                   2. Tanggal Nota <span className="text-error">*</span>
