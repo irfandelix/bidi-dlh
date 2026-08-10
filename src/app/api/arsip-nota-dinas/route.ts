@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
