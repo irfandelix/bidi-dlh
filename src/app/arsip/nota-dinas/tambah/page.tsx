@@ -265,13 +265,18 @@ export default function TambahNotaDinasPage() {
                 <div key={idx} className="flex items-center gap-2">
                   <div className="flex-1 relative">
                     <User size={16} className="absolute left-3 top-3.5 text-on-surface-variant" />
-                    <input 
-                      type="text" 
+                    <select 
                       value={p}
                       onChange={(e) => updatePetugas(idx, e.target.value)}
-                      placeholder="Nama Petugas" 
-                      className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl pl-10 pr-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none" 
-                    />
+                      className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl pl-10 pr-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none cursor-pointer" 
+                    >
+                      <option value="">- Pilih Petugas -</option>
+                      {anggota.map((a) => (
+                        <option key={a.id} value={a.nama}>
+                          {a.nama}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   {petugasList.length > 1 && (
                     <button type="button" onClick={() => removePetugas(idx)} className="p-3 text-error hover:bg-error-container rounded-xl transition-all border border-transparent hover:border-error">
