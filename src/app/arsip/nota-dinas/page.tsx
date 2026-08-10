@@ -136,7 +136,7 @@ export default function DaftarArsipNotaDinasPage() {
   };
 
   if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center"><LottieLoader size={24} /></div>;
+    return <div className="min-h-[50vh] flex items-center justify-center"><LottieLoader size={150} text="MEMUAT DATA..." /></div>;
   }
 
   return (
