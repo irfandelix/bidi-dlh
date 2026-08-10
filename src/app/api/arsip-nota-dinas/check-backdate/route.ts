@@ -16,7 +16,8 @@ export async function POST(request: Request) {
     const { data, error, count } = await supabase
       .from('arsip_nota_dinas')
       .select('id', { count: 'exact', head: true })
-      .ilike('tanggal_nota', `${tahun}-%`)
+      .gte('tanggal_nota', `${tahun}-01-01`)
+      .lte('tanggal_nota', `${tahun}-12-31`)
       .gt('tanggal_nota', tanggal);
 
     if (error) {

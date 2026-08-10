@@ -49,7 +49,8 @@ export async function POST(request: Request) {
     const { data: lastDoc, error: lastErr } = await supabase
       .from('arsip_nota_dinas')
       .select('no_urut')
-      .ilike('tanggal_nota', `${tahun}-%`)
+      .gte('tanggal_nota', `${tahun}-01-01`)
+      .lte('tanggal_nota', `${tahun}-12-31`)
       .order('no_urut', { ascending: false })
       .limit(1);
 
