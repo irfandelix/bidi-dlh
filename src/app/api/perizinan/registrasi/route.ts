@@ -23,12 +23,27 @@ export async function POST(request: Request) {
     const noUrutPadded = String(nextUrut).padStart(3, '0');
     const jenisDokumen = body.jenis_dokumen || 'UKL-UPL';
     
+    const jenisAcronym = ({
+      'SPPL': 'SPPL', 'UKLUPL': 'UKLUPL', 'UKL-UPL': 'UKLUPL',
+      'RINTEK LB3': 'RT.LB3', 'PERTEK AIR LIMBAH': 'ST.AL', 'PERTEK EMISI': 'ST.EM',
+      'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
+      'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
+      'DELH': 'DELH', 'AMDAL': 'AMDAL',
+      'Permohonan Arahan': 'ARH',
+      'Integrasi RINTEK LB3 ke Persetujuan Lingkungan': 'INT.LB3',
+      'INTEGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
+      'INTERGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
+      'Permohonan Integrasi RINTEK LB3': 'INT.LB3',
+      'Permohonan Intergrasi RINTEK LB3': 'INT.LB3',
+      'Permohonan Perubahan Lingkungan': 'PPL'
+    } as Record<string, string>)[jenisDokumen] || jenisDokumen;
+    
     const dataToInsert = {
       ...body,
       status_tahapan: 'Uji Administrasi',
       tahun: tahun,
       no_urut: nextUrut,
-      nomor_checklist: body.nomor_checklist || `600.4.5/${noUrutPadded}.${bulan}/17/REG.${jenisDokumen}/${tahun}`,
+      nomor_checklist: body.nomor_checklist || `600.4.5/${noUrutPadded}.${bulan}/17/REG.${jenisAcronym}/${tahun}`,
     };
 
     // Insert data to supabase (table: dokumens)
