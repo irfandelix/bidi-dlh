@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
     let urutStr = String(nextUrut).padStart(3, '0');
     // Format Perizinan Lingkungan (600.4.1)
-    const nomor_otomatis = `600.4.1/${urutStr}.${bulan}/17/PI/${tahun}`;
+    const nomor_otomatis = `600.4.1/${urutStr}.${bulan}/17/PL/${tahun}`;
 
     // 2. Simpan Nomor ke Database (Booking nomor)
     const payload = {
