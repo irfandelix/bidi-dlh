@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { yth, dari, hal, sifat, lampiran, nama_usaha, hasil_pengawasan, petugas } = body;
+    const { yth, dari, hal, sifat, lampiran, kegiatan, petugas } = body;
 
     // 1. Dapatkan Nomor Nota Dinas terbaru
     const tanggal_nota = new Date().toISOString().split('T')[0];
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       nomor_otomatis,
       file_url: null,
       pemohon_id: null,
-      keterangan: `Dibuat otomatis dari Modul Pengawasan: ${nama_usaha || '-'}`
+      keterangan: `Dibuat otomatis dari Modul Pengawasan: ${kegiatan && kegiatan.length > 0 ? kegiatan[0].nama_usaha + (kegiatan.length > 1 ? ' dkk' : '') : '-'}`
     };
 
     const { error: insertErr } = await supabase
@@ -92,6 +92,13 @@ export async function POST(request: Request) {
     // Format Data Petugas
     const petugasArr = Array.isArray(petugas) ? petugas.map((p, idx) => ({ nomor: idx + 1, nama: p })) : [];
 
+    // Format Data Kegiatan (array of objects)
+    const kegiatanArr = Array.isArray(kegiatan) ? kegiatan.map((k, idx) => ({
+      no: idx + 1,
+      nama_usaha: k.nama_usaha || '-',
+      hasil_pengawasan: k.hasil_pengawasan || '-'
+    })) : [];
+
     // Render Data
     doc.render({
       yth: yth || '',
@@ -101,8 +108,7 @@ export async function POST(request: Request) {
       lampiran: lampiran || '-',
       nomor_notadinas: nomor_otomatis,
       tanggal: tanggalFull,
-      nama_usaha: nama_usaha || '',
-      hasil_pengawasan: hasil_pengawasan || '',
+      kegiatan: kegiatanArr,
       petugas: petugasArr
     });
 

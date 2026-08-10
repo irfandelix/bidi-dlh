@@ -11,6 +11,8 @@ export default function NotaDinasPengawasanPage() {
   const [successMsg, setSuccessMsg] = useState('');
   const [petugasList, setPetugasList] = useState<string[]>(['']);
 
+  const [kegiatanList, setKegiatanList] = useState([{ nama_usaha: '', hasil_pengawasan: '' }]);
+
   const addPetugas = () => setPetugasList([...petugasList, '']);
   const removePetugas = (idx: number) => {
     const newArr = [...petugasList];
@@ -21,6 +23,18 @@ export default function NotaDinasPengawasanPage() {
     const newArr = [...petugasList];
     newArr[idx] = val;
     setPetugasList(newArr);
+  };
+
+  const addKegiatan = () => setKegiatanList([...kegiatanList, { nama_usaha: '', hasil_pengawasan: '' }]);
+  const removeKegiatan = (idx: number) => {
+    const newArr = [...kegiatanList];
+    newArr.splice(idx, 1);
+    setKegiatanList(newArr);
+  };
+  const updateKegiatan = (idx: number, field: 'nama_usaha' | 'hasil_pengawasan', val: string) => {
+    const newArr = [...kegiatanList];
+    newArr[idx][field] = val;
+    setKegiatanList(newArr);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -36,8 +50,7 @@ export default function NotaDinasPengawasanPage() {
       dari: formData.get('dari'),
       sifat: formData.get('sifat'),
       lampiran: formData.get('lampiran'),
-      nama_usaha: formData.get('nama_usaha'),
-      hasil_pengawasan: formData.get('hasil_pengawasan'),
+      kegiatan: kegiatanList.filter(k => k.nama_usaha.trim() !== '' || k.hasil_pengawasan.trim() !== ''),
       petugas: petugasList.filter(p => p.trim() !== '')
     };
 
@@ -74,6 +87,7 @@ export default function NotaDinasPengawasanPage() {
       setSuccessMsg('Nota Dinas berhasil dibuat dan diunduh. Tersimpan otomatis di Arsip Nota Dinas!');
       e.currentTarget.reset();
       setPetugasList(['']);
+      setKegiatanList([{ nama_usaha: '', hasil_pengawasan: '' }]);
     } catch (err: any) {
       setErrorMsg(err.message);
     } finally {
@@ -151,14 +165,29 @@ export default function NotaDinasPengawasanPage() {
             {/* Isi Pengawasan */}
             <div className="space-y-4">
               <h3 className="font-black text-slate-900 uppercase tracking-widest border-b-2 border-slate-100 pb-2">Konten Pengawasan</h3>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2"><Building2 size={16} /> Nama Usaha / Kegiatan / Objek</label>
-                <input type="text" name="nama_usaha" required className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:border-fuchsia-500 outline-none transition-all" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2"><FileText size={16} /> Deskripsi / Hasil Pengawasan</label>
-                <textarea name="hasil_pengawasan" required rows={6} className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:border-fuchsia-500 outline-none transition-all resize-y"></textarea>
-              </div>
+              
+              {kegiatanList.map((keg, idx) => (
+                <div key={idx} className="bg-slate-100 p-4 rounded-xl border border-slate-200 relative space-y-4">
+                  {kegiatanList.length > 1 && (
+                    <button type="button" onClick={() => removeKegiatan(idx)} className="absolute -top-3 -right-3 bg-rose-500 text-white p-1.5 rounded-lg shadow-sm hover:bg-rose-600 transition-all">
+                      <X size={16} />
+                    </button>
+                  )}
+                  
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2"><Building2 size={16} /> Nama Usaha / Kegiatan / Objek {idx + 1}</label>
+                    <input type="text" required value={keg.nama_usaha} onChange={(e) => updateKegiatan(idx, 'nama_usaha', e.target.value)} className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:border-fuchsia-500 outline-none transition-all" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2"><FileText size={16} /> Deskripsi / Hasil Pengawasan {idx + 1}</label>
+                    <textarea required rows={4} value={keg.hasil_pengawasan} onChange={(e) => updateKegiatan(idx, 'hasil_pengawasan', e.target.value)} className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm font-bold text-slate-900 focus:border-fuchsia-500 outline-none transition-all resize-y"></textarea>
+                  </div>
+                </div>
+              ))}
+              
+              <button type="button" onClick={addKegiatan} className="flex items-center gap-2 text-sm font-black text-fuchsia-600 hover:text-fuchsia-700 bg-fuchsia-50 px-4 py-2 rounded-xl transition-all uppercase tracking-widest">
+                <Plus size={16} /> Tambah Objek Pengawasan
+              </button>
             </div>
 
             {/* Tim Petugas */}
