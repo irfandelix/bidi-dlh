@@ -151,6 +151,7 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
   'INTERGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
   'Permohonan Integrasi RINTEK LB3': 'INT.LB3',
   'Permohonan Intergrasi RINTEK LB3': 'INT.LB3',
+  'Permohonan Perubahan Dokumen Lingkungan': 'PDL',
   'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
                         input.value = `600.4.5/${String(doc.no_urut || doc.id).padStart(3, '0')}.${bulan}/17/RPD.${jenisAcronym}/${doc.tahun || dateObj.getFullYear()}`;

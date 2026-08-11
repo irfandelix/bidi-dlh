@@ -36,6 +36,7 @@ export async function POST(request: Request) {
       'INTERGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
       'Permohonan Integrasi RINTEK LB3': 'INT.LB3',
       'Permohonan Intergrasi RINTEK LB3': 'INT.LB3',
+      'Permohonan Perubahan Dokumen Lingkungan': 'PDL',
       'Permohonan Perubahan Lingkungan': 'PPL'
     } as Record<string, string>)[jenisDokumen] || jenisDokumen;
     

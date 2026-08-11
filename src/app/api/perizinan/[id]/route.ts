@@ -44,6 +44,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL',
+  'Permohonan Perubahan Dokumen Lingkungan': 'PDL',
+  'Permohonan Perubahan Lingkungan': 'PPL',
   'Permohonan Arahan': 'ARH',
   'Integrasi RINTEK LB3 ke Persetujuan Lingkungan': 'INT.LB3',
   'INTEGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',

@@ -377,7 +377,7 @@ export default function RegistrasiPage() {
                           <option value="DPLH">DPLH</option>
                           <option value="DELH">DELH</option>
                           <option value="Permohonan Arahan">Permohonan Arahan</option>
-                          <option value="Permohonan Perubahan Lingkungan">Permohonan Perubahan Lingkungan</option>
+                          <option value="Permohonan Perubahan Dokumen Lingkungan">Permohonan Perubahan Dokumen Lingkungan</option>
                         </select>
                       </div>
                       <div>
@@ -549,7 +549,7 @@ export default function RegistrasiPage() {
                         <option value="DPLH">DPLH</option>
                         <option value="DELH">DELH</option>
                         <option value="Permohonan Arahan">Permohonan Arahan</option>
-                        <option value="Permohonan Perubahan Lingkungan">Permohonan Perubahan Lingkungan</option>
+                        <option value="Permohonan Perubahan Dokumen Lingkungan">Permohonan Perubahan Dokumen Lingkungan</option>
                       </select>
                     </div>
       
