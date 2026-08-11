@@ -370,14 +370,13 @@ export default function RegistrasiPage() {
                           <option value="SPPL">SPPL</option>
                           <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Air Limbah</option>
                           <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Emisi</option>
-                          <option value="RINTEK LB3">Rincian Teknis Limbah B3</option>
+                          <option value="Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan">Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan</option>
                           <option value="PERTEK AIR LIMBAH">Persetujuan Teknis Air Limbah</option>
                           <option value="PERTEK EMISI">Persetujuan Teknis Emisi</option>
                           <option value="SLO">SLO</option>
                           <option value="DPLH">DPLH</option>
                           <option value="DELH">DELH</option>
                           <option value="Permohonan Arahan">Permohonan Arahan</option>
-                          <option value="Integrasi RINTEK LB3 ke Persetujuan Lingkungan">Permohonan Integrasi RINTEK LB3 ke Persetujuan Lingkungan</option>
                           <option value="Permohonan Perubahan Lingkungan">Permohonan Perubahan Lingkungan</option>
                         </select>
                       </div>
@@ -543,14 +542,13 @@ export default function RegistrasiPage() {
                         <option value="SPPL">SPPL</option>
                         <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Air Limbah</option>
                         <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Emisi</option>
-                        <option value="RINTEK LB3">Rincian Teknis Limbah B3</option>
+                        <option value="Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan">Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan</option>
                         <option value="PERTEK AIR LIMBAH">Persetujuan Teknis Air Limbah</option>
                         <option value="PERTEK EMISI">Persetujuan Teknis Emisi</option>
                         <option value="SLO">SLO</option>
                         <option value="DPLH">DPLH</option>
                         <option value="DELH">DELH</option>
                         <option value="Permohonan Arahan">Permohonan Arahan</option>
-                        <option value="Integrasi RINTEK LB3 ke Persetujuan Lingkungan">Permohonan Integrasi RINTEK LB3 ke Persetujuan Lingkungan</option>
                         <option value="Permohonan Perubahan Lingkungan">Permohonan Perubahan Lingkungan</option>
                       </select>
                     </div>
