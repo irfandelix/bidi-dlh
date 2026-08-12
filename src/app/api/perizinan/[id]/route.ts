@@ -68,8 +68,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
           .from('dokumens')
           .select('seq_verlap')
           .eq('tahun', tahun)
-          .not('nomor_ba_verlap', 'is', null)
-          .order('seq_verlap', { ascending: false })
+          .not('seq_verlap', 'is', null)
+          .order('seq_verlap', { ascending: false, nullsFirst: false })
           .limit(1);
         
         const maxSeq = maxDocs && maxDocs.length > 0 && maxDocs[0].seq_verlap ? maxDocs[0].seq_verlap : 48;
@@ -95,8 +95,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
           .from('dokumens')
           .select('seq_pemeriksaan')
           .eq('tahun', tahun)
-          .not('nomor_ba_pemeriksaan', 'is', null)
-          .order('seq_pemeriksaan', { ascending: false })
+          .not('seq_pemeriksaan', 'is', null)
+          .order('seq_pemeriksaan', { ascending: false, nullsFirst: false })
           .limit(1);
         
         const maxSeq = maxDocs && maxDocs.length > 0 && maxDocs[0].seq_pemeriksaan ? maxDocs[0].seq_pemeriksaan : 48;
