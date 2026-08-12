@@ -142,7 +142,7 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal BA Pemeriksaan <span className="text-error">*</span></label>
-              <input type="date" name="tanggal_pemeriksaan" required defaultValue={new Date().toISOString().split('T')[0]}
+              <input type="date" name="tanggal_pemeriksaan" required defaultValue={doc.tanggal_pemeriksaan || new Date().toISOString().split('T')[0]}
                 className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
             </div>
             

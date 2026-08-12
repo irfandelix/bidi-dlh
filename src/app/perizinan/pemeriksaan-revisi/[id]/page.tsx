@@ -138,7 +138,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
 
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Pengembalian Revisi <span className="text-error">*</span></label>
-              <input type="date" name="tanggal_revisi" required defaultValue={new Date().toISOString().split('T')[0]}
+              <input type="date" name="tanggal_revisi" required defaultValue={doc.tanggal_revisi || new Date().toISOString().split('T')[0]}
                 className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
             </div>
             

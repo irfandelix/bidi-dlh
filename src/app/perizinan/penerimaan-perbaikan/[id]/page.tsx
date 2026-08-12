@@ -140,7 +140,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
 
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Penyerahan Berkas <span className="text-error">*</span></label>
-              <input type="date" name="tanggal_penyerahan_perbaikan" required defaultValue={new Date().toISOString().split('T')[0]}
+              <input type="date" name="tanggal_penyerahan_perbaikan" required defaultValue={doc.tanggal_penyerahan_perbaikan || new Date().toISOString().split('T')[0]}
                 className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
             </div>
 

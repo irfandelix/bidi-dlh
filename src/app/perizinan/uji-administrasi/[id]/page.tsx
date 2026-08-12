@@ -227,7 +227,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
           {/* Tanggal */}
           <div className="mb-8">
             <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal BA Uji Administrasi <span className="text-error">*</span></label>
-            <input type="date" name="tanggal_uji_berkas" required defaultValue={new Date().toISOString().split('T')[0]}
+            <input type="date" name="tanggal_uji_berkas" required defaultValue={doc.tanggal_uji_berkas || new Date().toISOString().split('T')[0]}
               className="w-full sm:w-1/3 bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
           </div>
 

@@ -133,7 +133,7 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Verifikasi Lapangan <span className="text-error">*</span></label>
-              <input type="date" name="tanggal_verlap" required defaultValue={new Date().toISOString().split('T')[0]}
+              <input type="date" name="tanggal_verlap" required defaultValue={doc.tanggal_verlap || new Date().toISOString().split('T')[0]}
                 className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
             </div>
 
