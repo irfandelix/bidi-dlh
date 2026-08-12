@@ -93,7 +93,14 @@ export async function POST(request: Request) {
       return angka.toString();
     };
 
-    const d = new Date();
+    let d = new Date();
+    if (stage === 'uji-administrasi' && doc.tanggal_uji_berkas) d = new Date(doc.tanggal_uji_berkas);
+    else if (stage === 'verifikasi-lapangan' && doc.tanggal_verlap) d = new Date(doc.tanggal_verlap);
+    else if (stage === 'pemeriksaan-substansi' && doc.tanggal_pemeriksaan) d = new Date(doc.tanggal_pemeriksaan);
+    else if (stage === 'pemeriksaan-revisi' && doc.tanggal_revisi) d = new Date(doc.tanggal_revisi);
+    else if (stage === 'penerimaan-perbaikan' && doc.tanggal_penyerahan_perbaikan) d = new Date(doc.tanggal_penyerahan_perbaikan);
+    else if (stage === 'pengembalian' && doc.tanggal_pengembalian) d = new Date(doc.tanggal_pengembalian);
+    else if (stage === 'finalisasi' && doc.tanggal_risalah) d = new Date(doc.tanggal_risalah);
     const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
     const namaHari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
     
