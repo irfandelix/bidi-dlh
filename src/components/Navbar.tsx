@@ -67,12 +67,6 @@ export default function Navbar() {
             <span>Hotline</span>
           </Link>
         </li>
-        <li className="hidden lg:block">
-          <Link href="/hotline" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-emerald-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
-            <PhoneCall size={18} />
-            <span>Hotline</span>
-          </Link>
-        </li>
         <li>
           <Link href="/peta" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-blue-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
             <Map size={18} />
