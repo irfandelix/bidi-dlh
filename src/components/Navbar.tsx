@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link'
-import { LayoutDashboard, ShieldCheck, Map, Settings, LogOut, MessageSquareWarning, Archive } from 'lucide-react'
+import { LayoutDashboard, ShieldCheck, Map, Settings, LogOut, MessageSquareWarning, Archive, PhoneCall } from 'lucide-react'
 import { handleLogout } from '@/app/login/actions'
 import { usePathname } from 'next/navigation'
 import BidiLogo from './BidiLogo'
@@ -32,8 +32,11 @@ export default function Navbar() {
               <Link href="/pengawasan" className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-rose-100 border-b-2 border-slate-200 flex items-center gap-2">
                 <ShieldCheck size={16} /> Pengawasan
               </Link>
-              <Link href="/pengaduan" className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-fuchsia-100 flex items-center gap-2">
+              <Link href="/pengaduan" className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-fuchsia-100 border-b-2 border-slate-200 flex items-center gap-2">
                 <MessageSquareWarning size={16} /> Pengaduan
+              </Link>
+              <Link href="/hotline" className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-emerald-100 flex items-center gap-2">
+                <PhoneCall size={16} /> Hotline
               </Link>
             </div>
           </div>
@@ -56,6 +59,18 @@ export default function Navbar() {
           <Link href="/pengaduan" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-fuchsia-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
             <MessageSquareWarning size={18} />
             <span>Pengaduan</span>
+          </Link>
+        </li>
+        <li className="hidden lg:block">
+          <Link href="/hotline" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-emerald-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
+            <PhoneCall size={18} />
+            <span>Hotline</span>
+          </Link>
+        </li>
+        <li className="hidden lg:block">
+          <Link href="/hotline" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-emerald-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
+            <PhoneCall size={18} />
+            <span>Hotline</span>
           </Link>
         </li>
         <li>
