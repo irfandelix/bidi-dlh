@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { cookies } from 'next/headers';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,10 +95,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const supabaseAdmin = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = await createClient();
     const body = await request.json();
     
     // Generate Token (e.g. FYK-A8B9C2)
@@ -113,7 +109,7 @@ export async function POST(request: Request) {
     const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
     body.token = `${prefix}-${randomStr}`;
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from('pengawasan_lapangans')
       // @ts-ignore
       .insert([body])
