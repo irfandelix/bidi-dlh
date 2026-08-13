@@ -7,7 +7,7 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const isLogin = pathname === '/login';
   const isPeta = pathname === '/peta';
-  const isMobileApp = pathname === '/pengawasan/mobile';
+  const isMobileApp = pathname === '/pengawasan/mobile' || pathname === '/hotline/mobile';
 
   let mainClass = "flex-1 pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full";
   if (isLogin) {
