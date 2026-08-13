@@ -36,7 +36,7 @@ export async function GET(request: Request) {
       if (agendaError) throw agendaError;
       
       const agendas = agendaData.filter(item => !(item as any).bap_pengawasans || (item as any).bap_pengawasans.length === 0);
-      return NextResponse.json({ data: agendas });
+      return NextResponse.json({ data: agendas }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
     }
 
     if (type === 'arsip') {

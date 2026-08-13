@@ -18,7 +18,7 @@ export default function DaftarAgenda() {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    fetch('/api/pengawasan?type=agenda')
+    fetch('/api/pengawasan?type=agenda', { cache: 'no-store' })
       .then(res => res.json())
       .then(res => {
         setAgendas(res.data || []);
