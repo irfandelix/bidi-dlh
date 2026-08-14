@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
 type Staff = { id: number; name: string; phone_number: string; role: string; department: string };
-type Chat = { phone_number: string; name: string; assigned_staff_id: number | null; last_message: string; last_message_time: string; category?: string };
+type Chat = { phone_number: string; name: string; assigned_staff_id: number | null; last_message: string; last_message_time: string; category?: string; ticket_id?: string };
 type Message = { id: string; wa_chat_id: string; sender_type: string; message: string; created_at: string; status?: string };
 
 export default function HotlineDashboard() {
@@ -64,6 +64,29 @@ export default function HotlineDashboard() {
   const handleSelectChat = (chat: Chat) => {
     setSelectedChat(chat);
     fetchMessages(chat.phone_number);
+  };
+
+  const handleCloseTicket = async (chatId: string, ticketId: string | undefined) => {
+    if (!confirm('Tutup tiket obrolan ini? Warga akan direset ke status Umum.')) return;
+    
+    // 1. Kirim pesan penutup
+    const closingMessage = `Terima kasih, layanan untuk Tiket ${ticketId || ''} telah diselesaikan. Sesi obrolan ini ditutup.`;
+    await supabase.from('wa_messages').insert([{
+        wa_chat_id: chatId,
+        sender_type: 'staff',
+        message: closingMessage,
+        status: 'pending' // Bot will send this
+    }]);
+
+    // 2. Reset category and ticket
+    await supabase.from('wa_chats').update({ 
+        category: 'Umum', 
+        ticket_id: null, 
+        assigned_staff_id: null 
+    }).eq('phone_number', chatId);
+
+    alert('Tiket berhasil ditutup!');
+    setSelectedChat(null);
   };
 
   const handleTransfer = async (chatId: string, staffId: number) => {
@@ -177,6 +200,11 @@ export default function HotlineDashboard() {
                              <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${catColor}`}>
                                {chat.category || 'Umum'}
                              </span>
+                             {chat.ticket_id && (
+                               <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-800 text-white text-[10px] font-bold">
+                                 {chat.ticket_id}
+                               </span>
+                             )}
                           </div>
                         </div>
                     )
@@ -192,26 +220,45 @@ export default function HotlineDashboard() {
                   {/* Chat Header */}
                   <div className="p-4 border-b border-slate-100 bg-slate-50/80 backdrop-blur-sm flex justify-between items-center sticky top-0 z-10">
                     <div>
-                        <h2 className="font-bold text-slate-800">{selectedChat.name || selectedChat.phone_number.split('@')[0]}</h2>
+                        <div className="flex items-center gap-2 mb-0.5">
+                            <h2 className="font-bold text-slate-800">{selectedChat.name || selectedChat.phone_number.split('@')[0]}</h2>
+                            {selectedChat.ticket_id && (
+                                <span className="bg-slate-800 text-white text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                    {selectedChat.ticket_id}
+                                </span>
+                            )}
+                        </div>
                         <p className="text-xs text-slate-500">+{selectedChat.phone_number.split('@')[0]}</p>
                     </div>
                     
-                    {/* Transfer Dropdown */}
-                    <div className="relative group">
-                        <button className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 shadow-sm flex items-center gap-2 transition-all focus:ring-2 focus:ring-blue-500/20">
-                          <ArrowRight size={14} className="text-blue-500" />
-                          Transfer Obrolan
-                        </button>
-                        <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
-                           <div className="p-2 bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pilih Penerima</div>
-                           <div className="max-h-60 overflow-y-auto p-1">
-                               {staff.map(s => (
-                                   <button key={s.id} onClick={() => handleTransfer(selectedChat.phone_number, s.id)} className="w-full text-left px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg flex flex-col">
-                                      <span>{s.name} <span className="text-[10px] text-slate-400 font-normal uppercase bg-slate-200 px-1.5 py-0.5 rounded ml-1">{s.role}</span></span>
-                                      <span className="text-xs text-slate-400">{s.department}</span>
-                                   </button>
-                               ))}
-                           </div>
+                    <div className="flex items-center gap-2">
+                        {/* Tutup Tiket Button */}
+                        {selectedChat.category && selectedChat.category !== 'Umum' && (
+                            <button 
+                                onClick={() => handleCloseTicket(selectedChat.phone_number, selectedChat.ticket_id)}
+                                className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold border border-rose-200 shadow-sm transition-all focus:ring-2 focus:ring-rose-500/20"
+                            >
+                                Tutup Tiket
+                            </button>
+                        )}
+                        
+                        {/* Transfer Dropdown */}
+                        <div className="relative group">
+                            <button className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 shadow-sm flex items-center gap-2 transition-all focus:ring-2 focus:ring-blue-500/20">
+                              <ArrowRight size={14} className="text-blue-500" />
+                              Transfer Obrolan
+                            </button>
+                            <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+                               <div className="p-2 bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pilih Penerima</div>
+                               <div className="max-h-60 overflow-y-auto p-1">
+                                   {staff.map(s => (
+                                       <button key={s.id} onClick={() => handleTransfer(selectedChat.phone_number, s.id)} className="w-full text-left px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg flex flex-col">
+                                          <span>{s.name} <span className="text-[10px] text-slate-400 font-normal uppercase bg-slate-200 px-1.5 py-0.5 rounded ml-1">{s.role}</span></span>
+                                          <span className="text-xs text-slate-400">{s.department}</span>
+                                       </button>
+                                   ))}
+                               </div>
+                            </div>
                         </div>
                     </div>
                   </div>
