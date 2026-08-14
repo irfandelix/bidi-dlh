@@ -291,9 +291,13 @@ export async function POST(request: Request) {
         const seqPadded = String(seqUntukRevisi).padStart(3, '0');
         return `600.4.5/${seqPadded}.${tglObj.getMonth()+1}/17/BA.P.P1.${jenisAcronym}/${doc.tahun || tglObj.getFullYear()}`;
       })(),
-      tanggal_revisi_format: doc[`tanggal_revisi_${targetRevisi}`] 
-        ? new Date(doc[`tanggal_revisi_${targetRevisi}`]).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) 
-        : '',
+      tanggal_revisi_format: stage === 'penerimaan-perbaikan'
+        ? (doc[`tanggal_php_${targetRevisi}`] 
+            ? new Date(doc[`tanggal_php_${targetRevisi}`]).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) 
+            : (doc.tanggal_php_1 ? new Date(doc.tanggal_php_1).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : ''))
+        : (doc[`tanggal_revisi_${targetRevisi}`] 
+            ? new Date(doc[`tanggal_revisi_${targetRevisi}`]).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) 
+            : ''),
       tanggal_penyerahan_perbaikan_format: doc[`tanggal_php_${targetRevisi}`] 
         ? new Date(doc[`tanggal_php_${targetRevisi}`]).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) 
         : (doc.tanggal_php_1 ? new Date(doc.tanggal_php_1).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : ''),
