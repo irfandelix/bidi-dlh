@@ -98,7 +98,11 @@ export async function POST(request: Request) {
     else if (stage === 'verifikasi-lapangan' && doc.tanggal_verlap) d = new Date(doc.tanggal_verlap);
     else if (stage === 'pemeriksaan-substansi' && doc.tanggal_pemeriksaan) d = new Date(doc.tanggal_pemeriksaan);
     else if (stage === 'pemeriksaan-revisi' && doc.tanggal_revisi) d = new Date(doc.tanggal_revisi);
-    else if (stage === 'penerimaan-perbaikan' && doc.tanggal_penyerahan_perbaikan) d = new Date(doc.tanggal_penyerahan_perbaikan);
+    else if (stage === 'penerimaan-perbaikan') {
+      const revKe = target_revisi ? String(target_revisi) : (doc.revisi_ke || '1');
+      const tglPhp = doc[`tanggal_php_${revKe}`] || doc.tanggal_php_1;
+      if (tglPhp) d = new Date(tglPhp);
+    }
     else if (stage === 'pengembalian' && doc.tanggal_pengembalian) d = new Date(doc.tanggal_pengembalian);
     else if (stage === 'finalisasi' && doc.tanggal_risalah) d = new Date(doc.tanggal_risalah);
     const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -290,6 +294,12 @@ export async function POST(request: Request) {
       tanggal_revisi_format: doc[`tanggal_revisi_${targetRevisi}`] 
         ? new Date(doc[`tanggal_revisi_${targetRevisi}`]).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) 
         : '',
+      tanggal_penyerahan_perbaikan_format: doc[`tanggal_php_${targetRevisi}`] 
+        ? new Date(doc[`tanggal_php_${targetRevisi}`]).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) 
+        : (doc.tanggal_php_1 ? new Date(doc.tanggal_php_1).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : ''),
+      tanggal_masuk_dokumen_revisi: doc[`tanggal_php_${targetRevisi}`] 
+        ? new Date(doc[`tanggal_php_${targetRevisi}`]).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) 
+        : (doc.tanggal_php_1 ? new Date(doc.tanggal_php_1).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : ''),
       tanggal_revisi_1_format: doc.tanggal_revisi_1 ? new Date(doc.tanggal_revisi_1).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '',
       tanggal_revisi_2_format: doc.tanggal_revisi_2 ? new Date(doc.tanggal_revisi_2).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '',
       tanggal_revisi_3_format: doc.tanggal_revisi_3 ? new Date(doc.tanggal_revisi_3).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' }) : '',
