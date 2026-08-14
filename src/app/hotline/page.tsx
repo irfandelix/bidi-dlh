@@ -131,7 +131,7 @@ export default function HotlineDashboard() {
               
               {/* Category Filter Tabs */}
               <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                 {['Semua', 'Perizinan', 'Pengawasan', 'Pengaduan', 'Sampah', 'Tukar Botol', 'Menunggu Pilihan'].map(cat => (
+                 {['Semua', 'Perizinan', 'Pengawasan', 'Pengaduan', 'Sampah', 'Bibit', 'Menunggu Pilihan'].map(cat => (
                     <button 
                        key={cat} 
                        onClick={() => setSelectedCategory(cat)}
