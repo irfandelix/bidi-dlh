@@ -8,7 +8,7 @@ const supabase = createClient();
 
 type Staff = { id: number; name: string; phone_number: string; role: string; department: string };
 type Chat = { phone_number: string; name: string; assigned_staff_id: number | null; last_message: string; last_message_time: string };
-type Message = { id: string; wa_chat_id: string; sender_type: string; message: string; created_at: string };
+type Message = { id: string; wa_chat_id: string; sender_type: string; message: string; created_at: string; status?: string };
 
 export default function HotlineDashboard() {
   const [activeTab, setActiveTab] = useState<'chat' | 'settings'>('chat');
@@ -214,13 +214,58 @@ export default function HotlineDashboard() {
                                       </div>
                                       {!isPublic && (
                                           <span className="text-[10px] text-slate-400 mt-1 font-medium px-1 flex items-center gap-1">
-                                              <ShieldCheck size={10} /> Dibalas oleh Staff/Admin
+                                              <ShieldCheck size={10} /> Dibalas oleh Staff/Admin {msg.status === 'pending' ? '(Tertunda)' : ''}
                                           </span>
                                       )}
                                   </div>
                               )
                           })}
                       </div>
+                  </div>
+
+                  {/* Reply Input Area */}
+                  <div className="p-4 bg-white border-t border-slate-200 sticky bottom-0">
+                      <form onSubmit={async (e) => {
+                          e.preventDefault();
+                          const form = e.target as HTMLFormElement;
+                          const input = form.elements.namedItem('replyText') as HTMLInputElement;
+                          const text = input.value.trim();
+                          if (!text) return;
+                          
+                          // Set input to empty immediately for snappy feel
+                          input.value = '';
+                          
+                          // Insert to Supabase with status 'pending'
+                          await supabase.from('wa_messages').insert([{
+                              wa_chat_id: selectedChat.phone_number,
+                              sender_type: 'web_admin',
+                              message: text,
+                              status: 'pending'
+                          }]);
+                          
+                          // Update chat last_message
+                          await supabase.from('wa_chats').update({
+                              last_message: text,
+                              last_message_time: new Date().toISOString()
+                          }).eq('phone_number', selectedChat.phone_number);
+                          
+                      }} className="flex gap-2 items-end">
+                          <textarea 
+                             name="replyText"
+                             placeholder="Ketik balasan Anda di sini..." 
+                             rows={1}
+                             className="flex-1 resize-none bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all max-h-32"
+                             onKeyDown={(e) => {
+                                 if (e.key === 'Enter' && !e.shiftKey) {
+                                     e.preventDefault();
+                                     e.currentTarget.form?.requestSubmit();
+                                 }
+                             }}
+                          ></textarea>
+                          <button type="submit" className="bg-emerald-500 hover:bg-emerald-600 text-white p-3 rounded-xl shadow-sm transition-all flex-shrink-0 focus:ring-2 focus:ring-emerald-500/20">
+                              <ArrowRight size={20} />
+                          </button>
+                      </form>
                   </div>
                 </>
             ) : (
