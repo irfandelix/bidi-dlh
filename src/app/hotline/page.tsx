@@ -7,11 +7,12 @@ import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 
 type Staff = { id: number; name: string; phone_number: string; role: string; department: string };
-type Chat = { phone_number: string; name: string; assigned_staff_id: number | null; last_message: string; last_message_time: string };
+type Chat = { phone_number: string; name: string; assigned_staff_id: number | null; last_message: string; last_message_time: string; category?: string };
 type Message = { id: string; wa_chat_id: string; sender_type: string; message: string; created_at: string; status?: string };
 
 export default function HotlineDashboard() {
   const [activeTab, setActiveTab] = useState<'chat' | 'settings'>('chat');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [chats, setChats] = useState<Chat[]>([]);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
@@ -123,20 +124,39 @@ export default function HotlineDashboard() {
           {/* Left Column: Chat List */}
           <div className="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
             <div className="p-4 border-b border-slate-100 bg-slate-50/80 backdrop-blur-sm sticky top-0">
-              <div className="relative">
+              <div className="relative mb-3">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                  <input type="text" placeholder="Cari pesan atau nama..." className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all" />
               </div>
+              
+              {/* Category Filter Tabs */}
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                 {['Semua', 'Perizinan', 'Pengawasan', 'Pengaduan', 'Sampah', 'Tukar Botol', 'Menunggu Pilihan'].map(cat => (
+                    <button 
+                       key={cat} 
+                       onClick={() => setSelectedCategory(cat)}
+                       className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-slate-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                    >
+                       {cat}
+                    </button>
+                 ))}
+              </div>
             </div>
+            
             <div className="flex-1 overflow-y-auto">
-              {chats.length === 0 ? (
+              {chats.filter(c => selectedCategory === 'Semua' || (c.category || 'Umum') === selectedCategory).length === 0 ? (
                  <div className="p-6 text-center text-slate-400 flex flex-col items-center mt-10">
                     <MessageSquare size={32} className="mb-2 opacity-20" />
                     <p className="text-sm">Belum ada obrolan</p>
                  </div>
               ) : (
-                 chats.map(chat => {
+                 chats.filter(c => selectedCategory === 'Semua' || (c.category || 'Umum') === selectedCategory).map(chat => {
                     const assignee = staff.find(s => s.id === chat.assigned_staff_id);
+                    const catColor = chat.category === 'Perizinan' ? 'bg-blue-100 text-blue-700' :
+                                     chat.category === 'Pengawasan' ? 'bg-amber-100 text-amber-700' :
+                                     chat.category === 'Pengaduan' ? 'bg-rose-100 text-rose-700' :
+                                     chat.category === 'Sampah' ? 'bg-emerald-100 text-emerald-700' :
+                                     'bg-slate-100 text-slate-600';
                     return (
                         <div key={chat.phone_number} onClick={() => handleSelectChat(chat)} className={`p-4 border-b border-slate-100 cursor-pointer transition-all hover:bg-slate-50 ${selectedChat?.phone_number === chat.phone_number ? 'bg-emerald-50/50 border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent'}`}>
                           <div className="flex justify-between items-start mb-1">
@@ -144,7 +164,7 @@ export default function HotlineDashboard() {
                              <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">{formatTime(chat.last_message_time)}</span>
                           </div>
                           <p className="text-xs text-slate-500 truncate mb-2">{chat.last_message}</p>
-                          <div className="flex items-center gap-1.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
                              {assignee ? (
                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-[10px] font-bold border border-blue-100/50">
                                  <ShieldCheck size={10} /> {assignee.name}
@@ -154,6 +174,9 @@ export default function HotlineDashboard() {
                                  Menunggu Admin
                                </span>
                              )}
+                             <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${catColor}`}>
+                               {chat.category || 'Umum'}
+                             </span>
                           </div>
                         </div>
                     )
