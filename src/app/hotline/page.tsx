@@ -131,6 +131,15 @@ export default function HotlineDashboard() {
         
         const katimNotification = `⚠️ *PELIMPAHAN TIKET BARU (${chatCategory.toUpperCase()})*\nPengirim: *${citizenName}*\nTiket: ${chatTicketId}\n\n*Riwayat Percakapan (10 terakhir):*\n\n${historyText}\n\n---\n_(Abaikan tulisan ini, cukup Swipe Kanan pesan ini untuk membalas)_`;
         
+        // Dapatkan nomor Katim dari database
+        const { data: staffData } = await supabase.from('wa_staff').select('phone_number').eq('id', staffId).single();
+        let katimPhoneTarget = chatId; // Default fallback
+        if (staffData && staffData.phone_number) {
+            let phone = staffData.phone_number.split('@')[0].replace(/\D/g, '');
+            if (phone.startsWith('0')) phone = '62' + phone.substring(1);
+            katimPhoneTarget = phone + '@s.whatsapp.net';
+        }
+        
         await supabase.from('wa_messages').insert([
             {
                 wa_chat_id: chatId,
@@ -139,8 +148,8 @@ export default function HotlineDashboard() {
                 status: 'pending'
             },
             {
-                wa_chat_id: chatId,
-                sender_type: 'system_transfer',
+                wa_chat_id: katimPhoneTarget,
+                sender_type: 'staff',
                 message: katimNotification,
                 status: 'pending'
             }
