@@ -17,6 +17,7 @@ export default function HotlineDashboard() {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [ticketToClose, setTicketToClose] = useState<{phone: string, ticketId?: string} | null>(null);
   
   // Settings Form State
   const [isEditingStaff, setIsEditingStaff] = useState<Staff | null>(null);
@@ -67,8 +68,6 @@ export default function HotlineDashboard() {
   };
 
   const handleCloseTicket = async (chatId: string, ticketId: string | undefined) => {
-    if (!confirm('Tutup tiket obrolan ini? Warga akan direset ke status Umum.')) return;
-    
     // 1. Kirim pesan penutup
     const closingMessage = `Terima kasih, layanan untuk Tiket ${ticketId || ''} telah diselesaikan. Sesi obrolan ini ditutup.`;
     await supabase.from('wa_messages').insert([{
@@ -235,7 +234,7 @@ export default function HotlineDashboard() {
                         {/* Tutup Tiket Button */}
                         {selectedChat.category && selectedChat.category !== 'Umum' && (
                             <button 
-                                onClick={() => handleCloseTicket(selectedChat.phone_number, selectedChat.ticket_id)}
+                                onClick={() => setTicketToClose({ phone: selectedChat.phone_number, ticketId: selectedChat.ticket_id })}
                                 className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs font-bold border border-rose-200 shadow-sm transition-all focus:ring-2 focus:ring-rose-500/20"
                             >
                                 Tutup Tiket
@@ -453,6 +452,40 @@ export default function HotlineDashboard() {
         </div>
       )}
 
+      {/* Ticket Close Confirmation Modal */}
+      {ticketToClose && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Tutup Tiket Obrolan?</h3>
+              <p className="text-sm text-slate-500 mb-6">
+                Anda yakin ingin menutup tiket ini? Warga akan direset kembali ke status "Umum" dan tiket ini akan diselesaikan.
+              </p>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setTicketToClose(null)}
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition-all"
+                >
+                  Batal
+                </button>
+                <button 
+                  onClick={() => {
+                    handleCloseTicket(ticketToClose.phone, ticketToClose.ticketId);
+                    setTicketToClose(null);
+                  }}
+                  className="flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-sm transition-all"
+                >
+                  Ya, Tutup
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
     </div>
   );
 }
