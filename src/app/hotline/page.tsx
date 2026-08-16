@@ -123,13 +123,13 @@ export default function HotlineDashboard() {
         if (historyData && historyData.length > 0) {
             historyText = historyData.map((msg: any) => {
                 const sender = msg.sender_type === 'public' ? 'Warga' : 'Admin';
-                return `*${sender}*: ${msg.message}`;
-            }).join('\n');
+                return `*${sender}*:\n${msg.message}`;
+            }).join('\n\n');
         } else {
-            historyText = `_Warga_: ${lastMsg}`;
+            historyText = `_Warga_:\n${lastMsg}`;
         }
         
-        const katimNotification = `⚠️ *PELIMPAHAN TIKET BARU (${chatCategory.toUpperCase()})*\nPengirim: *${citizenName}*\nTiket: ${chatTicketId}\n\n*Riwayat Percakapan (10 terakhir):*\n${historyText}\n\n---\n_(Abaikan tulisan ini, cukup Swipe Kanan pesan ini untuk membalas)_`;
+        const katimNotification = `⚠️ *PELIMPAHAN TIKET BARU (${chatCategory.toUpperCase()})*\nPengirim: *${citizenName}*\nTiket: ${chatTicketId}\n\n*Riwayat Percakapan (10 terakhir):*\n\n${historyText}\n\n---\n_(Abaikan tulisan ini, cukup Swipe Kanan pesan ini untuk membalas)_`;
         
         await supabase.from('wa_messages').insert([
             {
