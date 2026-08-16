@@ -108,8 +108,28 @@ export default function HotlineDashboard() {
         const lastMsg = selectedChatData ? selectedChatData.last_message : '';
         const citizenName = selectedChatData ? selectedChatData.name : 'Warga';
         const chatCategory = selectedChatData ? selectedChatData.category : 'Umum';
+        const chatTicketId = selectedChatData?.ticket_id || `#ID-${Math.floor(1000 + Math.random() * 9000)}`;
         
-        const katimNotification = `⚠️ *PELIMPAHAN TIKET BARU (${chatCategory.toUpperCase()})*\nPelapor: *${citizenName}*\n\n_${lastMsg}_\n\n---\n_ID Sistem: (Abaikan, silakan Swipe Kanan pesan ini untuk membalas)_\nDari: +${chatId.split('@')[0]}`;
+        // Ambil riwayat percakapan 10 pesan terakhir
+        const { data: historyData } = await supabase
+            .from('wa_messages')
+            .select('*')
+            .eq('wa_chat_id', chatId)
+            .neq('sender_type', 'system_transfer')
+            .order('created_at', { ascending: true })
+            .limit(10);
+            
+        let historyText = '';
+        if (historyData && historyData.length > 0) {
+            historyText = historyData.map((msg: any) => {
+                const sender = msg.sender_type === 'public' ? 'Warga' : 'Admin';
+                return `*${sender}*: ${msg.message}`;
+            }).join('\n');
+        } else {
+            historyText = `_Warga_: ${lastMsg}`;
+        }
+        
+        const katimNotification = `⚠️ *PELIMPAHAN TIKET BARU (${chatCategory.toUpperCase()})*\nPengirim: *${citizenName}*\nTiket: ${chatTicketId}\n\n*Riwayat Percakapan (10 terakhir):*\n${historyText}\n\n---\n_(Abaikan tulisan ini, cukup Swipe Kanan pesan ini untuk membalas)_`;
         
         await supabase.from('wa_messages').insert([
             {
