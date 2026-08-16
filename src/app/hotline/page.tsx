@@ -18,6 +18,7 @@ export default function HotlineDashboard() {
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [ticketToClose, setTicketToClose] = useState<{phone: string, ticketId?: string} | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
   // Settings Form State
   const [isEditingStaff, setIsEditingStaff] = useState<Staff | null>(null);
@@ -84,7 +85,7 @@ export default function HotlineDashboard() {
         assigned_staff_id: null 
     }).eq('phone_number', chatId);
 
-    alert('Tiket berhasil ditutup!');
+    setSuccessMessage('Tiket berhasil ditutup!');
     setSelectedChat(null);
   };
 
@@ -94,7 +95,7 @@ export default function HotlineDashboard() {
     if (selectedChat?.phone_number === chatId) {
         setSelectedChat({ ...selectedChat, assigned_staff_id: staffId });
     }
-    alert('Chat berhasil ditransfer!');
+    setSuccessMessage('Chat berhasil ditransfer!');
   };
 
   const handleSaveStaff = async () => {
@@ -481,6 +482,29 @@ export default function HotlineDashboard() {
                   Ya, Tutup
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Success Notification Modal */}
+      {successMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 text-center">
+              <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShieldCheck size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Berhasil!</h3>
+              <p className="text-sm text-slate-500 mb-6">
+                {successMessage}
+              </p>
+              <button 
+                onClick={() => setSuccessMessage(null)}
+                className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-sm transition-all"
+              >
+                OK
+              </button>
             </div>
           </div>
         </div>
