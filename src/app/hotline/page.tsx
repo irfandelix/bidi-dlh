@@ -95,6 +95,22 @@ export default function HotlineDashboard() {
     if (selectedChat?.phone_number === chatId) {
         setSelectedChat({ ...selectedChat, assigned_staff_id: staffId });
     }
+    
+    // Kirim pesan otomatis ke WA warga
+    const staffMember = staff.find(s => s.id === staffId);
+    if (staffMember) {
+        let roleText = staffMember.role;
+        if (staffMember.role.toLowerCase().includes('katim')) roleText = 'Ketua Tim';
+        
+        const transferMessage = `Sesi obrolan Anda telah dialihkan ke *${roleText} ${staffMember.department}*. Beliau akan segera merespons Anda.`;
+        await supabase.from('wa_messages').insert([{
+            wa_chat_id: chatId,
+            sender_type: 'staff',
+            message: transferMessage,
+            status: 'pending'
+        }]);
+    }
+    
     setSuccessMessage('Chat berhasil ditransfer!');
   };
 
