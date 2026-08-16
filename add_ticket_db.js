@@ -9,8 +9,8 @@ const client = new Client({
 });
 async function run() {
   await client.connect();
-  const res = await client.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'wa_messages'");
-  console.log(res.rows);
+  await client.query("ALTER TABLE wa_chats ADD COLUMN IF NOT EXISTS ticket_id text");
+  console.log('Ticket ID column added successfully');
   await client.end();
 }
-run();
+run().catch(console.error);

@@ -10,10 +10,14 @@ const client = new Client({
 async function run() {
   await client.connect();
   try {
-    const res = await client.query("SELECT * FROM public.pengawasan_lapangans ORDER BY id DESC LIMIT 5");
-    console.log(res.rows);
+    await client.query('CREATE POLICY "Allow anon select" ON public.pengawasan_lapangans FOR SELECT TO anon, authenticated USING (true);');
+    console.log('Select policy added successfully');
   } catch (err) {
-    console.error('Error:', err);
+    if (err.message.includes('already exists')) {
+       console.log('Policy already exists');
+    } else {
+       console.error('Error:', err);
+    }
   }
   await client.end();
 }

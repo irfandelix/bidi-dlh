@@ -9,7 +9,7 @@ const client = new Client({
 });
 async function run() {
   await client.connect();
-  const res = await client.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'wa_messages'");
+  const res = await client.query("SELECT * FROM pg_policies WHERE tablename = 'pengawasan_lapangans'");
   console.log(res.rows);
   await client.end();
 }

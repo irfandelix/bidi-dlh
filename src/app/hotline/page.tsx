@@ -306,12 +306,19 @@ export default function HotlineDashboard() {
                           input.value = '';
                           
                           // Insert to Supabase with status 'pending'
-                          await supabase.from('wa_messages').insert([{
+                          const { error } = await supabase.from('wa_messages').insert([{
                               wa_chat_id: selectedChat.phone_number,
-                              sender_type: 'web_admin',
+                              sender_type: 'staff',
                               message: text,
                               status: 'pending'
                           }]);
+                          
+                          if (error) {
+                              console.error("Supabase Insert Error:", error);
+                              alert("Gagal mengirim pesan: " + error.message);
+                              input.value = text; // Kembalikan teks jika gagal
+                              return;
+                          }
                           
                           // Update chat last_message
                           await supabase.from('wa_chats').update({
