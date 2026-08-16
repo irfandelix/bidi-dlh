@@ -59,7 +59,7 @@ export default function HotlineDashboard() {
   };
 
   const fetchMessages = async (chatId: string) => {
-    const { data } = await supabase.from('wa_messages').select('*').eq('wa_chat_id', chatId).order('created_at', { ascending: true });
+    const { data } = await supabase.from('wa_messages').select('*').eq('wa_chat_id', chatId).neq('sender_type', 'system_transfer').order('created_at', { ascending: true });
     if (data) setMessages(data);
   };
 
@@ -103,12 +103,28 @@ export default function HotlineDashboard() {
         if (staffMember.role.toLowerCase().includes('katim')) roleText = 'Ketua Tim';
         
         const transferMessage = `Sesi obrolan Anda telah dialihkan ke *${roleText} ${staffMember.department}*. Beliau akan segera merespons Anda.`;
-        await supabase.from('wa_messages').insert([{
-            wa_chat_id: chatId,
-            sender_type: 'staff',
-            message: transferMessage,
-            status: 'pending'
-        }]);
+        
+        const selectedChatData = chats.find(c => c.phone_number === chatId);
+        const lastMsg = selectedChatData ? selectedChatData.last_message : '';
+        const citizenName = selectedChatData ? selectedChatData.name : 'Warga';
+        const chatCategory = selectedChatData ? selectedChatData.category : 'Umum';
+        
+        const katimNotification = `⚠️ *PELIMPAHAN TIKET BARU (${chatCategory.toUpperCase()})*\nPelapor: *${citizenName}*\n\n_${lastMsg}_\n\n---\n_ID Sistem: (Abaikan, silakan Swipe Kanan pesan ini untuk membalas)_\nDari: +${chatId.split('@')[0]}`;
+        
+        await supabase.from('wa_messages').insert([
+            {
+                wa_chat_id: chatId,
+                sender_type: 'staff',
+                message: transferMessage,
+                status: 'pending'
+            },
+            {
+                wa_chat_id: chatId,
+                sender_type: 'system_transfer',
+                message: katimNotification,
+                status: 'pending'
+            }
+        ]);
     }
     
     setSuccessMessage('Chat berhasil ditransfer!');
