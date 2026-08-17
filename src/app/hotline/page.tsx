@@ -132,12 +132,21 @@ export default function HotlineDashboard() {
         const katimNotification = `⚠️ *PELIMPAHAN TIKET BARU (${chatCategory.toUpperCase()})*\nPengirim: *${citizenName}*\nTiket: ${chatTicketId}\n\n*Riwayat Percakapan (10 terakhir):*\n\n${historyText}\n\n---\n_(Abaikan tulisan ini, cukup Swipe Kanan pesan ini untuk membalas)_`;
         
         // Dapatkan nomor Katim dari database
-        const { data: staffData } = await supabase.from('wa_staff').select('phone_number').eq('id', staffId).single();
+        const { data: staffData } = await supabase.from('wa_staff').select('name, phone_number').eq('id', staffId).single();
         let katimPhoneTarget = chatId; // Default fallback
         if (staffData && staffData.phone_number) {
             let phone = staffData.phone_number.split('@')[0].replace(/\D/g, '');
             if (phone.startsWith('0')) phone = '62' + phone.substring(1);
             katimPhoneTarget = phone + '@s.whatsapp.net';
+            
+            // Mencegah Error 409 (Foreign Key Conflict):
+            // Pastikan Katim terdaftar di tabel wa_chats sebelum memasukkan pesan.
+            await supabase.from('wa_chats').upsert({
+                phone_number: katimPhoneTarget,
+                name: staffData.name || 'Ketua Tim',
+                last_message_time: new Date().toISOString(),
+                category: 'Umum'
+            }, { onConflict: 'phone_number' });
         }
         
         await supabase.from('wa_messages').insert([
