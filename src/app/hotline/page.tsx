@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { PhoneCall, MessageSquare, Settings2, ShieldCheck, Users, Search, Clock, Save, Trash2, Edit2, Plus, ArrowRight } from 'lucide-react';
+import { PhoneCall, MessageSquare, Settings2, ShieldCheck, Users, Search, Clock, Save, Trash2, Edit2, Plus, ArrowRight, Paperclip, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 const supabase = createClient();

@@ -15,6 +15,9 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
   const [message, setMessage] = useState('');
 
   const [daftarPegawai, setDaftarPegawai] = useState<any[]>([]);
+  const [includeUndangan, setIncludeUndangan] = useState(false);
+  const [undanganFile, setUndanganFile] = useState<File | null>(null);
+  const [nomorUndangan, setNomorUndangan] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -63,6 +66,46 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
     };
 
     try {
+      if (includeUndangan && undanganFile && nomorUndangan) {
+        setMessage('Mengunggah file undangan...');
+        const uploadData = new FormData();
+        uploadData.append('file', undanganFile);
+        uploadData.append('folderName', 'Arsip Undangan Sidang');
+
+        const uploadRes = await fetch('/api/perizinan/upload', {
+          method: 'POST',
+          body: uploadData
+        });
+        
+        if (!uploadRes.ok) {
+          const uploadResult = await uploadRes.json();
+          alert('Gagal mengunggah undangan: ' + (uploadResult.error || 'Unknown error'));
+          setSubmittingAction(null);
+          return;
+        }
+
+        const uploadResult = await uploadRes.json();
+        
+        setMessage('Menyimpan ke Arsip...');
+        const arsipPayload = {
+          kode_klasifikasi: '000', 
+          nomor_surat_keluar: nomorUndangan,
+          tanggal_surat: new Date().toISOString().split('T')[0],
+          tujuan: doc.nama_pemrakarsa || 'Pemrakarsa',
+          perihal: `Undangan Sidang - ${doc.nama_kegiatan}`,
+          file_url: uploadResult.url || uploadResult.id,
+          jumlah: 1,
+          status_surat: 'Biasa'
+        };
+
+        await fetch('/api/arsip-keluar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(arsipPayload)
+        });
+      }
+
+      setMessage('Memproses Data Pemeriksaan...');
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -197,6 +240,44 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
               </div>
             </div>
             <p className="text-[11px] text-on-surface-variant mt-3 font-bold uppercase">* Kepala Bidang akan otomatis menjadi Penandatangan Utama (Kiri Bawah).</p>
+          </div>
+
+          <div className="pt-8 border-t border-outline-variant mt-8">
+            <div className="bg-surface border border-outline-variant rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <label className="flex items-center gap-3 cursor-pointer mb-4">
+                <input 
+                  type="checkbox" 
+                  checked={includeUndangan}
+                  onChange={(e) => setIncludeUndangan(e.target.checked)}
+                  className="w-5 h-5 text-indigo-500 bg-surface border border-outline-variant rounded focus:ring-indigo-500 cursor-pointer shadow-sm" 
+                />
+                <span className="font-bold text-on-surface uppercase tracking-wide">11. UNDANGAN SIDANG</span>
+              </label>
+
+              {includeUndangan && (
+                <div className="pl-8 space-y-4">
+                  <input 
+                    type="text" 
+                    placeholder="Input nomor surat..." 
+                    value={nomorUndangan}
+                    onChange={(e) => setNomorUndangan(e.target.value)}
+                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none"
+                    required={includeUndangan}
+                  />
+                  
+                  <div className="pt-4 border-t border-outline-variant">
+                    <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">UPLOAD SCAN UNDANGAN (PDF)</label>
+                    <input 
+                      type="file" 
+                      accept="application/pdf"
+                      onChange={(e) => setUndanganFile(e.target.files?.[0] || null)}
+                      className="block w-full text-sm text-on-surface file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-outline-variant file:text-sm file:font-bold file:bg-[#ffd149] file:text-black hover:file:bg-[#e5bc41] cursor-pointer"
+                      required={includeUndangan}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
             <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
