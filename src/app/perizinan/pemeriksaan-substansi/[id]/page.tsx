@@ -57,20 +57,15 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
       tambahan_kolom_kosong: formData.get('tambahan_kolom_kosong')
     };
 
-    const payload = {
-      nomor_ba_pemeriksaan: 'AUTO',
-      tanggal_pemeriksaan: formData.get('tanggal_pemeriksaan'),
-      penandatangan_pemeriksaan: JSON.stringify(penandatangan),
-      status_tahapan, 
-      penandatangan_hua: updatedEkstra
-    };
+    let updatedArsipFisik = {};
+    try { if (doc.arsip_fisik) updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
 
     try {
       if (includeUndangan && undanganFile && nomorUndangan) {
         setMessage('Mengunggah file undangan...');
         const uploadData = new FormData();
         uploadData.append('file', undanganFile);
-        uploadData.append('folderName', 'Arsip Undangan Sidang');
+        uploadData.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
 
         const uploadRes = await fetch('/api/perizinan/upload', {
           method: 'POST',
@@ -86,24 +81,23 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
 
         const uploadResult = await uploadRes.json();
         
-        setMessage('Menyimpan ke Arsip...');
-        const arsipPayload = {
-          kode_klasifikasi: '000', 
-          nomor_surat_keluar: nomorUndangan,
-          tanggal_surat: new Date().toISOString().split('T')[0],
-          tujuan: doc.nama_pemrakarsa || 'Pemrakarsa',
-          perihal: `Undangan Sidang - ${doc.nama_kegiatan}`,
-          file_url: uploadResult.url || uploadResult.id,
-          jumlah: 1,
-          status_surat: 'Biasa'
+        // Simpan ke arsip_fisik agar masuk ke Arsip Perizinan
+        updatedArsipFisik = {
+          ...updatedArsipFisik,
+          undanganSidang: true,
+          noUndanganSidang: nomorUndangan,
+          urlUndanganSidang: uploadResult.url || uploadResult.id
         };
-
-        await fetch('/api/arsip-keluar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(arsipPayload)
-        });
       }
+
+      const payload = {
+        nomor_ba_pemeriksaan: 'AUTO',
+        tanggal_pemeriksaan: formData.get('tanggal_pemeriksaan'),
+        penandatangan_pemeriksaan: JSON.stringify(penandatangan),
+        status_tahapan, 
+        penandatangan_hua: updatedEkstra,
+        arsip_fisik: updatedArsipFisik
+      };
 
       setMessage('Memproses Data Pemeriksaan...');
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
