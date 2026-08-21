@@ -26,6 +26,19 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
       fetch('/api/tim-penilai').then(res => res.json())
     ]).then(([docRes, pegawaiRes]) => {
       setDoc(docRes.data);
+      
+      let af: any = {};
+      try { 
+        if (docRes.data?.arsip_fisik) {
+          af = typeof docRes.data.arsip_fisik === 'string' ? JSON.parse(docRes.data.arsip_fisik) : docRes.data.arsip_fisik; 
+        }
+      } catch(e) {}
+      
+      if (af.undanganSidang) {
+        setIncludeUndangan(true);
+        if (af.noUndanganSidang) setNomorUndangan(af.noUndanganSidang);
+      }
+
       // Urutkan berdasarkan urutan_hierarki
       const sortedPegawai = (pegawaiRes.data || []).sort((a: any, b: any) => (a.urutan_hierarki || 0) - (b.urutan_hierarki || 0));
       setDaftarPegawai(sortedPegawai);
@@ -156,11 +169,21 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
   if (loading) return <LottieLoader size={150} text="MEMUAT DATA..." />;
   if (!doc) return <div className="text-center py-20 text-error font-bold bg-error-container text-on-error-container border border-outline-variant m-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">DATA TIDAK DITEMUKAN!</div>;
 
+  let arsipFisik: any = {};
+  try {
+    if (doc?.arsip_fisik) {
+      arsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik;
+    }
+  } catch (e) {}
+  const hasUndangan = arsipFisik?.undanganSidang === true;
+
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-8 pb-20">
       <Link href="/perizinan/daftar" className="inline-flex items-center gap-2 text-sm text-on-surface font-bold transition-all bg-surface border border-outline-variant px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow uppercase tracking-wide">
         <ArrowLeft size={16} /> Kembali ke Dashboard
       </Link>
+      
+      {/* existing JSX... */}
 
       {message && (
         <div className="p-4 bg-emerald-200 text-on-surface rounded-xl shadow-sm hover:shadow-md transition-shadow border border-outline-variant font-bold uppercase tracking-wide">
@@ -260,26 +283,35 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
           </div>
 
           <div className="pt-8 border-t border-outline-variant mt-8">
-            <div className="bg-surface border border-outline-variant rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className={`border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow ${hasUndangan ? 'bg-emerald-50 border-emerald-500' : 'bg-surface border-outline-variant'}`}>
               <label className="flex items-center gap-3 cursor-pointer mb-4">
                 <input 
                   type="checkbox" 
                   checked={includeUndangan}
                   onChange={(e) => setIncludeUndangan(e.target.checked)}
-                  className="w-5 h-5 text-indigo-500 bg-surface border border-outline-variant rounded focus:ring-indigo-500 cursor-pointer shadow-sm" 
+                  className={`w-5 h-5 border rounded focus:ring-indigo-500 cursor-pointer shadow-sm ${hasUndangan ? 'text-emerald-600 border-emerald-500 bg-emerald-100' : 'text-indigo-500 border-outline-variant bg-surface'}`} 
                 />
-                <span className="font-bold text-on-surface uppercase tracking-wide">11. UNDANGAN SIDANG</span>
+                <span className={`font-bold uppercase tracking-wide ${hasUndangan ? 'text-emerald-800' : 'text-on-surface'}`}>11. UNDANGAN SIDANG {hasUndangan && <CheckCircle2 className="inline ml-2 text-emerald-600" size={18} />}</span>
               </label>
 
               {includeUndangan && (
                 <div className="pl-8 space-y-4">
+                  {hasUndangan && arsipFisik?.urlUndanganSidang && (
+                    <div className="p-3 bg-emerald-100 border border-emerald-300 rounded-lg text-emerald-800 text-sm mb-4">
+                      ✅ Undangan telah diupload: 
+                      <a href={arsipFisik.urlUndanganSidang} target="_blank" rel="noopener noreferrer" className="ml-2 font-bold underline hover:text-emerald-900">
+                        Lihat Dokumen
+                      </a>
+                    </div>
+                  )}
+                  
                   <input 
                     type="text" 
                     placeholder="Input nomor surat..." 
                     value={nomorUndangan}
                     onChange={(e) => setNomorUndangan(e.target.value)}
                     className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none"
-                    required={includeUndangan}
+                    required={includeUndangan && !hasUndangan}
                   />
                   
                   <div className="pt-4 border-t border-outline-variant flex flex-col md:flex-row md:items-end gap-4">
