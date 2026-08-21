@@ -221,6 +221,61 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
           </div>
         </div>
 
+        <div className={`border rounded-2xl p-6 mb-8 shadow-sm hover:shadow-md transition-shadow ${hasUndangan ? 'bg-emerald-50 border-emerald-500' : 'bg-surface border-outline-variant'}`}>
+          <label className="flex items-center gap-3 cursor-pointer mb-4">
+            <input 
+              type="checkbox" 
+              checked={includeUndangan}
+              onChange={(e) => setIncludeUndangan(e.target.checked)}
+              className={`w-5 h-5 border rounded focus:ring-indigo-500 cursor-pointer shadow-sm ${hasUndangan ? 'text-emerald-600 border-emerald-500 bg-emerald-100' : 'text-indigo-500 border-outline-variant bg-surface'}`} 
+            />
+            <span className={`font-bold uppercase tracking-wide ${hasUndangan ? 'text-emerald-800' : 'text-on-surface'}`}>UNDANGAN PEMERIKSAAN {hasUndangan && <CheckCircle2 className="inline ml-2 text-emerald-600" size={18} />}</span>
+          </label>
+
+          {includeUndangan && (
+            <div className="pl-8 space-y-4">
+              {hasUndangan && arsipFisik?.urlUndanganSidang && (
+                <div className="p-3 bg-emerald-100 border border-emerald-300 rounded-lg text-emerald-800 text-sm mb-4">
+                  ✅ Undangan telah diupload: 
+                  <a href={arsipFisik.urlUndanganSidang} target="_blank" rel="noopener noreferrer" className="ml-2 font-bold underline hover:text-emerald-900">
+                    Lihat Dokumen
+                  </a>
+                </div>
+              )}
+              
+              <input 
+                type="text" 
+                placeholder="Input nomor surat..." 
+                value={nomorUndangan}
+                onChange={(e) => setNomorUndangan(e.target.value)}
+                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none"
+                required={includeUndangan && !hasUndangan}
+              />
+              
+              <div className="pt-4 border-t border-outline-variant flex flex-col md:flex-row md:items-end gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">UPLOAD SCAN UNDANGAN (PDF)</label>
+                  <input 
+                    type="file" 
+                    accept="application/pdf"
+                    onChange={(e) => setUndanganFile(e.target.files?.[0] || null)}
+                    className="block w-full text-sm text-on-surface file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-outline-variant file:text-sm file:font-bold file:bg-[#ffd149] file:text-black hover:file:bg-[#e5bc41] cursor-pointer"
+                  />
+                </div>
+                
+                <button 
+                  type="button" 
+                  onClick={handleSimpanUndangan}
+                  disabled={isUploadingUndangan || !undanganFile || !nomorUndangan}
+                  className="px-6 py-2 bg-indigo-500 text-white font-bold rounded-lg hover:bg-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 flex items-center justify-center min-w-[120px]"
+                >
+                  {isUploadingUndangan ? <LottieLoader size={20} /> : 'Simpan'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
             <div>
@@ -282,62 +337,7 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
             <p className="text-[11px] text-on-surface-variant mt-3 font-bold uppercase">* Kepala Bidang akan otomatis menjadi Penandatangan Utama (Kiri Bawah).</p>
           </div>
 
-          <div className="pt-8 border-t border-outline-variant mt-8">
-            <div className={`border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow ${hasUndangan ? 'bg-emerald-50 border-emerald-500' : 'bg-surface border-outline-variant'}`}>
-              <label className="flex items-center gap-3 cursor-pointer mb-4">
-                <input 
-                  type="checkbox" 
-                  checked={includeUndangan}
-                  onChange={(e) => setIncludeUndangan(e.target.checked)}
-                  className={`w-5 h-5 border rounded focus:ring-indigo-500 cursor-pointer shadow-sm ${hasUndangan ? 'text-emerald-600 border-emerald-500 bg-emerald-100' : 'text-indigo-500 border-outline-variant bg-surface'}`} 
-                />
-                <span className={`font-bold uppercase tracking-wide ${hasUndangan ? 'text-emerald-800' : 'text-on-surface'}`}>11. UNDANGAN SIDANG {hasUndangan && <CheckCircle2 className="inline ml-2 text-emerald-600" size={18} />}</span>
-              </label>
 
-              {includeUndangan && (
-                <div className="pl-8 space-y-4">
-                  {hasUndangan && arsipFisik?.urlUndanganSidang && (
-                    <div className="p-3 bg-emerald-100 border border-emerald-300 rounded-lg text-emerald-800 text-sm mb-4">
-                      ✅ Undangan telah diupload: 
-                      <a href={arsipFisik.urlUndanganSidang} target="_blank" rel="noopener noreferrer" className="ml-2 font-bold underline hover:text-emerald-900">
-                        Lihat Dokumen
-                      </a>
-                    </div>
-                  )}
-                  
-                  <input 
-                    type="text" 
-                    placeholder="Input nomor surat..." 
-                    value={nomorUndangan}
-                    onChange={(e) => setNomorUndangan(e.target.value)}
-                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none"
-                    required={includeUndangan && !hasUndangan}
-                  />
-                  
-                  <div className="pt-4 border-t border-outline-variant flex flex-col md:flex-row md:items-end gap-4">
-                    <div className="flex-1">
-                      <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">UPLOAD SCAN UNDANGAN (PDF)</label>
-                      <input 
-                        type="file" 
-                        accept="application/pdf"
-                        onChange={(e) => setUndanganFile(e.target.files?.[0] || null)}
-                        className="block w-full text-sm text-on-surface file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-outline-variant file:text-sm file:font-bold file:bg-[#ffd149] file:text-black hover:file:bg-[#e5bc41] cursor-pointer"
-                      />
-                    </div>
-                    
-                    <button 
-                      type="button" 
-                      onClick={handleSimpanUndangan}
-                      disabled={isUploadingUndangan || !undanganFile || !nomorUndangan}
-                      className="px-6 py-2 bg-indigo-500 text-white font-bold rounded-lg hover:bg-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 flex items-center justify-center min-w-[120px]"
-                    >
-                      {isUploadingUndangan ? <LottieLoader size={20} /> : 'Simpan'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
 
             <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
               className="w-full px-8 py-4 bg-error text-on-error hover:bg-error-container text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
