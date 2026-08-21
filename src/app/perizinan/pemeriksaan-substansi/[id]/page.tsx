@@ -18,6 +18,7 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
   const [includeUndangan, setIncludeUndangan] = useState(false);
   const [undanganFile, setUndanganFile] = useState<File | null>(null);
   const [nomorUndangan, setNomorUndangan] = useState('');
+  const [isUploadingUndangan, setIsUploadingUndangan] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -31,6 +32,61 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
       setLoading(false);
     });
   }, [unwrappedParams.id]);
+
+  const handleSimpanUndangan = async () => {
+    if (!undanganFile || !nomorUndangan) {
+      alert('Mohon isi nomor surat dan pilih file undangan terlebih dahulu.');
+      return;
+    }
+    
+    setIsUploadingUndangan(true);
+    setMessage('Mengunggah file undangan...');
+    
+    try {
+      const uploadData = new FormData();
+      uploadData.append('file', undanganFile);
+      uploadData.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
+
+      const uploadRes = await fetch('/api/perizinan/upload', {
+        method: 'POST',
+        body: uploadData
+      });
+      
+      if (!uploadRes.ok) {
+        throw new Error('Gagal mengunggah file undangan.');
+      }
+
+      const uploadResult = await uploadRes.json();
+      
+      let updatedArsipFisik = {};
+      try { if (doc.arsip_fisik) updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+      
+      updatedArsipFisik = {
+        ...updatedArsipFisik,
+        undanganSidang: true,
+        noUndanganSidang: nomorUndangan,
+        urlUndanganSidang: uploadResult.url || uploadResult.id
+      };
+
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ arsip_fisik: updatedArsipFisik })
+      });
+
+      if (res.ok) {
+        alert('Undangan berhasil di-upload dan tersimpan di Arsip Perizinan!');
+        setIncludeUndangan(false);
+      } else {
+        throw new Error('Gagal menyimpan data undangan ke database.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsUploadingUndangan(false);
+      setMessage('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -57,48 +113,15 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
       tambahan_kolom_kosong: formData.get('tambahan_kolom_kosong')
     };
 
-    let updatedArsipFisik = {};
-    try { if (doc.arsip_fisik) updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+    const payload = {
+      nomor_ba_pemeriksaan: 'AUTO',
+      tanggal_pemeriksaan: formData.get('tanggal_pemeriksaan'),
+      penandatangan_pemeriksaan: JSON.stringify(penandatangan),
+      status_tahapan, 
+      penandatangan_hua: updatedEkstra
+    };
 
     try {
-      if (includeUndangan && undanganFile && nomorUndangan) {
-        setMessage('Mengunggah file undangan...');
-        const uploadData = new FormData();
-        uploadData.append('file', undanganFile);
-        uploadData.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
-
-        const uploadRes = await fetch('/api/perizinan/upload', {
-          method: 'POST',
-          body: uploadData
-        });
-        
-        if (!uploadRes.ok) {
-          const uploadResult = await uploadRes.json();
-          alert('Gagal mengunggah undangan: ' + (uploadResult.error || 'Unknown error'));
-          setSubmittingAction(null);
-          return;
-        }
-
-        const uploadResult = await uploadRes.json();
-        
-        // Simpan ke arsip_fisik agar masuk ke Arsip Perizinan
-        updatedArsipFisik = {
-          ...updatedArsipFisik,
-          undanganSidang: true,
-          noUndanganSidang: nomorUndangan,
-          urlUndanganSidang: uploadResult.url || uploadResult.id
-        };
-      }
-
-      const payload = {
-        nomor_ba_pemeriksaan: 'AUTO',
-        tanggal_pemeriksaan: formData.get('tanggal_pemeriksaan'),
-        penandatangan_pemeriksaan: JSON.stringify(penandatangan),
-        status_tahapan, 
-        penandatangan_hua: updatedEkstra,
-        arsip_fisik: updatedArsipFisik
-      };
-
       setMessage('Memproses Data Pemeriksaan...');
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
         method: 'PUT',
@@ -259,15 +282,25 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
                     required={includeUndangan}
                   />
                   
-                  <div className="pt-4 border-t border-outline-variant">
-                    <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">UPLOAD SCAN UNDANGAN (PDF)</label>
-                    <input 
-                      type="file" 
-                      accept="application/pdf"
-                      onChange={(e) => setUndanganFile(e.target.files?.[0] || null)}
-                      className="block w-full text-sm text-on-surface file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-outline-variant file:text-sm file:font-bold file:bg-[#ffd149] file:text-black hover:file:bg-[#e5bc41] cursor-pointer"
-                      required={includeUndangan}
-                    />
+                  <div className="pt-4 border-t border-outline-variant flex flex-col md:flex-row md:items-end gap-4">
+                    <div className="flex-1">
+                      <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">UPLOAD SCAN UNDANGAN (PDF)</label>
+                      <input 
+                        type="file" 
+                        accept="application/pdf"
+                        onChange={(e) => setUndanganFile(e.target.files?.[0] || null)}
+                        className="block w-full text-sm text-on-surface file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-outline-variant file:text-sm file:font-bold file:bg-[#ffd149] file:text-black hover:file:bg-[#e5bc41] cursor-pointer"
+                      />
+                    </div>
+                    
+                    <button 
+                      type="button" 
+                      onClick={handleSimpanUndangan}
+                      disabled={isUploadingUndangan || !undanganFile || !nomorUndangan}
+                      className="px-6 py-2 bg-indigo-500 text-white font-bold rounded-lg hover:bg-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 flex items-center justify-center min-w-[120px]"
+                    >
+                      {isUploadingUndangan ? <LottieLoader size={20} /> : 'Simpan'}
+                    </button>
                   </div>
                 </div>
               )}
