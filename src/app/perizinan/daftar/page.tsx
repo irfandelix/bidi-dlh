@@ -62,8 +62,15 @@ export default function DaftarPerizinanPage() {
     orange: { light: 'bg-orange-50', text: 'text-orange-700', solid: 'bg-orange-500', icon: 'text-orange-500', hover: 'hover:text-orange-600', cardBg: 'bg-orange-100', cardText: 'text-orange-600' },
   };
 
-  const allStage = { id: 0, title: 'Semua Dokumen', shortTitle: 'Semua', statuses: [], color: 'slate', icon: LayoutDashboard, link: '' };
-  const [activeStage, setActiveStage] = useState<any>(allStage);
+  const groupTabs = [
+    { id: 0, title: 'Semua Dokumen', shortTitle: 'Semua', color: 'slate', icon: LayoutDashboard, filterFn: (d: any) => true },
+    { id: 1, title: 'Pendaftaran Baru', shortTitle: 'Baru', color: 'teal', icon: Plus, filterFn: (d: any) => [1, 2].includes(getStageForStatus(d.status_tahapan, d).id) },
+    { id: 2, title: 'Sedang Diproses', shortTitle: 'Diproses', color: 'indigo', icon: Clock, filterFn: (d: any) => [3, 4, 7, 10, 11].includes(getStageForStatus(d.status_tahapan, d).id) },
+    { id: 3, title: 'Menunggu Revisi', shortTitle: 'Revisi', color: 'rose', icon: RotateCcw, filterFn: (d: any) => [5, 6, 8, 9].includes(getStageForStatus(d.status_tahapan, d).id) },
+    { id: 4, title: 'Arsip / Selesai', shortTitle: 'Arsip', color: 'emerald', icon: Archive, filterFn: (d: any) => [12].includes(getStageForStatus(d.status_tahapan, d).id) },
+  ];
+
+  const [activeGroup, setActiveGroup] = useState<any>(groupTabs[0]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -78,21 +85,8 @@ export default function DaftarPerizinanPage() {
     return stages.find(s => s.statuses.includes(status)) || stages[1]; // default to Uji Admin if not found
   };
 
-  // Filter docs based on active stage
-  const activeDocs = activeStage.id === 0 ? docs : docs.filter(d => {
-    // Tampilkan semua dokumen di menu Arsip (ID 12) agar pemrakarsa bisa mencicil upload file arsip kapan saja
-    if (activeStage.id === 12) return true;
-
-    const currentStage = getStageForStatus(d.status_tahapan, d);
-    // Jika dokumen sedang berada di tahap yang dipilih, tampilkan
-    if (activeStage.statuses.includes(d.status_tahapan)) return true;
-    
-    // Jika dokumen SUDAH MELEWATI tahap yang dipilih (id tahap saat ini >= id tahap yang difilter)
-    // Maka tetap tampilkan (misal: filter Uji Admin (2), dokumen di Pemeriksaan (4) -> tampilkan)
-    if (currentStage.id >= activeStage.id) return true;
-
-    return false;
-  });
+  // Filter docs based on active group
+  const activeDocs = docs.filter(d => activeGroup.filterFn(d));
 
   
   // Pagination
@@ -129,35 +123,18 @@ export default function DaftarPerizinanPage() {
         </div>
       </div>
 
-      {/* 12 Stages Buttons (Light Neobrutalism) - Grid 3 Kolom */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {stages.map((stage) => {
-          const theme = colorMap[stage.color];
-          const Icon = stage.icon;
-          const isActive = activeStage.id === stage.id;
-
-          if (stage.id === 1) {
-            return (
-              <Link 
-                href={stage.link}
-                key={stage.id} 
-                className={`text-left p-4 rounded-xl border border-slate-200 transition-all group flex items-center gap-4 cursor-pointer bg-white shadow-md hover:-translate-y-1 hover:shadow-md`}
-              >
-                <div className={`w-12 h-12 shrink-0 rounded-xl border border-slate-200 flex items-center justify-center shadow-sm transition-transform ${theme.cardBg} ${theme.cardText} group-hover:scale-110`}>
-                  <Icon size={20} />
-                </div>
-                <p className="text-sm font-black tracking-wide uppercase text-slate-800">
-                  {stage.title}
-                </p>
-              </Link>
-            );
-          }
+      {/* 5 Group Tabs (Light Neobrutalism) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {groupTabs.map((group) => {
+          const theme = colorMap[group.color];
+          const Icon = group.icon;
+          const isActive = activeGroup.id === group.id;
 
           return (
             <button 
-              onClick={() => { setActiveStage(stage); setCurrentPage(1); }}
-              key={stage.id} 
-              className={`text-left p-4 rounded-xl border border-slate-200 transition-all group flex items-center gap-4 cursor-pointer ${
+              onClick={() => { setActiveGroup(group); setCurrentPage(1); }}
+              key={group.id} 
+              className={`text-left p-4 rounded-xl border border-slate-200 transition-all group flex flex-col xl:flex-row items-center xl:items-start gap-4 cursor-pointer ${
                 isActive 
                   ? 'bg-slate-900 text-white shadow-sm translate-y-1' 
                   : 'bg-white shadow-md hover:-translate-y-1 hover:shadow-md'
@@ -168,8 +145,8 @@ export default function DaftarPerizinanPage() {
               }`}>
                 <Icon size={20} />
               </div>
-              <p className={`text-sm font-black tracking-wide uppercase ${isActive ? 'text-white' : 'text-slate-800'}`}>
-                {stage.title}
+              <p className={`text-sm font-black tracking-wide uppercase text-center xl:text-left mt-1 xl:mt-0 ${isActive ? 'text-white' : 'text-slate-800'}`}>
+                {group.title}
               </p>
             </button>
           );
@@ -182,17 +159,17 @@ export default function DaftarPerizinanPage() {
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white rounded-xl border border-slate-200 flex items-center justify-center shadow-sm">
               {(() => {
-                const ActiveIcon = activeStage.icon;
+                const ActiveIcon = activeGroup.icon;
                 return <ActiveIcon size={20} className="text-slate-900" />;
               })()}
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 uppercase">Daftar Dokumen: {activeStage.shortTitle}</h3>
-              <p className="text-sm font-bold text-slate-500">{activeDocs.length} dokumen {activeStage.id === 0 ? 'keseluruhan' : 'dalam tahap ini'}</p>
+              <h3 className="text-xl font-black text-slate-900 uppercase">Daftar Dokumen: {activeGroup.shortTitle}</h3>
+              <p className="text-sm font-bold text-slate-500">{activeDocs.length} dokumen {activeGroup.id === 0 ? 'keseluruhan' : 'dalam kelompok ini'}</p>
             </div>
           </div>
-          {activeStage.id !== 0 && (
-            <button onClick={() => { setActiveStage(allStage); setCurrentPage(1); }} className="bg-slate-900 text-white px-4 py-2 rounded-xl border border-slate-200 text-xs font-black uppercase shadow-md hover:-translate-y-1 hover:shadow-md transition-all">
+          {activeGroup.id !== 0 && (
+            <button onClick={() => { setActiveGroup(groupTabs[0]); setCurrentPage(1); }} className="bg-slate-900 text-white px-4 py-2 rounded-xl border border-slate-200 text-xs font-black uppercase shadow-md hover:-translate-y-1 hover:shadow-md transition-all">
               Lihat Semua Dokumen
             </button>
           )}
