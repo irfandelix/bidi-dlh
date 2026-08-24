@@ -289,7 +289,6 @@ export default function DaftarPerizinanPage() {
           </div>
         )}
       </div>
-      </div>
 
       {/* Modal Pilih Tahapan */}
       {isActionModalOpen && selectedDoc && (
