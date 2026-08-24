@@ -8,7 +8,7 @@ import LottieLoader from '@/components/LottieLoader';
 
 export default function Home() {
   const [stats, setStats] = useState({
-    perizinan: { total: 0, selesai: 0, proses: 0, ditolak: 0 },
+    perizinan: { total: 0, selesai: 0, proses: 0, dikembalikan: 0, ditolak: 0 },
     pengawasan: { total: 0, taat: 0, kurang: 0, tidak: 0 },
     pengaduan: { total: 0, belum: 0, proses: 0, selesai: 0 }
   });
@@ -52,9 +52,10 @@ export default function Home() {
         ]);
 
         const pData: any[] = perizinanRes.data || [];
-        const pSelesai = pData.filter(d => ['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan'].includes(d.status_tahapan)).length;
-        const pDitolak = pData.filter(d => ['DIKEMBALIKAN', 'Dikembalikan / Ditolak'].includes(d.status_tahapan)).length;
-        const pProses = pData.length - pSelesai - pDitolak;
+        const pSelesai = pData.filter(d => ['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan', 'Selesai'].includes(d.status_tahapan)).length;
+        const pDikembalikan = pData.filter(d => ['DIKEMBALIKAN', 'Dikembalikan / Ditolak', 'Pengembalian BA', 'Pengembalian Revisi'].includes(d.status_tahapan)).length;
+        const pDitolak = pData.filter(d => ['DITOLAK', 'BATAL', 'Ditolak', 'Batal'].includes(d.status_tahapan)).length;
+        const pProses = pData.length - pSelesai - pDikembalikan - pDitolak;
 
         const gData: any[] = pengawasanRes.data || [];
         const gTaat = gData.filter(d => d.status_ketaatan === 'Taat').length;
@@ -62,7 +63,7 @@ export default function Home() {
         const gTidak = gData.filter(d => d.status_ketaatan === 'Tidak Taat').length;
 
         setStats({
-          perizinan: { total: pData.length, selesai: pSelesai, proses: pProses, ditolak: pDitolak },
+          perizinan: { total: pData.length, selesai: pSelesai, proses: pProses, dikembalikan: pDikembalikan, ditolak: pDitolak },
           pengawasan: { total: gData.length, taat: gTaat, kurang: gKurang, tidak: gTidak },
           pengaduan: { total: 0, belum: 0, proses: 0, selesai: 0 } // Mocked until API is ready
         });
@@ -111,33 +112,35 @@ export default function Home() {
           </div>
           <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest">Data Perizinan</h2>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <div onClick={() => openModal('Total Permohonan', 'perizinan', () => true)} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
-            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Permohonan</p>
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-slate-900">{loading ? '...' : stats.perizinan.total}</h3>
-              <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
           </div>
-          <div onClick={() => openModal('Sedang Proses', 'perizinan', (d) => !['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan', 'DIKEMBALIKAN', 'Dikembalikan / Ditolak'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
-            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Sedang Proses</p>
+          <div onClick={() => openModal('Sedang Proses', 'perizinan', (d) => !['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan', 'DIKEMBALIKAN', 'Dikembalikan / Ditolak', 'Pengembalian BA', 'Pengembalian Revisi', 'DITOLAK', 'BATAL', 'Ditolak', 'Batal'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Diproses</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-amber-600">{loading ? '...' : stats.perizinan.proses}</h3>
-              <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
           </div>
-          <div onClick={() => openModal('Selesai / SK', 'perizinan', (d) => ['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
-            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Selesai / SK</p>
+          <div onClick={() => openModal('Selesai / SK', 'perizinan', (d) => ['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan', 'Selesai'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Selesai</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-emerald-600">{loading ? '...' : stats.perizinan.selesai}</h3>
-              <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
           </div>
-          <div onClick={() => openModal('Ditolak / Batal', 'perizinan', (d) => ['DIKEMBALIKAN', 'Dikembalikan / Ditolak'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
-            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Ditolak / Batal</p>
+          <div onClick={() => openModal('Dikembalikan', 'perizinan', (d) => ['DIKEMBALIKAN', 'Dikembalikan / Ditolak', 'Pengembalian BA', 'Pengembalian Revisi'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Kembali</p>
+            <div className="flex items-end gap-2">
+              <h3 className="text-4xl font-black text-blue-600">{loading ? '...' : stats.perizinan.dikembalikan}</h3>
+            </div>
+          </div>
+          <div onClick={() => openModal('Ditolak / Batal', 'perizinan', (d) => ['DITOLAK', 'BATAL', 'Ditolak', 'Batal'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
+            <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Ditolak</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-rose-600">{loading ? '...' : stats.perizinan.ditolak}</h3>
-              <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
           </div>
         </div>
