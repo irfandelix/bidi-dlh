@@ -28,7 +28,7 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
     setSubmitting(true);
     
     const formData = new FormData(e.currentTarget);
-    const status_tahapan = 'Dikembalikan / Ditolak'; 
+    const status_tahapan = 'DIKEMBALIKAN';
 
     const payload = {
       tanggal_pengembalian: formData.get('tanggal_pengembalian'),
@@ -75,7 +75,7 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
         </div>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface uppercase">Form Pengembalian Dokumen</h2>
-          <p className="text-sm font-bold text-on-surface-variant mt-1 uppercase">TAHUN {doc.tahun || '2026'} | BERKAS DIKEMBALIKAN / DITOLAK</p>
+          <p className="text-sm font-bold text-on-surface-variant mt-1 uppercase">TAHUN {doc.tahun || '2026'} | BERKAS DIKEMBALIKAN</p>
         </div>
       </div>
       

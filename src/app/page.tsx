@@ -38,7 +38,7 @@ export default function Home() {
 
         const pData: any[] = perizinanRes.data || [];
         const pSelesai = pData.filter(d => ['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan'].includes(d.status_tahapan)).length;
-        const pDitolak = pData.filter(d => ['Dikembalikan / Ditolak'].includes(d.status_tahapan)).length;
+        const pDitolak = pData.filter(d => ['DIKEMBALIKAN', 'Dikembalikan / Ditolak'].includes(d.status_tahapan)).length;
         const pProses = pData.length - pSelesai - pDitolak;
 
         const gData: any[] = pengawasanRes.data || [];
@@ -245,7 +245,7 @@ export default function Home() {
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-[10px] font-bold text-slate-600 tracking-wide line-clamp-1 flex-1">{doc.nama_pemrakarsa}</span>
                           <span className="shrink-0 inline-block px-2 py-1 bg-white text-slate-900 rounded-lg text-[9px] font-black uppercase tracking-widest border border-slate-200 shadow-sm">
-                            {doc.status_tahapan || 'Antrean'}
+                            {doc.status_tahapan === 'Dikembalikan / Ditolak' ? 'DIKEMBALIKAN' : doc.status_tahapan || 'Antrean'}
                           </span>
                         </div>
                       </div>
