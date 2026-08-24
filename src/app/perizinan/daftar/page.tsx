@@ -67,7 +67,7 @@ export default function DaftarPerizinanPage() {
     { id: 1, title: 'Pendaftaran Baru', shortTitle: 'Baru', color: 'teal', icon: Plus, filterFn: (d: any) => [1, 2].includes(getStageForStatus(d.status_tahapan, d).id) },
     { id: 2, title: 'Sedang Diproses', shortTitle: 'Diproses', color: 'indigo', icon: Clock, filterFn: (d: any) => [3, 4, 7, 10, 11].includes(getStageForStatus(d.status_tahapan, d).id) },
     { id: 3, title: 'Menunggu Revisi', shortTitle: 'Revisi', color: 'rose', icon: RotateCcw, filterFn: (d: any) => [5, 6, 8, 9].includes(getStageForStatus(d.status_tahapan, d).id) },
-    { id: 4, title: 'Arsip / Selesai', shortTitle: 'Arsip', color: 'emerald', icon: Archive, filterFn: (d: any) => [12].includes(getStageForStatus(d.status_tahapan, d).id) },
+    { id: 4, title: 'Dokumen Selesai', shortTitle: 'Selesai', color: 'emerald', icon: Archive, filterFn: (d: any) => [12].includes(getStageForStatus(d.status_tahapan, d).id) },
   ];
 
   const [activeGroup, setActiveGroup] = useState<any>(groupTabs[0]);
