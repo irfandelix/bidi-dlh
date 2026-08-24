@@ -267,6 +267,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
             <p className="font-bold bg-teal-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block mt-1 text-sm shadow-sm hover:shadow-md transition-shadow">
               #{String(doc.no_urut || doc.id).padStart(3, '0')} / {doc.tahun || '2026'}
             </p>
+          </div>
         </div>
 
         {/* Upload Arsip Fisik Awal (Isolated from main form) */}
