@@ -17,6 +17,12 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
 
   const [daftarPegawai, setDaftarPegawai] = useState<any[]>([]);
 
+  // State for Arsip Uploads
+  const [fileSuratPermohonan, setFileSuratPermohonan] = useState<File | null>(null);
+  const [fileTandaTerima, setFileTandaTerima] = useState<File | null>(null);
+  const [fileFormulirUji, setFileFormulirUji] = useState<File | null>(null);
+  const [isUploadingArsip, setIsUploadingArsip] = useState(false);
+
   const checklistItems = [
     "Surat Permohonan Pemeriksaan Dokumen UKL-UPL / SPPL*", 
     "Pernyataan Pengelolaan dan Pemantauan Lingkungan (Bermaterai)*",
@@ -51,6 +57,63 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
       setLoading(false);
     });
   }, [unwrappedParams.id]);
+
+  const handleUploadArsip = async () => {
+    if (!fileSuratPermohonan && !fileTandaTerima && !fileFormulirUji) {
+      alert('Pilih setidaknya satu file untuk di-upload.');
+      return;
+    }
+
+    setIsUploadingArsip(true);
+    setMessage('Mengunggah dokumen arsip HUA...');
+
+    try {
+      const uploadFile = async (file: File | null) => {
+        if (!file || file.size === 0) return null;
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
+        const res = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload gagal');
+        return data.url;
+      };
+
+      const urlSuratPermohonan = await uploadFile(fileSuratPermohonan);
+      const urlRegistrasi = await uploadFile(fileTandaTerima);
+      const urlUjiAdmin = await uploadFile(fileFormulirUji);
+
+      let updatedArsipFisik = {};
+      try { if (doc.arsip_fisik) updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+      
+      if (urlSuratPermohonan) updatedArsipFisik = { ...updatedArsipFisik, urlSuratPermohonan };
+      if (urlRegistrasi) updatedArsipFisik = { ...updatedArsipFisik, urlRegistrasi };
+      if (urlUjiAdmin) updatedArsipFisik = { ...updatedArsipFisik, urlUjiAdmin };
+
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ arsip_fisik: updatedArsipFisik })
+      });
+
+      if (res.ok) {
+        alert('Dokumen berhasil di-upload dan tersimpan di Arsip Perizinan!');
+        setFileSuratPermohonan(null);
+        setFileTandaTerima(null);
+        setFileFormulirUji(null);
+        // Refresh doc
+        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
+        setDoc(newDoc.data);
+      } else {
+        throw new Error('Gagal menyimpan url ke database.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsUploadingArsip(false);
+      setMessage('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -204,7 +267,63 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
             <p className="font-bold bg-teal-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block mt-1 text-sm shadow-sm hover:shadow-md transition-shadow">
               #{String(doc.no_urut || doc.id).padStart(3, '0')} / {doc.tahun || '2026'}
             </p>
+        </div>
+
+        {/* Upload Arsip Fisik Awal (Isolated from main form) */}
+        <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-teal-300 bg-teal-50">
+          <h3 className="text-sm font-bold text-teal-800 mb-4 uppercase flex items-center gap-2">
+            <ClipboardCheck size={18} /> Upload Berkas Digital (Dicicil)
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            {/* Surat Permohonan */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-teal-900 uppercase">1. Surat Permohonan</label>
+              {(() => {
+                let url = '';
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlSuratPermohonan; } catch(e) {}
+                if (url) return <a href={url} target="_blank" className="inline-block bg-teal-200 text-teal-800 text-xs font-bold px-3 py-2 rounded-lg border border-teal-300">✅ Sudah Diupload</a>;
+                return (
+                  <input type="file" accept=".pdf" onChange={(e) => setFileSuratPermohonan(e.target.files?.[0] || null)} className="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-teal-200 file:text-teal-800 file:font-bold hover:file:bg-teal-300 cursor-pointer bg-white border border-teal-200 rounded-lg" />
+                );
+              })()}
+            </div>
+            
+            {/* Tanda Terima / Register */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-teal-900 uppercase">2. Tanda Terima Register</label>
+              {(() => {
+                let url = '';
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlRegistrasi; } catch(e) {}
+                if (url) return <a href={url} target="_blank" className="inline-block bg-teal-200 text-teal-800 text-xs font-bold px-3 py-2 rounded-lg border border-teal-300">✅ Sudah Diupload</a>;
+                return (
+                  <input type="file" accept=".pdf" onChange={(e) => setFileTandaTerima(e.target.files?.[0] || null)} className="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-teal-200 file:text-teal-800 file:font-bold hover:file:bg-teal-300 cursor-pointer bg-white border border-teal-200 rounded-lg" />
+                );
+              })()}
+            </div>
+            
+            {/* Formulir Uji Admin */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-teal-900 uppercase">3. Formulir Uji Admin</label>
+              {(() => {
+                let url = '';
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlUjiAdmin; } catch(e) {}
+                if (url) return <a href={url} target="_blank" className="inline-block bg-teal-200 text-teal-800 text-xs font-bold px-3 py-2 rounded-lg border border-teal-300">✅ Sudah Diupload</a>;
+                return (
+                  <input type="file" accept=".pdf" onChange={(e) => setFileFormulirUji(e.target.files?.[0] || null)} className="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-teal-200 file:text-teal-800 file:font-bold hover:file:bg-teal-300 cursor-pointer bg-white border border-teal-200 rounded-lg" />
+                );
+              })()}
+            </div>
           </div>
+          
+          <button 
+            type="button" 
+            onClick={handleUploadArsip}
+            disabled={isUploadingArsip || (!fileSuratPermohonan && !fileTandaTerima && !fileFormulirUji)}
+            className="px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl shadow border border-teal-600 transition-all text-xs uppercase disabled:opacity-50"
+          >
+            {isUploadingArsip ? 'Mengunggah...' : 'Simpan Berkas ke Arsip'}
+          </button>
         </div>
 
         <form onSubmit={handleSubmit}>
