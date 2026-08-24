@@ -38,14 +38,14 @@ export default function DaftarPerizinanPage() {
   const stages = [
     { id: 1, title: '1. Registrasi', shortTitle: 'Registrasi', statuses: ['Registrasi', 'PROSES'], color: 'slate', icon: FileText, link: '/perizinan/registrasi' },
     { id: 2, title: '2. Uji Admin', shortTitle: 'Uji Admin', statuses: ['Uji Administrasi'], color: 'teal', icon: ClipboardCheck, link: '/perizinan/uji-administrasi' },
-    { id: 3, title: '3. Verlap', shortTitle: 'Verlap', statuses: ['Verifikasi Lapangan', 'Verlap Selesai', 'Uji Administrasi Selesai'], color: 'amber', icon: MapPin, link: '/perizinan/verifikasi-lapangan' },
-    { id: 4, title: '4. Pemeriksaan', shortTitle: 'Pemeriksaan', statuses: ['Pemeriksaan Substansi', 'PEMERIKSAAN-SUBSTANSI', 'DIPERIKSA', 'Verlap Selesai', 'Uji Administrasi Selesai'], color: 'indigo', icon: FileText, link: '/perizinan/pemeriksaan-substansi' },
+    { id: 3, title: '3. Verlap', shortTitle: 'Verlap', statuses: ['Verifikasi Lapangan', 'Uji Administrasi Selesai'], color: 'amber', icon: MapPin, link: '/perizinan/verifikasi-lapangan' },
+    { id: 4, title: '4. Pemeriksaan', shortTitle: 'Pemeriksaan', statuses: ['Pemeriksaan Substansi', 'PEMERIKSAAN-SUBSTANSI', 'DIPERIKSA', 'Verlap Selesai'], color: 'indigo', icon: FileText, link: '/perizinan/pemeriksaan-substansi' },
     { id: 5, title: '5. Pengembalian BA', shortTitle: 'Pengembalian', statuses: ['Pengembalian BA', 'Dikembalikan / Ditolak', 'DIKEMBALIKAN'], color: 'rose', icon: RotateCcw, link: '/perizinan/pengembalian' },
-    { id: 6, title: '6. Terima Perbaikan', shortTitle: 'Terima BA', statuses: ['Penerimaan Perbaikan', 'Pengembalian BA', 'Dikembalikan / Ditolak', 'DIKEMBALIKAN'], color: 'emerald', icon: CheckCircle, link: '/perizinan/penerimaan-perbaikan' },
+    { id: 6, title: '6. Terima Perbaikan', shortTitle: 'Terima BA', statuses: [], color: 'emerald', icon: CheckCircle, link: '/perizinan/penerimaan-perbaikan' },
     { id: 7, title: '7. Pemeriksaan Revisi', shortTitle: 'Revisi', statuses: ['Pemeriksaan Revisi', 'Revisi', 'REVISI', 'Pemeriksaan Selesai', 'Penerimaan Perbaikan'], color: 'blue', icon: FileEdit, link: '/perizinan/pemeriksaan-revisi' },
     { id: 8, title: '8. Pengembalian Revisi', shortTitle: 'Kembali Revisi', statuses: ['Pengembalian Revisi'], color: 'rose', icon: RotateCcw, link: '/perizinan/pengembalian' },
-    { id: 9, title: '9. Terima Revisi', shortTitle: 'Terima Revisi', statuses: ['Penerimaan Revisi', 'Revisi Lanjutan', 'Pengembalian Revisi'], color: 'emerald', icon: CheckCircle, link: '/perizinan/penerimaan-perbaikan' },
-    { id: 10, title: '10. Finalisasi (RPD & SK)', shortTitle: 'Finalisasi', statuses: ['Penyerahan SK', 'Selesai / SK', 'Selesai', 'Revisi Selesai'], color: 'purple', icon: FileText, link: '/perizinan/finalisasi' },
+    { id: 9, title: '9. Terima Revisi', shortTitle: 'Terima Revisi', statuses: [], color: 'emerald', icon: CheckCircle, link: '/perizinan/penerimaan-perbaikan' },
+    { id: 10, title: '10. Finalisasi (RPD & SK)', shortTitle: 'Finalisasi', statuses: ['Penyerahan SK', 'Selesai / SK', 'Selesai', 'Revisi Selesai', 'Penerimaan Revisi', 'Revisi Lanjutan'], color: 'purple', icon: FileText, link: '/perizinan/finalisasi' },
     { id: 11, title: '11. Jilidan Final', shortTitle: 'Jilidan', statuses: ['Penerimaan Jilidan', 'Menunggu Jilidan'], color: 'orange', icon: FileText, link: '/perizinan/jilidan' },
     { id: 12, title: '12. Arsip', shortTitle: 'Arsip', statuses: ['Arsip', 'Diarsipkan', 'ARSIP', 'Jilidan Selesai'], color: 'slate', icon: Archive, link: '/perizinan/arsip' },
   ];
@@ -293,6 +293,12 @@ export default function DaftarPerizinanPage() {
                   
                   // Verlap (3) and Pemeriksaan (4) unlock together because Verlap is optional
                   if (currentStageId === 3 && stage.id === 4) isDisabled = false;
+
+                  // If returned (5), we must allow receiving the revision (6)
+                  if (currentStageId === 5 && stage.id === 6) isDisabled = false;
+
+                  // If returned again (8), we must allow receiving the revision again (9)
+                  if (currentStageId === 8 && stage.id === 9) isDisabled = false;
 
                   // Arsip (12) is always available
                   if (stage.id === 12) isDisabled = false;
