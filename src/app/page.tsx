@@ -429,7 +429,7 @@ export default function Home() {
                     
                     <div className="shrink-0 text-right sm:text-left">
                       <span className="inline-block px-3 py-1 bg-slate-100 text-slate-900 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-200">
-                        {modalType === 'perizinan' ? d.status_tahapan : (modalType === 'pengawasan' ? d.status_ketaatan : d.status_aduan)}
+                        {modalType === 'perizinan' ? (d.status_tahapan === 'Dikembalikan / Ditolak' ? 'DIKEMBALIKAN' : d.status_tahapan) : (modalType === 'pengawasan' ? d.status_ketaatan : d.status_aduan)}
                       </span>
                     </div>
                   </div>
