@@ -312,7 +312,10 @@ export default function DaftarPerizinanPage() {
                   const Icon = stage.icon;
                   const isCurrent = stage.statuses.includes(selectedDoc.status_tahapan);
                   const currentStageId = getStageForStatus(selectedDoc.status_tahapan, selectedDoc).id;
-                  const isDisabled = stage.id > currentStageId;
+                  let isDisabled = stage.id > currentStageId;
+                  
+                  // Verlap (3) and Pemeriksaan (4) unlock together because Verlap is optional
+                  if (currentStageId === 3 && stage.id === 4) isDisabled = false;
 
                   const content = (
                     <>
