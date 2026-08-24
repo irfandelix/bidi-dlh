@@ -14,6 +14,8 @@ type Dokumen = any; // Will use proper types later
 export default function DaftarPerizinanPage() {
   const [docs, setDocs] = useState<Dokumen[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDoc, setSelectedDoc] = useState<Dokumen | null>(null);
+  const [isActionModalOpen, setIsActionModalOpen] = useState(false);
 
   useEffect(() => {
     fetch('/api/perizinan')
@@ -228,12 +230,15 @@ export default function DaftarPerizinanPage() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex justify-center gap-2">
-                        <Link 
-                          href={activeStage.id !== 0 && activeStage.id !== 1 ? `${activeStage.link}/${d.id}` : `${getStageForStatus(d.status_tahapan, d).link}/${d.id}`}
+                        <button 
+                          onClick={() => {
+                            setSelectedDoc(d);
+                            setIsActionModalOpen(true);
+                          }}
                           className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all uppercase"
                         >
-                          {activeStage.id !== 0 && activeStage.id !== 1 ? `Buka ${activeStage.shortTitle}` : 'Buka'}
-                        </Link>
+                          BUKA
+                        </button>
                         <Link 
                           href={`/perizinan/cetak/${d.id}`}
                           className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center gap-1 uppercase"
@@ -284,6 +289,62 @@ export default function DaftarPerizinanPage() {
           </div>
         )}
       </div>
+      </div>
+
+      {/* Modal Pilih Tahapan */}
+      {isActionModalOpen && selectedDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col border-4 border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b-4 border-slate-200 bg-emerald-50 flex justify-between items-center">
+              <div>
+                <h3 className="font-black text-slate-900 text-lg uppercase tracking-wide flex items-center gap-2">
+                  <LayoutDashboard size={20} className="text-emerald-600" /> BUKA TAHAPAN DOKUMEN
+                </h3>
+                <p className="text-xs font-bold text-slate-500 mt-1 uppercase">#{selectedDoc.no_urut || selectedDoc.id} - {selectedDoc.nama_kegiatan}</p>
+              </div>
+              <button onClick={() => { setIsActionModalOpen(false); setSelectedDoc(null); }} className="w-8 h-8 rounded-full bg-slate-200 hover:bg-rose-200 hover:text-rose-700 flex items-center justify-center font-bold text-slate-600 transition-colors shrink-0">
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-4 flex-1 overflow-y-auto bg-slate-50">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {stages.map((stage) => {
+                  const Icon = stage.icon;
+                  const isCurrent = stage.statuses.includes(selectedDoc.status_tahapan);
+                  return (
+                    <Link 
+                      key={stage.id}
+                      href={`${stage.link}/${selectedDoc.id}`}
+                      className={`group p-4 bg-white rounded-xl border-2 transition-all flex items-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-1 ${
+                        isCurrent 
+                          ? 'border-emerald-400 bg-emerald-50/50 ring-2 ring-emerald-400/20' 
+                          : 'border-slate-200 hover:border-indigo-300'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${
+                        isCurrent ? 'bg-emerald-100 border-emerald-200 text-emerald-600' : 'bg-slate-100 border-slate-200 text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600 group-hover:border-indigo-200'
+                      }`}>
+                        <Icon size={18} />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <div className="flex items-center gap-2">
+                          <h4 className={`text-sm font-black uppercase ${isCurrent ? 'text-emerald-700' : 'text-slate-700 group-hover:text-indigo-700'}`}>
+                            {stage.title}
+                          </h4>
+                        </div>
+                        {isCurrent && (
+                          <span className="inline-block mt-1 text-[9px] font-black uppercase text-emerald-700 bg-emerald-200 px-2 py-0.5 rounded tracking-widest">Tahap Saat Ini</span>
+                        )}
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
