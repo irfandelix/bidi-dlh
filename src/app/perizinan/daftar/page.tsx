@@ -311,6 +311,49 @@ export default function DaftarPerizinanPage() {
                 {stages.map((stage) => {
                   const Icon = stage.icon;
                   const isCurrent = stage.statuses.includes(selectedDoc.status_tahapan);
+                  const currentStageId = getStageForStatus(selectedDoc.status_tahapan, selectedDoc).id;
+                  const isDisabled = stage.id > currentStageId;
+
+                  const content = (
+                    <>
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${
+                        isCurrent ? 'bg-emerald-100 border-emerald-200 text-emerald-600' : 
+                        isDisabled ? 'bg-slate-50 border-slate-200 text-slate-300' :
+                        'bg-slate-100 border-slate-200 text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600 group-hover:border-indigo-200'
+                      }`}>
+                        <Icon size={18} />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <div className="flex items-center gap-2">
+                          <h4 className={`text-sm font-black uppercase ${
+                            isCurrent ? 'text-emerald-700' : 
+                            isDisabled ? 'text-slate-300' :
+                            'text-slate-700 group-hover:text-indigo-700'
+                          }`}>
+                            {stage.title}
+                          </h4>
+                        </div>
+                        {isCurrent && (
+                          <span className="inline-block mt-1 text-[9px] font-black uppercase text-emerald-700 bg-emerald-200 px-2 py-0.5 rounded tracking-widest">Tahap Saat Ini</span>
+                        )}
+                        {isDisabled && (
+                          <span className="inline-block mt-1 text-[9px] font-black uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded tracking-widest">Belum Tersedia</span>
+                        )}
+                      </div>
+                    </>
+                  );
+
+                  if (isDisabled) {
+                    return (
+                      <div 
+                        key={stage.id}
+                        className="p-4 bg-slate-50/50 rounded-xl border-2 border-dashed border-slate-200 flex items-center gap-3 cursor-not-allowed opacity-70"
+                      >
+                        {content}
+                      </div>
+                    );
+                  }
+
                   return (
                     <Link 
                       key={stage.id}
@@ -321,21 +364,7 @@ export default function DaftarPerizinanPage() {
                           : 'border-slate-200 hover:border-indigo-300'
                       }`}
                     >
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${
-                        isCurrent ? 'bg-emerald-100 border-emerald-200 text-emerald-600' : 'bg-slate-100 border-slate-200 text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600 group-hover:border-indigo-200'
-                      }`}>
-                        <Icon size={18} />
-                      </div>
-                      <div className="flex-1 text-left">
-                        <div className="flex items-center gap-2">
-                          <h4 className={`text-sm font-black uppercase ${isCurrent ? 'text-emerald-700' : 'text-slate-700 group-hover:text-indigo-700'}`}>
-                            {stage.title}
-                          </h4>
-                        </div>
-                        {isCurrent && (
-                          <span className="inline-block mt-1 text-[9px] font-black uppercase text-emerald-700 bg-emerald-200 px-2 py-0.5 rounded tracking-widest">Tahap Saat Ini</span>
-                        )}
-                      </div>
+                      {content}
                     </Link>
                   )
                 })}
