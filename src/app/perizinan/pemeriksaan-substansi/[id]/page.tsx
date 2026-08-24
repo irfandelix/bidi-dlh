@@ -20,6 +20,9 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
   const [nomorUndangan, setNomorUndangan] = useState('');
   const [isUploadingUndangan, setIsUploadingUndangan] = useState(false);
 
+  const [fileBaSidang, setFileBaSidang] = useState<File | null>(null);
+  const [isUploadingBaSidang, setIsUploadingBaSidang] = useState(false);
+
   useEffect(() => {
     Promise.all([
       fetch(`/api/perizinan/${unwrappedParams.id}`).then(res => res.json()),
@@ -97,6 +100,62 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
       alert(err.message);
     } finally {
       setIsUploadingUndangan(false);
+      setMessage('');
+    }
+  };
+
+  const handleSimpanBaSidang = async () => {
+    if (!fileBaSidang) {
+      alert('Mohon pilih file BA Sidang terlebih dahulu.');
+      return;
+    }
+    
+    setIsUploadingBaSidang(true);
+    setMessage('Mengunggah file BA Sidang...');
+    
+    try {
+      const uploadData = new FormData();
+      uploadData.append('file', fileBaSidang);
+      uploadData.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
+
+      const uploadRes = await fetch('/api/perizinan/upload', {
+        method: 'POST',
+        body: uploadData
+      });
+      
+      if (!uploadRes.ok) {
+        throw new Error('Gagal mengunggah file BA Sidang.');
+      }
+
+      const uploadResult = await uploadRes.json();
+      
+      let updatedArsipFisik = {};
+      try { if (doc.arsip_fisik) updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+      
+      updatedArsipFisik = {
+        ...updatedArsipFisik,
+        urlBaSidang: uploadResult.url || uploadResult.id
+      };
+
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ arsip_fisik: updatedArsipFisik })
+      });
+
+      if (res.ok) {
+        alert('BA Sidang berhasil di-upload dan tersimpan di Arsip Perizinan!');
+        setFileBaSidang(null);
+        // Refresh doc
+        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
+        setDoc(newDoc.data);
+      } else {
+        throw new Error('Gagal menyimpan data BA Sidang ke database.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsUploadingBaSidang(false);
       setMessage('');
     }
   };
@@ -274,6 +333,37 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
               </div>
             </div>
           )}
+        </div>
+
+        {/* Upload Arsip Fisik BA Sidang (Isolated from main form) */}
+        <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-indigo-300 bg-indigo-50">
+          <h3 className="text-sm font-bold text-indigo-800 mb-4 uppercase flex items-center gap-2">
+            <ClipboardCheck size={18} /> Upload Berkas Digital (Dicicil)
+          </h3>
+          
+          <div className="grid grid-cols-1 gap-4 mb-4">
+            {/* BA Sidang */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-indigo-900 uppercase">Berita Acara Sidang / Pemeriksaan Ter-Tanda Tangan</label>
+              {(() => {
+                let url = '';
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlBaSidang; } catch(e) {}
+                if (url) return <a href={url} target="_blank" className="inline-block bg-indigo-200 text-indigo-800 text-xs font-bold px-3 py-2 rounded-lg border border-indigo-300">✅ Sudah Diupload</a>;
+                return (
+                  <input type="file" accept=".pdf" onChange={(e) => setFileBaSidang(e.target.files?.[0] || null)} className="w-full md:w-1/3 text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-indigo-200 file:text-indigo-800 file:font-bold hover:file:bg-indigo-300 cursor-pointer bg-white border border-indigo-200 rounded-lg" />
+                );
+              })()}
+            </div>
+          </div>
+          
+          <button 
+            type="button" 
+            onClick={handleSimpanBaSidang}
+            disabled={isUploadingBaSidang || !fileBaSidang}
+            className="px-6 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl shadow border border-indigo-600 transition-all text-xs uppercase disabled:opacity-50"
+          >
+            {isUploadingBaSidang ? 'Mengunggah...' : 'Simpan BA Sidang ke Arsip'}
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">

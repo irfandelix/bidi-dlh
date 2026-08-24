@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, BookCopy, Info, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Loader2, BookCopy, Info, CheckCircle2, ClipboardCheck } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -15,6 +15,10 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
+
+  // State for Arsip Upload
+  const [fileDokumenCetak, setFileDokumenCetak] = useState<File | null>(null);
+  const [isUploadingArsip, setIsUploadingArsip] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,6 +38,53 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
     };
     fetchData();
   }, [unwrappedParams.id]);
+
+  const handleUploadArsip = async () => {
+    if (!fileDokumenCetak) {
+      alert('Pilih Dokumen Cetak Jilidan untuk di-upload.');
+      return;
+    }
+
+    setIsUploadingArsip(true);
+    setMessage('Mengunggah dokumen cetak jilidan...');
+
+    try {
+      const fd = new FormData();
+      fd.append('file', fileDokumenCetak);
+      fd.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
+      const uploadRes = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
+      const uploadData = await uploadRes.json();
+      
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'Upload gagal');
+
+      let updatedArsipFisik = {};
+      try { if (doc.arsip_fisik) updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+      
+      updatedArsipFisik = { ...updatedArsipFisik, urlDokumenCetak: uploadData.url };
+
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ arsip_fisik: updatedArsipFisik })
+      });
+
+      if (res.ok) {
+        alert('Dokumen berhasil di-upload dan tersimpan di Arsip Perizinan!');
+        setFileDokumenCetak(null);
+        // Refresh doc
+        const supabase = createClient();
+        const { data: newDoc } = await supabase.from('dokumens').select('*').eq('id', unwrappedParams.id).single();
+        setDoc(newDoc);
+      } else {
+        throw new Error('Gagal menyimpan url ke database.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsUploadingArsip(false);
+      setMessage('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -123,6 +174,37 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
             <p className="text-xs text-on-surface-variant font-bold mt-2 uppercase">{doc.nama_pemrakarsa} • {doc.jenis_dokumen}</p>
             <p className="text-xs font-bold bg-amber-300 text-on-surface px-2 py-1 rounded border border-outline-variant inline-block mt-2 shadow-sm hover:shadow-md transition-shadow uppercase">No. Registrasi: {doc.nomor_checklist || 'Belum ada'}</p>
           </div>
+        </div>
+
+        {/* Upload Arsip Dokumen Cetak (Isolated from main form) */}
+        <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-orange-300 bg-orange-50">
+          <h3 className="text-sm font-bold text-orange-800 mb-4 uppercase flex items-center gap-2">
+            <ClipboardCheck size={18} /> Upload Berkas Digital (Dicicil)
+          </h3>
+          
+          <div className="grid grid-cols-1 gap-4 mb-4">
+            {/* Dokumen Cetak / Jilidan */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-orange-900 uppercase">Dokumen Cetak (Jilidan Final) / Dokumen Lingkungan</label>
+              {(() => {
+                let url = '';
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlDokumenCetak; } catch(e) {}
+                if (url) return <a href={url} target="_blank" className="inline-block bg-orange-200 text-orange-800 text-xs font-bold px-3 py-2 rounded-lg border border-orange-300">✅ Sudah Diupload</a>;
+                return (
+                  <input type="file" accept=".pdf" onChange={(e) => setFileDokumenCetak(e.target.files?.[0] || null)} className="w-full md:w-1/3 text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-orange-200 file:text-orange-800 file:font-bold hover:file:bg-orange-300 cursor-pointer bg-white border border-orange-200 rounded-lg" />
+                );
+              })()}
+            </div>
+          </div>
+          
+          <button 
+            type="button" 
+            onClick={handleUploadArsip}
+            disabled={isUploadingArsip || !fileDokumenCetak}
+            className="px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow border border-orange-600 transition-all text-xs uppercase disabled:opacity-50"
+          >
+            {isUploadingArsip ? 'Mengunggah...' : 'Simpan Berkas ke Arsip'}
+          </button>
         </div>
 
         <form onSubmit={handleSubmit}>

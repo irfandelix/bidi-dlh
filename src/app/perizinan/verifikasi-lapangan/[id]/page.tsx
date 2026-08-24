@@ -13,8 +13,11 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
-
   const [daftarPegawai, setDaftarPegawai] = useState<any[]>([]);
+
+  // State for Arsip Upload
+  const [fileBaVerlap, setFileBaVerlap] = useState<File | null>(null);
+  const [isUploadingArsip, setIsUploadingArsip] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -28,6 +31,52 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
       setLoading(false);
     });
   }, [unwrappedParams.id]);
+
+  const handleUploadArsip = async () => {
+    if (!fileBaVerlap) {
+      alert('Pilih file BA Verlap untuk di-upload.');
+      return;
+    }
+
+    setIsUploadingArsip(true);
+    setMessage('Mengunggah dokumen arsip BA Verlap...');
+
+    try {
+      const fd = new FormData();
+      fd.append('file', fileBaVerlap);
+      fd.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
+      const uploadRes = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
+      const uploadData = await uploadRes.json();
+      
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'Upload gagal');
+
+      let updatedArsipFisik = {};
+      try { if (doc.arsip_fisik) updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+      
+      updatedArsipFisik = { ...updatedArsipFisik, urlBaVerlap: uploadData.url };
+
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ arsip_fisik: updatedArsipFisik })
+      });
+
+      if (res.ok) {
+        alert('Dokumen berhasil di-upload dan tersimpan di Arsip Perizinan!');
+        setFileBaVerlap(null);
+        // Refresh doc
+        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
+        setDoc(newDoc.data);
+      } else {
+        throw new Error('Gagal menyimpan url ke database.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsUploadingArsip(false);
+      setMessage('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -127,6 +176,37 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
             <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pemrakarsa</span>
             <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.nama_pemrakarsa || '-'}</p>
           </div>
+        </div>
+
+        {/* Upload Arsip Fisik Awal (Isolated from main form) */}
+        <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-amber-300 bg-amber-50">
+          <h3 className="text-sm font-bold text-amber-800 mb-4 uppercase flex items-center gap-2">
+            <ClipboardCheck size={18} /> Upload Berkas Digital (Dicicil)
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* BA Verlap */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-amber-900 uppercase">Berita Acara Verlap Ter-Tanda Tangan</label>
+              {(() => {
+                let url = '';
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlBaVerlap; } catch(e) {}
+                if (url) return <a href={url} target="_blank" className="inline-block bg-amber-200 text-amber-800 text-xs font-bold px-3 py-2 rounded-lg border border-amber-300">✅ Sudah Diupload</a>;
+                return (
+                  <input type="file" accept=".pdf" onChange={(e) => setFileBaVerlap(e.target.files?.[0] || null)} className="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-200 file:text-amber-800 file:font-bold hover:file:bg-amber-300 cursor-pointer bg-white border border-amber-200 rounded-lg" />
+                );
+              })()}
+            </div>
+          </div>
+          
+          <button 
+            type="button" 
+            onClick={handleUploadArsip}
+            disabled={isUploadingArsip || !fileBaVerlap}
+            className="px-6 py-2 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow border border-amber-600 transition-all text-xs uppercase disabled:opacity-50"
+          >
+            {isUploadingArsip ? 'Mengunggah...' : 'Simpan Berkas ke Arsip'}
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">

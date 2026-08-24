@@ -294,6 +294,19 @@ export default function DaftarPerizinanPage() {
                   // Verlap (3) and Pemeriksaan (4) unlock together because Verlap is optional
                   if (currentStageId === 3 && stage.id === 4) isDisabled = false;
 
+                  // Arsip (12) is always available
+                  if (stage.id === 12) isDisabled = false;
+
+                  let docNumber = '';
+                  if (stage.id === 1 && selectedDoc.nomor_checklist) docNumber = selectedDoc.nomor_checklist;
+                  if (stage.id === 2 && selectedDoc.nomor_uji_berkas) docNumber = selectedDoc.nomor_uji_berkas;
+                  if (stage.id === 3 && selectedDoc.nomor_ba_verlap) docNumber = selectedDoc.nomor_ba_verlap;
+                  if (stage.id === 4 && selectedDoc.nomor_ba_pemeriksaan) docNumber = selectedDoc.nomor_ba_pemeriksaan;
+                  if (stage.id === 10) {
+                    if (selectedDoc.nomor_risalah) docNumber = selectedDoc.nomor_risalah;
+                    else if (selectedDoc.nomor_sk) docNumber = selectedDoc.nomor_sk;
+                  }
+
                   const content = (
                     <>
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${
@@ -313,6 +326,11 @@ export default function DaftarPerizinanPage() {
                             {stage.title}
                           </h4>
                         </div>
+                        {docNumber && (
+                          <p className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-wide">
+                            {docNumber}
+                          </p>
+                        )}
                         {isCurrent && (
                           <span className="inline-block mt-1 text-[9px] font-black uppercase text-emerald-700 bg-emerald-200 px-2 py-0.5 rounded tracking-widest">Tahap Saat Ini</span>
                         )}

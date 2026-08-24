@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, CheckCircle2, Award, BookCopy, FileText } from 'lucide-react';
+import { ArrowLeft, Loader2, CheckCircle2, Award, BookCopy, FileText, ClipboardCheck } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function FinalisasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -14,6 +14,11 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
+  // State for Arsip Upload
+  const [fileRpd, setFileRpd] = useState<File | null>(null);
+  const [fileSk, setFileSk] = useState<File | null>(null);
+  const [isUploadingArsip, setIsUploadingArsip] = useState(false);
+
   useEffect(() => {
     fetch(`/api/perizinan/${unwrappedParams.id}`)
       .then(res => res.json())
@@ -22,6 +27,60 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
         setLoading(false);
       });
   }, [unwrappedParams.id]);
+
+  const handleUploadArsip = async () => {
+    if (!fileRpd && !fileSk) {
+      alert('Pilih setidaknya satu file untuk di-upload.');
+      return;
+    }
+
+    setIsUploadingArsip(true);
+    setMessage('Mengunggah dokumen arsip finalisasi...');
+
+    try {
+      const uploadFile = async (file: File | null) => {
+        if (!file || file.size === 0) return null;
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
+        const res = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload gagal');
+        return data.url;
+      };
+
+      const urlRpd = await uploadFile(fileRpd);
+      const urlSk = await uploadFile(fileSk);
+
+      let updatedArsipFisik = {};
+      try { if (doc.arsip_fisik) updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+      
+      if (urlRpd) updatedArsipFisik = { ...updatedArsipFisik, urlRpd };
+      if (urlSk) updatedArsipFisik = { ...updatedArsipFisik, urlSk };
+
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ arsip_fisik: updatedArsipFisik })
+      });
+
+      if (res.ok) {
+        alert('Dokumen berhasil di-upload dan tersimpan di Arsip Perizinan!');
+        setFileRpd(null);
+        setFileSk(null);
+        // Refresh doc
+        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
+        setDoc(newDoc.data);
+      } else {
+        throw new Error('Gagal menyimpan url ke database.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsUploadingArsip(false);
+      setMessage('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -106,6 +165,50 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
             <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pemrakarsa</span>
             <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.nama_pemrakarsa || '-'}</p>
           </div>
+        </div>
+
+        {/* Upload Arsip Finalisasi (Isolated from main form) */}
+        <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50">
+          <h3 className="text-sm font-bold text-blue-800 mb-4 uppercase flex items-center gap-2">
+            <ClipboardCheck size={18} /> Upload Berkas Digital (Dicicil)
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* Lembar RPD */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-blue-900 uppercase">1. Lembar Risalah (RPD) Ter-Tanda Tangan</label>
+              {(() => {
+                let url = '';
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlRpd; } catch(e) {}
+                if (url) return <a href={url} target="_blank" className="inline-block bg-blue-200 text-blue-800 text-xs font-bold px-3 py-2 rounded-lg border border-blue-300">✅ Sudah Diupload</a>;
+                return (
+                  <input type="file" accept=".pdf" onChange={(e) => setFileRpd(e.target.files?.[0] || null)} className="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-200 file:text-blue-800 file:font-bold hover:file:bg-blue-300 cursor-pointer bg-white border border-blue-200 rounded-lg" />
+                );
+              })()}
+            </div>
+            
+            {/* SK / Persetujuan */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-blue-900 uppercase">2. Surat Keputusan / Rekomendasi Ter-Tanda Tangan</label>
+              {(() => {
+                let url = '';
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlSk; } catch(e) {}
+                if (url) return <a href={url} target="_blank" className="inline-block bg-blue-200 text-blue-800 text-xs font-bold px-3 py-2 rounded-lg border border-blue-300">✅ Sudah Diupload</a>;
+                return (
+                  <input type="file" accept=".pdf" onChange={(e) => setFileSk(e.target.files?.[0] || null)} className="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-200 file:text-blue-800 file:font-bold hover:file:bg-blue-300 cursor-pointer bg-white border border-blue-200 rounded-lg" />
+                );
+              })()}
+            </div>
+          </div>
+          
+          <button 
+            type="button" 
+            onClick={handleUploadArsip}
+            disabled={isUploadingArsip || (!fileRpd && !fileSk)}
+            className="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl shadow border border-blue-600 transition-all text-xs uppercase disabled:opacity-50"
+          >
+            {isUploadingArsip ? 'Mengunggah...' : 'Simpan Berkas ke Arsip'}
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">

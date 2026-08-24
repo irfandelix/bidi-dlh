@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FileCheck2, UserCheck } from 'lucide-react';
+import { ArrowLeft, Loader2, FileCheck2, UserCheck, ClipboardCheck } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ id: string }> }) {
@@ -14,6 +14,10 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [petugasGerai, setPetugasGerai] = useState<any[]>([]);
+
+  // State for Arsip Upload
+  const [fileTandaTerimaRevisi, setFileTandaTerimaRevisi] = useState<File | null>(null);
+  const [isUploadingArsip, setIsUploadingArsip] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -27,6 +31,52 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
       setLoading(false);
     });
   }, [unwrappedParams.id]);
+
+  const handleUploadArsip = async () => {
+    if (!fileTandaTerimaRevisi) {
+      alert('Pilih Tanda Terima Revisi untuk di-upload.');
+      return;
+    }
+
+    setIsUploadingArsip(true);
+    setMessage('Mengunggah dokumen Tanda Terima Revisi...');
+
+    try {
+      const fd = new FormData();
+      fd.append('file', fileTandaTerimaRevisi);
+      fd.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
+      const uploadRes = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
+      const uploadData = await uploadRes.json();
+      
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'Upload gagal');
+
+      let updatedArsipFisik = {};
+      try { if (doc.arsip_fisik) updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+      
+      updatedArsipFisik = { ...updatedArsipFisik, urlTandaTerimaRevisi: uploadData.url };
+
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ arsip_fisik: updatedArsipFisik })
+      });
+
+      if (res.ok) {
+        alert('Dokumen berhasil di-upload dan tersimpan di Arsip Perizinan!');
+        setFileTandaTerimaRevisi(null);
+        // Refresh doc
+        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
+        setDoc(newDoc.data);
+      } else {
+        throw new Error('Gagal menyimpan url ke database.');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsUploadingArsip(false);
+      setMessage('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -123,6 +173,37 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
             <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pemrakarsa</span>
             <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.nama_pemrakarsa || '-'}</p>
           </div>
+        </div>
+
+        {/* Upload Arsip Tanda Terima Revisi (Isolated from main form) */}
+        <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50">
+          <h3 className="text-sm font-bold text-emerald-800 mb-4 uppercase flex items-center gap-2">
+            <ClipboardCheck size={18} /> Upload Berkas Digital (Dicicil)
+          </h3>
+          
+          <div className="grid grid-cols-1 gap-4 mb-4">
+            {/* Tanda Terima Revisi */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-emerald-900 uppercase">Tanda Terima Perbaikan (Revisi) Ter-Tanda Tangan</label>
+              {(() => {
+                let url = '';
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlTandaTerimaRevisi; } catch(e) {}
+                if (url) return <a href={url} target="_blank" className="inline-block bg-emerald-200 text-emerald-800 text-xs font-bold px-3 py-2 rounded-lg border border-emerald-300">✅ Sudah Diupload</a>;
+                return (
+                  <input type="file" accept=".pdf" onChange={(e) => setFileTandaTerimaRevisi(e.target.files?.[0] || null)} className="w-full md:w-1/3 text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-200 file:text-emerald-800 file:font-bold hover:file:bg-emerald-300 cursor-pointer bg-white border border-emerald-200 rounded-lg" />
+                );
+              })()}
+            </div>
+          </div>
+          
+          <button 
+            type="button" 
+            onClick={handleUploadArsip}
+            disabled={isUploadingArsip || !fileTandaTerimaRevisi}
+            className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow border border-emerald-600 transition-all text-xs uppercase disabled:opacity-50"
+          >
+            {isUploadingArsip ? 'Mengunggah...' : 'Simpan Berkas ke Arsip'}
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
