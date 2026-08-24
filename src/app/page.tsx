@@ -16,7 +16,22 @@ export default function Home() {
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
   const [recentPengawasan, setRecentPengawasan] = useState<any[]>([]);
   const [recentAduan, setRecentAduan] = useState<any[]>([]);
+  const [allPerizinan, setAllPerizinan] = useState<any[]>([]);
+  const [allPengawasan, setAllPengawasan] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalType, setModalType] = useState<'perizinan'|'pengawasan'|'pengaduan'>('perizinan');
+  const [modalData, setModalData] = useState<any[]>([]);
+
+  const openModal = (title: string, type: 'perizinan'|'pengawasan'|'pengaduan', filterFn: (d: any) => boolean) => {
+    setModalTitle(title);
+    setModalType(type);
+    if (type === 'perizinan') setModalData(allPerizinan.filter(filterFn));
+    if (type === 'pengawasan') setModalData(allPengawasan.filter(filterFn));
+    setIsModalOpen(true);
+  };
 
   // Simple calendar logic
   const today = new Date();
@@ -52,6 +67,8 @@ export default function Home() {
           pengaduan: { total: 0, belum: 0, proses: 0, selesai: 0 } // Mocked until API is ready
         });
 
+        setAllPerizinan(pData);
+        setAllPengawasan(gData);
         setRecentDocs(pData.slice(0, 4));
         setRecentPengawasan(gData.slice(0, 4));
         setRecentAduan([]); // Mocked until API is ready
@@ -95,34 +112,34 @@ export default function Home() {
           <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest">Data Perizinan</h2>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Link href="/perizinan/daftar" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          <div onClick={() => openModal('Total Permohonan', 'perizinan', () => true)} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Permohonan</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-slate-900">{loading ? '...' : stats.perizinan.total}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
-          </Link>
-          <Link href="/perizinan/daftar" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          </div>
+          <div onClick={() => openModal('Sedang Proses', 'perizinan', (d) => !['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan', 'DIKEMBALIKAN', 'Dikembalikan / Ditolak'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Sedang Proses</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-amber-600">{loading ? '...' : stats.perizinan.proses}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
-          </Link>
-          <Link href="/perizinan/daftar" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          </div>
+          <div onClick={() => openModal('Selesai / SK', 'perizinan', (d) => ['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Selesai / SK</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-emerald-600">{loading ? '...' : stats.perizinan.selesai}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
-          </Link>
-          <Link href="/perizinan/daftar" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          </div>
+          <div onClick={() => openModal('Ditolak / Batal', 'perizinan', (d) => ['DIKEMBALIKAN', 'Dikembalikan / Ditolak'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Ditolak / Batal</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-rose-600">{loading ? '...' : stats.perizinan.ditolak}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
-          </Link>
+          </div>
         </div>
       </div>
 
@@ -135,34 +152,34 @@ export default function Home() {
           <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest">Data Pengawasan</h2>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          <Link href="/pengawasan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          <div onClick={() => openModal('Total Kegiatan Pengawasan', 'pengawasan', () => true)} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Kegiatan</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-slate-900">{loading ? '...' : stats.pengawasan.total}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </Link>
-          <Link href="/pengawasan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          </div>
+          <div onClick={() => openModal('Pengawasan Taat', 'pengawasan', (d) => d.status_ketaatan === 'Taat')} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Taat</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-emerald-600">{loading ? '...' : stats.pengawasan.taat}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </Link>
-          <Link href="/pengawasan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          </div>
+          <div onClick={() => openModal('Pengawasan Kurang Taat', 'pengawasan', (d) => ['Kurang Taat', 'Taat Bersyarat'].includes(d.status_ketaatan))} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Kurang Taat</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-amber-600">{loading ? '...' : stats.pengawasan.kurang}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </Link>
-          <Link href="/pengawasan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          </div>
+          <div onClick={() => openModal('Pengawasan Tidak Taat', 'pengawasan', (d) => d.status_ketaatan === 'Tidak Taat')} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Tidak Taat</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-rose-600">{loading ? '...' : stats.pengawasan.tidak}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </Link>
+          </div>
         </div>
       </div>
 
@@ -175,34 +192,34 @@ export default function Home() {
           <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest">Data Aduan</h2>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          <Link href="/pengaduan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          <div onClick={() => openModal('Total Aduan', 'pengaduan', () => true)} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Aduan</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-slate-900">{loading ? '...' : stats.pengaduan.total}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </Link>
-          <Link href="/pengaduan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          </div>
+          <div onClick={() => openModal('Aduan Belum Diproses', 'pengaduan', (d) => d.status === 'Belum Diproses')} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Belum Diproses</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-rose-600">{loading ? '...' : stats.pengaduan.belum}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </Link>
-          <Link href="/pengaduan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          </div>
+          <div onClick={() => openModal('Aduan Sedang Proses', 'pengaduan', (d) => d.status === 'Proses')} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Sedang Proses</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-amber-600">{loading ? '...' : stats.pengaduan.proses}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </Link>
-          <Link href="/pengaduan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
+          </div>
+          <div onClick={() => openModal('Aduan Selesai', 'pengaduan', (d) => d.status === 'Selesai')} className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform cursor-pointer block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Selesai</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-emerald-600">{loading ? '...' : stats.pengaduan.selesai}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </Link>
+          </div>
         </div>
       </div>
 
@@ -374,6 +391,60 @@ export default function Home() {
         </div>
 
       </div>
+
+      {/* Modal View for Lists */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col border-4 border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b-4 border-slate-200 bg-indigo-50 flex justify-between items-center">
+              <h3 className="font-black text-slate-900 text-lg uppercase tracking-wide flex items-center gap-2">
+                <FileText size={20} className="text-indigo-600" /> {modalTitle}
+              </h3>
+              <button onClick={() => setIsModalOpen(false)} className="w-8 h-8 rounded-full bg-slate-200 hover:bg-rose-200 hover:text-rose-700 flex items-center justify-center font-bold text-slate-600 transition-colors">
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-2 flex-1 overflow-y-auto bg-slate-50 space-y-2">
+              {modalData.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+                  <div className="font-black text-4xl mb-2">0</div>
+                  <div className="text-sm font-bold uppercase tracking-widest">Tidak Ada Data</div>
+                </div>
+              ) : (
+                modalData.map((d, i) => (
+                  <div key={i} className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-indigo-300 shadow-sm transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="shrink-0 text-[10px] font-black uppercase text-white bg-slate-800 px-2 py-0.5 rounded-md tracking-wider">
+                          #{d.no_urut || d.id}
+                        </span>
+                        <h4 className="text-sm font-black text-slate-900 uppercase">{d.nama_kegiatan || d.nama_usaha || d.nama_pelapor}</h4>
+                      </div>
+                      <p className="text-xs font-bold text-slate-500 uppercase">{d.nama_pemrakarsa || d.nama_penanggung_jawab || d.alamat}</p>
+                    </div>
+                    
+                    <div className="shrink-0 text-right sm:text-left">
+                      <span className="inline-block px-3 py-1 bg-slate-100 text-slate-900 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-200">
+                        {modalType === 'perizinan' ? d.status_tahapan : (modalType === 'pengawasan' ? d.status_ketaatan : d.status_aduan)}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            
+            <div className="p-4 border-t-4 border-slate-200 bg-white flex justify-end">
+              <Link 
+                href={`/${modalType === 'perizinan' ? 'perizinan/daftar' : modalType}`} 
+                className="px-6 py-2 bg-slate-900 text-white text-sm font-black rounded-xl hover:bg-indigo-600 transition-colors uppercase tracking-widest"
+              >
+                Lihat Selengkapnya
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
