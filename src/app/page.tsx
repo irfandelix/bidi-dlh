@@ -95,34 +95,34 @@ export default function Home() {
           <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest">Data Perizinan</h2>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          <Link href="/perizinan/daftar" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Permohonan</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-slate-900">{loading ? '...' : stats.perizinan.total}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
-          </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          </Link>
+          <Link href="/perizinan/daftar" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Sedang Proses</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-amber-600">{loading ? '...' : stats.perizinan.proses}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
-          </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          </Link>
+          <Link href="/perizinan/daftar" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Selesai / SK</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-emerald-600">{loading ? '...' : stats.perizinan.selesai}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
-          </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          </Link>
+          <Link href="/perizinan/daftar" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Ditolak / Batal</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-rose-600">{loading ? '...' : stats.perizinan.ditolak}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Dok.</span>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
@@ -135,34 +135,34 @@ export default function Home() {
           <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest">Data Pengawasan</h2>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          <Link href="/pengawasan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Kegiatan</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-slate-900">{loading ? '...' : stats.pengawasan.total}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          </Link>
+          <Link href="/pengawasan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Taat</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-emerald-600">{loading ? '...' : stats.pengawasan.taat}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          </Link>
+          <Link href="/pengawasan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Kurang Taat</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-amber-600">{loading ? '...' : stats.pengawasan.kurang}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          </Link>
+          <Link href="/pengawasan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Tidak Taat</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-rose-600">{loading ? '...' : stats.pengawasan.tidak}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
@@ -175,34 +175,34 @@ export default function Home() {
           <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest">Data Aduan</h2>
         </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          <Link href="/pengaduan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Total Aduan</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-slate-900">{loading ? '...' : stats.pengaduan.total}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          </Link>
+          <Link href="/pengaduan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Belum Diproses</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-rose-600">{loading ? '...' : stats.pengaduan.belum}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          </Link>
+          <Link href="/pengaduan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Sedang Proses</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-amber-600">{loading ? '...' : stats.pengaduan.proses}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </div>
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform">
+          </Link>
+          <Link href="/pengaduan" className="bg-white border border-slate-200 p-6 rounded-2xl shadow-md relative overflow-hidden group hover:-translate-y-1 transition-transform block">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Selesai</p>
             <div className="flex items-end gap-2">
               <h3 className="text-4xl font-black text-emerald-600">{loading ? '...' : stats.pengaduan.selesai}</h3>
               <span className="text-slate-500 text-sm font-bold mb-1">Lap.</span>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
 
