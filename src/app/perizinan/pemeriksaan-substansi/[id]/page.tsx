@@ -338,7 +338,7 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
         {/* Upload Arsip Fisik BA Sidang (Isolated from main form) */}
         <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-indigo-300 bg-indigo-50">
           <h3 className="text-sm font-bold text-indigo-800 mb-4 uppercase flex items-center gap-2">
-            <ClipboardCheck size={18} /> Upload Berkas Digital (Dicicil)
+            <ClipboardCheck size={18} /> Upload Berkas Digital
           </h3>
           
           <div className="grid grid-cols-1 gap-4 mb-4">

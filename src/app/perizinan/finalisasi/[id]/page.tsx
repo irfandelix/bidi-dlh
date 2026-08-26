@@ -170,7 +170,7 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
         {/* Upload Arsip Finalisasi (Isolated from main form) */}
         <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50">
           <h3 className="text-sm font-bold text-blue-800 mb-4 uppercase flex items-center gap-2">
-            <ClipboardCheck size={18} /> Upload Berkas Digital (Dicicil)
+            <ClipboardCheck size={18} /> Upload Berkas Digital
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
