@@ -21,6 +21,9 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
   const [isUploadingArsip, setIsUploadingArsip] = useState(false);
   const [nomorSuratPerbaikan, setNomorSuratPerbaikan] = useState('');
   const [tanggalSuratPerbaikan, setTanggalSuratPerbaikan] = useState('');
+  
+  // Track selected revision
+  const [revisiKe, setRevisiKe] = useState<string>('1');
 
   useEffect(() => {
     Promise.all([
@@ -32,25 +35,35 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
         setPetugasGerai(petugasRes.data);
       }
       
-      let arsip = {};
-      try {
-        if (docRes.data?.arsip_fisik) {
-          arsip = typeof docRes.data.arsip_fisik === 'string' ? JSON.parse(docRes.data.arsip_fisik) : docRes.data.arsip_fisik;
-        }
-      } catch (e) {}
-      
-      setNomorSuratPerbaikan((arsip as any).nomorSuratPerbaikan || '');
-      setTanggalSuratPerbaikan((arsip as any).tanggalSuratPerbaikan || '');
+      const initialRevisi = docRes.data?.revisi_ke || '1';
+      setRevisiKe(String(initialRevisi));
       
       setLoading(false);
     });
   }, [unwrappedParams.id]);
 
+  useEffect(() => {
+    if (!doc) return;
+    let arsip: any = {};
+    try {
+      if (doc?.arsip_fisik) {
+        arsip = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik;
+      }
+    } catch (e) {}
+    
+    setNomorSuratPerbaikan(arsip[`nomorSuratPerbaikan_${revisiKe}`] || '');
+    setTanggalSuratPerbaikan(arsip[`tanggalSuratPerbaikan_${revisiKe}`] || '');
+    
+    // Clear selected files when revision changes
+    setFileTandaTerimaRevisi(null);
+    setFileSuratPerbaikan(null);
+  }, [revisiKe, doc]);
+
   const handleUploadArsip = async () => {
     let arsipFisik: any = {};
     try { if (doc.arsip_fisik) arsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
     
-    const isFieldsChanged = nomorSuratPerbaikan !== (arsipFisik.nomorSuratPerbaikan || '') || tanggalSuratPerbaikan !== (arsipFisik.tanggalSuratPerbaikan || '');
+    const isFieldsChanged = nomorSuratPerbaikan !== (arsipFisik[`nomorSuratPerbaikan_${revisiKe}`] || '') || tanggalSuratPerbaikan !== (arsipFisik[`tanggalSuratPerbaikan_${revisiKe}`] || '');
     
     if (!fileTandaTerimaRevisi && !fileSuratPerbaikan && !isFieldsChanged) {
       alert('Pilih setidaknya satu file untuk di-upload atau ubah data surat.');
@@ -71,18 +84,18 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
         return uploadData.url;
       };
 
-      let urlTandaTerima = arsipFisik.urlTandaTerimaRevisi;
-      let urlSuratPerbaikan = arsipFisik.urlSuratPerbaikan;
+      let urlTandaTerima = arsipFisik[`urlTandaTerimaRevisi_${revisiKe}`];
+      let urlSuratPerbaikan = arsipFisik[`urlSuratPerbaikan_${revisiKe}`];
 
       if (fileTandaTerimaRevisi) urlTandaTerima = await uploadFile(fileTandaTerimaRevisi);
       if (fileSuratPerbaikan) urlSuratPerbaikan = await uploadFile(fileSuratPerbaikan);
 
       const updatedArsipFisik = { 
         ...arsipFisik, 
-        urlTandaTerimaRevisi: urlTandaTerima,
-        urlSuratPerbaikan: urlSuratPerbaikan,
-        nomorSuratPerbaikan,
-        tanggalSuratPerbaikan
+        [`urlTandaTerimaRevisi_${revisiKe}`]: urlTandaTerima,
+        [`urlSuratPerbaikan_${revisiKe}`]: urlSuratPerbaikan,
+        [`nomorSuratPerbaikan_${revisiKe}`]: nomorSuratPerbaikan,
+        [`tanggalSuratPerbaikan_${revisiKe}`]: tanggalSuratPerbaikan
       };
 
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
@@ -239,7 +252,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
               <label className="block text-xs font-bold text-emerald-900 uppercase">Surat Permohonan Perbaikan</label>
               {(() => {
                 let url = '';
-                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlSuratPerbaikan; } catch(e) {}
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.[`urlSuratPerbaikan_${revisiKe}`]; } catch(e) {}
                 if (url) return <a href={url} target="_blank" className="inline-block bg-emerald-200 text-emerald-800 text-xs font-bold px-3 py-2 rounded-lg border border-emerald-300">✅ Sudah Diupload</a>;
                 return (
                   <input type="file" accept=".pdf" onChange={(e) => setFileSuratPerbaikan(e.target.files?.[0] || null)} className="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-200 file:text-emerald-800 file:font-bold hover:file:bg-emerald-300 cursor-pointer bg-white border border-emerald-200 rounded-lg" />
@@ -252,7 +265,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
               <label className="block text-xs font-bold text-emerald-900 uppercase">Tanda Terima Perbaikan (Revisi) Ter-Tanda Tangan</label>
               {(() => {
                 let url = '';
-                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlTandaTerimaRevisi; } catch(e) {}
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.[`urlTandaTerimaRevisi_${revisiKe}`]; } catch(e) {}
                 if (url) return <a href={url} target="_blank" className="inline-block bg-emerald-200 text-emerald-800 text-xs font-bold px-3 py-2 rounded-lg border border-emerald-300">✅ Sudah Diupload</a>;
                 return (
                   <input type="file" accept=".pdf" onChange={(e) => setFileTandaTerimaRevisi(e.target.files?.[0] || null)} className="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-200 file:text-emerald-800 file:font-bold hover:file:bg-emerald-300 cursor-pointer bg-white border border-emerald-200 rounded-lg" />
@@ -275,7 +288,10 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Penerimaan Revisi Ke-</label>
-              <select name="nomor_revisi" defaultValue="1"
+              <select 
+                name="nomor_revisi" 
+                value={revisiKe}
+                onChange={(e) => setRevisiKe(e.target.value)}
                 className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer">
                 <option value="1">Revisi 1 (PHP1)</option>
                 <option value="2">Revisi 2 (PHP2)</option>
