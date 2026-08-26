@@ -18,12 +18,18 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
   const [fileRegister, setFileRegister] = useState<File | null>(null);
   const [isUploadingArsip, setIsUploadingArsip] = useState(false);
   const [message, setMessage] = useState('');
+  
+  // State for Nomor
+  const [inputNomorSurat, setInputNomorSurat] = useState('');
+  const [inputNomorReg, setInputNomorReg] = useState('');
 
   useEffect(() => {
     fetch(`/api/perizinan/${unwrappedParams.id}`)
       .then(res => res.json())
       .then(res => {
         setDoc(res.data);
+        setInputNomorSurat(res.data.nomor_surat_permohonan || '');
+        setInputNomorReg(res.data.nomor_checklist || '');
         setLoading(false);
       });
   }, [unwrappedParams.id]);
@@ -65,13 +71,14 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
   };
 
   const handleUploadArsip = async () => {
-    if (!fileSuratPermohonan && !fileRegister) {
-      alert('Pilih setidaknya satu file untuk di-upload.');
+    const isNomorChanged = inputNomorSurat !== (doc.nomor_surat_permohonan || '') || inputNomorReg !== (doc.nomor_checklist || '');
+    if (!fileSuratPermohonan && !fileRegister && !isNomorChanged) {
+      alert('Tidak ada file yang dipilih atau data yang diubah.');
       return;
     }
 
     setIsUploadingArsip(true);
-    setMessage('Mengunggah dokumen...');
+    setMessage('Menyimpan data dan mengunggah dokumen...');
 
     try {
       let urlSuratPermohonan = '';
@@ -98,21 +105,27 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
       if (urlSuratPermohonan) updatedArsipFisik = { ...updatedArsipFisik, urlSuratPermohonan };
       if (urlRegistrasi) updatedArsipFisik = { ...updatedArsipFisik, urlRegistrasi };
 
+      const payload: any = { 
+        arsip_fisik: updatedArsipFisik,
+        nomor_surat_permohonan: inputNomorSurat,
+        nomor_checklist: inputNomorReg
+      };
+
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ arsip_fisik: updatedArsipFisik })
+        body: JSON.stringify(payload)
       });
 
       if (res.ok) {
-        alert('Dokumen berhasil di-upload dan tersimpan di Arsip Perizinan!');
+        alert('Dokumen dan data berhasil disimpan!');
         setFileSuratPermohonan(null);
         setFileRegister(null);
         // Refresh doc
         const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
         setDoc(newDoc.data);
       } else {
-        throw new Error('Gagal menyimpan url ke database.');
+        throw new Error('Gagal menyimpan data ke database.');
       }
     } catch (err: any) {
       alert(err.message);
@@ -278,8 +291,31 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
           <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase flex items-center gap-2">
             <ClipboardCheck size={18} /> Upload Berkas Digital
           </h3>
-          <p className="text-xs font-bold text-slate-500 mb-4 uppercase">Upload dokumen yang sudah ditandatangani untuk Arsip.</p>
+          <p className="text-xs font-bold text-slate-500 mb-6 uppercase">Sesuaikan nomor surat jika diperlukan dan upload dokumen yang sudah ditandatangani untuk Arsip.</p>
           
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-900 uppercase">Nomor Surat Permohonan</label>
+              <input 
+                type="text" 
+                value={inputNomorSurat} 
+                onChange={(e) => setInputNomorSurat(e.target.value)} 
+                placeholder="/" 
+                className="w-full text-sm px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 font-bold text-slate-700" 
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-900 uppercase">Nomor Registrasi / Checklist</label>
+              <input 
+                type="text" 
+                value={inputNomorReg} 
+                onChange={(e) => setInputNomorReg(e.target.value)} 
+                placeholder="/" 
+                className="w-full text-sm px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 font-bold text-slate-700" 
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {/* Surat Permohonan */}
             <div className="space-y-2">
