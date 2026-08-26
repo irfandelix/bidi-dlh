@@ -17,7 +17,10 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
 
   // State for Arsip Upload
   const [fileTandaTerimaRevisi, setFileTandaTerimaRevisi] = useState<File | null>(null);
+  const [fileSuratPerbaikan, setFileSuratPerbaikan] = useState<File | null>(null);
   const [isUploadingArsip, setIsUploadingArsip] = useState(false);
+  const [nomorSuratPerbaikan, setNomorSuratPerbaikan] = useState('');
+  const [tanggalSuratPerbaikan, setTanggalSuratPerbaikan] = useState('');
 
   useEffect(() => {
     Promise.all([
@@ -28,32 +31,59 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
       if (petugasRes.data) {
         setPetugasGerai(petugasRes.data);
       }
+      
+      let arsip = {};
+      try {
+        if (docRes.data?.arsip_fisik) {
+          arsip = typeof docRes.data.arsip_fisik === 'string' ? JSON.parse(docRes.data.arsip_fisik) : docRes.data.arsip_fisik;
+        }
+      } catch (e) {}
+      
+      setNomorSuratPerbaikan((arsip as any).nomorSuratPerbaikan || '');
+      setTanggalSuratPerbaikan((arsip as any).tanggalSuratPerbaikan || '');
+      
       setLoading(false);
     });
   }, [unwrappedParams.id]);
 
   const handleUploadArsip = async () => {
-    if (!fileTandaTerimaRevisi) {
-      alert('Pilih Tanda Terima Revisi untuk di-upload.');
+    let arsipFisik: any = {};
+    try { if (doc.arsip_fisik) arsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+    
+    const isFieldsChanged = nomorSuratPerbaikan !== (arsipFisik.nomorSuratPerbaikan || '') || tanggalSuratPerbaikan !== (arsipFisik.tanggalSuratPerbaikan || '');
+    
+    if (!fileTandaTerimaRevisi && !fileSuratPerbaikan && !isFieldsChanged) {
+      alert('Pilih setidaknya satu file untuk di-upload atau ubah data surat.');
       return;
     }
 
     setIsUploadingArsip(true);
-    setMessage('Mengunggah dokumen Tanda Terima Revisi...');
+    setMessage('Menyimpan data dan mengunggah dokumen...');
 
     try {
-      const fd = new FormData();
-      fd.append('file', fileTandaTerimaRevisi);
-      fd.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
-      const uploadRes = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
-      const uploadData = await uploadRes.json();
-      
-      if (!uploadRes.ok) throw new Error(uploadData.error || 'Upload gagal');
+      const uploadFile = async (file: File) => {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
+        const uploadRes = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(uploadData.error || 'Upload gagal');
+        return uploadData.url;
+      };
 
-      let updatedArsipFisik = {};
-      try { if (doc.arsip_fisik) updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
-      
-      updatedArsipFisik = { ...updatedArsipFisik, urlTandaTerimaRevisi: uploadData.url };
+      let urlTandaTerima = arsipFisik.urlTandaTerimaRevisi;
+      let urlSuratPerbaikan = arsipFisik.urlSuratPerbaikan;
+
+      if (fileTandaTerimaRevisi) urlTandaTerima = await uploadFile(fileTandaTerimaRevisi);
+      if (fileSuratPerbaikan) urlSuratPerbaikan = await uploadFile(fileSuratPerbaikan);
+
+      const updatedArsipFisik = { 
+        ...arsipFisik, 
+        urlTandaTerimaRevisi: urlTandaTerima,
+        urlSuratPerbaikan: urlSuratPerbaikan,
+        nomorSuratPerbaikan,
+        tanggalSuratPerbaikan
+      };
 
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
         method: 'PUT',
@@ -62,8 +92,9 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
       });
 
       if (res.ok) {
-        alert('Dokumen berhasil di-upload dan tersimpan di Arsip Perizinan!');
+        alert('Dokumen dan data berhasil disimpan di Arsip Perizinan!');
         setFileTandaTerimaRevisi(null);
+        setFileSuratPerbaikan(null);
         // Refresh doc
         const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
         setDoc(newDoc.data);
@@ -180,8 +211,42 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
           <h3 className="text-sm font-bold text-emerald-800 mb-4 uppercase flex items-center gap-2">
             <ClipboardCheck size={18} /> Upload Berkas Digital
           </h3>
-          
-          <div className="grid grid-cols-1 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-emerald-900 uppercase">Nomor Surat Permohonan Perbaikan</label>
+              <input 
+                type="text" 
+                value={nomorSuratPerbaikan} 
+                onChange={(e) => setNomorSuratPerbaikan(e.target.value)} 
+                placeholder="-" 
+                className="w-full text-sm px-4 py-2 rounded-xl border border-emerald-300 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-bold text-slate-700 bg-white" 
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-emerald-900 uppercase">Tanggal Surat Permohonan Perbaikan</label>
+              <input 
+                type="date" 
+                value={tanggalSuratPerbaikan} 
+                onChange={(e) => setTanggalSuratPerbaikan(e.target.value)} 
+                className="w-full text-sm px-4 py-2 rounded-xl border border-emerald-300 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 font-bold text-slate-700 bg-white cursor-pointer" 
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* Surat Permohonan Perbaikan */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-emerald-900 uppercase">Surat Permohonan Perbaikan</label>
+              {(() => {
+                let url = '';
+                try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlSuratPerbaikan; } catch(e) {}
+                if (url) return <a href={url} target="_blank" className="inline-block bg-emerald-200 text-emerald-800 text-xs font-bold px-3 py-2 rounded-lg border border-emerald-300">✅ Sudah Diupload</a>;
+                return (
+                  <input type="file" accept=".pdf" onChange={(e) => setFileSuratPerbaikan(e.target.files?.[0] || null)} className="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-200 file:text-emerald-800 file:font-bold hover:file:bg-emerald-300 cursor-pointer bg-white border border-emerald-200 rounded-lg" />
+                );
+              })()}
+            </div>
+
             {/* Tanda Terima Revisi */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-emerald-900 uppercase">Tanda Terima Perbaikan (Revisi) Ter-Tanda Tangan</label>
@@ -190,7 +255,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
                 try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlTandaTerimaRevisi; } catch(e) {}
                 if (url) return <a href={url} target="_blank" className="inline-block bg-emerald-200 text-emerald-800 text-xs font-bold px-3 py-2 rounded-lg border border-emerald-300">✅ Sudah Diupload</a>;
                 return (
-                  <input type="file" accept=".pdf" onChange={(e) => setFileTandaTerimaRevisi(e.target.files?.[0] || null)} className="w-full md:w-1/3 text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-200 file:text-emerald-800 file:font-bold hover:file:bg-emerald-300 cursor-pointer bg-white border border-emerald-200 rounded-lg" />
+                  <input type="file" accept=".pdf" onChange={(e) => setFileTandaTerimaRevisi(e.target.files?.[0] || null)} className="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-200 file:text-emerald-800 file:font-bold hover:file:bg-emerald-300 cursor-pointer bg-white border border-emerald-200 rounded-lg" />
                 );
               })()}
             </div>
@@ -199,7 +264,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
           <button 
             type="button" 
             onClick={handleUploadArsip}
-            disabled={isUploadingArsip || !fileTandaTerimaRevisi}
+            disabled={isUploadingArsip}
             className="px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow border border-emerald-600 transition-all text-xs uppercase disabled:opacity-50"
           >
             {isUploadingArsip ? 'Mengunggah...' : 'Simpan Berkas ke Arsip'}
