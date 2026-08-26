@@ -15,6 +15,9 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
   const [message, setMessage] = useState('');
 
   const [daftarPegawai, setDaftarPegawai] = useState<any[]>([]);
+  
+  const [revisiKe, setRevisiKe] = useState<string>('1');
+  const [tanggalRevisi, setTanggalRevisi] = useState<string>('');
 
   useEffect(() => {
     Promise.all([
@@ -22,6 +25,10 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
       fetch('/api/tim-penilai').then(res => res.json())
     ]).then(([docRes, pegawaiRes]) => {
       setDoc(docRes.data);
+      
+      const initialRevisi = docRes.data?.revisi_ke || '1';
+      setRevisiKe(String(initialRevisi));
+      
       // Urutkan berdasarkan urutan_hierarki
       const sortedPegawai = (pegawaiRes.data || []).sort((a: any, b: any) => (a.urutan_hierarki || 0) - (b.urutan_hierarki || 0));
       setDaftarPegawai(sortedPegawai);
@@ -29,6 +36,13 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
       setLoading(false);
     });
   }, [unwrappedParams.id]);
+
+  useEffect(() => {
+    if (!doc) return;
+    const dateKey = revisiKe === '1' ? 'tanggal_revisi_1' : `tanggal_revisi_${revisiKe}`;
+    const initialDate = doc[dateKey] || doc.tanggal_revisi || new Date().toISOString().split('T')[0];
+    setTanggalRevisi(initialDate);
+  }, [revisiKe, doc]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -126,7 +140,11 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Dokumen Revisi Ke- <span className="text-error">*</span></label>
-              <select name="nomor_revisi" required defaultValue="1"
+              <select 
+                name="nomor_revisi" 
+                required 
+                value={revisiKe}
+                onChange={(e) => setRevisiKe(e.target.value)}
                 className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer">
                 <option value="1">Revisi 1 (PHP1)</option>
                 <option value="2">Revisi 2 (PHP2)</option>
@@ -138,7 +156,12 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
 
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Pengembalian Revisi <span className="text-error">*</span></label>
-              <input type="date" name="tanggal_revisi" required defaultValue={doc.tanggal_revisi || new Date().toISOString().split('T')[0]}
+              <input 
+                type="date" 
+                name="tanggal_revisi" 
+                required 
+                value={tanggalRevisi}
+                onChange={(e) => setTanggalRevisi(e.target.value)}
                 className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
             </div>
             
