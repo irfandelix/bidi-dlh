@@ -152,7 +152,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
       
       <div className="bg-surface border border-outline-variant rounded-3xl p-8 shadow-sm hover:shadow-md transition-shadow">
         {/* Info Box */}
-        <div className="bg-surface-container-low border border-outline-variant rounded-2xl p-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-surface-container-low border border-outline-variant rounded-2xl p-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 shadow-sm hover:shadow-md transition-shadow">
           <div>
             <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Nama Kegiatan</span>
             <p className="font-bold text-on-surface mt-1 uppercase text-sm md:text-base">{doc.nama_kegiatan}</p>
@@ -163,9 +163,72 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
               {doc.nomor_checklist || '-'}
             </p>
           </div>
-          <div className="md:col-span-2 border-t border-outline-variant pt-4 mt-2">
+
+          <div className="md:col-span-2 border-t border-outline-variant pt-4"></div>
+
+          <div>
             <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pemrakarsa</span>
             <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.nama_pemrakarsa || '-'}</p>
+          </div>
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Telepon Pemrakarsa</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.telepon_pemrakarsa || '-'}</p>
+          </div>
+
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Jenis Dokumen</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.jenis_dokumen || '-'}</p>
+          </div>
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Jenis Kegiatan</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.jenis_kegiatan || '-'}</p>
+          </div>
+
+          <div className="md:col-span-2">
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Lokasi Kegiatan</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.lokasi_kegiatan || '-'}</p>
+          </div>
+
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Besaran / Luasan</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.besaran_luasan || '-'} {doc.satuan_luasan || ''}</p>
+          </div>
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Sumber Data</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.sumber_data || '-'}</p>
+          </div>
+
+          <div className="md:col-span-2 border-t border-outline-variant pt-4"></div>
+
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Surat Permohonan</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.nomor_surat_permohonan || '-'}</p>
+            <p className="text-xs text-on-surface-variant uppercase mt-0.5">{doc.tanggal_surat_permohonan || ''}</p>
+          </div>
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Perihal Permohonan</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.perihal_surat_permohonan || '-'}</p>
+          </div>
+
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Konsultan</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.nama_konsultan || '-'}</p>
+            <p className="text-xs text-on-surface-variant uppercase mt-0.5">{doc.telepon_konsultan || 'Tidak ada no telepon'}</p>
+          </div>
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pengirim Berkas</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.nama_pengirim || '-'} ({doc.pengirim_sebagai || '-'})</p>
+          </div>
+
+          <div className="md:col-span-2 border-t border-outline-variant pt-4"></div>
+
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Tanggal Masuk Dokumen</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.tanggal_masuk_dokumen || '-'}</p>
+          </div>
+          <div>
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Keterangan / Catatan</span>
+            <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.keterangan || '-'}</p>
           </div>
         </div>
 
