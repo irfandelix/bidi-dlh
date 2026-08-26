@@ -15,6 +15,13 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    fetch(`/api/perizinan/${unwrappedParams.id}`)
+      .then(res => res.json())
+      .then(res => {
+        setDoc(res.data);
+        setLoading(false);
+      });
+  }, [unwrappedParams.id]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
