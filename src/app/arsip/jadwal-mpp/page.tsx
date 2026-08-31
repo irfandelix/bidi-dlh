@@ -30,11 +30,15 @@ export default function JadwalMPPPage() {
 
   // Fetch holidays when year changes
   useEffect(() => {
-    fetch(`https://api-harilibur.vercel.app/api?year=${selectedYear}`)
+    fetch(`https://api-hari-libur.vercel.app/api?year=${selectedYear}`)
       .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          const holidayDates = data.filter((d: any) => d.is_national_holiday).map((d: any) => d.holiday_date);
+      .then(response => {
+        if (response && Array.isArray(response.data)) {
+          const holidayDates = response.data.map((d: any) => d.holiday_date || d.date);
+          setHolidays(holidayDates);
+        } else if (Array.isArray(response)) {
+          // Fallback if the API returns direct array
+          const holidayDates = response.map((d: any) => d.holiday_date || d.date);
           setHolidays(holidayDates);
         }
       })
