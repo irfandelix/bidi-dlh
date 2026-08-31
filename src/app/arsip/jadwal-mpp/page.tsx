@@ -131,12 +131,7 @@ export default function JadwalMPPPage() {
               <CalendarIcon size={28} className="text-on-surface" />
             </div>
             <div>
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <h1 className="text-2xl font-bold uppercase tracking-tight text-on-surface">Jadwal Jaga Petugas MPP</h1>
-                <Link href="/pengaturan/tim-penilai" title="Pengaturan Petugas (Set Hierarki = 13)" className="flex items-center gap-1.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant px-3 py-1 rounded-lg text-xs font-bold text-on-surface uppercase tracking-widest transition-colors shadow-sm shrink-0">
-                  <Settings size={14} /> Atur Petugas
-                </Link>
-              </div>
+              <h1 className="text-2xl font-bold uppercase tracking-tight text-on-surface">Jadwal Jaga Petugas MPP</h1>
               <p className="text-on-surface-variant text-sm font-bold uppercase mt-1">Atur penugasan loket MPP DLH</p>
             </div>
           </div>
@@ -176,12 +171,17 @@ export default function JadwalMPPPage() {
               </button>
             </div>
             
-            <button 
-              onClick={() => window.print()}
-              className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2 rounded-xl shadow-sm transition-colors uppercase tracking-widest text-sm cursor-pointer ml-auto"
-            >
-              <Printer size={18} /> Cetak
-            </button>
+            <div className="flex gap-2 ml-auto">
+              <Link href="/pengaturan/tim-penilai" title="Pengaturan Petugas (Set Hierarki = 13)" className="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high border border-outline-variant px-4 py-2 rounded-xl text-sm font-bold text-on-surface uppercase tracking-widest transition-colors shadow-sm cursor-pointer">
+                <Settings size={18} /> Atur Petugas
+              </Link>
+              <button 
+                onClick={() => window.print()}
+                className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2 rounded-xl shadow-sm transition-colors uppercase tracking-widest text-sm cursor-pointer"
+              >
+                <Printer size={18} /> Cetak
+              </button>
+            </div>
           </div>
         </div>
       </div>
