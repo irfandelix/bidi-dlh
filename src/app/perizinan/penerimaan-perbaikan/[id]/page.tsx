@@ -219,6 +219,60 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
+        {/* Riwayat PHP */}
+        {(() => {
+          let arsip: any = {};
+          try { arsip = doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : (doc?.arsip_fisik || {}); } catch(e) {}
+          
+          const revisiNames: Record<string, string> = { '1': 'PHP 1', '2': 'PHP 2', '3': 'PHP 3', '4': 'PHP 4' };
+          const revisiHistory = Object.entries(revisiNames).filter(([key]) => {
+            return arsip[`nomorSuratPerbaikan_${key}`] || arsip[`tanggalSuratPerbaikan_${key}`] || arsip[`urlSuratPerbaikan_${key}`] || arsip[`urlTandaTerimaRevisi_${key}`] || doc[`tanggal_php_${key}`];
+          });
+
+          if (revisiHistory.length === 0) return null;
+
+          return (
+            <div className="mb-8 p-6 rounded-2xl border border-slate-200 bg-slate-50">
+              <h3 className="text-sm font-bold text-slate-700 mb-4 uppercase flex items-center gap-2">
+                <span className="text-base">📋</span> Riwayat Penerimaan Perbaikan
+              </h3>
+              <div className="space-y-3">
+                {revisiHistory.map(([key, label]) => {
+                  const nomor = arsip[`nomorSuratPerbaikan_${key}`];
+                  const tanggal = arsip[`tanggalSuratPerbaikan_${key}`];
+                  const urlSurat = arsip[`urlSuratPerbaikan_${key}`];
+                  const urlTandaTerima = arsip[`urlTandaTerimaRevisi_${key}`];
+                  const tanggalPhp = doc[`tanggal_php_${key}`];
+                  return (
+                    <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                      <div>
+                        <span className="inline-block bg-emerald-100 text-emerald-800 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 mb-2">{label}</span>
+                        {nomor && <p className="text-xs font-bold text-slate-700 uppercase">{nomor}</p>}
+                        {tanggal && <p className="text-xs text-slate-500 mt-0.5">{new Date(tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
+                        {tanggalPhp && <p className="text-xs text-slate-500 mt-0.5">Penyerahan: {new Date(tanggalPhp).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <span className="text-xs font-bold text-slate-500 uppercase">Surat Permohonan</span>
+                        {urlSurat
+                          ? <a href={urlSurat} target="_blank" className="inline-block bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-200 transition-colors w-fit">✅ Lihat File</a>
+                          : <span className="text-xs text-slate-400 italic">Belum diupload</span>
+                        }
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <span className="text-xs font-bold text-slate-500 uppercase">Tanda Terima</span>
+                        {urlTandaTerima
+                          ? <a href={urlTandaTerima} target="_blank" className="inline-block bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-200 transition-colors w-fit">✅ Lihat File</a>
+                          : <span className="text-xs text-slate-400 italic">Belum diupload</span>
+                        }
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Upload Arsip Tanda Terima Revisi (Isolated from main form) */}
         <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50">
           <h3 className="text-sm font-bold text-emerald-800 mb-4 uppercase flex items-center gap-2">
