@@ -136,7 +136,7 @@ export default function JadwalMPPPage() {
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-4 items-center w-full xl:w-auto">
+          <div className="flex flex-wrap justify-end gap-4 items-center w-full xl:w-auto ml-auto">
             <div className="flex bg-surface-container rounded-xl p-1 border border-outline-variant">
               <select 
                 value={selectedMonth} 
@@ -173,7 +173,7 @@ export default function JadwalMPPPage() {
             
             <button 
               onClick={() => window.print()}
-              className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2 rounded-xl shadow-sm transition-colors uppercase tracking-widest text-sm cursor-pointer ml-auto xl:ml-0"
+              className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2 rounded-xl shadow-sm transition-colors uppercase tracking-widest text-sm cursor-pointer ml-auto"
             >
               <Printer size={18} /> Cetak
             </button>
