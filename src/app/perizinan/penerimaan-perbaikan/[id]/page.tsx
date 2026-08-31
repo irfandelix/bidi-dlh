@@ -238,7 +238,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
           return (
             <div className="mb-8 p-6 rounded-2xl border border-slate-200 bg-slate-50">
               <h3 className="text-sm font-bold text-slate-700 mb-4 uppercase flex items-center gap-2">
-                <span className="text-base">📋</span> Riwayat Penerimaan Perbaikan
+                Riwayat Penerimaan Perbaikan
               </h3>
               <div className="space-y-3">
                 {revisiHistory.map(([key, label]) => {
@@ -258,14 +258,14 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
                       <div className="flex flex-col gap-2">
                         <span className="text-xs font-bold text-slate-500 uppercase">Surat Permohonan</span>
                         {urlSurat
-                          ? <a href={urlSurat} target="_blank" className="inline-block bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-200 transition-colors w-fit">✅ Lihat File</a>
+                          ? <a href={urlSurat} target="_blank" className="inline-block bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-200 transition-colors w-fit">Lihat File</a>
                           : <span className="text-xs text-slate-400 italic">Belum diupload</span>
                         }
                       </div>
                       <div className="flex flex-col gap-2">
                         <span className="text-xs font-bold text-slate-500 uppercase">Tanda Terima</span>
                         {urlTandaTerima
-                          ? <a href={urlTandaTerima} target="_blank" className="inline-block bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-200 transition-colors w-fit">✅ Lihat File</a>
+                          ? <a href={urlTandaTerima} target="_blank" className="inline-block bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-200 transition-colors w-fit">Lihat File</a>
                           : <span className="text-xs text-slate-400 italic">Belum diupload</span>
                         }
                       </div>
