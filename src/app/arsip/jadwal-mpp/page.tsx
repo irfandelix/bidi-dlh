@@ -84,6 +84,31 @@ export default function JadwalMPPPage() {
     saveToLocalStorage(newSchedule);
   };
 
+  const [startOfficerId, setStartOfficerId] = useState<number | ''>('');
+
+  const generateOtomatis = () => {
+    if (officers.length === 0) return;
+    
+    let currentOfficerIdx = officers.findIndex(o => o.id === Number(startOfficerId));
+    if (currentOfficerIdx === -1) currentOfficerIdx = 0;
+
+    const newSchedule: Record<string, boolean> = {};
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      if (!isHoliday(day)) {
+        const officer = officers[currentOfficerIdx];
+        const key = `${officer.id}_${selectedYear}_${selectedMonth}_${day}`;
+        newSchedule[key] = true;
+        
+        // Giliran selanjutnya
+        currentOfficerIdx = (currentOfficerIdx + 1) % officers.length;
+      }
+    }
+
+    setSchedule(newSchedule);
+    saveToLocalStorage(newSchedule);
+  };
+
   const months = [
     'JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI', 
     'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
@@ -100,8 +125,8 @@ export default function JadwalMPPPage() {
           <ArrowLeft size={16} /> Kembali
         </Link>
 
-        <div className="bg-surface border border-outline-variant rounded-[2rem] p-8 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-4">
+        <div className="bg-surface border border-outline-variant rounded-[2rem] p-8 shadow-sm flex flex-col xl:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-4 w-full xl:w-auto">
             <div className="w-14 h-14 rounded-2xl bg-purple-400 border border-outline-variant flex items-center justify-center shrink-0">
               <CalendarIcon size={28} className="text-on-surface" />
             </div>
@@ -111,25 +136,44 @@ export default function JadwalMPPPage() {
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-4">
-            <select 
-              value={selectedMonth} 
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="bg-surface-container border border-outline-variant text-on-surface font-bold px-4 py-2 rounded-xl outline-none"
-            >
-              {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
-            </select>
-            
-            <input 
-              type="number" 
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-surface-container border border-outline-variant text-on-surface font-bold px-4 py-2 rounded-xl outline-none w-24"
-            />
+          <div className="flex flex-wrap gap-4 items-center w-full xl:w-auto">
+            <div className="flex bg-surface-container rounded-xl p-1 border border-outline-variant">
+              <select 
+                value={selectedMonth} 
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                className="bg-transparent text-on-surface font-bold px-3 py-2 outline-none"
+              >
+                {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
+              </select>
+              <div className="w-px bg-outline-variant my-2 mx-1"></div>
+              <input 
+                type="number" 
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="bg-transparent text-on-surface font-bold px-3 py-2 outline-none w-20"
+              />
+            </div>
+
+            <div className="flex gap-2 bg-blue-50 border border-blue-200 rounded-xl p-2 items-center">
+              <select 
+                value={startOfficerId} 
+                onChange={(e) => setStartOfficerId(e.target.value === '' ? '' : Number(e.target.value))}
+                className="bg-transparent text-blue-900 text-sm font-bold px-2 py-1 outline-none max-w-[150px]"
+              >
+                <option value="">-- Mulai Dari --</option>
+                {officers.map(o => <option key={o.id} value={o.id}>{o.nama}</option>)}
+              </select>
+              <button 
+                onClick={generateOtomatis}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-colors text-xs uppercase tracking-widest whitespace-nowrap"
+              >
+                Isi Otomatis
+              </button>
+            </div>
             
             <button 
               onClick={() => window.print()}
-              className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2 rounded-xl shadow-sm transition-colors uppercase tracking-widest text-sm cursor-pointer shrink-0"
+              className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2 rounded-xl shadow-sm transition-colors uppercase tracking-widest text-sm cursor-pointer ml-auto xl:ml-0"
             >
               <Printer size={18} /> Cetak
             </button>
