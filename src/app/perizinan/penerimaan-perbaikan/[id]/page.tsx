@@ -226,7 +226,11 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
           
           const revisiNames: Record<string, string> = { '1': 'PHP 1', '2': 'PHP 2', '3': 'PHP 3', '4': 'PHP 4' };
           const revisiHistory = Object.entries(revisiNames).filter(([key]) => {
-            return arsip[`nomorSuratPerbaikan_${key}`] || arsip[`tanggalSuratPerbaikan_${key}`] || arsip[`urlSuratPerbaikan_${key}`] || arsip[`urlTandaTerimaRevisi_${key}`] || doc[`tanggal_php_${key}`];
+            const hasData = arsip[`nomorSuratPerbaikan_${key}`] || arsip[`tanggalSuratPerbaikan_${key}`] || arsip[`urlSuratPerbaikan_${key}`] || arsip[`urlTandaTerimaRevisi_${key}`] || doc[`tanggal_php_${key}`];
+            if (key === '1' && !hasData) {
+              return arsip['nomorSuratPerbaikan'] || arsip['tanggalSuratPerbaikan'] || arsip['urlSuratPerbaikan'] || arsip['urlTandaTerimaRevisi'] || doc['tanggal_php_1'];
+            }
+            return hasData;
           });
 
           if (revisiHistory.length === 0) return null;
@@ -238,10 +242,10 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
               </h3>
               <div className="space-y-3">
                 {revisiHistory.map(([key, label]) => {
-                  const nomor = arsip[`nomorSuratPerbaikan_${key}`];
-                  const tanggal = arsip[`tanggalSuratPerbaikan_${key}`];
-                  const urlSurat = arsip[`urlSuratPerbaikan_${key}`];
-                  const urlTandaTerima = arsip[`urlTandaTerimaRevisi_${key}`];
+                  const nomor = arsip[`nomorSuratPerbaikan_${key}`] || (key === '1' ? arsip.nomorSuratPerbaikan : '');
+                  const tanggal = arsip[`tanggalSuratPerbaikan_${key}`] || (key === '1' ? arsip.tanggalSuratPerbaikan : '');
+                  const urlSurat = arsip[`urlSuratPerbaikan_${key}`] || (key === '1' ? arsip.urlSuratPerbaikan : '');
+                  const urlTandaTerima = arsip[`urlTandaTerimaRevisi_${key}`] || (key === '1' ? arsip.urlTandaTerimaRevisi : '');
                   const tanggalPhp = doc[`tanggal_php_${key}`];
                   return (
                     <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
