@@ -182,7 +182,7 @@ export default function JadwalMPPPage() {
       </div>
 
       {/* Printable Area */}
-      <div className="bg-white print:bg-transparent rounded-2xl border border-slate-200 print:border-none p-8 print:p-0 overflow-x-auto print:overflow-visible">
+      <div id="printable-area" className="bg-white print:bg-transparent rounded-2xl border border-slate-200 print:border-none p-8 print:p-0 overflow-x-auto print:overflow-visible">
         
         {/* Header */}
         <div className="text-center font-bold text-black uppercase mb-8 leading-snug">
@@ -284,27 +284,25 @@ export default function JadwalMPPPage() {
           body * {
             visibility: hidden;
           }
-          .print\\:hidden {
-            display: none !important;
+          #printable-area, #printable-area * {
+            visibility: visible;
+          }
+          #printable-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
           }
           .print-exact-color {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          .max-w-7xl {
-            max-w: none !important;
-          }
-          .bg-white.print\\:bg-transparent {
-            border: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-          .bg-white.print\\:bg-transparent * {
-            visibility: visible;
+          @page {
+            size: landscape;
+            margin: 1cm;
           }
         }
       `}</style>
