@@ -172,7 +172,7 @@ export default function JadwalMPPPage() {
             </div>
             
             <div className="flex gap-2 ml-auto">
-              <Link href="/pengaturan/tim-penilai" title="Pengaturan Petugas (Set Hierarki = 13)" className="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high border border-outline-variant px-4 py-2 rounded-xl text-sm font-bold text-on-surface uppercase tracking-widest transition-colors shadow-sm cursor-pointer">
+              <Link href="/pengaturan/petugas-mpp" title="Pengaturan Petugas MPP" className="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high border border-outline-variant px-4 py-2 rounded-xl text-sm font-bold text-on-surface uppercase tracking-widest transition-colors shadow-sm cursor-pointer">
                 <Settings size={18} /> Atur Petugas
               </Link>
               <button 
