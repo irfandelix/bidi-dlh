@@ -195,8 +195,12 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
           <FileCheck2 size={28} className="text-on-surface" />
         </div>
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface uppercase">Input Penerimaan Perbaikan</h2>
-          <p className="text-sm font-bold text-on-surface-variant mt-1 uppercase">TAHUN {doc.tahun || '2026'} | TAHAP 6: PHP</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface uppercase">
+            {doc?.status_tahapan === 'Pengembalian Revisi' ? 'Input Terima Revisi' : 'Input Penerimaan Perbaikan'}
+          </h2>
+          <p className="text-sm font-bold text-on-surface-variant mt-1 uppercase">
+            TAHUN {doc?.tahun || '2026'} | {doc?.status_tahapan === 'Pengembalian Revisi' ? 'TAHAP 9: TERIMA REVISI' : 'TAHAP 6: PHP'}
+          </p>
         </div>
       </div>
       
