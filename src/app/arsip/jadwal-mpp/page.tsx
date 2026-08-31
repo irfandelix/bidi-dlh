@@ -20,12 +20,16 @@ export default function JadwalMPPPage() {
   const [holidays, setHolidays] = useState<string[]>([]);
   
   useEffect(() => {
-    fetch('/api/tim-penilai?hierarki=13')
+    // Fetch officers
+    fetch('/api/pengaturan/petugas-mpp')
       .then(res => res.json())
-      .then(res => {
-        setOfficers(res.data || []);
-        setLoading(false);
-      });
+      .then(response => {
+        if (response && response.data) {
+          setOfficers(response.data);
+        }
+      })
+      .catch(err => console.error('Gagal mengambil petugas MPP', err))
+      .finally(() => setLoading(false));
   }, []);
 
   // Fetch holidays when year changes

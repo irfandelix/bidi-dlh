@@ -34,7 +34,7 @@ export default function TimPenilaiPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/pengaturan/tim-penilai?hierarki=13');
+      const res = await fetch('/api/pengaturan/petugas-mpp');
       const json = await res.json();
       setPersonil(json.data || []);
     } catch (err) {
@@ -77,13 +77,13 @@ export default function TimPenilaiPage() {
     e.preventDefault();
     try {
       if (editId) {
-        await fetch(`/api/pengaturan/tim-penilai/${editId}`, {
+        await fetch(`/api/pengaturan/petugas-mpp/${editId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
       } else {
-        await fetch('/api/pengaturan/tim-penilai', {
+        await fetch('/api/pengaturan/petugas-mpp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
@@ -100,7 +100,7 @@ export default function TimPenilaiPage() {
   const handleDelete = async (id: number) => {
     if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) return;
     try {
-      await fetch(`/api/pengaturan/tim-penilai/${id}`, { method: 'DELETE' });
+      await fetch(`/api/pengaturan/petugas-mpp/${id}`, { method: 'DELETE' });
       fetchData();
     } catch (err) {
       console.error(err);
