@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Printer, Calendar as CalendarIcon, Save } from 'lucide-react';
+import { ArrowLeft, Printer, Calendar as CalendarIcon, Save, Settings } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function JadwalMPPPage() {
@@ -126,13 +126,18 @@ export default function JadwalMPPPage() {
         </Link>
 
         <div className="bg-surface border border-outline-variant rounded-[2rem] p-8 shadow-sm flex flex-col xl:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-4 w-full xl:w-auto">
-            <div className="w-14 h-14 rounded-2xl bg-purple-400 border border-outline-variant flex items-center justify-center shrink-0">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-4 w-full xl:w-auto text-center md:text-left">
+            <div className="w-14 h-14 rounded-2xl bg-purple-400 border border-outline-variant flex items-center justify-center shrink-0 mx-auto md:mx-0">
               <CalendarIcon size={28} className="text-on-surface" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold uppercase tracking-tight text-on-surface">Jadwal Jaga Petugas MPP</h1>
-              <p className="text-on-surface-variant text-sm font-bold uppercase">Atur penugasan loket MPP DLH</p>
+              <div className="flex flex-col sm:flex-row items-center gap-3">
+                <h1 className="text-2xl font-bold uppercase tracking-tight text-on-surface">Jadwal Jaga Petugas MPP</h1>
+                <Link href="/pengaturan/tim-penilai" title="Pengaturan Petugas (Set Hierarki = 13)" className="flex items-center gap-1.5 bg-surface-container hover:bg-surface-container-high border border-outline-variant px-3 py-1 rounded-lg text-xs font-bold text-on-surface uppercase tracking-widest transition-colors shadow-sm shrink-0">
+                  <Settings size={14} /> Atur Petugas
+                </Link>
+              </div>
+              <p className="text-on-surface-variant text-sm font-bold uppercase mt-1">Atur penugasan loket MPP DLH</p>
             </div>
           </div>
           
