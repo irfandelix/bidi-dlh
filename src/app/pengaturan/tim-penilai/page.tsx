@@ -136,21 +136,20 @@ export default function TimPenilaiPage() {
       {/* TABLE */}
       <div className="bg-surface border border-outline-variant rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
+          <table className="w-full text-left border-collapse min-w-[600px]">
             <thead>
               <tr className="bg-surface-container-low border-b-4 border-outline-variant">
                 <th className="p-4 font-bold text-on-surface uppercase tracking-widest text-sm border-r border-outline-variant w-16 text-center">No</th>
                 <th className="p-4 font-bold text-on-surface uppercase tracking-widest text-sm border-r border-outline-variant">Nama & NIP</th>
-                <th className="p-4 font-bold text-on-surface uppercase tracking-widest text-sm border-r border-outline-variant">Kategori</th>
                 <th className="p-4 font-bold text-on-surface uppercase tracking-widest text-sm border-r border-outline-variant">Jabatan Dinas</th>
                 <th className="p-4 font-bold text-on-surface uppercase tracking-widest text-sm text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={5} className="p-8 text-center font-bold text-on-surface-variant"><LottieLoader size={150} text="MEMUAT DATA..." /></td></tr>
+                <tr><td colSpan={4} className="p-8 text-center font-bold text-on-surface-variant"><LottieLoader size={150} text="MEMUAT DATA..." /></td></tr>
               ) : personil.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center font-bold text-on-surface-variant">Belum ada personil terdaftar.</td></tr>
+                <tr><td colSpan={4} className="p-8 text-center font-bold text-on-surface-variant">Belum ada personil terdaftar.</td></tr>
               ) : (
                 personil.map((p, index) => (
                   <tr key={p.id} className="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors">
@@ -159,7 +158,6 @@ export default function TimPenilaiPage() {
                       <div className="font-bold text-on-surface text-base">{p.nama}</div>
                       {p.nip && <div className="text-xs font-bold text-on-surface-variant mt-1 uppercase tracking-widest">NIP. {p.nip}</div>}
                     </td>
-                    <td className="p-4 font-bold text-on-surface-variant border-r border-outline-variant">{p.kategori || '-'}</td>
                     <td className="p-4 font-bold text-on-surface-variant border-r border-outline-variant">{p.jabatan_dinas || '-'}</td>
                     <td className="p-4 text-center">
                       <div className="flex items-center justify-center gap-2">
@@ -199,25 +197,9 @@ export default function TimPenilaiPage() {
                 <input type="text" value={formData.nip} onChange={e => setFormData({...formData, nip: e.target.value})} className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Cth: 198001012005011001" />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Kategori (Peran)</label>
-                  <input type="text" value={formData.kategori} onChange={e => setFormData({...formData, kategori: e.target.value})} className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Cth: Katim 1 / Kabid" />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Pangkat/Golongan</label>
-                  <input type="text" value={formData.pangkat_golongan} onChange={e => setFormData({...formData, pangkat_golongan: e.target.value})} className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Cth: Penata Tk. I (III/d)" />
-                </div>
-              </div>
-
               <div>
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Jabatan Dinas</label>
                 <input type="text" value={formData.jabatan_dinas} onChange={e => setFormData({...formData, jabatan_dinas: e.target.value})} className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Cth: Kepala Bidang Perencanaan..." />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Urutan Hierarki</label>
-                <input type="number" value={formData.urutan_hierarki} onChange={e => setFormData({...formData, urutan_hierarki: parseInt(e.target.value) || 99})} className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Angka urutan cetak (cth: 1, 2, 3)" />
               </div>
 
               <div className="pt-6 flex gap-3 border-t-2 border-outline-variant mt-6">

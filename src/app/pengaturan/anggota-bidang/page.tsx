@@ -111,11 +111,6 @@ export default function AnggotaBidangPage() {
               <input type="text" name="jabatan" placeholder="Cth: Analis Lingkungan" className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-on-surface mb-1 uppercase tracking-wider">Hierarki (Opsional)</label>
-              <input type="number" name="hierarki" placeholder="1, 2, 3..." className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
-            </div>
-
             <button type="submit" disabled={submitting} className="w-full mt-4 px-6 py-4 bg-primary text-on-primary text-on-primary font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2">
               {submitting ? <LottieLoader size={24} /> : <Plus size={16} />}
               Simpan Anggota

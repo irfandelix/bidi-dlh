@@ -142,17 +142,15 @@ export default function TimPengawasPage() {
                 <tr>
                   <th className="p-5 uppercase text-xs tracking-widest w-12 text-center whitespace-nowrap">No</th>
                   <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap">Nama & NIP</th>
-                  <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap">Pangkat / Golongan</th>
                   <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap">Jabatan</th>
-                  <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap text-center">Hierarki</th>
                   <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y-4 divide-slate-900">
                 {loading ? (
-                  <tr><td colSpan={6} className="p-10 text-center font-bold text-on-surface uppercase"><LottieLoader size={150} text="MEMUAT DATA..." /></td></tr>
+                  <tr><td colSpan={4} className="p-10 text-center font-bold text-on-surface uppercase"><LottieLoader size={150} text="MEMUAT DATA..." /></td></tr>
                 ) : personil.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').length === 0 ? (
-                  <tr><td colSpan={6} className="p-10 text-center text-on-surface-variant font-bold uppercase tracking-widest">Belum ada data tim pengawas.</td></tr>
+                  <tr><td colSpan={4} className="p-10 text-center text-on-surface-variant font-bold uppercase tracking-widest">Belum ada data tim pengawas.</td></tr>
                 ) : (
                   personil.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').map((item, index) => (
                     <tr key={item.id} className="hover:bg-surface-container-lowest transition-colors">
@@ -161,9 +159,7 @@ export default function TimPengawasPage() {
                         <div className="font-bold text-on-surface">{item.nama}</div>
                         <div className="text-xs font-bold text-on-surface-variant mt-1">{item.nip || '-'}</div>
                       </td>
-                      <td className="p-5 font-bold text-on-surface-variant">{item.pangkat_golongan || '-'}</td>
                       <td className="p-5 font-bold text-on-surface-variant">{item.jabatan_dinas || '-'}</td>
-                      <td className="p-5 text-center font-bold text-on-surface">{item.urutan_hierarki || '-'}</td>
                       <td className="p-5 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <button onClick={() => handleOpenModal(item)} className="p-2 bg-indigo-200 text-indigo-900 border border-indigo-200 rounded-xl hover:bg-indigo-400 transition-all">
@@ -193,17 +189,15 @@ export default function TimPengawasPage() {
                 <tr>
                   <th className="p-5 uppercase text-xs tracking-widest w-12 text-center whitespace-nowrap">No</th>
                   <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap">Nama & NIP</th>
-                  <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap">Pangkat / Golongan</th>
                   <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap">Jabatan</th>
-                  <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap text-center">Hierarki</th>
                   <th className="p-5 uppercase text-xs tracking-widest whitespace-nowrap text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y-4 divide-slate-900">
                 {loading ? (
-                  <tr><td colSpan={6} className="p-10 text-center font-bold text-on-surface uppercase"><LottieLoader size={150} text="MEMUAT DATA..." /></td></tr>
+                  <tr><td colSpan={4} className="p-10 text-center font-bold text-on-surface uppercase"><LottieLoader size={150} text="MEMUAT DATA..." /></td></tr>
                 ) : personil.filter(p => p.kategori === 'Saksi').length === 0 ? (
-                  <tr><td colSpan={6} className="p-10 text-center text-on-surface-variant font-bold uppercase tracking-widest">Belum ada data saksi.</td></tr>
+                  <tr><td colSpan={4} className="p-10 text-center text-on-surface-variant font-bold uppercase tracking-widest">Belum ada data saksi.</td></tr>
                 ) : (
                   personil.filter(p => p.kategori === 'Saksi').map((item, index) => (
                     <tr key={item.id} className="hover:bg-surface-container-lowest transition-colors">
@@ -212,9 +206,7 @@ export default function TimPengawasPage() {
                         <div className="font-bold text-on-surface">{item.nama}</div>
                         <div className="text-xs font-bold text-on-surface-variant mt-1">{item.nip || '-'}</div>
                       </td>
-                      <td className="p-5 font-bold text-on-surface-variant">{item.pangkat_golongan || '-'}</td>
                       <td className="p-5 font-bold text-on-surface-variant">{item.jabatan_dinas || '-'}</td>
-                      <td className="p-5 text-center font-bold text-on-surface">{item.urutan_hierarki || '-'}</td>
                       <td className="p-5 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <button onClick={() => handleOpenModal(item)} className="p-2 bg-indigo-200 text-indigo-900 border border-indigo-200 rounded-xl hover:bg-indigo-400 transition-all">
@@ -264,20 +256,10 @@ export default function TimPengawasPage() {
                 <label className="block text-xs font-bold text-on-surface uppercase mb-2">NIP</label>
                 <input type="text" value={formData.nip} onChange={e => setFormData({...formData, nip: e.target.value})} className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-300" placeholder="Contoh: 19800101 200501 1 001" />
               </div>
-              
-              <div>
-                <label className="block text-xs font-bold text-on-surface uppercase mb-2">Pangkat / Golongan</label>
-                <input type="text" value={formData.pangkat_golongan} onChange={e => setFormData({...formData, pangkat_golongan: e.target.value})} className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-300" placeholder="Contoh: Pembina / IVa" />
-              </div>
 
               <div>
                 <label className="block text-xs font-bold text-on-surface uppercase mb-2">Jabatan</label>
                 <input type="text" value={formData.jabatan_dinas} onChange={e => setFormData({...formData, jabatan_dinas: e.target.value})} className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-300" placeholder="Contoh: Pengawas Lingkungan Hidup Ahli Muda" />
-              </div>
-              
-              <div>
-                <label className="block text-xs font-bold text-on-surface uppercase mb-2">Urutan Hierarki (1 = Ketua)</label>
-                <input type="number" value={formData.urutan_hierarki} onChange={e => setFormData({...formData, urutan_hierarki: parseInt(e.target.value) || 99})} className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-300" placeholder="Contoh: 1" />
               </div>
 
               <div className="pt-4">
