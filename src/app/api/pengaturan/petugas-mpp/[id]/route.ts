@@ -12,10 +12,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
       .update({
         nama: body.nama,
         nip: body.nip || null,
-        pangkat_golongan: body.pangkat_golongan || null,
         jabatan_dinas: body.jabatan_dinas || null,
-        kategori: body.kategori || null,
-        urutan_hierarki: body.urutan_hierarki || 99,
         updated_at: new Date().toISOString()
       })
       .eq('id', id)

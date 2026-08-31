@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   try {
     const supabase = await createClient();
     
-    let query = supabase.from('petugas_mpp').select('*').order('urutan_hierarki', { ascending: true });
+    let query = supabase.from('petugas_mpp').select('*').order('id', { ascending: true });
     
     const { data, error } = await query;
 
@@ -28,10 +28,7 @@ export async function POST(request: Request) {
         {
           nama: body.nama,
           nip: body.nip || null,
-          pangkat_golongan: body.pangkat_golongan || null,
           jabatan_dinas: body.jabatan_dinas || null,
-          kategori: body.kategori || null,
-          urutan_hierarki: body.urutan_hierarki || 99,
           updated_at: new Date().toISOString()
         }
       ])
