@@ -44,20 +44,69 @@ export default function JadwalMPPPage() {
       .catch(err => console.error('Gagal mengambil hari libur', err));
   }, [selectedYear]);
 
-  // Load schedule from local storage
+  // Load schedule from database
   useEffect(() => {
-    const key = `jadwal_mpp_${selectedYear}_${selectedMonth}`;
-    const saved = localStorage.getItem(key);
-    if (saved) {
-      setSchedule(JSON.parse(saved));
-    } else {
-      setSchedule({});
-    }
+    setLoading(true);
+    fetch(`/api/arsip/jadwal-mpp?year=${selectedYear}&month=${selectedMonth}`)
+      .then(res => res.json())
+      .then(response => {
+        if (response && response.data) {
+          const newSchedule: Record<string, boolean> = {};
+          response.data.forEach((row: any) => {
+            // row.tanggal is 'YYYY-MM-DD'
+            const day = parseInt(row.tanggal.split('-')[2], 10);
+            const key = `${row.officer_id}_${selectedYear}_${selectedMonth}_${day}`;
+            newSchedule[key] = true;
+          });
+          setSchedule(newSchedule);
+        }
+      })
+      .catch(err => console.error('Gagal mengambil jadwal MPP', err))
+      .finally(() => setLoading(false));
   }, [selectedYear, selectedMonth]);
 
-  const saveToLocalStorage = (newSchedule: Record<string, boolean>) => {
-    const key = `jadwal_mpp_${selectedYear}_${selectedMonth}`;
-    localStorage.setItem(key, JSON.stringify(newSchedule));
+  const [saving, setSaving] = useState(false);
+
+  const saveToDatabase = async () => {
+    setSaving(true);
+    try {
+      const assignments = [];
+      const m = selectedMonth + 1;
+      const monthStr = String(m).padStart(2, '0');
+      
+      for (const key in schedule) {
+        if (schedule[key]) {
+          const parts = key.split('_');
+          const officerId = parseInt(parts[0]);
+          const keyYear = parseInt(parts[1]);
+          const keyMonth = parseInt(parts[2]);
+          const day = parseInt(parts[3]);
+          
+          if (keyYear === selectedYear && keyMonth === selectedMonth) {
+            const dateStr = `${selectedYear}-${monthStr}-${String(day).padStart(2, '0')}`;
+            assignments.push({ officer_id: officerId, tanggal: dateStr });
+          }
+        }
+      }
+
+      const res = await fetch('/api/arsip/jadwal-mpp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          year: selectedYear,
+          month: selectedMonth,
+          assignments
+        })
+      });
+      
+      if (!res.ok) throw new Error('Gagal menyimpan ke database');
+      alert('Jadwal berhasil disimpan secara permanen ke database!');
+    } catch (err) {
+      console.error(err);
+      alert('Gagal menyimpan jadwal.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getDaysInMonth = (month: number, year: number) => {
@@ -85,7 +134,6 @@ export default function JadwalMPPPage() {
       [key]: !schedule[key]
     };
     setSchedule(newSchedule);
-    saveToLocalStorage(newSchedule);
   };
 
   const [startOfficerId, setStartOfficerId] = useState<number | ''>('');
@@ -110,7 +158,6 @@ export default function JadwalMPPPage() {
     }
 
     setSchedule(newSchedule);
-    saveToLocalStorage(newSchedule);
   };
 
   const months = [
@@ -179,6 +226,13 @@ export default function JadwalMPPPage() {
               <Link href="/pengaturan/petugas-mpp" title="Pengaturan Petugas MPP" className="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high border border-outline-variant px-4 py-2 rounded-xl text-sm font-bold text-on-surface uppercase tracking-widest transition-colors shadow-sm cursor-pointer">
                 <Settings size={18} /> Atur Petugas
               </Link>
+              <button 
+                onClick={saveToDatabase}
+                disabled={saving}
+                className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-6 py-2 rounded-xl shadow-sm transition-colors uppercase tracking-widest text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? <LottieLoader size={18} /> : <Save size={18} />} Simpan
+              </button>
               <button 
                 onClick={() => window.print()}
                 className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2 rounded-xl shadow-sm transition-colors uppercase tracking-widest text-sm cursor-pointer"
