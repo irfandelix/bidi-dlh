@@ -12,9 +12,9 @@ export async function GET(request: Request) {
     }
 
     const m = parseInt(month) + 1; // JS month is 0-indexed, PostgreSQL date uses 1-indexed
-    const startDate = \\-\-01\;
+    const startDate = `${year}-${String(m).padStart(2, '0')}-01`;
     const lastDay = new Date(parseInt(year), m, 0).getDate();
-    const endDate = \\-\-\\;
+    const endDate = `${year}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 
     const supabase = await createClient();
     
@@ -46,9 +46,9 @@ export async function POST(request: Request) {
     }
 
     const m = parseInt(month) + 1;
-    const startDate = \\-\-01\;
+    const startDate = `${year}-${String(m).padStart(2, '0')}-01`;
     const lastDay = new Date(parseInt(year), m, 0).getDate();
-    const endDate = \\-\-\\;
+    const endDate = `${year}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 
     // 1. Delete all existing schedule for this month
     const { error: delError } = await supabase
