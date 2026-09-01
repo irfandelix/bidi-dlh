@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Printer, Calendar as CalendarIcon, Save, Settings } from 'lucide-react';
+import { ArrowLeft, Printer, Calendar as CalendarIcon, Save, Settings, ChevronUp, ChevronDown } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function JadwalMPPPage() {
@@ -196,13 +196,17 @@ export default function JadwalMPPPage() {
               >
                 {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
               </select>
-              <div className="w-px bg-outline-variant my-2 mx-1"></div>
-              <input 
-                type="number" 
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="bg-transparent text-on-surface font-bold px-3 py-2 outline-none w-20"
-              />
+              <div className="flex items-center px-3 gap-2">
+                <span className="font-bold text-on-surface text-lg w-12 text-center">{selectedYear}</span>
+                <div className="flex flex-col bg-surface border border-outline-variant rounded-lg overflow-hidden">
+                  <button onClick={() => setSelectedYear(y => y + 1)} className="hover:bg-slate-200 bg-surface text-slate-700 px-1 py-0.5 border-b border-outline-variant flex items-center justify-center cursor-pointer transition-colors">
+                    <ChevronUp size={16} strokeWidth={3} />
+                  </button>
+                  <button onClick={() => setSelectedYear(y => y - 1)} className="hover:bg-slate-200 bg-surface text-slate-700 px-1 py-0.5 flex items-center justify-center cursor-pointer transition-colors">
+                    <ChevronDown size={16} strokeWidth={3} />
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="flex gap-2 bg-blue-50 border border-blue-200 rounded-xl p-2 items-center">
