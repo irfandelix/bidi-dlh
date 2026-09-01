@@ -183,7 +183,7 @@ export default function TimPengaduanPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary text-on-primary/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-surface border border-outline-variant rounded-3xl w-full max-w-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-5 bg-surface-container-low border-b-4 border-outline-variant flex justify-between items-center shrink-0">
               <h3 className="text-xl font-bold text-on-surface uppercase">{editId ? 'Edit Personil' : 'Tambah Personil'}</h3>

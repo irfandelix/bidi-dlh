@@ -179,7 +179,7 @@ export default function TimPenilaiPage() {
 
       {/* MODAL */}
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-primary text-on-primary/50 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
           <div className="bg-surface border border-outline-variant rounded-2xl shadow-sm hover:shadow-md transition-shadow w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b-4 border-outline-variant bg-secondary-container">
               <h2 className="text-2xl font-bold text-on-surface tracking-tight">
