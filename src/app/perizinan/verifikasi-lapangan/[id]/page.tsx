@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Send, Loader2, MapPinned } from 'lucide-react';
+import { ArrowLeft, MapPin, Send, Loader2, MapPinned, ClipboardCheck } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function VerlapPage({ params }: { params: Promise<{ id: string }> }) {
