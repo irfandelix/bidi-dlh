@@ -115,8 +115,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                 <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs">Identitas Pemrakarsa</th>
                 <td className="py-3 px-6 font-bold text-on-surface text-sm">
                   Pemrakarsa: {doc.nama_pemrakarsa || '-'} <br/>
-                  Nama Usaha/PT: {doc.nama_usaha || '-'} <br/>
-                  No. Telepon: {doc.no_telp_pemrakarsa || '-'}
+                  No. Telepon: {doc.telepon_pemrakarsa || doc.no_telp_pemrakarsa || '-'}
                 </td>
               </tr>
               <tr className="hover:bg-surface-container-lowest">
