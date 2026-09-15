@@ -155,6 +155,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       }
     }
 
+    // Convert empty string dates to null
+    const dateFields = [
+      'tanggal_uji_berkas', 'tanggal_verlap', 'tanggal_pemeriksaan', 'tanggal_masuk_dokumen',
+      'tanggal_revisi_1', 'tanggal_revisi_2', 'tanggal_revisi_3', 'tanggal_revisi_4', 'tanggal_revisi_5',
+      'tanggal_php_1', 'tanggal_php_2', 'tanggal_php_3', 'tanggal_php_4', 'tanggal_php_5',
+      'tanggal_risalah', 'tanggal_pengembalian', 'tanggal_penyerahan_sk', 'tanggal_penerimaan_jilidan',
+      'tanggal_surat_permohonan'
+    ];
+    for (const field of dateFields) {
+      if (body[field] === '') {
+        body[field] = null;
+      }
+    }
+
     const { data, error } = await supabase
       .from('dokumens')
       // @ts-ignore

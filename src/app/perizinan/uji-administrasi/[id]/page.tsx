@@ -185,6 +185,8 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
         body: JSON.stringify(payload)
       });
       
+      const resData = await res.json();
+      
       if(res.ok) {
         if (!isAmdalnet) {
           setMessage('Menyiapkan Dokumen BA HUA (Mohon Tunggu)...');
@@ -213,9 +215,12 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
 
         setMessage('Uji Administrasi Berhasil Disimpan!');
         setTimeout(() => router.push('/perizinan/daftar'), 1500);
+      } else {
+        alert(`Gagal menyimpan: ${resData.error || 'Server error'}`);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(`Terjadi kesalahan jaringan: ${err.message}`);
     } finally {
       setSubmitting(false);
     }
