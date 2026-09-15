@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock 
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search 
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -16,6 +16,7 @@ export default function DaftarPerizinanPage() {
   const [loading, setLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState<Dokumen | null>(null);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetch('/api/perizinan')
@@ -86,9 +87,17 @@ export default function DaftarPerizinanPage() {
   };
 
   // Filter docs based on active group
-  const activeDocs = docs.filter(d => activeGroup.filterFn(d));
-
-  
+  const activeDocs = docs.filter(d => {
+    const matchesGroup = activeGroup.filterFn(d);
+    if (!searchQuery) return matchesGroup;
+    
+    const query = searchQuery.toLowerCase();
+    const matchNama = d.nama_kegiatan?.toLowerCase().includes(query);
+    const matchLokasi = d.lokasi_kegiatan?.toLowerCase().includes(query);
+    const matchTanggal = d.tanggal_masuk_dokumen?.toLowerCase().includes(query) || d.created_at?.toLowerCase().includes(query);
+    
+    return matchesGroup && (matchNama || matchLokasi || matchTanggal);
+  });
   // Pagination
   const totalPages = Math.ceil(activeDocs.length / itemsPerPage);
   const paginatedDocs = activeDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -155,9 +164,9 @@ export default function DaftarPerizinanPage() {
 
       {/* Dynamic Data Table (NeoBrutalism) */}
       <div className="bg-white border border-slate-200 shadow-lg rounded-3xl overflow-hidden mt-8">
-        <div className="bg-slate-100 border-b-4 border-slate-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="bg-slate-100 border-b-4 border-slate-200 p-6 flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white rounded-xl border border-slate-200 flex items-center justify-center shadow-sm">
+            <div className="w-12 h-12 bg-white rounded-xl border border-slate-200 flex items-center justify-center shadow-sm shrink-0">
               {(() => {
                 const ActiveIcon = activeGroup.icon;
                 return <ActiveIcon size={20} className="text-slate-900" />;
@@ -165,14 +174,27 @@ export default function DaftarPerizinanPage() {
             </div>
             <div>
               <h3 className="text-xl font-black text-slate-900 uppercase">Daftar Dokumen: {activeGroup.shortTitle}</h3>
-              <p className="text-sm font-bold text-slate-500">{activeDocs.length} dokumen {activeGroup.id === 0 ? 'keseluruhan' : 'dalam kelompok ini'}</p>
+              <p className="text-sm font-bold text-slate-500">{activeDocs.length} dokumen {activeGroup.id === 0 && !searchQuery ? 'keseluruhan' : 'ditemukan'}</p>
             </div>
           </div>
-          {activeGroup.id !== 0 && (
-            <button onClick={() => { setActiveGroup(groupTabs[0]); setCurrentPage(1); }} className="bg-slate-900 text-white px-4 py-2 rounded-xl border border-slate-200 text-xs font-black uppercase shadow-md hover:-translate-y-1 hover:shadow-md transition-all">
-              Lihat Semua Dokumen
-            </button>
-          )}
+          
+          <div className="flex items-center flex-wrap gap-3 w-full xl:w-auto">
+            <div className="relative flex-1 md:min-w-[300px]">
+              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Cari nama, lokasi, tanggal..." 
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                className="w-full bg-white border-2 border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-400 shadow-sm transition-colors"
+              />
+            </div>
+            {activeGroup.id !== 0 && (
+              <button onClick={() => { setActiveGroup(groupTabs[0]); setCurrentPage(1); }} className="bg-slate-900 text-white px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-black uppercase shadow-md hover:-translate-y-1 hover:shadow-md transition-all shrink-0">
+                Lihat Semua
+              </button>
+            )}
+          </div>
         </div>
         
         <div className="overflow-x-auto">
