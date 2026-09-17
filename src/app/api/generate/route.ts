@@ -205,7 +205,10 @@ export async function POST(request: Request) {
 
     const targetRevisi = target_revisi ? String(target_revisi) : doc.revisi_ke;
 
-    const formattedJenisDokumen = (doc.jenis_dokumen || '').replace(/RINTEK LB3/gi, 'Rincian Teknis Penyimpanan Limbah B3');
+    let formattedJenisDokumen = doc.jenis_dokumen || '';
+    formattedJenisDokumen = formattedJenisDokumen.replace(/RINTEK LB3/gi, 'Rincian Teknis Penyimpanan Limbah B3');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK EMISI/gi, 'Persetujuan Teknis Pemenuhan Baku Mutu Emisi');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK AIR LIMBAH/gi, 'Persetujuan Teknis Pemenuhan Baku Mutu Air Limbah');
 
     const templateData = {
       ...doc,
