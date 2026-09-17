@@ -209,10 +209,22 @@ export async function POST(request: Request) {
     formattedJenisDokumen = formattedJenisDokumen.replace(/RINTEK LB3/gi, 'Rincian Teknis Penyimpanan Limbah B3');
     formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK EMISI/gi, 'Persetujuan Teknis Pemenuhan Baku Mutu Emisi');
     formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK AIR LIMBAH/gi, 'Persetujuan Teknis Pemenuhan Baku Mutu Air Limbah');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/^SPPL$/gi, 'Surat Pernyataan Kesanggupan Pengelolaan dan Pemantauan Lingkungan Hidup');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/^UKLUPL$|^UKL-UPL$/gi, 'Upaya Pengelolaan Lingkungan Hidup dan Upaya Pemantauan Lingkungan Hidup');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/^AMDAL$/gi, 'Analisis Mengenai Dampak Lingkungan Hidup');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/^DELH$/gi, 'Dokumen Evaluasi Lingkungan Hidup');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/^DPLH$/gi, 'Dokumen Pengelolaan Lingkungan Hidup');
+
+    let teks_persetujuan = formattedJenisDokumen;
+    const lowerJenis = formattedJenisDokumen.toLowerCase();
+    if (!lowerJenis.startsWith('persetujuan') && !lowerJenis.startsWith('rincian teknis') && !lowerJenis.startsWith('kajian teknis') && !lowerJenis.startsWith('surat kelayakan')) {
+        teks_persetujuan = 'Persetujuan ' + formattedJenisDokumen;
+    }
 
     const templateData = {
       ...doc,
       jenis_dokumen: formattedJenisDokumen,
+      teks_persetujuan: teks_persetujuan,
       ...ekstra,
       ...checklistData,
       nama_kegiatan_upper: doc.nama_kegiatan?.toUpperCase() || '',
@@ -220,6 +232,7 @@ export async function POST(request: Request) {
       nama_pemrakarsa_upper: doc.nama_pemrakarsa?.toUpperCase() || '',
       alamat_pemrakarsa_upper: doc.alamat_pemrakarsa?.toUpperCase() || '',
       JENIS_DOKUMEN: formattedJenisDokumen.toUpperCase(),
+      TEKS_PERSETUJUAN: teks_persetujuan.toUpperCase(),
       NAMA_KEGIATAN: doc.nama_kegiatan?.toUpperCase() || '-',
       LOKASI_KEGIATAN: doc.lokasi_kegiatan?.toUpperCase() || '-',
       persyaratan: persyaratan,
