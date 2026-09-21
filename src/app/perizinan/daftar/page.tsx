@@ -311,20 +311,8 @@ export default function DaftarPerizinanPage() {
                   const Icon = stage.icon;
                   const isCurrent = stage.statuses.includes(selectedDoc.status_tahapan);
                   const currentStageId = getStageForStatus(selectedDoc.status_tahapan, selectedDoc).id;
-                  let isDisabled = stage.id > currentStageId;
+                  let isDisabled = false; // Membuka semua tombol agar bisa diinput tidak urut
                   
-                  // Verlap (3) and Pemeriksaan (4) unlock together because Verlap is optional
-                  if (currentStageId === 3 && stage.id === 4) isDisabled = false;
-
-                  // If returned (5), we must allow receiving the revision (6)
-                  if (currentStageId === 5 && stage.id === 6) isDisabled = false;
-
-                  // If returned again (8), we must allow receiving the revision again (9)
-                  if (currentStageId === 8 && stage.id === 9) isDisabled = false;
-
-                  // Arsip (12) is always available
-                  if (stage.id === 12) isDisabled = false;
-
                   let docNumber = '';
                   if (stage.id === 1 && selectedDoc.nomor_checklist) docNumber = selectedDoc.nomor_checklist;
                   if (stage.id === 2 && selectedDoc.nomor_uji_berkas) docNumber = selectedDoc.nomor_uji_berkas;
