@@ -347,9 +347,6 @@ export default function DaftarPerizinanPage() {
                             {docNumber}
                           </p>
                         )}
-                        {isCurrent && (
-                          <span className="inline-block mt-1 text-[9px] font-black uppercase text-emerald-700 bg-emerald-200 px-2 py-0.5 rounded tracking-widest">Tahap Saat Ini</span>
-                        )}
                         {isDisabled && (
                           <span className="inline-block mt-1 text-[9px] font-black uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded tracking-widest">Belum Tersedia</span>
                         )}
