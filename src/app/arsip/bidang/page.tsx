@@ -117,42 +117,39 @@ export default function DaftarArsipBidangPage() {
       </div>
 
       {/* Dynamic Data Table */}
-      <div className="bg-surface border border-outline-variant shadow-sm hover:shadow-md transition-shadow rounded-xl overflow-hidden mt-8">
+      <div className="bg-surface border border-outline-variant shadow-sm rounded-xl overflow-hidden mt-8">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-surface-container-low border-b-4 border-outline-variant">
+            <thead className="bg-surface-container-low border-b border-outline-variant">
               <tr>
-                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] border-r border-outline-variant min-w-[150px]">Tim</th>
-                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] border-r border-outline-variant min-w-[250px]">Nama Kegiatan</th>
-                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] border-r border-outline-variant min-w-[150px]">Tanggal</th>
-                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] border-r border-outline-variant min-w-[200px]">Lokasi</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] min-w-[150px]">Tim</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] min-w-[250px]">Nama Kegiatan</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] min-w-[150px]">Tanggal</th>
+                <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] min-w-[200px]">Lokasi</th>
                 <th className="px-6 py-4 font-bold text-on-surface uppercase text-[10px] min-w-[150px] text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y-2 divide-slate-900">
+            <tbody className="divide-y divide-outline-variant">
               {filteredDocs.length > 0 ? (
                 paginatedDocs.map((d) => (
-                  <tr key={d.id} className="hover:bg-amber-50 transition-colors">
-                    <td className="px-6 py-4 border-r border-outline-variant font-bold text-on-surface">{d.tim}</td>
-                    <td className="px-6 py-4 border-r border-outline-variant font-bold text-on-surface">{d.nama_kegiatan}</td>
-                    <td className="px-6 py-4 border-r border-outline-variant font-bold text-on-surface-variant">{d.tanggal_kegiatan}</td>
-                    <td className="px-6 py-4 border-r border-outline-variant font-bold text-on-surface-variant">{d.lokasi_kegiatan}</td>
-                    <td className="px-6 py-4 font-bold text-on-surface-variant text-sm flex items-center justify-center gap-2">
-                      <Link href={`/arsip/bidang/${d.id}`} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg text-xs hover:bg-blue-200 transition-colors border border-blue-200 hidden">
-                        Buka
-                      </Link>
-                      <button onClick={() => handleDelete(d.id)} className="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs hover:bg-red-200 transition-colors border border-red-200 flex items-center gap-1">
-                        <Trash2 size={12} /> Hapus
+                  <tr key={d.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-sm text-on-surface">{d.tim}</td>
+                    <td className="px-6 py-4 font-medium text-sm text-on-surface">{d.nama_kegiatan}</td>
+                    <td className="px-6 py-4 font-medium text-sm text-on-surface-variant">{d.tanggal_kegiatan}</td>
+                    <td className="px-6 py-4 font-medium text-sm text-on-surface-variant">{d.lokasi_kegiatan}</td>
+                    <td className="px-6 py-4 text-sm flex items-center justify-center gap-2">
+                      <button onClick={() => handleDelete(d.id)} className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-xs hover:bg-red-100 transition-colors flex items-center gap-1 font-medium">
+                        <Trash2 size={14} /> Hapus
                       </button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant font-bold bg-surface-container-lowest">
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-medium">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <FolderOpen size={32} className="text-slate-300" />
-                      <p className="uppercase tracking-widest">TIDAK ADA DATA ARSIP BIDANG.</p>
+                      <FolderOpen size={32} className="text-slate-300 mb-2" />
+                      <p>Belum ada data Arsip Bidang.</p>
                     </div>
                   </td>
                 </tr>
