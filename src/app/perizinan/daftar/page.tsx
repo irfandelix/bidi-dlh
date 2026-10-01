@@ -141,7 +141,7 @@ export default function DaftarPerizinanPage() {
       </div>
 
       {/* 2 Group Tabs (Minimalist) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
         {groupTabs.map((group) => {
           const theme = colorMap[group.color];
           const Icon = group.icon;
@@ -151,7 +151,7 @@ export default function DaftarPerizinanPage() {
             <button 
               onClick={() => { setActiveGroup(group); setCurrentPage(1); }}
               key={group.id} 
-              className={`text-left p-4 rounded-xl border border-slate-200 transition-all group flex flex-col xl:flex-row items-center xl:items-start gap-4 cursor-pointer ${
+              className={`p-4 rounded-xl border border-slate-200 transition-all group flex flex-row items-center justify-center gap-4 cursor-pointer w-full sm:w-auto sm:min-w-[300px] ${
                 isActive 
                   ? 'bg-slate-900 text-white shadow-sm translate-y-1' 
                   : 'bg-white shadow-md hover:-translate-y-1 hover:shadow-md'
@@ -162,7 +162,7 @@ export default function DaftarPerizinanPage() {
               }`}>
                 <Icon size={20} />
               </div>
-              <p className={`text-sm font-black tracking-wide uppercase text-center xl:text-left mt-1 xl:mt-0 ${isActive ? 'text-white' : 'text-slate-800'}`}>
+              <p className={`text-sm font-black tracking-wide uppercase text-left ${isActive ? 'text-white' : 'text-slate-800'}`}>
                 {group.title}
               </p>
             </button>
