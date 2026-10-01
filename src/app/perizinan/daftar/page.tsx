@@ -243,6 +243,13 @@ export default function DaftarPerizinanPage() {
                           >
                             BUKA
                           </button>
+                          <Link 
+                            href={`/perizinan/cetak/${d.id}`}
+                            className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center gap-1 uppercase"
+                            title="Pusat Cetak Dokumen"
+                          >
+                            <Printer size={14} /> Cetak
+                          </Link>
                         </div>
                       </td>
                     </tr>
