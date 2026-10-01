@@ -1,12 +1,12 @@
 'use client';
 
 import LottieLoader from '@/components/LottieLoader';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info 
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -17,6 +17,11 @@ export default function DaftarPerizinanPage() {
   const [selectedDoc, setSelectedDoc] = useState<Dokumen | null>(null);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [expandedRows, setExpandedRows] = useState<number[]>([]);
+
+  const toggleRow = (id: number) => {
+    setExpandedRows(prev => prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]);
+  };
 
   useEffect(() => {
     fetch('/api/perizinan')
@@ -58,7 +63,7 @@ export default function DaftarPerizinanPage() {
 
   const groupTabs = [
     { id: 0, title: 'Semua Dokumen', shortTitle: 'Semua', color: 'slate', icon: LayoutDashboard, filterFn: (d: any) => true },
-    { id: 1, title: 'Tabel Arsip Perizinan', shortTitle: 'Arsip', color: 'emerald', icon: Archive, filterFn: (d: any) => ['Arsip', 'Diarsipkan', 'ARSIP', 'Jilidan Selesai'].includes(d.status_tahapan) || d.lokasi_arsip },
+    { id: 1, title: 'Tabel Arsip Perizinan', shortTitle: 'Arsip', color: 'emerald', icon: Archive, filterFn: (d: any) => true },
   ];
 
   const [activeGroup, setActiveGroup] = useState<any>(groupTabs[0]);
@@ -281,51 +286,123 @@ export default function DaftarPerizinanPage() {
               <tbody className="divide-y-2 divide-slate-900">
                 {activeDocs.length > 0 ? (
                   paginatedDocs.map((d) => (
-                    <tr key={d.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="px-6 py-4 border-r-2 border-slate-200">
-                        <span className="bg-emerald-100 text-emerald-800 font-black px-2 py-1 rounded border border-emerald-200 text-xs shadow-sm">
-                          #{String(d.no_urut || d.id).padStart(3, '0')} / {d.tahun || '2026'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 border-r-2 border-slate-200">
-                        <p className="font-bold text-slate-900 text-sm uppercase">{d.nama_kegiatan}</p>
-                        <p className="text-xs font-bold text-slate-600 uppercase mt-1 flex items-center gap-2">
-                           <span className="bg-slate-200 px-1.5 py-0.5 rounded border border-slate-300">{d.jenis_dokumen}</span> 
-                           {d.nama_pemrakarsa}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
-                        {d.tanggal_masuk_dokumen || '-'}
-                      </td>
-                      <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
-                        <div className="flex flex-wrap gap-1.5">
-                          {getFiles(d).map(f => (
-                             <a key={f.name} href={f.url} target="_blank" rel="noreferrer" className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded border border-indigo-200 hover:bg-indigo-100 transition-colors shadow-sm">
-                               {f.name}
-                             </a>
-                          ))}
-                          {getFiles(d).length === 0 && <span className="text-[10px] text-slate-400 font-bold bg-slate-100 px-2 py-1 rounded border border-slate-200">BELUM ADA FILE UPLOAD</span>}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex flex-col gap-2">
-                          <Link 
-                            href={`/perizinan/arsip/${d.id}`}
-                            className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center justify-center gap-1 uppercase"
-                            title="Buka Detail Arsip"
-                          >
-                            <Info size={14} /> Detail
-                          </Link>
-                          <Link 
-                            href={`/perizinan/cetak/${d.id}`}
-                            className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center justify-center gap-1 uppercase"
-                            title="Pusat Cetak Dokumen"
-                          >
-                            <Printer size={14} /> Cetak
-                          </Link>
-                        </div>
-                      </td>
-                    </tr>
+                    <React.Fragment key={d.id}>
+                      <tr onClick={() => toggleRow(d.id)} className="hover:bg-slate-50 transition-colors cursor-pointer group">
+                        <td className="px-6 py-4 border-r-2 border-slate-200">
+                          <div className="flex items-center gap-2">
+                            <button className="w-6 h-6 shrink-0 rounded-full bg-slate-200 flex items-center justify-center group-hover:bg-indigo-200 group-hover:text-indigo-700 transition-colors">
+                              {expandedRows.includes(d.id) ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                            </button>
+                            <span className="bg-emerald-100 text-emerald-800 font-black px-2 py-1 rounded border border-emerald-200 text-xs shadow-sm">
+                              #{String(d.no_urut || d.id).padStart(3, '0')} / {d.tahun || '2026'}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 border-r-2 border-slate-200">
+                          <p className="font-bold text-slate-900 text-sm uppercase">{d.nama_kegiatan}</p>
+                          <p className="text-xs font-bold text-slate-600 uppercase mt-1 flex items-center gap-2">
+                             <span className="bg-slate-200 px-1.5 py-0.5 rounded border border-slate-300">{d.jenis_dokumen}</span> 
+                             {d.nama_pemrakarsa}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
+                          {d.tanggal_masuk_dokumen || '-'}
+                        </td>
+                        <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
+                          <div className="flex flex-wrap gap-1.5">
+                            {getFiles(d).map(f => (
+                               <a key={f.name} href={f.url} onClick={e => e.stopPropagation()} target="_blank" rel="noreferrer" className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded border border-indigo-200 hover:bg-indigo-100 transition-colors shadow-sm">
+                                 {f.name}
+                               </a>
+                            ))}
+                            {getFiles(d).length === 0 && <span className="text-[10px] text-slate-400 font-bold bg-slate-100 px-2 py-1 rounded border border-slate-200">BELUM ADA FILE UPLOAD</span>}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <div className="flex flex-col gap-2">
+                            <Link 
+                              href={`/perizinan/arsip/${d.id}`}
+                              onClick={e => e.stopPropagation()}
+                              className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center justify-center gap-1 uppercase"
+                              title="Buka Detail Arsip"
+                            >
+                              <Info size={14} /> Detail
+                            </Link>
+                            <Link 
+                              href={`/perizinan/cetak/${d.id}`}
+                              onClick={e => e.stopPropagation()}
+                              className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center justify-center gap-1 uppercase"
+                              title="Pusat Cetak Dokumen"
+                            >
+                              <Printer size={14} /> Cetak
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                      {expandedRows.includes(d.id) && (
+                        <tr className="bg-slate-50 border-b-2 border-slate-200">
+                          <td colSpan={5} className="p-6 border-r-2 border-l-2 border-slate-200">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                              
+                              <div className="space-y-4">
+                                <div>
+                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Status Tahapan Saat Ini</h4>
+                                  <p className="text-sm font-bold text-slate-900 uppercase">
+                                    <span className="inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-lg border border-amber-200 shadow-sm">{d.status_tahapan || '-'}</span>
+                                  </p>
+                                </div>
+                                <div>
+                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Lokasi Kegiatan</h4>
+                                  <p className="text-sm font-bold text-slate-900 uppercase">{d.lokasi_kegiatan || '-'}</p>
+                                </div>
+                                <div>
+                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Bidang Usaha</h4>
+                                  <p className="text-sm font-bold text-slate-900 uppercase">{d.bidang_usaha || '-'}</p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-4">
+                                <div>
+                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Nomor Registrasi / Checklist</h4>
+                                  <p className="text-sm font-bold text-slate-900">{d.nomor_checklist || '-'}</p>
+                                </div>
+                                <div>
+                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Lokasi Arsip / Letak Rak</h4>
+                                  <p className="text-sm font-bold text-slate-900">{d.lokasi_arsip || '-'}</p>
+                                </div>
+                                <div>
+                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Titik Koordinat (Map)</h4>
+                                  <p className="text-sm font-bold text-slate-900">{d.latitude && d.longitude ? `${d.latitude}, ${d.longitude}` : '-'}</p>
+                                </div>
+                              </div>
+
+                              <div className="space-y-4">
+                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Riwayat Tanggal Penting</h4>
+                                <ul className="space-y-2">
+                                  <li className="flex justify-between items-center border-b border-slate-100 pb-1">
+                                    <span className="text-xs font-bold text-slate-500 uppercase">Tgl Masuk</span>
+                                    <span className="text-xs font-black text-slate-900">{d.tanggal_masuk_dokumen || '-'}</span>
+                                  </li>
+                                  <li className="flex justify-between items-center border-b border-slate-100 pb-1">
+                                    <span className="text-xs font-bold text-slate-500 uppercase">Tgl Uji Admin</span>
+                                    <span className="text-xs font-black text-slate-900">{d.tanggal_uji_berkas || '-'}</span>
+                                  </li>
+                                  <li className="flex justify-between items-center border-b border-slate-100 pb-1">
+                                    <span className="text-xs font-bold text-slate-500 uppercase">Tgl Verlap</span>
+                                    <span className="text-xs font-black text-slate-900">{d.tanggal_ba_verlap || '-'}</span>
+                                  </li>
+                                  <li className="flex justify-between items-center border-b border-slate-100 pb-1">
+                                    <span className="text-xs font-bold text-slate-500 uppercase">Tgl Sidang</span>
+                                    <span className="text-xs font-black text-slate-900">{d.tanggal_ba_pemeriksaan || '-'}</span>
+                                  </li>
+                                </ul>
+                              </div>
+                              
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))
                 ) : (
                   <tr>
