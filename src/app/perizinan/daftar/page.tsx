@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search 
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info 
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -53,22 +53,12 @@ export default function DaftarPerizinanPage() {
 
   const colorMap: Record<string, any> = {
     slate: { light: 'bg-slate-50', text: 'text-slate-700', solid: 'bg-slate-500', icon: 'text-slate-500', hover: 'hover:text-slate-600', cardBg: 'bg-slate-100', cardText: 'text-slate-600' },
-    teal: { light: 'bg-teal-50', text: 'text-teal-700', solid: 'bg-teal-500', icon: 'text-teal-600', hover: 'hover:text-teal-600', cardBg: 'bg-teal-100', cardText: 'text-teal-600' },
-    amber: { light: 'bg-amber-50', text: 'text-amber-700', solid: 'bg-amber-500', icon: 'text-amber-500', hover: 'hover:text-amber-600', cardBg: 'bg-amber-100', cardText: 'text-amber-600' },
-    indigo: { light: 'bg-indigo-50', text: 'text-indigo-700', solid: 'bg-indigo-600', icon: 'text-indigo-600', hover: 'hover:text-indigo-600', cardBg: 'bg-indigo-100', cardText: 'text-indigo-600' },
-    rose: { light: 'bg-rose-50', text: 'text-rose-700', solid: 'bg-rose-600', icon: 'text-rose-600', hover: 'hover:text-rose-600', cardBg: 'bg-rose-100', cardText: 'text-rose-600' },
     emerald: { light: 'bg-emerald-50', text: 'text-emerald-700', solid: 'bg-emerald-500', icon: 'text-emerald-500', hover: 'hover:text-emerald-600', cardBg: 'bg-emerald-100', cardText: 'text-emerald-600' },
-    blue: { light: 'bg-blue-50', text: 'text-blue-700', solid: 'bg-blue-500', icon: 'text-blue-500', hover: 'hover:text-blue-600', cardBg: 'bg-blue-100', cardText: 'text-blue-600' },
-    purple: { light: 'bg-purple-50', text: 'text-purple-700', solid: 'bg-purple-500', icon: 'text-purple-500', hover: 'hover:text-purple-600', cardBg: 'bg-purple-100', cardText: 'text-purple-600' },
-    orange: { light: 'bg-orange-50', text: 'text-orange-700', solid: 'bg-orange-500', icon: 'text-orange-500', hover: 'hover:text-orange-600', cardBg: 'bg-orange-100', cardText: 'text-orange-600' },
   };
 
   const groupTabs = [
     { id: 0, title: 'Semua Dokumen', shortTitle: 'Semua', color: 'slate', icon: LayoutDashboard, filterFn: (d: any) => true },
-    { id: 1, title: 'Pendaftaran Baru', shortTitle: 'Baru', color: 'teal', icon: Plus, filterFn: (d: any) => [1, 2].includes(getStageForStatus(d.status_tahapan, d).id) },
-    { id: 2, title: 'Sedang Diproses', shortTitle: 'Diproses', color: 'indigo', icon: Clock, filterFn: (d: any) => [3, 4, 7, 10, 11].includes(getStageForStatus(d.status_tahapan, d).id) },
-    { id: 3, title: 'Menunggu Revisi', shortTitle: 'Revisi', color: 'rose', icon: RotateCcw, filterFn: (d: any) => [5, 6, 8, 9].includes(getStageForStatus(d.status_tahapan, d).id) },
-    { id: 4, title: 'Dokumen Selesai', shortTitle: 'Selesai', color: 'emerald', icon: Archive, filterFn: (d: any) => [12].includes(getStageForStatus(d.status_tahapan, d).id) },
+    { id: 1, title: 'Tabel Arsip Perizinan', shortTitle: 'Arsip', color: 'emerald', icon: Archive, filterFn: (d: any) => ['Arsip', 'Diarsipkan', 'ARSIP', 'Jilidan Selesai'].includes(d.status_tahapan) || d.lokasi_arsip },
   ];
 
   const [activeGroup, setActiveGroup] = useState<any>(groupTabs[0]);
@@ -84,6 +74,24 @@ export default function DaftarPerizinanPage() {
       return stages.find(s => s.id === 11) || stages[10];
     }
     return stages.find(s => s.statuses.includes(status)) || stages[1]; // default to Uji Admin if not found
+  };
+
+  const getFiles = (d: any) => {
+    if (!d.arsip_fisik) return [];
+    let parsed: any = {};
+    try {
+      parsed = JSON.parse(d.arsip_fisik);
+      if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+    } catch(e) { return []; }
+    
+    const files = [];
+    if (parsed.urlDokumenCetak) files.push({ name: 'Dok. Final', url: parsed.urlDokumenCetak });
+    if (parsed.urlPkplh) files.push({ name: 'PKPLH', url: parsed.urlPkplh });
+    if (parsed.urlUjiAdmin) files.push({ name: 'Uji Admin', url: parsed.urlUjiAdmin });
+    if (parsed.urlBaVerlap) files.push({ name: 'BA Verlap', url: parsed.urlBaVerlap });
+    if (parsed.urlBaSidang) files.push({ name: 'BA Sidang', url: parsed.urlBaSidang });
+    if (parsed.urlRpd) files.push({ name: 'RPD', url: parsed.urlRpd });
+    return files;
   };
 
   // Filter docs based on active group
@@ -103,7 +111,7 @@ export default function DaftarPerizinanPage() {
   const paginatedDocs = activeDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="max-w-7xl mx-auto py-8 space-y-8 pb-20">
+    <div className="max-w-7xl mx-auto py-8 space-y-8 pb-20 px-4">
       
       {/* Header Neobrutalism Style (Light Variant) */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-white p-6 rounded-3xl border border-slate-200 shadow-lg text-slate-900 relative overflow-hidden">
@@ -132,8 +140,8 @@ export default function DaftarPerizinanPage() {
         </div>
       </div>
 
-      {/* 5 Group Tabs (Light Neobrutalism) */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      {/* 2 Group Tabs (Minimalist) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {groupTabs.map((group) => {
           const theme = colorMap[group.color];
           const Icon = group.icon;
@@ -173,7 +181,7 @@ export default function DaftarPerizinanPage() {
               })()}
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 uppercase">Daftar Dokumen: {activeGroup.shortTitle}</h3>
+              <h3 className="text-xl font-black text-slate-900 uppercase">{activeGroup.id === 1 ? 'Daftar Arsip Perizinan' : 'Daftar Semua Dokumen'}</h3>
               <p className="text-sm font-bold text-slate-500">{activeDocs.length} dokumen {activeGroup.id === 0 && !searchQuery ? 'keseluruhan' : 'ditemukan'}</p>
             </div>
           </div>
@@ -189,78 +197,142 @@ export default function DaftarPerizinanPage() {
                 className="w-full bg-white border-2 border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-400 shadow-sm transition-colors"
               />
             </div>
-            {activeGroup.id !== 0 && (
-              <button onClick={() => { setActiveGroup(groupTabs[0]); setCurrentPage(1); }} className="bg-slate-900 text-white px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-black uppercase shadow-md hover:-translate-y-1 hover:shadow-md transition-all shrink-0">
-                Lihat Semua
-              </button>
-            )}
           </div>
         </div>
         
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-white border-b-4 border-slate-200">
-              <tr>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">NO URUT / THN</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Nama Kegiatan</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Pemrakarsa</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Tanggal Masuk</th>
-                <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs text-center w-32">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y-2 divide-slate-900">
-              {activeDocs.length > 0 ? (
-                paginatedDocs.map((d) => (
-                  <tr key={d.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 border-r-2 border-slate-200">
-                      <span className="bg-slate-200 text-slate-900 font-black px-2 py-1 rounded border border-slate-200 text-xs shadow-sm">
-                        #{d.no_urut || d.id}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 border-r-2 border-slate-200">
-                      <p className="font-bold text-slate-900 text-sm uppercase">{d.nama_kegiatan}</p>
-                      <p className="text-xs font-bold text-slate-500">{d.jenis_dokumen}</p>
-                    </td>
-                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
-                      {d.nama_pemrakarsa}
-                    </td>
-                    <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
-                      {d.tanggal_masuk_dokumen}
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button 
-                          onClick={() => {
-                            setSelectedDoc(d);
-                            setIsActionModalOpen(true);
-                          }}
-                          className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all uppercase"
-                        >
-                          BUKA
-                        </button>
-                        <Link 
-                          href={`/perizinan/cetak/${d.id}`}
-                          className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center gap-1 uppercase"
-                          title="Pusat Cetak Dokumen"
-                        >
-                          <Printer size={14} /> Cetak
-                        </Link>
+          {activeGroup.id === 0 ? (
+            // TABEL SEMUA DOKUMEN
+            <table className="w-full text-left">
+              <thead className="bg-white border-b-4 border-slate-200">
+                <tr>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">NO URUT / THN</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Nama Kegiatan</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Pemrakarsa</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Tanggal Masuk</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs text-center w-32">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y-2 divide-slate-900">
+                {activeDocs.length > 0 ? (
+                  paginatedDocs.map((d) => (
+                    <tr key={d.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 border-r-2 border-slate-200">
+                        <span className="bg-slate-200 text-slate-900 font-black px-2 py-1 rounded border border-slate-200 text-xs shadow-sm">
+                          #{d.no_urut || d.id}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 border-r-2 border-slate-200">
+                        <p className="font-bold text-slate-900 text-sm uppercase">{d.nama_kegiatan}</p>
+                        <p className="text-xs font-bold text-slate-500">{d.jenis_dokumen}</p>
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
+                        {d.nama_pemrakarsa}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
+                        {d.tanggal_masuk_dokumen}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button 
+                            onClick={() => {
+                              setSelectedDoc(d);
+                              setIsActionModalOpen(true);
+                            }}
+                            className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all uppercase"
+                          >
+                            BUKA
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <CircleDashed size={32} className="text-slate-300" />
+                        <p>Tidak ada dokumen di tahap ini.</p>
                       </div>
                     </td>
                   </tr>
-                ))
-              ) : (
+                )}
+              </tbody>
+            </table>
+          ) : (
+            // TABEL ARSIP PERIZINAN
+            <table className="w-full text-left">
+              <thead className="bg-white border-b-4 border-slate-200">
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <CircleDashed size={32} className="text-slate-300" />
-                      <p>Tidak ada dokumen di tahap ini.</p>
-                    </div>
-                  </td>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200 w-32">NO URUT</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Kegiatan & Pemrakarsa</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200 w-40">Tanggal Masuk</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">File Tersimpan</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs text-center w-32">Aksi</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y-2 divide-slate-900">
+                {activeDocs.length > 0 ? (
+                  paginatedDocs.map((d) => (
+                    <tr key={d.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-6 py-4 border-r-2 border-slate-200">
+                        <span className="bg-emerald-100 text-emerald-800 font-black px-2 py-1 rounded border border-emerald-200 text-xs shadow-sm">
+                          #{String(d.no_urut || d.id).padStart(3, '0')} / {d.tahun || '2026'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 border-r-2 border-slate-200">
+                        <p className="font-bold text-slate-900 text-sm uppercase">{d.nama_kegiatan}</p>
+                        <p className="text-xs font-bold text-slate-600 uppercase mt-1 flex items-center gap-2">
+                           <span className="bg-slate-200 px-1.5 py-0.5 rounded border border-slate-300">{d.jenis_dokumen}</span> 
+                           {d.nama_pemrakarsa}
+                        </p>
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
+                        {d.tanggal_masuk_dokumen || '-'}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
+                        <div className="flex flex-wrap gap-1.5">
+                          {getFiles(d).map(f => (
+                             <a key={f.name} href={f.url} target="_blank" rel="noreferrer" className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded border border-indigo-200 hover:bg-indigo-100 transition-colors shadow-sm">
+                               {f.name}
+                             </a>
+                          ))}
+                          {getFiles(d).length === 0 && <span className="text-[10px] text-slate-400 font-bold bg-slate-100 px-2 py-1 rounded border border-slate-200">BELUM ADA FILE UPLOAD</span>}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex flex-col gap-2">
+                          <Link 
+                            href={`/perizinan/arsip/${d.id}`}
+                            className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center justify-center gap-1 uppercase"
+                            title="Buka Detail Arsip"
+                          >
+                            <Info size={14} /> Detail
+                          </Link>
+                          <Link 
+                            href={`/perizinan/cetak/${d.id}`}
+                            className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center justify-center gap-1 uppercase"
+                            title="Pusat Cetak Dokumen"
+                          >
+                            <Printer size={14} /> Cetak
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Archive size={32} className="text-slate-300" />
+                        <p>Tidak ada arsip perizinan.</p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Pagination Controls */}
