@@ -461,63 +461,7 @@ export default function DaftarPerizinanPage() {
                       {expandedRows.includes(d.id) && (
                         <tr className="bg-slate-50 border-b-2 border-slate-200">
                           <td colSpan={4} className="p-6 border-r-2 border-l-2 border-slate-200">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                              
-                              <div className="space-y-4">
-                                <div>
-                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Status Tahapan Saat Ini</h4>
-                                  <p className="text-sm font-bold text-slate-900 uppercase">
-                                    <span className="inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-lg border border-amber-200 shadow-sm">{d.status_tahapan || '-'}</span>
-                                  </p>
-                                </div>
-                                <div>
-                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Lokasi Kegiatan</h4>
-                                  <p className="text-sm font-bold text-slate-900 uppercase">{d.lokasi_kegiatan || '-'}</p>
-                                </div>
-                                <div>
-                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Bidang Usaha</h4>
-                                  <p className="text-sm font-bold text-slate-900 uppercase">{d.bidang_usaha || '-'}</p>
-                                </div>
-                              </div>
-
-                              <div className="space-y-4">
-                                <div>
-                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Nomor Registrasi / Checklist</h4>
-                                  <p className="text-sm font-bold text-slate-900">{d.nomor_checklist || '-'}</p>
-                                </div>
-                                <div>
-                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Lokasi Arsip / Letak Rak</h4>
-                                  <p className="text-sm font-bold text-slate-900">{d.lokasi_arsip || '-'}</p>
-                                </div>
-                                <div>
-                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Titik Koordinat (Map)</h4>
-                                  <p className="text-sm font-bold text-slate-900">{d.latitude && d.longitude ? `${d.latitude}, ${d.longitude}` : '-'}</p>
-                                </div>
-                              </div>
-
-                              <div className="space-y-4">
-                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-2">Riwayat Tanggal Penting</h4>
-                                <ul className="space-y-2">
-                                  <li className="flex justify-between items-center border-b border-slate-100 pb-1">
-                                    <span className="text-xs font-bold text-slate-500 uppercase">Tgl Masuk</span>
-                                    <span className="text-xs font-black text-slate-900">{d.tanggal_masuk_dokumen || '-'}</span>
-                                  </li>
-                                  <li className="flex justify-between items-center border-b border-slate-100 pb-1">
-                                    <span className="text-xs font-bold text-slate-500 uppercase">Tgl Uji Admin</span>
-                                    <span className="text-xs font-black text-slate-900">{d.tanggal_uji_berkas || '-'}</span>
-                                  </li>
-                                  <li className="flex justify-between items-center border-b border-slate-100 pb-1">
-                                    <span className="text-xs font-bold text-slate-500 uppercase">Tgl Verlap</span>
-                                    <span className="text-xs font-black text-slate-900">{d.tanggal_ba_verlap || '-'}</span>
-                                  </li>
-                                  <li className="flex justify-between items-center border-b border-slate-100 pb-1">
-                                    <span className="text-xs font-bold text-slate-500 uppercase">Tgl Sidang</span>
-                                    <span className="text-xs font-black text-slate-900">{d.tanggal_ba_pemeriksaan || '-'}</span>
-                                  </li>
-                                </ul>
-                              </div>
-                              
-                            </div>
+                            {renderAccordionContent(d)}
                           </td>
                         </tr>
                       )}
