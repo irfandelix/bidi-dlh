@@ -156,7 +156,7 @@ export default function DaftarPerizinanPage() {
            </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sections.map(s => (
              <div key={s.title} className={`p-4 rounded-xl border ${s.status ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-200'}`}>
                 <div className="flex items-start gap-3">
@@ -427,16 +427,7 @@ export default function DaftarPerizinanPage() {
                         <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
                           {d.tanggal_masuk_dokumen || '-'}
                         </td>
-                        <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
-                          <div className="flex flex-wrap gap-1.5">
-                            {getFiles(d).map(f => (
-                               <a key={f.name} href={f.url} onClick={e => e.stopPropagation()} target="_blank" rel="noreferrer" className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded border border-indigo-200 hover:bg-indigo-100 transition-colors shadow-sm">
-                                 {f.name}
-                               </a>
-                            ))}
-                            {getFiles(d).length === 0 && <span className="text-[10px] text-slate-400 font-bold bg-slate-100 px-2 py-1 rounded border border-slate-200">BELUM ADA FILE UPLOAD</span>}
-                          </div>
-                        </td>
+                        
                         <td className="px-6 py-4 text-center">
                           <div className="flex flex-col gap-2">
                             <Link 
