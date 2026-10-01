@@ -96,8 +96,8 @@ export default function DaftarPerizinanPage() {
     ];
 
     return (
-      <div className="bg-slate-50 p-6 rounded-2xl border-2 border-slate-200 shadow-sm text-left">
-        <div className="bg-white p-6 rounded-xl border border-slate-200 mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 shadow-sm text-left">
+        <div className="bg-white p-5 rounded-xl border border-slate-200 mb-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
            <div className="space-y-4">
               <div>
                 <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-1">Status Tahapan Saat Ini</h4>
@@ -164,7 +164,7 @@ export default function DaftarPerizinanPage() {
                    <div className="flex-1">
                       <p className="text-xs font-black uppercase text-slate-800 leading-tight mb-2">{s.title}</p>
                       <div className="bg-white/60 px-2 py-1.5 rounded border border-slate-200/60 min-h-7 flex items-center">
-                         {s.number ? <p className="text-[10px] font-bold text-slate-700 uppercase">{s.number}</p> : <p className="text-[10px] font-bold text-slate-400 uppercase">BELUM ADA NOMOR</p>}
+                         {s.number ? <p className="text-[10px] font-bold text-slate-700 uppercase break-all">{s.number}</p> : <p className="text-[10px] font-bold text-slate-400 uppercase">BELUM ADA NOMOR</p>}
                       </div>
                       
                       <div className="mt-3 pt-3 border-t border-slate-200/50">
@@ -460,7 +460,7 @@ export default function DaftarPerizinanPage() {
                       </tr>
                       {expandedRows.includes(d.id) && (
                         <tr className="bg-slate-50 border-b-2 border-slate-200">
-                          <td colSpan={4} className="p-6 border-r-2 border-l-2 border-slate-200">
+                          <td colSpan={4} className="p-4 border-r-2 border-l-2 border-slate-200">
                             {renderAccordionContent(d)}
                           </td>
                         </tr>
