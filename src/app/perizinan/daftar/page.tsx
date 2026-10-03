@@ -3,10 +3,11 @@
 import LottieLoader from '@/components/LottieLoader';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import * as XLSX from 'xlsx';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -17,6 +18,8 @@ export default function DaftarPerizinanPage() {
   const [selectedDoc, setSelectedDoc] = useState<Dokumen | null>(null);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterTahun, setFilterTahun] = useState('');
+  const [filterJenis, setFilterJenis] = useState('');
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
 
   const toggleRow = (id: number) => {
