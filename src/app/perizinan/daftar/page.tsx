@@ -402,7 +402,6 @@ export default function DaftarPerizinanPage() {
               <Download size={18} /> Ekspor Excel
             </button>
           </div>
-          </div>
         </div>
         
         <div className="overflow-x-auto">
