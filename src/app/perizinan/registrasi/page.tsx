@@ -53,6 +53,8 @@ export default function RegistrasiPage() {
     "Lembar Penapisan dari AMDALNET / Arahan dari Instansi Lingkungan Hidup",
     "Surat Kuasa Pekerjaan dari Pemrakarsa ke Konsultan (Bermaterai)", 
     "Perizinan yang Sudah Dimiliki atau Izin yang Lama (Jika Ada)",
+    "Perjanjian Pengangkutan Sampah (MOU)",
+    "Perjanjian Pengangkutan Limbah B3 (MOU)",
     "Pemenuhan Persetujuan Teknis Air Limbah", 
     "Pemenuhan Rincian Teknis Limbah B3 Sementara", 
     "Pemenuhan Persetujuan Teknis Emisi", 
