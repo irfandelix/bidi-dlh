@@ -193,14 +193,24 @@ export async function POST(request: Request) {
       "Bukti Upload Permohonan pada AMDALNET dan/atau SIDARLING"
     ];
     
-    let chkStatus = [];
+    let chkStatusRaw = [];
     let chkNotes = [];
-    try { if (doc.checklist_status) chkStatus = typeof doc.checklist_status === 'string' ? JSON.parse(doc.checklist_status) : doc.checklist_status; } catch(e) {}
+    try { if (doc.checklist_status) chkStatusRaw = typeof doc.checklist_status === 'string' ? JSON.parse(doc.checklist_status) : doc.checklist_status; } catch(e) {}
     try { if (doc.checklist_notes) chkNotes = typeof doc.checklist_notes === 'string' ? JSON.parse(doc.checklist_notes) : doc.checklist_notes; } catch(e) {}
     
-        let keteranganCounter = 1;
+    let chkStatus = [];
+    if (chkStatusRaw && chkStatusRaw.length > 0 && typeof chkStatusRaw[0] === 'boolean') {
+        chkStatus = chkStatusRaw.map(b => ({ pl: b, pertek: false, rintek: false }));
+    } else if (chkStatusRaw && chkStatusRaw.length > 0 && typeof chkStatusRaw[0] === 'object') {
+        chkStatus = chkStatusRaw;
+    } else {
+        chkStatus = defaultChecklistItems.map(() => ({ pl: false, pertek: false, rintek: false }));
+    }
+    
+    let keteranganCounter = 1;
     const keterangan_otomatis = defaultChecklistItems.map((item_nama, index) => {
-        const isChecked = chkStatus[index];
+        const st = chkStatus[index] || { pl: false, pertek: false, rintek: false };
+        const isChecked = st.pl || st.pertek || st.rintek;
         const note = chkNotes[index] || '';
         if (!isChecked && !note) {
             if (item_nama.includes('MOU')) {
@@ -215,13 +225,16 @@ export async function POST(request: Request) {
         return null;
     }).filter(k => k !== null);
 
-    const persyaratan = defaultChecklistItems.map((item_nama, index) => ({
-      no: index + 1,
-      item_nama: item_nama,
-      ada_pl: chkStatus[index] ? 'V' : '-',
-      ada_pertek: '-',
-      ada_rintek: '-'
-    }));
+    const persyaratan = defaultChecklistItems.map((item_nama, index) => {
+      const st = chkStatus[index] || { pl: false, pertek: false, rintek: false };
+      return {
+        no: index + 1,
+        item_nama: item_nama,
+        ada_pl: st.pl ? 'V' : '-',
+        ada_pertek: st.pertek ? 'V' : '-',
+        ada_rintek: st.rintek ? 'V' : '-'
+      };
+    });
 
     const targetRevisi = target_revisi ? String(target_revisi) : doc.revisi_ke;
 

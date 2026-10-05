@@ -167,7 +167,11 @@ export default function RegistrasiPage() {
 
     // Map checklist items if manual tab
     if (activeTab === 'manual') {
-      const checklistStatus = checklistItems.map((_, i) => formData.get(`checklistStatus[${i}]`) === 'true');
+      const checklistStatus = checklistItems.map((_, i) => ({
+          pl: formData.get(`checklistStatusPL[${i}]`) === 'true',
+          pertek: formData.get(`checklistStatusPertek[${i}]`) === 'true',
+          rintek: formData.get(`checklistStatusRintek[${i}]`) === 'true'
+        }));
       const checklistNotes = checklistItems.map((_, i) => formData.get(`checklistNotes[${i}]`) || '');
       data.checklist_status = JSON.stringify(checklistStatus);
       data.checklist_notes = JSON.stringify(checklistNotes);
@@ -466,8 +470,14 @@ export default function RegistrasiPage() {
                             <td className="px-4 py-3 text-center border-r border-slate-200">{index + 1}</td>
                             <td className="px-4 py-3 border-r border-slate-200">{item}</td>
                             <td className="px-4 py-3 text-center border-r border-slate-200">
-                              <input type="checkbox" name={`checklistStatus[${index}]`} value="true" className="w-5 h-5 rounded border border-slate-200 text-indigo-600 focus:ring-indigo-600 cursor-pointer shadow-sm" />
-                            </td>
+                                <input type="checkbox" name={`checklistStatusPL[${index}]`} value="true" className="w-5 h-5 rounded border border-slate-200 text-indigo-600 focus:ring-indigo-600 cursor-pointer shadow-sm" />
+                              </td>
+                              <td className="px-4 py-3 text-center border-r border-slate-200">
+                                <input type="checkbox" name={`checklistStatusPertek[${index}]`} value="true" className="w-5 h-5 rounded border border-slate-200 text-indigo-600 focus:ring-indigo-600 cursor-pointer shadow-sm" />
+                              </td>
+                              <td className="px-4 py-3 text-center border-r border-slate-200">
+                                <input type="checkbox" name={`checklistStatusRintek[${index}]`} value="true" className="w-5 h-5 rounded border border-slate-200 text-indigo-600 focus:ring-indigo-600 cursor-pointer shadow-sm" />
+                              </td>
                             <td className="px-4 py-2">
                               <input type="text" name={`checklistNotes[${index}]`} placeholder="..." className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:bg-white outline-none" />
                             </td>
