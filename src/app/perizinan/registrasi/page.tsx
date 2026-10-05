@@ -39,7 +39,7 @@ export default function RegistrasiPage() {
   }, [activeTab]);
 
   const checklistItems = [
-    "Surat Permohonan Pemeriksaan Dokumen UKL-UPL / SPPL*", 
+    "Surat Permohonan Pemeriksaan Dokumen*", 
     "Pernyataan Pengelolaan dan Pemantauan Lingkungan (Bermaterai)*",
     "Dokumen Lingkungan*", 
     "Peta Tapak Proyek", 

@@ -169,7 +169,7 @@ export async function POST(request: Request) {
 
     // Parse Checklist items for "persyaratan" table loop
     const defaultChecklistItems = [
-      "Surat Permohonan Pemeriksaan Dokumen UKL-UPL / SPPL*", 
+      "Surat Permohonan Pemeriksaan Dokumen*", 
       "Pernyataan Pengelolaan dan Pemantauan Lingkungan (Bermaterai)*",
       "Dokumen Lingkungan*", 
       "Peta Tapak Proyek", 
