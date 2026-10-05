@@ -460,7 +460,9 @@ export default function RegistrasiPage() {
                         <tr>
                           <th className="px-4 py-4 w-12 text-center border-r border-slate-200">No</th>
                           <th className="px-4 py-4 border-r border-slate-200">Persyaratan Dokumen</th>
-                          <th className="px-4 py-4 w-24 text-center border-r border-slate-200">Ada (V)</th>
+                          <th className="px-4 py-4 w-16 text-center border-r border-slate-200">PL</th>
+                            <th className="px-4 py-4 w-16 text-center border-r border-slate-200">PERTEK</th>
+                            <th className="px-4 py-4 w-16 text-center border-r border-slate-200">RINTEK</th>
                           <th className="px-4 py-4 w-1/3">Catatan</th>
                         </tr>
                       </thead>
