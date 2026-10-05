@@ -183,6 +183,8 @@ export async function POST(request: Request) {
       "Lembar Penapisan dari AMDALNET / Arahan dari Instansi Lingkungan Hidup",
       "Surat Kuasa Pekerjaan dari Pemrakarsa ke Konsultan (Bermaterai)", 
       "Perizinan yang Sudah Dimiliki atau Izin yang Lama (Jika Ada)",
+      "Perjanjian Pengangkutan Sampah (MOU)",
+      "Perjanjian Pengangkutan Limbah B3 (MOU)",
       "Pemenuhan Persetujuan Teknis Air Limbah", 
       "Pemenuhan Rincian Teknis Limbah B3 Sementara", 
       "Pemenuhan Persetujuan Teknis Emisi", 
@@ -196,11 +198,26 @@ export async function POST(request: Request) {
     try { if (doc.checklist_status) chkStatus = typeof doc.checklist_status === 'string' ? JSON.parse(doc.checklist_status) : doc.checklist_status; } catch(e) {}
     try { if (doc.checklist_notes) chkNotes = typeof doc.checklist_notes === 'string' ? JSON.parse(doc.checklist_notes) : doc.checklist_notes; } catch(e) {}
     
+        let keteranganCounter = 1;
+    const keterangan_otomatis = defaultChecklistItems.map((item_nama, index) => {
+        const isChecked = chkStatus[index];
+        const note = chkNotes[index] || '';
+        if (!isChecked && !note) {
+            return { no: keteranganCounter++, teks_keterangan: `${item_nama} belum lengkap.` };
+        } else if (!isChecked && note) {
+            return { no: keteranganCounter++, teks_keterangan: `${item_nama} belum lengkap. Keterangan: ${note}` };
+        } else if (isChecked && note) {
+            return { no: keteranganCounter++, teks_keterangan: `${item_nama}: ${note}` };
+        }
+        return null;
+    }).filter(k => k !== null);
+
     const persyaratan = defaultChecklistItems.map((item_nama, index) => ({
       no: index + 1,
       item_nama: item_nama,
-      ada: chkStatus[index] ? '✓' : '-',
-      keterangan: chkNotes[index] || ''
+      ada_pl: chkStatus[index] ? 'V' : '-',
+      ada_pertek: '-',
+      ada_rintek: '-'
     }));
 
     const targetRevisi = target_revisi ? String(target_revisi) : doc.revisi_ke;
@@ -227,6 +244,7 @@ export async function POST(request: Request) {
       teks_persetujuan: teks_persetujuan,
       ...ekstra,
       ...checklistData,
+      keterangan_otomatis: keterangan_otomatis,
       nama_kegiatan_upper: doc.nama_kegiatan?.toUpperCase() || '',
       lokasi_kegiatan_upper: doc.lokasi_kegiatan?.toUpperCase() || '',
       nama_pemrakarsa_upper: doc.nama_pemrakarsa?.toUpperCase() || '',
