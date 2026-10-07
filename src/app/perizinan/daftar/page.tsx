@@ -49,11 +49,11 @@ export default function DaftarPerizinanPage() {
     { id: 2, title: '2. Uji Admin (DLH)', shortTitle: 'Uji Admin (DLH)', statuses: ['Uji Administrasi'], color: 'teal', icon: ClipboardCheck, link: '/perizinan/uji-administrasi' },
     { id: 3, title: '3. Verlap (DLH)', shortTitle: 'Verlap (DLH)', statuses: ['Verifikasi Lapangan', 'Uji Administrasi Selesai'], color: 'amber', icon: MapPin, link: '/perizinan/verifikasi-lapangan' },
     { id: 4, title: '4. Pemeriksaan (DLH)', shortTitle: 'Pemeriksaan (DLH)', statuses: ['Pemeriksaan Substansi', 'PEMERIKSAAN-SUBSTANSI', 'DIPERIKSA', 'Verlap Selesai'], color: 'indigo', icon: FileText, link: '/perizinan/pemeriksaan-substansi' },
-    { id: 5, title: '5. Penyerahan BA Pemeriksaan (MPP)', shortTitle: 'Penyerahan BA (MPP)', statuses: ['Pengembalian BA', 'Dikembalikan / Ditolak', 'DIKEMBALIKAN'], color: 'rose', icon: RotateCcw, link: '/perizinan/pengembalian' },
+    { id: 5, title: '5. Penyerahan BA Pemeriksaan (MPP)', shortTitle: 'Serahkan BA (MPP)', statuses: ['Pengembalian BA', 'Dikembalikan / Ditolak', 'DIKEMBALIKAN'], color: 'rose', icon: RotateCcw, link: '/perizinan/pengembalian' },
     { id: 6, title: '6. Terima Perbaikan (MPP)', shortTitle: 'Terima BA (MPP)', statuses: [], color: 'emerald', icon: CheckCircle, link: '/perizinan/penerimaan-perbaikan' },
     { id: 7, title: '7. Pemeriksaan Revisi (DLH)', shortTitle: 'Revisi (DLH)', statuses: ['Pemeriksaan Revisi', 'Revisi', 'REVISI', 'Pemeriksaan Selesai', 'Penerimaan Perbaikan'], color: 'blue', icon: FileEdit, link: '/perizinan/pemeriksaan-revisi' },
-    { id: 8, title: '8. Penyerahan BA Revisi (MPP)', shortTitle: 'Penyerahan Revisi (MPP)', statuses: ['Pengembalian Revisi'], color: 'rose', icon: RotateCcw, link: '/perizinan/pengembalian' },
-    { id: 9, title: '9. Terima Revisi (MPP)', shortTitle: 'Terima Revisi (MPP)', statuses: [], color: 'emerald', icon: CheckCircle, link: '/perizinan/penerimaan-perbaikan' },
+    { id: 8, title: '8. Penyerahan BA Revisi (MPP)', shortTitle: 'Serahkan Rev (MPP)', statuses: ['Pengembalian Revisi'], color: 'rose', icon: RotateCcw, link: '/perizinan/pengembalian' },
+    { id: 9, title: '9. Terima Revisi (MPP)', shortTitle: 'Terima Rev (MPP)', statuses: [], color: 'emerald', icon: CheckCircle, link: '/perizinan/penerimaan-perbaikan' },
     { id: 10, title: '10. Finalisasi (RPD & SK) (DLH)', shortTitle: 'Finalisasi (DLH)', statuses: ['Penyerahan SK', 'Selesai / SK', 'Selesai', 'Revisi Selesai', 'Penerimaan Revisi', 'Revisi Lanjutan'], color: 'purple', icon: FileText, link: '/perizinan/finalisasi' },
     { id: 11, title: '11. Jilidan Final (MPP)', shortTitle: 'Jilidan (MPP)', statuses: ['Penerimaan Jilidan', 'Menunggu Jilidan'], color: 'orange', icon: FileText, link: '/perizinan/jilidan' },
     { id: 12, title: '12. Arsip (DLH)', shortTitle: 'Arsip (DLH)', statuses: ['Arsip', 'Diarsipkan', 'ARSIP', 'Jilidan Selesai'], color: 'slate', icon: Archive, link: '/perizinan/arsip' },
@@ -468,7 +468,7 @@ export default function DaftarPerizinanPage() {
                             <td colSpan={5} className="p-8 border-r-2 border-l-2 border-slate-200">
                                 <div className="w-full mx-auto overflow-x-auto overflow-y-hidden pb-16">
                                   <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-8 text-center sticky left-0">Progress Dokumen (Tahapan Aktif: {d.status_tahapan === 'Pengembalian BA' ? 'MENUNGGU PENYERAHAN BA OLEH MPP' : d.status_tahapan === 'Pengembalian Revisi' ? 'MENUNGGU PENYERAHAN BA REVISI OLEH MPP' : d.status_tahapan || 'Registrasi'})</h4>
-                                  <div className="flex items-center justify-between relative mt-4 mb-4 min-w-[900px]">
+                                  <div className="flex items-center justify-between relative mt-4 mb-4 min-w-[1150px]">
                                       <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1.5 bg-slate-200 rounded-full z-0"></div>
                                       <div className="absolute left-4 top-1/2 -translate-y-1/2 h-1.5 bg-indigo-500 rounded-full z-0 transition-all duration-500" style={{ width: `${Math.min(100, ((getStageForStatus(d.status_tahapan, d).id - 1) / 11) * 100)}%` }}></div>
                                       
