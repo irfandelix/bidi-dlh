@@ -208,22 +208,20 @@ export async function POST(request: Request) {
     }
     
     let keteranganCounter = 1;
-    const keterangan_otomatis = defaultChecklistItems.map((item_nama, index) => {
-        const st = chkStatus[index] || { pl: false, pertek: false, rintek: false };
-        const isChecked = st.pl || st.pertek || st.rintek;
+    const keterangan_otomatis: any[] = [];
+    
+    // 1. Masukkan catatan dari tiap item checklist
+    defaultChecklistItems.forEach((item_nama, index) => {
         const note = chkNotes[index] || '';
-        if (!isChecked && !note) {
-            if (item_nama.includes('MOU')) {
-                return { no: keteranganCounter++, teks_keterangan: `${item_nama}: Kegiatan masih dalam perencanaan.` };
-            }
-            return { no: keteranganCounter++, teks_keterangan: `${item_nama} belum lengkap.` };
-        } else if (!isChecked && note) {
-            return { no: keteranganCounter++, teks_keterangan: `${item_nama} belum lengkap. Keterangan: ${note}` };
-        } else if (isChecked && note) {
-            return { no: keteranganCounter++, teks_keterangan: `${item_nama}: ${note}` };
+        if (typeof note === 'string' && note.trim()) {
+            keterangan_otomatis.push({ no: keteranganCounter++, teks_keterangan: note.trim() });
         }
-        return null;
-    }).filter(k => k !== null);
+    });
+
+    // 2. Masukkan keterangan tambahan (KETERANGAN TAMBAHAN UI)
+    if (doc.keterangan && typeof doc.keterangan === 'string' && doc.keterangan.trim()) {
+        keterangan_otomatis.push({ no: keteranganCounter++, teks_keterangan: doc.keterangan.trim() });
+    }
 
     const persyaratan = defaultChecklistItems.map((item_nama, index) => {
       const st = chkStatus[index] || { pl: false, pertek: false, rintek: false };
