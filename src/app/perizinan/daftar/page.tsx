@@ -466,9 +466,9 @@ export default function DaftarPerizinanPage() {
                     {expandedRows.includes(d.id) && (
                         <tr className="bg-slate-50 border-b-2 border-slate-200 cursor-default" onClick={e => e.stopPropagation()}>
                             <td colSpan={5} className="p-8 border-r-2 border-l-2 border-slate-200">
-                                <div className="w-full mx-auto overflow-x-auto pb-4">
+                                <div className="w-full mx-auto overflow-x-auto overflow-y-hidden pb-16">
                                   <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-8 text-center sticky left-0">Progress Dokumen (Tahapan Aktif: {d.status_tahapan || 'Registrasi'})</h4>
-                                  <div className="flex items-center justify-between relative mt-4 mb-4 min-w-[1200px]">
+                                  <div className="flex items-center justify-between relative mt-4 mb-4 min-w-[900px]">
                                       <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1.5 bg-slate-200 rounded-full z-0"></div>
                                       <div className="absolute left-4 top-1/2 -translate-y-1/2 h-1.5 bg-indigo-500 rounded-full z-0 transition-all duration-500" style={{ width: `${Math.min(100, ((getStageForStatus(d.status_tahapan, d).id - 1) / 11) * 100)}%` }}></div>
                                       
