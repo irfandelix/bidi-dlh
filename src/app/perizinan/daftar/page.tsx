@@ -431,8 +431,8 @@ export default function DaftarPerizinanPage() {
                         <p className="text-xs font-bold text-slate-500">{d.jenis_dokumen}</p>
                       </td>
                       <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
-                        
-                      </td>
+                          {d.nama_pemrakarsa || '-'}
+                        </td>
                       <td className="px-6 py-4 font-bold text-slate-700 text-sm border-r-2 border-slate-200">
                         {d.tanggal_masuk_dokumen}
                       </td>
