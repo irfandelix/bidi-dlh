@@ -465,7 +465,7 @@ export default function DaftarPerizinanPage() {
                     </tr>
                     {expandedRows.includes(d.id) && (
                         <tr className="bg-slate-50 border-b-2 border-slate-200 cursor-default" onClick={e => e.stopPropagation()}>
-                            <td colSpan={5} className="p-8 border-r-2 border-l-2 border-slate-200">
+                            <td colSpan={5} className="p-8 border-r-2 border-l-2 border-slate-200 max-w-0">
                                 <div className="w-full mx-auto overflow-x-auto overflow-y-hidden pb-16">
                                   <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-8 text-center sticky left-0">Progress Dokumen (Tahapan Aktif: {d.status_tahapan === 'Pengembalian BA' ? 'MENUNGGU PENYERAHAN BA OLEH MPP' : d.status_tahapan === 'Pengembalian Revisi' ? 'MENUNGGU PENYERAHAN BA REVISI OLEH MPP' : d.status_tahapan || 'Registrasi'})</h4>
                                   <div className="flex items-center justify-between relative mt-4 mb-4 min-w-[1150px]">
