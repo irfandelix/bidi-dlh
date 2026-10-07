@@ -49,10 +49,10 @@ export default function DaftarPerizinanPage() {
     { id: 2, title: '2. Uji Admin (DLH)', shortTitle: 'Uji Admin (DLH)', statuses: ['Uji Administrasi'], color: 'teal', icon: ClipboardCheck, link: '/perizinan/uji-administrasi' },
     { id: 3, title: '3. Verlap (DLH)', shortTitle: 'Verlap (DLH)', statuses: ['Verifikasi Lapangan', 'Uji Administrasi Selesai'], color: 'amber', icon: MapPin, link: '/perizinan/verifikasi-lapangan' },
     { id: 4, title: '4. Pemeriksaan (DLH)', shortTitle: 'Pemeriksaan (DLH)', statuses: ['Pemeriksaan Substansi', 'PEMERIKSAAN-SUBSTANSI', 'DIPERIKSA', 'Verlap Selesai'], color: 'indigo', icon: FileText, link: '/perizinan/pemeriksaan-substansi' },
-    { id: 5, title: '5. Pengembalian BA (MPP)', shortTitle: 'Pengembalian (MPP)', statuses: ['Pengembalian BA', 'Dikembalikan / Ditolak', 'DIKEMBALIKAN'], color: 'rose', icon: RotateCcw, link: '/perizinan/pengembalian' },
+    { id: 5, title: '5. Penyerahan BA Pemeriksaan (MPP)', shortTitle: 'Penyerahan BA (MPP)', statuses: ['Pengembalian BA', 'Dikembalikan / Ditolak', 'DIKEMBALIKAN'], color: 'rose', icon: RotateCcw, link: '/perizinan/pengembalian' },
     { id: 6, title: '6. Terima Perbaikan (MPP)', shortTitle: 'Terima BA (MPP)', statuses: [], color: 'emerald', icon: CheckCircle, link: '/perizinan/penerimaan-perbaikan' },
     { id: 7, title: '7. Pemeriksaan Revisi (DLH)', shortTitle: 'Revisi (DLH)', statuses: ['Pemeriksaan Revisi', 'Revisi', 'REVISI', 'Pemeriksaan Selesai', 'Penerimaan Perbaikan'], color: 'blue', icon: FileEdit, link: '/perizinan/pemeriksaan-revisi' },
-    { id: 8, title: '8. Pengembalian Revisi (MPP)', shortTitle: 'Kembali Revisi (MPP)', statuses: ['Pengembalian Revisi'], color: 'rose', icon: RotateCcw, link: '/perizinan/pengembalian' },
+    { id: 8, title: '8. Penyerahan BA Revisi (MPP)', shortTitle: 'Penyerahan Revisi (MPP)', statuses: ['Pengembalian Revisi'], color: 'rose', icon: RotateCcw, link: '/perizinan/pengembalian' },
     { id: 9, title: '9. Terima Revisi (MPP)', shortTitle: 'Terima Revisi (MPP)', statuses: [], color: 'emerald', icon: CheckCircle, link: '/perizinan/penerimaan-perbaikan' },
     { id: 10, title: '10. Finalisasi (RPD & SK) (DLH)', shortTitle: 'Finalisasi (DLH)', statuses: ['Penyerahan SK', 'Selesai / SK', 'Selesai', 'Revisi Selesai', 'Penerimaan Revisi', 'Revisi Lanjutan'], color: 'purple', icon: FileText, link: '/perizinan/finalisasi' },
     { id: 11, title: '11. Jilidan Final (MPP)', shortTitle: 'Jilidan (MPP)', statuses: ['Penerimaan Jilidan', 'Menunggu Jilidan'], color: 'orange', icon: FileText, link: '/perizinan/jilidan' },
@@ -500,7 +500,7 @@ export default function DaftarPerizinanPage() {
                                           return (
                                               <div key={stepId} className="relative z-10 flex flex-col items-center gap-2 group flex-1" title={isSkipped ? 'Dilewati / Belum ada data' : ''}>
                                                   <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 ${
-                                                    isCurrent ? 'border-indigo-100 bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-110' : 
+                                                    isCurrent ? 'border-blue-300 bg-blue-500 text-white shadow-lg shadow-blue-200 scale-125 ring-4 ring-blue-400/50 animate-[pulse_2s_ease-in-out_infinite]' : 
                                                     isSkipped ? 'border-slate-200 bg-slate-200 text-slate-400' :
                                                     isPast ? 'border-indigo-100 bg-indigo-500 text-white' : 
                                                     'border-slate-100 bg-white text-slate-300'
@@ -508,7 +508,7 @@ export default function DaftarPerizinanPage() {
                                                       {stageData && <stageData.icon size={16} />}
                                                   </div>
                                                   <div className={`absolute top-12 text-center whitespace-nowrap text-[10px] font-black uppercase tracking-tight flex flex-col items-center gap-1 ${
-                                                    isCurrent ? 'text-indigo-600' : 
+                                                    isCurrent ? 'text-blue-600 scale-110 transition-transform' : 
                                                     isSkipped ? 'text-slate-400' :
                                                     isPast ? 'text-slate-700' : 
                                                     'text-slate-400'

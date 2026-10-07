@@ -49,7 +49,7 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
       });
       
       if(res.ok) {
-        setMessage('Status Pengembalian Berhasil Disimpan!');
+        setMessage('Status Penyerahan Berhasil Disimpan!');
         setTimeout(() => router.push('/perizinan/daftar'), 1500);
       }
     } catch (err) {
@@ -80,8 +80,8 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
           <RotateCcw size={28} className="text-on-surface" />
         </div>
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface uppercase">Form Pengembalian Dokumen</h2>
-          <p className="text-sm font-bold text-on-surface-variant mt-1 uppercase">TAHUN {doc.tahun || '2026'} | BERKAS DIKEMBALIKAN</p>
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface uppercase">Form Penyerahan BA ke Pemrakarsa (MPP)</h2>
+          <p className="text-sm font-bold text-on-surface-variant mt-1 uppercase">TAHUN {doc.tahun || '2026'} | PENYERAHAN BERKAS KE PEMRAKARSA</p>
         </div>
       </div>
       
@@ -104,7 +104,7 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        {/* Riwayat Pengembalian Revisi */}
+        {/* Riwayat Penyerahan BA Revisi */}
         {(() => {
           const revisiNames: Record<string, string> = { '1': 'Revisi 1', '2': 'Revisi 2', '3': 'Revisi 3', '4': 'Revisi 4' };
           const revisiHistory = Object.entries(revisiNames).filter(([key]) => {
@@ -125,7 +125,7 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
                     <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 flex justify-between items-center">
                       <div>
                         <span className="inline-block bg-error-container text-on-error-container text-xs font-black px-3 py-1 rounded-full border border-error mb-2">{label}</span>
-                        {tanggal && <p className="text-sm text-slate-700 font-bold">Pengembalian: {new Date(tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
+                        {tanggal && <p className="text-sm text-slate-700 font-bold">Penyerahan: {new Date(tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
                       </div>
                     </div>
                   );
@@ -137,7 +137,7 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="max-w-md">
-            <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Dikembalikan <span className="text-error">*</span></label>
+            <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Penyerahan Berkas <span className="text-error">*</span></label>
             <input type="date" name="tanggal_pengembalian" required defaultValue={doc.tanggal_pengembalian || new Date().toISOString().split('T')[0]}
               className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
           </div>
@@ -146,7 +146,7 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
             <button type="submit" disabled={submitting} 
               className="w-full sm:w-auto px-10 py-4 bg-error text-on-error hover:bg-error-container text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0 text-sm">
               {submitting ? <LottieLoader size={24} /> : <Save size={18} />}
-              Simpan Pengembalian
+              Simpan Penyerahan
             </button>
           </div>
         </form>
