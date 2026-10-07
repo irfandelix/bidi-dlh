@@ -457,6 +457,7 @@ export default function DaftarPerizinanPage() {
                         </div>
                       </td>
                     </tr>
+                    </React.Fragment>
                   ))
                 ) : (
                   <tr>
