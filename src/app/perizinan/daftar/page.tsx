@@ -420,12 +420,12 @@ export default function DaftarPerizinanPage() {
               <tbody className="divide-y-2 divide-slate-900">
                 {activeDocs.length > 0 ? (
                   paginatedDocs.map((d) => (
-                    <tr key={d.id} className="hover:bg-slate-50 transition-colors">
+                    <React.Fragment key={d.id}>
+<tr onClick={() => toggleRow(d.id)} className="hover:bg-slate-50 transition-colors cursor-pointer group">
                       <td className="px-6 py-4 border-r-2 border-slate-200">
-                        <span className="bg-slate-200 text-slate-900 font-black px-2 py-1 rounded border border-slate-200 text-xs shadow-sm">
+                        <div className="flex items-center gap-2"><button className="w-6 h-6 shrink-0 rounded-full bg-slate-200 flex items-center justify-center group-hover:bg-indigo-200 group-hover:text-indigo-700 transition-colors">{expandedRows.includes(d.id) ? <ChevronUp size={14} /> : <ChevronDown size={14} />}</button><span className="bg-slate-200 text-slate-900 font-black px-2 py-1 rounded border border-slate-200 text-xs shadow-sm">
                           #{d.no_urut || d.id}
-                        </span>
-                      </td>
+                        </span></div></td>
                       <td className="px-6 py-4 border-r-2 border-slate-200">
                         <p className="font-bold text-slate-900 text-sm uppercase">{d.nama_kegiatan}</p>
                         <p className="text-xs font-bold text-slate-500">{d.jenis_dokumen}</p>
