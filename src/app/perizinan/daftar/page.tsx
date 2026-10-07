@@ -466,34 +466,25 @@ export default function DaftarPerizinanPage() {
                     {expandedRows.includes(d.id) && (
                         <tr className="bg-slate-50 border-b-2 border-slate-200 cursor-default" onClick={e => e.stopPropagation()}>
                             <td colSpan={5} className="p-8 border-r-2 border-l-2 border-slate-200">
-                                <div className="w-full max-w-4xl mx-auto">
-                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-6 text-center">Progress Dokumen (Tahapan Aktif: {d.status_tahapan || 'Registrasi'})</h4>
-                                  <div className="flex items-center justify-between relative mt-4 mb-8">
-                                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1.5 bg-slate-200 rounded-full z-0"></div>
-                                      <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1.5 bg-indigo-500 rounded-full z-0 transition-all duration-500" style={{ width: `${Math.min(100, (getStageForStatus(d.status_tahapan, d).id / 11) * 100)}%` }}></div>
+                                <div className="w-full mx-auto overflow-x-auto pb-4">
+                                  <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-8 text-center sticky left-0">Progress Dokumen (Tahapan Aktif: {d.status_tahapan || 'Registrasi'})</h4>
+                                  <div className="flex items-center justify-between relative mt-4 mb-4 min-w-[800px]">
+                                      <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1.5 bg-slate-200 rounded-full z-0"></div>
+                                      <div className="absolute left-4 top-1/2 -translate-y-1/2 h-1.5 bg-indigo-500 rounded-full z-0 transition-all duration-500" style={{ width: `${Math.min(100, ((getStageForStatus(d.status_tahapan, d).id - 1) / 11) * 100)}%` }}></div>
                                       
-                                      {[1, 2, 3, 4, 10].map(stepId => {
+                                      {stages.map(stageData => {
+                                          const stepId = stageData.id;
                                           const currentStageId = getStageForStatus(d.status_tahapan, d).id;
                                           
-                                          let logicalStep = stepId;
-                                          if (stepId === 10) logicalStep = 5;
-
-                                          let currentLogicalStep = 1;
-                                          if (currentStageId >= 2) currentLogicalStep = 2;
-                                          if (currentStageId >= 3) currentLogicalStep = 3;
-                                          if (currentStageId >= 4) currentLogicalStep = 4;
-                                          if (currentStageId >= 10) currentLogicalStep = 5;
-
-                                          const isPast = currentLogicalStep > logicalStep;
-                                          const isCurrent = currentLogicalStep === logicalStep;
-                                          const stageData = stages.find(s => s.id === stepId);
+                                          const isPast = currentStageId > stepId;
+                                          const isCurrent = currentStageId === stepId;
                                           
                                           return (
-                                              <div key={stepId} className="relative z-10 flex flex-col items-center gap-2 group w-20">
-                                                  <div className={`w-12 h-12 rounded-full flex items-center justify-center border-4 ${isCurrent ? 'border-indigo-100 bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-110' : isPast ? 'border-indigo-100 bg-indigo-500 text-white' : 'border-slate-100 bg-white text-slate-300'} transition-all`}>
-                                                      {stageData && <stageData.icon size={20} />}
+                                              <div key={stepId} className="relative z-10 flex flex-col items-center gap-2 group flex-1">
+                                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 ${isCurrent ? 'border-indigo-100 bg-indigo-600 text-white shadow-lg shadow-indigo-200 scale-110' : isPast ? 'border-indigo-100 bg-indigo-500 text-white' : 'border-slate-100 bg-white text-slate-300'} transition-all`}>
+                                                      {stageData && <stageData.icon size={16} />}
                                                   </div>
-                                                  <div className={`absolute top-14 text-center whitespace-nowrap text-[10px] font-black uppercase tracking-wider ${isCurrent ? 'text-indigo-600' : isPast ? 'text-slate-700' : 'text-slate-400'}`}>
+                                                  <div className={`absolute top-12 text-center whitespace-nowrap text-[10px] font-black uppercase tracking-tight ${isCurrent ? 'text-indigo-600' : isPast ? 'text-slate-700' : 'text-slate-400'}`}>
                                                       {stageData?.shortTitle}
                                                   </div>
                                               </div>
