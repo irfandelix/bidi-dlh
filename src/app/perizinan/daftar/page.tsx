@@ -468,7 +468,7 @@ export default function DaftarPerizinanPage() {
                             <td colSpan={5} className="p-8 border-r-2 border-l-2 border-slate-200">
                                 <div className="w-full mx-auto overflow-x-auto pb-4">
                                   <h4 className="text-xs font-black text-slate-400 uppercase tracking-wider mb-8 text-center sticky left-0">Progress Dokumen (Tahapan Aktif: {d.status_tahapan || 'Registrasi'})</h4>
-                                  <div className="flex items-center justify-between relative mt-4 mb-4 min-w-[1100px]">
+                                  <div className="flex items-center justify-between relative mt-4 mb-4 min-w-[1200px]">
                                       <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-1.5 bg-slate-200 rounded-full z-0"></div>
                                       <div className="absolute left-4 top-1/2 -translate-y-1/2 h-1.5 bg-indigo-500 rounded-full z-0 transition-all duration-500" style={{ width: `${Math.min(100, ((getStageForStatus(d.status_tahapan, d).id - 1) / 11) * 100)}%` }}></div>
                                       
@@ -507,13 +507,16 @@ export default function DaftarPerizinanPage() {
                                                   } transition-all`}>
                                                       {stageData && <stageData.icon size={16} />}
                                                   </div>
-                                                  <div className={`absolute top-12 text-center whitespace-nowrap text-[10px] font-black uppercase tracking-tight ${
+                                                  <div className={`absolute top-12 text-center whitespace-nowrap text-[10px] font-black uppercase tracking-tight flex flex-col items-center gap-1 ${
                                                     isCurrent ? 'text-indigo-600' : 
                                                     isSkipped ? 'text-slate-400' :
                                                     isPast ? 'text-slate-700' : 
                                                     'text-slate-400'
                                                   }`}>
-                                                      {stageData?.shortTitle}
+                                                      <span>{stageData?.shortTitle?.replace(' (MPP)', '').replace(' (DLH)', '')}</span>
+                                                      <span className={`text-[8px] px-1.5 py-0.5 rounded leading-none border ${stageData?.shortTitle?.includes('(MPP)') ? 'bg-sky-50 text-sky-600 border-sky-200' : 'bg-orange-50 text-orange-600 border-orange-200'}`}>
+                                                          {stageData?.shortTitle?.includes('(MPP)') ? 'MPP' : 'DLH'}
+                                                      </span>
                                                   </div>
                                               </div>
                                           );
