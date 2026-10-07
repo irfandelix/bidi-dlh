@@ -1,57 +1,66 @@
 const fs = require('fs');
-let c = fs.readFileSync('src/app/perizinan/daftar/page.tsx', 'utf8');
+let content = fs.readFileSync('src/app/perizinan/daftar/page.tsx', 'utf8');
+const lines = content.split('\n');
 
-let startUI = c.indexOf('<div className="flex items-center flex-wrap gap-3 w-full xl:w-auto">');
-let regexEnd = /<\/div>\s*<\/div>\s*<\/div>\s*<div className="overflow-x-auto">/;
-let match = c.substring(startUI).match(regexEnd);
+const startIndex = lines.findIndex(l => l.includes('                  const content = ('));
+const endIndex = lines.findIndex((l, i) => i > startIndex && l.includes('                  if (isDisabled) {'));
 
-if (startUI > -1 && match) {
-    let endUI = startUI + match.index + 6; // 6 is length of </div>
-    const newUI = `<div className="flex items-center flex-wrap gap-3 w-full xl:w-auto">
-            <select 
-              value={filterTahun}
-              onChange={(e) => { setFilterTahun(e.target.value); setCurrentPage(1); }}
-              className="bg-white border-2 border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:border-indigo-400 cursor-pointer shadow-sm"
-            >
-              <option value="">Semua Tahun</option>
-              <option value="2026">2026</option>
-              <option value="2025">2025</option>
-              <option value="2024">2024</option>
-            </select>
-
-            <select 
-              value={filterJenis}
-              onChange={(e) => { setFilterJenis(e.target.value); setCurrentPage(1); }}
-              className="bg-white border-2 border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 focus:outline-none focus:border-indigo-400 cursor-pointer shadow-sm"
-            >
-              <option value="">Semua Jenis</option>
-              <option value="SPPL">SPPL</option>
-              <option value="UKL-UPL">UKL-UPL</option>
-              <option value="AMDAL">AMDAL</option>
-            </select>
-
-            <div className="relative flex-1 md:min-w-[200px]">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input 
-                type="text" 
-                placeholder="Cari nama, lokasi..." 
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                className="w-full bg-white border-2 border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-400 shadow-sm transition-colors"
-              />
-            </div>
-            
-            <button 
-              onClick={handleExportExcel}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm border border-emerald-600"
-            >
-              <Download size={18} /> Ekspor Excel
-            </button>
-          </div>`;
-
-    c = c.substring(0, startUI) + newUI + c.substring(endUI);
-    fs.writeFileSync('src/app/perizinan/daftar/page.tsx', c, 'utf8');
-    console.log("Done regex");
-} else {
-    console.log("UI block not found");
+if (startIndex === -1 || endIndex === -1) {
+    console.log('Cannot find content block');
+    process.exit(1);
 }
+
+const replacementLines = `                  const isMPP = stage.title.includes('(MPP)');
+                  const cleanTitle = stage.title.replace(' (MPP)', '').replace(' (DLH)', '');
+                  const stageColor = stage.color || 'slate';
+
+                  const iconBg = isCurrent ? 'bg-emerald-100 text-emerald-600 border-emerald-200' : 
+                               isDisabled ? 'bg-slate-50 text-slate-300 border-slate-200' : 
+                               'bg-slate-100 text-slate-500 border-slate-200 group-hover:bg-indigo-100 group-hover:text-indigo-600 group-hover:border-indigo-200 shadow-sm';
+                               
+                  const content = (
+                    <>
+                      <div className={\`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-300 \${iconBg}\`}>
+                        <Icon size={20} />
+                      </div>
+                      <div className="flex-1 text-left flex flex-col justify-center min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                          <h4 className={\`text-xs sm:text-sm font-black uppercase leading-tight truncate \${
+                            isCurrent ? 'text-emerald-700' : 
+                            isDisabled ? 'text-slate-300' :
+                            'text-slate-700 group-hover:text-indigo-700 transition-colors'
+                          }\`} title={cleanTitle}>
+                            {cleanTitle}
+                          </h4>
+                          <span className={\`px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider uppercase border shrink-0 \${
+                             isMPP 
+                               ? 'bg-blue-50 text-blue-600 border-blue-200' 
+                               : 'bg-amber-50 text-amber-600 border-amber-200'
+                          }\`}>
+                            {isMPP ? 'MPP' : 'DLH'}
+                          </span>
+                        </div>
+                        {docNumber ? (
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 truncate" title={docNumber}>
+                             <FileText size={10} className="shrink-0" /> {docNumber}
+                          </p>
+                        ) : (
+                          <p className="text-[10px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
+                             <CircleDashed size={10} /> Belum Ada Dokumen
+                          </p>
+                        )}
+                        {isDisabled && (
+                          <span className="inline-block mt-0.5 text-[9px] font-black uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded tracking-widest w-fit">Belum Tersedia</span>
+                        )}
+                      </div>
+                    </>
+                  );
+
+`.split('\n');
+
+const before = lines.slice(0, startIndex);
+const after = lines.slice(endIndex);
+
+const newLines = [...before, ...replacementLines, ...after];
+fs.writeFileSync('src/app/perizinan/daftar/page.tsx', newLines.join('\n'), 'utf8');
+console.log('Update success!');

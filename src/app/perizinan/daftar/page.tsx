@@ -680,36 +680,52 @@ export default function DaftarPerizinanPage() {
                     else if (selectedDoc.nomor_sk) docNumber = selectedDoc.nomor_sk;
                   }
 
+                  const isMPP = stage.title.includes('(MPP)');
+                  const cleanTitle = stage.title.replace(' (MPP)', '').replace(' (DLH)', '');
+                  const stageColor = stage.color || 'slate';
+
+                  const iconBg = isCurrent ? 'bg-emerald-100 text-emerald-600 border-emerald-200' : 
+                               isDisabled ? 'bg-slate-50 text-slate-300 border-slate-200' : 
+                               'bg-slate-100 text-slate-500 border-slate-200 group-hover:bg-indigo-100 group-hover:text-indigo-600 group-hover:border-indigo-200 shadow-sm';
+                               
                   const content = (
                     <>
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 border ${
-                        isCurrent ? 'bg-emerald-100 border-emerald-200 text-emerald-600' : 
-                        isDisabled ? 'bg-slate-50 border-slate-200 text-slate-300' :
-                        'bg-slate-100 border-slate-200 text-slate-500 group-hover:bg-indigo-100 group-hover:text-indigo-600 group-hover:border-indigo-200'
-                      }`}>
-                        <Icon size={18} />
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-all duration-300 ${iconBg}`}>
+                        <Icon size={20} />
                       </div>
-                      <div className="flex-1 text-left">
-                        <div className="flex items-center gap-2">
-                          <h4 className={`text-sm font-black uppercase ${
+                      <div className="flex-1 text-left flex flex-col justify-center min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                          <h4 className={`text-xs sm:text-sm font-black uppercase leading-tight truncate ${
                             isCurrent ? 'text-emerald-700' : 
                             isDisabled ? 'text-slate-300' :
-                            'text-slate-700 group-hover:text-indigo-700'
-                          }`}>
-                            {stage.title}
+                            'text-slate-700 group-hover:text-indigo-700 transition-colors'
+                          }`} title={cleanTitle}>
+                            {cleanTitle}
                           </h4>
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider uppercase border shrink-0 ${
+                             isMPP 
+                               ? 'bg-blue-50 text-blue-600 border-blue-200' 
+                               : 'bg-amber-50 text-amber-600 border-amber-200'
+                          }`}>
+                            {isMPP ? 'MPP' : 'DLH'}
+                          </span>
                         </div>
-                        {docNumber && (
-                          <p className="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-wide">
-                            {docNumber}
+                        {docNumber ? (
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1 truncate" title={docNumber}>
+                             <FileText size={10} className="shrink-0" /> {docNumber}
+                          </p>
+                        ) : (
+                          <p className="text-[10px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
+                             <CircleDashed size={10} /> Belum Ada Dokumen
                           </p>
                         )}
                         {isDisabled && (
-                          <span className="inline-block mt-1 text-[9px] font-black uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded tracking-widest">Belum Tersedia</span>
+                          <span className="inline-block mt-0.5 text-[9px] font-black uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded tracking-widest w-fit">Belum Tersedia</span>
                         )}
                       </div>
                     </>
                   );
+
 
                   if (isDisabled) {
                     return (
