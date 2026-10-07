@@ -35,7 +35,19 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
       status_tahapan, 
     };
 
-    if (['1', '2', '3', '4', '5'].includes(String(revisiKe))) {
+    let fisik: any = {};
+    try { if (doc.arsip_fisik) fisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+    if (typeof fisik === 'string') fisik = JSON.parse(fisik);
+
+    const isRevisi = doc.status_tahapan?.toLowerCase().includes('revisi');
+    const keySuffix = isRevisi ? `_revisi_${revisiKe}` : '';
+
+    fisik[`penerima_ba${keySuffix}`] = formData.get('penerima_ba');
+    fisik[`penyerah_ba${keySuffix}`] = formData.get('penyerah_ba');
+
+    payload.arsip_fisik = fisik;
+
+    if (isRevisi && ['1', '2', '3', '4', '5'].includes(String(revisiKe))) {
       payload[`tanggal_pengembalian_${revisiKe}`] = formData.get('tanggal_pengembalian');
     } else {
       payload.tanggal_pengembalian = formData.get('tanggal_pengembalian');
@@ -116,17 +128,33 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
           return (
             <div className="mb-8 p-6 rounded-2xl border border-slate-200 bg-slate-50">
               <h3 className="text-sm font-bold text-slate-700 mb-4 uppercase flex items-center gap-2">
-                Riwayat Pengembalian Revisi
+                Riwayat Penyerahan BA Revisi
               </h3>
               <div className="space-y-3">
                 {revisiHistory.map(([key, label]) => {
                   const tanggal = doc[`tanggal_pengembalian_${key}`] || (key === '1' ? doc.tanggal_pengembalian : null);
+                  let penerima = '';
+                  let penyerah = '';
+                  try {
+                    const fisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik;
+                    if (fisik) {
+                      penerima = fisik[`penerima_ba_revisi_${key}`] || (key === '1' ? fisik['penerima_ba'] : '');
+                      penyerah = fisik[`penyerah_ba_revisi_${key}`] || (key === '1' ? fisik['penyerah_ba'] : '');
+                    }
+                  } catch(e) {}
+                  
                   return (
-                    <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 flex justify-between items-center">
+                    <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                       <div>
                         <span className="inline-block bg-error-container text-on-error-container text-xs font-black px-3 py-1 rounded-full border border-error mb-2">{label}</span>
                         {tanggal && <p className="text-sm text-slate-700 font-bold">Penyerahan: {new Date(tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
                       </div>
+                      {(penerima || penyerah) && (
+                        <div className="text-xs text-slate-500 bg-slate-50 p-2 rounded-lg border border-slate-100 flex flex-col gap-1">
+                           {penerima && <p><span className="font-bold">Penerima:</span> {penerima}</p>}
+                           {penyerah && <p><span className="font-bold">Penyerah (MPP):</span> {penyerah}</p>}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -142,6 +170,28 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
               className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
           </div>
 
+          
+          {(() => {
+            let fisik: any = {};
+            try { if (doc.arsip_fisik) fisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
+            if (typeof fisik === 'string') fisik = JSON.parse(fisik);
+            const isRevisi = doc?.status_tahapan?.toLowerCase().includes('revisi');
+            const keySuffix = isRevisi ? `_revisi_${doc.revisi_ke || 1}` : '';
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div>
+                  <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Nama Penerima BA (Pemrakarsa/Konsultan) <span className="text-error">*</span></label>
+                  <input type="text" name="penerima_ba" required defaultValue={fisik[`penerima_ba${keySuffix}`] || ''} placeholder="Contoh: Budi Santoso"
+                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Nama Petugas Penyerah BA (MPP) <span className="text-error">*</span></label>
+                  <input type="text" name="penyerah_ba" required defaultValue={fisik[`penyerah_ba${keySuffix}`] || ''} placeholder="Contoh: Siti Aminah"
+                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none" />
+                </div>
+              </div>
+            );
+          })()}
           <div className="pt-8 border-t border-outline-variant mt-8 flex justify-end">
             <button type="submit" disabled={submitting} 
               className="w-full sm:w-auto px-10 py-4 bg-error text-on-error hover:bg-error-container text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0 text-sm">
