@@ -704,8 +704,8 @@ export default function DaftarPerizinanPage() {
                           </h4>
                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-black tracking-wider uppercase border shrink-0 ${
                              isMPP 
-                               ? 'bg-blue-50 text-blue-600 border-blue-200' 
-                               : 'bg-amber-50 text-amber-600 border-amber-200'
+                               ? 'bg-sky-100 text-sky-700 border-sky-200' 
+                               : 'bg-orange-100 text-orange-700 border-orange-200'
                           }`}>
                             {isMPP ? 'MPP' : 'DLH'}
                           </span>
