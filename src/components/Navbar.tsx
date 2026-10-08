@@ -14,7 +14,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border border-slate-200 shadow-md rounded-2xl px-4 sm:px-6 py-3 flex items-center gap-3 sm:gap-4 w-max max-w-[95vw]">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border border-slate-200 shadow-md rounded-2xl px-4 sm:px-6 py-3 flex items-center gap-3 sm:gap-4 w-max max-w-[95vw] overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
       <div className=""><BidiLogo /></div>
       <div className="h-6 w-1 bg-slate-900 rounded-full"></div>
       <ul className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm font-black text-slate-700 uppercase tracking-widest ">
