@@ -28,7 +28,8 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
     setSubmitting(true);
     
     const formData = new FormData(e.currentTarget);
-    const status_tahapan = 'DIKEMBALIKAN';
+    const isRevisi = doc?.status_tahapan?.toLowerCase().includes('revisi');
+    const status_tahapan = isRevisi ? 'Dikembalikan Revisi' : 'DIKEMBALIKAN';
     const revisiKe = doc?.revisi_ke || '1';
 
     const payload: any = {
@@ -39,7 +40,7 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
     try { if (doc.arsip_fisik) fisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
     if (typeof fisik === 'string') fisik = JSON.parse(fisik);
 
-    const isRevisi = doc.status_tahapan?.toLowerCase().includes('revisi');
+    // isRevisi already declared above
     const keySuffix = isRevisi ? `_revisi_${revisiKe}` : '';
 
     fisik[`penerima_ba${keySuffix}`] = formData.get('penerima_ba');
