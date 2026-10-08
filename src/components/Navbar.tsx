@@ -14,10 +14,10 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border border-slate-200 shadow-md rounded-2xl px-4 sm:px-6 py-3 flex items-center gap-4 sm:gap-6 w-max max-w-[95vw] overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-      <div className="shrink-0"><BidiLogo /></div>
-      <div className="h-6 w-1 bg-slate-900 rounded-full shrink-0"></div>
-      <ul className="flex items-center gap-2 sm:gap-6 text-xs sm:text-sm font-black text-slate-700 uppercase tracking-widest shrink-0">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border border-slate-200 shadow-md rounded-2xl px-4 sm:px-6 py-3 flex items-center gap-3 sm:gap-4 w-max max-w-[95vw]">
+      <div className=""><BidiLogo /></div>
+      <div className="h-6 w-1 bg-slate-900 rounded-full"></div>
+      <ul className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm font-black text-slate-700 uppercase tracking-widest ">
         {/* Kegiatan Dropdown - Only visible on smaller screens (below lg) */}
         <li className="relative group block lg:hidden">
           <button className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-200 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
@@ -43,45 +43,45 @@ export default function Navbar() {
         </li>
 
         {/* Individual Items - Only visible on large screens (lg and above) */}
-        <li className="hidden lg:block shrink-0">
+        <li className="hidden lg:block ">
           <Link href="/perizinan/daftar" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-amber-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
             <LayoutDashboard size={18} />
             <span>Perizinan</span>
           </Link>
         </li>
-        <li className="hidden lg:block shrink-0">
+        <li className="hidden lg:block ">
           <Link href="/pengawasan" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-rose-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
             <ShieldCheck size={18} />
             <span>Pengawasan</span>
           </Link>
         </li>
-        <li className="hidden lg:block shrink-0">
+        <li className="hidden lg:block ">
           <Link href="/pengaduan" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-fuchsia-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
             <MessageSquareWarning size={18} />
             <span>Pengaduan</span>
           </Link>
         </li>
-        <li className="hidden lg:block shrink-0">
+        <li className="hidden lg:block ">
           <Link href="/hotline" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-emerald-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
             <PhoneCall size={18} />
             <span>Hotline</span>
           </Link>
         </li>
-        <li className="shrink-0">
+        <li className="">
           <Link href="/peta" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-blue-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
             <Map size={18} />
             <span className="hidden md:inline">Peta Lokasi</span>
           </Link>
         </li>
-        <li className="shrink-0">
+        <li className="">
           <Link href="/arsip" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-200 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
             <Archive size={18} />
             <span className="hidden sm:inline">Arsip</span>
           </Link>
         </li>
       </ul>
-      <div className="h-6 w-1 bg-slate-900 rounded-full hidden sm:block shrink-0"></div>
-      <div className="relative group hidden sm:block shrink-0">
+      <div className="h-6 w-1 bg-slate-900 rounded-full hidden sm:block"></div>
+      <div className="relative group hidden sm:block ">
         <button className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 shadow-sm transition-all" title="Pengaturan">
           <Settings size={18} className="text-slate-900" />
         </button>
