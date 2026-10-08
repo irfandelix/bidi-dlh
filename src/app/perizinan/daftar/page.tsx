@@ -500,7 +500,7 @@ export default function DaftarPerizinanPage() {
                                           return (
                                               <div key={stepId} className="relative z-10 flex flex-col items-center gap-2 group flex-1" title={isSkipped ? 'Dilewati / Belum ada data' : ''}>
                                                   <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 ${
-                                                    isCurrent ? 'border-blue-300 bg-blue-500 text-white shadow-lg shadow-blue-200 scale-125 ring-4 ring-blue-400/50 animate-[pulse_2s_ease-in-out_infinite]' : 
+                                                    isCurrent ? 'border-emerald-300 bg-emerald-500 text-white shadow-lg shadow-emerald-200 scale-125 ring-4 ring-emerald-400/50 animate-[pulse_2s_ease-in-out_infinite]' : 
                                                     isSkipped ? 'border-slate-200 bg-slate-200 text-slate-400' :
                                                     isPast ? 'border-indigo-100 bg-indigo-500 text-white' : 
                                                     'border-slate-100 bg-white text-slate-300'
@@ -508,7 +508,7 @@ export default function DaftarPerizinanPage() {
                                                       {stageData && <stageData.icon size={16} />}
                                                   </div>
                                                   <div className={`absolute top-12 text-center text-[10px] w-24 leading-[1.1] font-black uppercase tracking-tight flex flex-col items-center gap-1.5 ${
-                                                    isCurrent ? 'text-blue-600 scale-110 transition-transform' : 
+                                                    isCurrent ? 'text-emerald-600 scale-110 transition-transform' : 
                                                     isSkipped ? 'text-slate-400' :
                                                     isPast ? 'text-slate-700' : 
                                                     'text-slate-400'
