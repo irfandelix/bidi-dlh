@@ -31,11 +31,13 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
     "PKKPR",
     "NIB (Untuk Swasta atau Perorangan)", 
     "Fotocopy Status Lahan (Sertifikat)", 
-    "Fotocopy KTP Penanggungjawab Kegiatan",
+    "Fotocopy KTP Penanggungjawab Kegiatan", 
     "Foto Eksisting Lokasi Rencana Kegiatan Disertai dengan Titik Koordinat", 
-    "Lembar Penapisan dari AMDALNET / Arahan dari Instansi Lingkungan Hidup",
+    "Lembar Penapisan dari AMDALNET / Arahan dari Instansi Lingkungan Hidup", 
     "Surat Kuasa Pekerjaan dari Pemrakarsa ke Konsultan (Bermaterai)", 
     "Perizinan yang Sudah Dimiliki atau Izin yang Lama (Jika Ada)",
+    "Perjanjian Pengangkutan Sampah (MOU)",
+    "Perjanjian Pengangkutan Limbah B3 (MOU)",
     "Pemenuhan Persetujuan Teknis Air Limbah", 
     "Pemenuhan Rincian Teknis Limbah B3 Sementara", 
     "Pemenuhan Persetujuan Teknis Emisi", 
@@ -345,27 +347,57 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
                   </tr>
                 </thead>
                 <tbody className="divide-y-2 divide-slate-900 font-bold">
-                  {checklistItems.map((item, index) => (
-                    <tr key={index} className="hover:bg-surface-container-lowest transition-colors">
-                      <td className="px-3 py-3 text-center border-r border-outline-variant bg-surface-container-low">{index + 1}</td>
-                      <td className="px-3 py-3 border-r border-outline-variant">{item}</td>
-                      <td className="px-2 py-3 text-center border-r border-outline-variant bg-secondary-container">
-                        <input type="radio" name={`keberadaan[${index}]`} value="Ada" required className="w-5 h-5 text-secondary border border-outline-variant focus:ring-emerald-500 shadow-sm hover:shadow-md transition-shadow cursor-pointer" />
-                      </td>
-                      <td className="px-2 py-3 text-center border-r border-outline-variant bg-error-container">
-                        <input type="radio" name={`keberadaan[${index}]`} value="Tidak Ada" className="w-5 h-5 text-error border border-outline-variant focus:ring-rose-500 shadow-sm hover:shadow-md transition-shadow cursor-pointer" />
-                      </td>
-                      <td className="px-2 py-3 text-center border-r border-outline-variant bg-blue-50">
-                        <input type="radio" name={`kesesuaian[${index}]`} value="Sesuai" required className="w-5 h-5 text-blue-500 border border-outline-variant focus:ring-blue-500 shadow-sm hover:shadow-md transition-shadow cursor-pointer" />
-                      </td>
-                      <td className="px-2 py-3 text-center border-r border-outline-variant bg-error-container">
-                        <input type="radio" name={`kesesuaian[${index}]`} value="Tidak Sesuai" className="w-5 h-5 text-error border border-outline-variant focus:ring-rose-500 shadow-sm hover:shadow-md transition-shadow cursor-pointer" />
-                      </td>
-                      <td className="px-2 py-2">
-                        <input type="text" name={`keterangan_uji[${index}]`} placeholder="..." className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs focus:bg-surface-container-lowest outline-none shadow-sm hover:shadow-md transition-shadow" />
-                      </td>
-                    </tr>
-                  ))}
+                  {checklistItems.map((item, index) => {
+                    let ekstra: any = {};
+                    try { if (doc?.penandatangan_hua) ekstra = typeof doc.penandatangan_hua === 'string' ? JSON.parse(doc.penandatangan_hua) : doc.penandatangan_hua; } catch(e) {}
+                    let chkStatus: any[] = [];
+                    let chkNotes: any[] = [];
+                    try { if (doc?.checklist_status) chkStatus = typeof doc.checklist_status === 'string' ? JSON.parse(doc.checklist_status) : doc.checklist_status; } catch(e) {}
+                    try { if (doc?.checklist_notes) chkNotes = typeof doc.checklist_notes === 'string' ? JSON.parse(doc.checklist_notes) : doc.checklist_notes; } catch(e) {}
+
+                    const savedKeberadaan = ekstra?.keberadaan?.[index];
+                    const savedKesesuaian = ekstra?.kesesuaian?.[index];
+                    const savedKet = ekstra?.keterangan_uji?.[index];
+
+                    const st = chkStatus?.[index];
+                    const isCheckedInReg = !!(st?.pl || st?.pertek || st?.rintek || st === true);
+
+                    let defaultKeberadaan = savedKeberadaan;
+                    if (!defaultKeberadaan && chkStatus.length > 0) {
+                      defaultKeberadaan = isCheckedInReg ? 'Ada' : 'Tidak Ada';
+                    }
+                    if (!defaultKeberadaan) defaultKeberadaan = 'Ada';
+
+                    let defaultKesesuaian = savedKesesuaian;
+                    if (!defaultKesesuaian && chkStatus.length > 0) {
+                      defaultKesesuaian = isCheckedInReg ? 'Sesuai' : 'Tidak Sesuai';
+                    }
+                    if (!defaultKesesuaian) defaultKesesuaian = 'Sesuai';
+
+                    const defaultKet = savedKet !== undefined ? savedKet : (chkNotes?.[index] || '');
+
+                    return (
+                      <tr key={index} className="hover:bg-surface-container-lowest transition-colors">
+                        <td className="px-3 py-3 text-center border-r border-outline-variant bg-surface-container-low">{index + 1}</td>
+                        <td className="px-3 py-3 border-r border-outline-variant">{item}</td>
+                        <td className="px-2 py-3 text-center border-r border-outline-variant bg-secondary-container">
+                          <input type="radio" name={`keberadaan[${index}]`} value="Ada" defaultChecked={defaultKeberadaan === 'Ada'} required className="w-5 h-5 text-secondary border border-outline-variant focus:ring-emerald-500 shadow-sm hover:shadow-md transition-shadow cursor-pointer" />
+                        </td>
+                        <td className="px-2 py-3 text-center border-r border-outline-variant bg-error-container">
+                          <input type="radio" name={`keberadaan[${index}]`} value="Tidak Ada" defaultChecked={defaultKeberadaan === 'Tidak Ada'} className="w-5 h-5 text-error border border-outline-variant focus:ring-rose-500 shadow-sm hover:shadow-md transition-shadow cursor-pointer" />
+                        </td>
+                        <td className="px-2 py-3 text-center border-r border-outline-variant bg-blue-50">
+                          <input type="radio" name={`kesesuaian[${index}]`} value="Sesuai" defaultChecked={defaultKesesuaian === 'Sesuai'} required className="w-5 h-5 text-blue-500 border border-outline-variant focus:ring-blue-500 shadow-sm hover:shadow-md transition-shadow cursor-pointer" />
+                        </td>
+                        <td className="px-2 py-3 text-center border-r border-outline-variant bg-error-container">
+                          <input type="radio" name={`kesesuaian[${index}]`} value="Tidak Sesuai" defaultChecked={defaultKesesuaian === 'Tidak Sesuai'} className="w-5 h-5 text-error border border-outline-variant focus:ring-rose-500 shadow-sm hover:shadow-md transition-shadow cursor-pointer" />
+                        </td>
+                        <td className="px-2 py-2">
+                          <input type="text" name={`keterangan_uji[${index}]`} defaultValue={defaultKet} placeholder="..." className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs focus:bg-surface-container-lowest outline-none shadow-sm hover:shadow-md transition-shadow" />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

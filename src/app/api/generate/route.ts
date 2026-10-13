@@ -158,15 +158,6 @@ export async function POST(request: Request) {
     }));
 
 
-    const checklistData: any = {};
-    for (let i = 0; i < 20; i++) {
-       checklistData[`ada_${i+1}`] = ekstra?.keberadaan?.[i] === 'Ada' ? '✓' : '';
-       checklistData[`tdk_ada_${i+1}`] = ekstra?.keberadaan?.[i] === 'Tidak Ada' ? '✓' : '';
-       checklistData[`sesuai_${i+1}`] = ekstra?.kesesuaian?.[i] === 'Sesuai' ? '✓' : '';
-       checklistData[`tdk_sesuai_${i+1}`] = ekstra?.kesesuaian?.[i] === 'Tidak Sesuai' ? '✓' : '';
-       checklistData[`ket_${i+1}`] = ekstra?.keterangan_uji?.[i] || '';
-    }
-
     // Parse Checklist items for "persyaratan" table loop
     const defaultChecklistItems = [
       "Surat Permohonan Pemeriksaan Dokumen*", 
@@ -178,9 +169,9 @@ export async function POST(request: Request) {
       "PKKPR",
       "NIB (Untuk Swasta atau Perorangan)", 
       "Fotocopy Status Lahan (Sertifikat)", 
-      "Fotocopy KTP Penanggungjawab Kegiatan",
+      "Fotocopy KTP Penanggungjawab Kegiatan", 
       "Foto Eksisting Lokasi Rencana Kegiatan Disertai dengan Titik Koordinat", 
-      "Lembar Penapisan dari AMDALNET / Arahan dari Instansi Lingkungan Hidup",
+      "Lembar Penapisan dari AMDALNET / Arahan dari Instansi Lingkungan Hidup", 
       "Surat Kuasa Pekerjaan dari Pemrakarsa ke Konsultan (Bermaterai)", 
       "Perizinan yang Sudah Dimiliki atau Izin yang Lama (Jika Ada)",
       "Perjanjian Pengangkutan Sampah (MOU)",
@@ -194,17 +185,48 @@ export async function POST(request: Request) {
     ];
     
     let chkStatusRaw = [];
-    let chkNotes = [];
+    let chkNotes: any[] = [];
     try { if (doc.checklist_status) chkStatusRaw = typeof doc.checklist_status === 'string' ? JSON.parse(doc.checklist_status) : doc.checklist_status; } catch(e) {}
     try { if (doc.checklist_notes) chkNotes = typeof doc.checklist_notes === 'string' ? JSON.parse(doc.checklist_notes) : doc.checklist_notes; } catch(e) {}
     
-    let chkStatus = [];
+    let chkStatus: any[] = [];
     if (chkStatusRaw && chkStatusRaw.length > 0 && typeof chkStatusRaw[0] === 'boolean') {
         chkStatus = chkStatusRaw.map(b => ({ pl: b, pertek: false, rintek: false }));
     } else if (chkStatusRaw && chkStatusRaw.length > 0 && typeof chkStatusRaw[0] === 'object') {
         chkStatus = chkStatusRaw;
     } else {
         chkStatus = defaultChecklistItems.map(() => ({ pl: false, pertek: false, rintek: false }));
+    }
+
+    const checklistData: any = {};
+    for (let i = 0; i < 22; i++) {
+       let ada = ekstra?.keberadaan?.[i] === 'Ada';
+       let tdkAda = ekstra?.keberadaan?.[i] === 'Tidak Ada';
+       let sesuai = ekstra?.kesesuaian?.[i] === 'Sesuai';
+       let tdkSesuai = ekstra?.kesesuaian?.[i] === 'Tidak Sesuai';
+       let ket = ekstra?.keterangan_uji?.[i] || '';
+
+       // Fallback to registrasi checklist if not explicitly saved in uji admin yet
+       if (!ekstra?.keberadaan?.[i]) {
+         const regItem = chkStatus[i];
+         const isCheckedInReg = !!(regItem?.pl || regItem?.pertek || regItem?.rintek || regItem === true);
+         if (isCheckedInReg) {
+           ada = true;
+           sesuai = true;
+         } else if (chkStatus.length > 0) {
+           tdkAda = true;
+           tdkSesuai = true;
+         }
+         if (!ket && chkNotes[i]) {
+           ket = chkNotes[i];
+         }
+       }
+
+       checklistData[`ada_${i+1}`] = ada ? '✓' : '';
+       checklistData[`tdk_ada_${i+1}`] = tdkAda ? '✓' : '';
+       checklistData[`sesuai_${i+1}`] = sesuai ? '✓' : '';
+       checklistData[`tdk_sesuai_${i+1}`] = tdkSesuai ? '✓' : '';
+       checklistData[`ket_${i+1}`] = ket;
     }
     
     let keteranganCounter = 1;
