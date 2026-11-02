@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Send, Loader2, MapPinned, ClipboardCheck, Zap, Copy, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, MapPin, Send, Loader2, MapPinned, ClipboardCheck, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function VerlapPage({ params }: { params: Promise<{ id: string }> }) {
@@ -13,6 +13,7 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isGeneratingNomor, setIsGeneratingNomor] = useState(false);
+  const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const [copiedNomor, setCopiedNomor] = useState(false);
   const [message, setMessage] = useState('');
   const [daftarPegawai, setDaftarPegawai] = useState<any[]>([]);
@@ -51,11 +52,12 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
         body: JSON.stringify({ tanggal_verlap: tgl, nomor_ba_verlap: 'AUTO' })
       });
       if (res.ok) {
-        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
-        setDoc(newDoc.data);
-        if (newDoc.data?.nomor_ba_verlap) {
+        const resData = await res.json();
+        const updatedDoc = resData.data || (await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json()).data;
+        setDoc(updatedDoc);
+        if (updatedDoc?.nomor_ba_verlap) {
           try {
-            await navigator.clipboard.writeText(newDoc.data.nomor_ba_verlap);
+            await navigator.clipboard.writeText(updatedDoc.nomor_ba_verlap);
             setCopiedNomor(true);
             setTimeout(() => setCopiedNomor(false), 2000);
           } catch {}
@@ -68,7 +70,7 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
       alert(err.message);
     } finally {
       setIsGeneratingNomor(false);
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(''), 4000);
     }
   };
 
@@ -79,6 +81,39 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
       setCopiedNomor(true);
       setTimeout(() => setCopiedNomor(false), 2000);
     } catch {}
+  };
+
+  const handleDownloadTemplate = async () => {
+    if (!doc?.nomor_ba_verlap) {
+      alert('Simpan tanggal & generate Nomor BA Verlap terlebih dahulu!');
+      return;
+    }
+    setDownloadingTemplate(true);
+    try {
+      const downloadUrl = `/api/generate?stage=verifikasi-lapangan&type=template_ba_verlap&id=${unwrappedParams.id}`;
+      const fileRes = await fetch(downloadUrl);
+      if (!fileRes.ok) throw new Error('Gagal men-generate berkas BA Verlap');
+
+      const blob = await fileRes.blob();
+      const disposition = fileRes.headers.get('Content-Disposition');
+      let filename = `BA_Verlap_${unwrappedParams.id}.docx`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+        if (matches && matches[1]) filename = matches[1].replace(/['"]/g, '');
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(err.message || 'Gagal mengunduh berkas');
+    } finally {
+      setDownloadingTemplate(false);
+    }
   };
 
   const handleUploadArsip = async () => {
@@ -134,7 +169,7 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
     const formData = new FormData(e.currentTarget);
     const penandatangan = formData.getAll('penandatangan[]');
 
-    let ekstra = {};
+    let ekstra: any = {};
     try { if (doc.penandatangan_hua) ekstra = typeof doc.penandatangan_hua === 'string' ? JSON.parse(doc.penandatangan_hua) : doc.penandatangan_hua; } catch(e) {}
 
     const updatedEkstra = {
@@ -147,7 +182,7 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
       nomor_ba_verlap: 'AUTO',
       tanggal_verlap: formData.get('tanggal_verlap'),
       penandatangan_verlap: JSON.stringify(penandatangan),
-      status_tahapan: doc.jenis_dokumen === 'Integrasi RINTEK LB3 ke Persetujuan Lingkungan' ? 'Revisi Selesai' : 'Verlap Selesai', // Langsung ke Finalisasi jika INT.LB3
+      status_tahapan: doc.jenis_dokumen === 'Integrasi RINTEK LB3 ke Persetujuan Lingkungan' ? 'Revisi Selesai' : 'Verlap Selesai',
       penandatangan_hua: updatedEkstra
     };
 
@@ -159,21 +194,10 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
       });
       
       if(res.ok) {
-        setMessage('Menyiapkan Dokumen BA Verlap...');
-        // Auto Download File
-        const downloadUrl = `/api/generate?stage=verifikasi-lapangan&type=template_ba_verlap&id=${unwrappedParams.id}`;
-        
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        
-        setTimeout(() => {
-          document.body.removeChild(a);
-          setMessage('Verifikasi Lapangan Berhasil Disimpan!');
-          setTimeout(() => router.push('/perizinan/daftar'), 1500);
-        }, 1000);
+        const resData = await res.json();
+        setDoc(resData.data);
+        setMessage('Data & Nomor Verifikasi Lapangan berhasil disimpan! Silakan klik tombol Unduh Berkas BA Verlap.');
+        setTimeout(() => setMessage(''), 5000);
       }
     } catch (err) {
       console.error(err);
@@ -184,6 +208,9 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
 
   if (loading) return <LottieLoader size={150} text="MEMUAT DATA..." />;
   if (!doc) return <div className="text-center py-20 text-error font-bold bg-error-container text-on-error-container border border-outline-variant m-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">DATA TIDAK DITEMUKAN!</div>;
+
+  let ekstraData: any = {};
+  try { if (doc.penandatangan_hua) ekstraData = typeof doc.penandatangan_hua === 'string' ? JSON.parse(doc.penandatangan_hua) : doc.penandatangan_hua; } catch(e) {}
 
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-8 pb-20">
@@ -216,10 +243,22 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
             <p className="font-bold text-on-surface mt-1 uppercase text-sm md:text-base">{doc.nama_kegiatan}</p>
           </div>
           <div>
-            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No Urut / Tahun</div>
-            <p className="font-bold bg-amber-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block mt-1 text-sm shadow-sm hover:shadow-md transition-shadow">
-              #{String(doc.no_urut || doc.id).padStart(3, '0')} / {doc.tahun || '2026'}
-            </p>
+            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No. BA Verifikasi Lapangan</div>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <p className="font-bold bg-amber-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block text-sm font-mono shadow-sm">
+                {doc.nomor_ba_verlap || 'Belum di-generate'}
+              </p>
+              {doc.nomor_ba_verlap && (
+                <button
+                  type="button"
+                  onClick={handleCopyNomor}
+                  className="px-2.5 py-1 bg-white hover:bg-amber-50 text-amber-900 border border-amber-300 font-bold rounded text-xs uppercase flex items-center gap-1 shadow-sm"
+                >
+                  {copiedNomor ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                  {copiedNomor ? 'Tersalin' : 'Salin'}
+                </button>
+              )}
+            </div>
           </div>
           <div className="md:col-span-2 border-t border-outline-variant pt-4 mt-2">
             <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pemrakarsa</span>
@@ -277,7 +316,7 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
                 2. Nomor BA Verifikasi Lapangan (BA Verlap)
               </label>
               {doc.nomor_ba_verlap ? (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="flex-1 bg-white border border-amber-300 text-amber-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
                       {doc.nomor_ba_verlap}
@@ -302,9 +341,20 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
                       <span className="hidden sm:inline">Update Tgl</span>
                     </button>
                   </div>
-                  <p className="text-[11px] text-emerald-800 font-bold">
-                    ✅ Tanggal ({doc.tanggal_verlap}) & Nomor sudah tersimpan.
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <p className="text-[11px] text-emerald-800 font-bold">
+                      ✅ Tanggal ({doc.tanggal_verlap}) & Nomor sudah tersimpan.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleDownloadTemplate}
+                      disabled={downloadingTemplate}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      <Download size={14} />
+                      <span>{downloadingTemplate ? 'Mengunduh...' : 'Unduh Berkas BA Verlap (.docx)'}</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button
@@ -327,12 +377,12 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Email Pemrakarsa</label>
-                  <input type="email" name="email_pemrakarsa" placeholder="Contoh: info@pt-abc.com"
+                  <input type="email" name="email_pemrakarsa" defaultValue={ekstraData?.email_pemrakarsa || ''} placeholder="Contoh: info@pt-abc.com"
                     className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Jabatan Pemrakarsa <span className="text-error">*</span></label>
-                  <input type="text" name="jabatan_pemrakarsa" required defaultValue="Penanggungjawab Kegiatan" placeholder="Contoh: Direktur Utama"
+                  <input type="text" name="jabatan_pemrakarsa" required defaultValue={ekstraData?.jabatan_pemrakarsa || 'Penanggungjawab Kegiatan'} placeholder="Contoh: Direktur Utama"
                     className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
                 </div>
               </div>
@@ -343,24 +393,43 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
                 Tim Verifikasi Lapangan (Pilih Petugas) <span className="text-error">*</span>
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-inner">
-                {daftarPegawai.map((pegawai) => (
-                  <label key={pegawai.id} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-tertiary-container text-on-tertiary-container border-2 border-transparent hover:border-outline-variant hover:shadow-sm hover:shadow-md transition-shadow transition-all cursor-pointer group bg-surface">
-                    <input type="checkbox" name="penandatangan[]" value={pegawai.id}
-                           className="w-5 h-5 rounded border border-outline-variant text-amber-500 focus:ring-amber-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
-                    <div className="flex flex-col">
-                      <span className="text-sm text-on-surface group-hover:text-amber-700 font-bold">{pegawai.nama}</span>
-                      
-                    </div>
-                  </label>
-                ))}
+                {daftarPegawai.map((pegawai) => {
+                  let isChecked = false;
+                  try {
+                    if (doc.penandatangan_verlap) {
+                      const parsed = JSON.parse(doc.penandatangan_verlap);
+                      if (parsed.includes(pegawai.id.toString())) isChecked = true;
+                    }
+                  } catch(e) {}
+                  return (
+                    <label key={pegawai.id} className="flex items-center space-x-3 p-3 rounded-xl hover:bg-tertiary-container text-on-tertiary-container border-2 border-transparent hover:border-outline-variant hover:shadow-sm hover:shadow-md transition-shadow transition-all cursor-pointer group bg-surface">
+                      <input type="checkbox" name="penandatangan[]" value={pegawai.id} defaultChecked={isChecked}
+                             className="w-5 h-5 rounded border border-outline-variant text-amber-500 focus:ring-amber-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
+                      <div className="flex flex-col">
+                        <span className="text-sm text-on-surface group-hover:text-amber-700 font-bold">{pegawai.nama}</span>
+                      </div>
+                    </label>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end pt-8 border-t border-outline-variant mt-8">
+          <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-outline-variant mt-8">
+            {doc.nomor_ba_verlap && (
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                disabled={downloadingTemplate}
+                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70"
+              >
+                {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
+                Unduh Berkas BA Verlap (.docx)
+              </button>
+            )}
             <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-tertiary text-on-tertiary hover:bg-amber-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70 disabled:hover:translate-y-0">
               {submitting ? <LottieLoader size={24} /> : <Send size={18} />}
-              Simpan & Generate BA Verlap
+              Simpan Data BA Verlap
             </button>
           </div>
         </form>

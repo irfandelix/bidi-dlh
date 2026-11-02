@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Send, Loader2, Monitor, Globe, FilePlus, MapPin, UserCheck, CheckCircle, Printer, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Send, Loader2, Monitor, Globe, FilePlus, MapPin, UserCheck, CheckCircle, Printer, ArrowRight, ArrowLeft, Copy, Check, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function RegistrasiPage() {
@@ -13,6 +13,8 @@ export default function RegistrasiPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [createdDocId, setCreatedDocId] = useState<string | null>(null);
+  const [createdNomorChecklist, setCreatedNomorChecklist] = useState<string>('');
+  const [copiedNomor, setCopiedNomor] = useState(false);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [timPenilais, setTimPenilais] = useState<any[]>([]);
   
@@ -116,6 +118,7 @@ export default function RegistrasiPage() {
       a.download = filename;
       document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (e: any) {
       console.error(e);
@@ -190,8 +193,9 @@ export default function RegistrasiPage() {
         throw new Error(result.error || 'Terjadi kesalahan saat registrasi.');
       }
 
-      setSuccessMsg('Registrasi berhasil disubmit!');
+      setSuccessMsg('Registrasi berhasil disimpan!');
       setCreatedDocId(result.data.id);
+      setCreatedNomorChecklist(result.data.nomor_checklist || '');
     } catch (err: any) {
       setErrorMsg(err.message);
     } finally {
@@ -255,7 +259,29 @@ export default function RegistrasiPage() {
             <CheckCircle size={40} className="text-slate-900" />
           </div>
           <h3 className="text-2xl font-black uppercase text-slate-900">{successMsg}</h3>
-          <p className="text-sm font-bold text-slate-600">Silakan cetak Tanda Terima dan Checklist pendaftaran berikut:</p>
+          {createdNomorChecklist && (
+            <div className="max-w-lg mx-auto p-4 bg-white border border-emerald-300 rounded-2xl shadow-sm space-y-2">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nomor Registrasi / Checklist Tersimpan</p>
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                <span className="font-mono font-black text-base text-emerald-950 bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-200">
+                  {createdNomorChecklist}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(createdNomorChecklist);
+                    setCopiedNomor(true);
+                    setTimeout(() => setCopiedNomor(false), 2000);
+                  }}
+                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg text-xs uppercase flex items-center gap-1"
+                >
+                  {copiedNomor ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                  {copiedNomor ? 'Tersalin' : 'Salin'}
+                </button>
+              </div>
+            </div>
+          )}
+          <p className="text-sm font-bold text-slate-600">Silakan unduh berkas Tanda Terima dan Checklist pendaftaran berikut:</p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             {activeTab === 'amdalnet' ? (
@@ -265,8 +291,8 @@ export default function RegistrasiPage() {
                 disabled={downloading === 'Lembar_Registrasi_Amdalnet'}
                 className="w-full sm:w-auto px-6 py-4 bg-emerald-400 hover:bg-emerald-300 text-slate-900 border border-slate-200 font-black rounded-xl text-sm shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
               >
-                {downloading === 'Lembar_Registrasi_Amdalnet' ? <LottieLoader size={24} /> : <Printer size={18} />}
-                Cetak Lembar Registrasi Amdalnet
+                {downloading === 'Lembar_Registrasi_Amdalnet' ? <LottieLoader size={24} /> : <Download size={18} />}
+                Unduh Lembar Registrasi Amdalnet (.docx)
               </button>
             ) : (
               <>
@@ -276,8 +302,8 @@ export default function RegistrasiPage() {
                   disabled={downloading === 'template_tanda_terima_registrasi'}
                   className="w-full sm:w-auto px-6 py-4 bg-amber-400 hover:bg-amber-300 text-slate-900 border border-slate-200 font-black rounded-xl text-sm shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {downloading === 'template_tanda_terima_registrasi' ? <LottieLoader size={24} /> : <Printer size={18} />}
-                  Cetak Tanda Terima
+                  {downloading === 'template_tanda_terima_registrasi' ? <LottieLoader size={24} /> : <Download size={18} />}
+                  Unduh Berkas Tanda Terima (.docx)
                 </button>
                 <button 
                   type="button"
@@ -285,8 +311,8 @@ export default function RegistrasiPage() {
                   disabled={downloading === 'template_checklist'}
                   className="w-full sm:w-auto px-6 py-4 bg-teal-400 hover:bg-teal-300 text-slate-900 border border-slate-200 font-black rounded-xl text-sm shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
                 >
-                  {downloading === 'template_checklist' ? <LottieLoader size={24} /> : <Printer size={18} />}
-                  Cetak Checklist
+                  {downloading === 'template_checklist' ? <LottieLoader size={24} /> : <Download size={18} />}
+                  Unduh Berkas Checklist (.docx)
                 </button>
               </>
             )}
@@ -308,7 +334,6 @@ export default function RegistrasiPage() {
         <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-md">
           {/* Progress Indicator */}
           <div className="flex items-start justify-between mb-8 relative px-4 sm:px-8">
-            {/* The connecting line - centered on the 48px (h-12) circles, so top-6 */}
             <div className="absolute left-[16.666667%] right-[16.666667%] top-6 -translate-y-1/2 h-1 bg-slate-200 z-0">
               <div 
                 className={`h-full transition-all duration-300 ease-in-out ${activeTab === 'manual' ? 'bg-indigo-400' : 'bg-emerald-400'}`}
@@ -518,7 +543,7 @@ export default function RegistrasiPage() {
                      <Monitor className="text-indigo-400 shrink-0 mt-1" size={24} />
                      <div>
                        <h4 className="font-bold text-slate-900">Konfirmasi Penyimpanan</h4>
-                       <p className="text-sm text-slate-600 mt-1">Pastikan kembali data registrasi manual dan kelengkapan checklist sudah benar. Tanda terima akan dapat dicetak setelah data disimpan.</p>
+                       <p className="text-sm text-slate-600 mt-1">Pastikan kembali data registrasi manual dan kelengkapan checklist sudah benar. Nomor registrasi akan muncul dan berkas tanda terima dapat diunduh setelah data disimpan.</p>
                      </div>
                   </div>
                 </div>
@@ -643,7 +668,7 @@ export default function RegistrasiPage() {
                      <Globe className="text-emerald-500 shrink-0 mt-1" size={24} />
                      <div>
                        <h4 className="font-bold text-slate-900">Konfirmasi Amdalnet</h4>
-                       <p className="text-sm text-slate-600 mt-1">Pastikan data yang dimasukkan sesuai dengan dokumen di sistem Amdalnet. Jika sesuai, silakan simpan dan cetak lembar registrasinya.</p>
+                       <p className="text-sm text-slate-600 mt-1">Pastikan data yang dimasukkan sesuai dengan dokumen di sistem Amdalnet. Jika sesuai, silakan simpan dan unduh lembar registrasinya.</p>
                      </div>
                   </div>
                 </div>

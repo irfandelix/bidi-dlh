@@ -49,9 +49,10 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
         body: JSON.stringify({ tanggal_risalah: tgl, nomor_risalah: 'AUTO' })
       });
       if (res.ok) {
-        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
-        setDoc(newDoc.data);
-        const generated = newDoc.data?.nomor_risalah || '';
+        const resData = await res.json();
+        const updatedDoc = resData.data || (await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json()).data;
+        setDoc(updatedDoc);
+        const generated = updatedDoc?.nomor_risalah || '';
         setNomorRisalah(generated);
         if (generated) {
           try {
@@ -68,14 +69,15 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
       alert(err.message);
     } finally {
       setIsGeneratingNomor(false);
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(''), 4000);
     }
   };
 
   const handleCopyNomorRisalah = async () => {
-    if (!nomorRisalah) return;
+    const val = doc?.nomor_risalah || nomorRisalah;
+    if (!val) return;
     try {
-      await navigator.clipboard.writeText(nomorRisalah);
+      await navigator.clipboard.writeText(val);
       setCopiedNomor(true);
       setTimeout(() => setCopiedNomor(false), 2000);
     } catch {}
@@ -140,20 +142,17 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
     setSubmitting(true);
     
     const formData = new FormData(e.currentTarget);
-    // Jika semua tanggal diisi, statusnya menjadi "Diarsipkan"
-    // Jika hanya SK, statusnya "Menunggu Jilidan"
     const tglSK = formData.get('tanggal_penyerahan_sk');
     const nomorSK = formData.get('nomor_sk');
     
     let status_tahapan = 'Selesai / SK';
     if (nomorSK || tglSK) status_tahapan = 'Menunggu Jilidan';
 
-    const payload = {
+    const payload: any = {
       tanggal_risalah: formData.get('tanggal_risalah'),
       nomor_risalah: formData.get('nomor_risalah') || 'AUTO',
       nomor_sk: formData.get('nomor_sk'),
       tanggal_penyerahan_sk: tglSK,
-      arsip_fisik: formData.get('lokasi_arsip'),
       status_tahapan, 
     };
 
@@ -165,8 +164,11 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
       });
       
       if(res.ok) {
-        setMessage('Data Finalisasi & Arsip Berhasil Disimpan!');
-        setTimeout(() => router.push('/perizinan/daftar'), 1500);
+        const resData = await res.json();
+        setDoc(resData.data);
+        setNomorRisalah(resData.data?.nomor_risalah || '');
+        setMessage('Data Finalisasi, Nomor RPD & SK berhasil disimpan!');
+        setTimeout(() => setMessage(''), 5000);
       }
     } catch (err) {
       console.error(err);
@@ -209,14 +211,30 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
             <p className="font-bold text-on-surface mt-1 uppercase text-sm md:text-base">{doc.nama_kegiatan}</p>
           </div>
           <div>
-            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No Urut / Tahun</div>
-            <p className="font-bold bg-amber-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block mt-1 text-sm shadow-sm hover:shadow-md transition-shadow">
-              #{String(doc.no_urut || doc.id).padStart(3, '0')} / {doc.tahun || '2026'}
-            </p>
+            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No. Risalah (RPD)</div>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <p className="font-bold bg-amber-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block text-sm font-mono shadow-sm">
+                {doc.nomor_risalah || 'Belum di-generate'}
+              </p>
+              {doc.nomor_risalah && (
+                <button
+                  type="button"
+                  onClick={handleCopyNomorRisalah}
+                  className="px-2.5 py-1 bg-white hover:bg-amber-50 text-amber-900 border border-amber-300 font-bold rounded text-xs uppercase flex items-center gap-1 shadow-sm"
+                >
+                  {copiedNomor ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                  {copiedNomor ? 'Tersalin' : 'Salin'}
+                </button>
+              )}
+            </div>
           </div>
-          <div className="md:col-span-2 border-t border-outline-variant pt-4 mt-2">
+          <div className="border-t border-outline-variant pt-4 mt-2">
             <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pemrakarsa</span>
             <p className="font-bold text-on-surface mt-1 uppercase text-sm">{doc.nama_pemrakarsa || '-'}</p>
+          </div>
+          <div className="border-t border-outline-variant pt-4 mt-2">
+            <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Nomor SK / Rekomendasi</span>
+            <p className="font-bold text-on-surface mt-1 font-mono text-sm">{doc.nomor_sk || '-'}</p>
           </div>
         </div>
 

@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Users, Loader2, ClipboardCheck, RotateCcw, CheckCircle2, Zap, Copy, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Users, Loader2, ClipboardCheck, RotateCcw, CheckCircle2, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -13,6 +13,7 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
   const [loading, setLoading] = useState(true);
   const [submittingAction, setSubmittingAction] = useState<'acc' | 'revisi' | null>(null);
   const [isGeneratingNomor, setIsGeneratingNomor] = useState(false);
+  const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const [copiedNomor, setCopiedNomor] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -42,11 +43,12 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
         body: JSON.stringify({ tanggal_pemeriksaan: tgl, nomor_ba_pemeriksaan: 'AUTO' })
       });
       if (res.ok) {
-        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
-        setDoc(newDoc.data);
-        if (newDoc.data?.nomor_ba_pemeriksaan) {
+        const resData = await res.json();
+        const updatedDoc = resData.data || (await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json()).data;
+        setDoc(updatedDoc);
+        if (updatedDoc?.nomor_ba_pemeriksaan) {
           try {
-            await navigator.clipboard.writeText(newDoc.data.nomor_ba_pemeriksaan);
+            await navigator.clipboard.writeText(updatedDoc.nomor_ba_pemeriksaan);
             setCopiedNomor(true);
             setTimeout(() => setCopiedNomor(false), 2000);
           } catch {}
@@ -59,7 +61,7 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
       alert(err.message);
     } finally {
       setIsGeneratingNomor(false);
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(''), 4000);
     }
   };
 
@@ -70,6 +72,39 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
       setCopiedNomor(true);
       setTimeout(() => setCopiedNomor(false), 2000);
     } catch {}
+  };
+
+  const handleDownloadTemplate = async () => {
+    if (!doc?.nomor_ba_pemeriksaan) {
+      alert('Simpan tanggal & generate Nomor BA Pemeriksaan terlebih dahulu!');
+      return;
+    }
+    setDownloadingTemplate(true);
+    try {
+      const downloadUrl = `/api/generate?stage=pemeriksaan-substansi&type=template_ba_substansi&id=${unwrappedParams.id}`;
+      const fileRes = await fetch(downloadUrl);
+      if (!fileRes.ok) throw new Error('Gagal men-generate berkas BA Pemeriksaan');
+
+      const blob = await fileRes.blob();
+      const disposition = fileRes.headers.get('Content-Disposition');
+      let filename = `BA_Pemeriksaan_Substansi_${unwrappedParams.id}.docx`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+        if (matches && matches[1]) filename = matches[1].replace(/['"]/g, '');
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(err.message || 'Gagal mengunduh berkas');
+    } finally {
+      setDownloadingTemplate(false);
+    }
   };
 
   useEffect(() => {
@@ -212,10 +247,8 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    // In standard HTML, we can't reliably get the clicked submit button from FormData directly
-    // in the onSubmit handler without tracking it. But we can use nativeEvent.submitter.
     const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
-    const actionType = submitter.value as 'acc' | 'revisi';
+    const actionType = (submitter?.value as 'acc' | 'revisi') || 'revisi';
     
     setSubmittingAction(actionType);
     
@@ -251,21 +284,10 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
       });
       
       if(res.ok) {
-        setMessage('Menyiapkan Dokumen BA Rapat...');
-        // Auto Download File
-        const downloadUrl = `/api/generate?stage=pemeriksaan-substansi&type=template_ba_substansi&id=${unwrappedParams.id}`;
-        
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        
-        setTimeout(() => {
-          document.body.removeChild(a);
-          setMessage('Dokumen Dikembalikan untuk Revisi!');
-          setTimeout(() => router.push('/perizinan/daftar'), 1500);
-        }, 1000);
+        const resData = await res.json();
+        setDoc(resData.data);
+        setMessage('Data & Nomor BA Pemeriksaan berhasil disimpan! Silakan klik tombol Unduh Berkas BA Pemeriksaan.');
+        setTimeout(() => setMessage(''), 5000);
       }
     } catch (err) {
       console.error(err);
@@ -285,11 +307,18 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
   } catch (e) {}
   const hasUndangan = arsipFisik?.undanganSidang === true;
 
+  let ekstraData: any = {};
+  try {
+    if (doc?.penandatangan_hua) {
+      ekstraData = typeof doc.penandatangan_hua === 'string' ? JSON.parse(doc.penandatangan_hua) : doc.penandatangan_hua;
+    }
+  } catch(e) {}
+
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-8 pb-20">
-      <button onClick={() => { if(window.confirm('Tekan Tombol "Simpan" Dahulu agar tersimpan di riwayat perizinan. Yakin ingin kembali?')) router.push('/perizinan/daftar'); }} className="inline-flex items-center gap-2 text-sm text-on-surface font-bold transition-all bg-surface border border-outline-variant px-4 py-2 rounded-xl shadow-sm hover:-translate-y-1 hover:shadow-md uppercase tracking-wide">
+      <Link href="/perizinan/daftar" className="inline-flex items-center gap-2 text-sm text-on-surface font-bold transition-all bg-surface border border-outline-variant px-4 py-2 rounded-xl shadow-sm hover:-translate-y-1 hover:shadow-md uppercase tracking-wide">
         <ArrowLeft size={16} /> Kembali ke Dashboard
-      </button>
+      </Link>
 
       {message && (
         <div className="p-4 bg-emerald-200 text-on-surface rounded-xl shadow-sm hover:shadow-md transition-shadow border border-outline-variant font-bold uppercase tracking-wide">
@@ -316,10 +345,22 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
             <p className="font-bold text-on-surface mt-1 uppercase text-sm md:text-base">{doc.nama_kegiatan}</p>
           </div>
           <div>
-            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No Urut / Tahun</div>
-            <p className="font-bold bg-indigo-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block mt-1 text-sm shadow-sm hover:shadow-md transition-shadow">
-              #{String(doc.no_urut || doc.id).padStart(3, '0')} / {doc.tahun || '2026'}
-            </p>
+            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No. BA Pemeriksaan Substansi</div>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <p className="font-bold bg-indigo-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block text-sm font-mono shadow-sm">
+                {doc.nomor_ba_pemeriksaan || 'Belum di-generate'}
+              </p>
+              {doc.nomor_ba_pemeriksaan && (
+                <button
+                  type="button"
+                  onClick={handleCopyNomor}
+                  className="px-2.5 py-1 bg-white hover:bg-indigo-50 text-indigo-900 border border-indigo-300 font-bold rounded text-xs uppercase flex items-center gap-1 shadow-sm"
+                >
+                  {copiedNomor ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                  {copiedNomor ? 'Tersalin' : 'Salin'}
+                </button>
+              )}
+            </div>
           </div>
           <div className="md:col-span-2 border-t border-outline-variant pt-4 mt-2">
             <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pemrakarsa</span>
@@ -432,7 +473,7 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
                 2. Nomor BA Pemeriksaan Substansi
               </label>
               {doc.nomor_ba_pemeriksaan ? (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="flex-1 bg-white border border-indigo-300 text-indigo-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
                       {doc.nomor_ba_pemeriksaan}
@@ -457,9 +498,20 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
                       <span className="hidden sm:inline">Update Tgl</span>
                     </button>
                   </div>
-                  <p className="text-[11px] text-emerald-800 font-bold">
-                    ✅ Tanggal ({doc.tanggal_pemeriksaan}) & Nomor sudah tersimpan.
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <p className="text-[11px] text-emerald-800 font-bold">
+                      ✅ Tanggal ({doc.tanggal_pemeriksaan}) & Nomor sudah tersimpan.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleDownloadTemplate}
+                      disabled={downloadingTemplate}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      <Download size={14} />
+                      <span>{downloadingTemplate ? 'Mengunduh...' : 'Unduh Berkas BA Pemeriksaan (.docx)'}</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button
@@ -478,14 +530,14 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Nama PT / Instansi</label>
-              <input type="text" name="nama_perusahaan" defaultValue={(() => { try { return JSON.parse(doc.ekstra_baris).nama_perusahaan || ''; } catch(e) { return ''; }})()} placeholder="Contoh: PT Kasoma Properti Indonesia"
+              <input type="text" name="nama_perusahaan" defaultValue={ekstraData?.nama_perusahaan || ''} placeholder="Contoh: PT Kasoma Properti Indonesia"
                 className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               <p className="text-[10px] text-on-surface-variant mt-1 uppercase font-bold">* Bedakan dengan nama pemrakarsa (nama orang) saat awal pendaftaran</p>
             </div>
 
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tambahan Baris Tanda Tangan Kosong</label>
-              <input type="number" name="tambahan_kolom_kosong" min="0" max="10" defaultValue={(() => { try { return JSON.parse(doc.ekstra_baris).tambahan_kolom_kosong || '0'; } catch(e) { return '0'; }})()}
+              <input type="number" name="tambahan_kolom_kosong" min="0" max="10" defaultValue={ekstraData?.tambahan_kolom_kosong || '0'}
                 className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               <p className="text-[10px] text-on-surface-variant mt-1 uppercase font-bold">* Isi angka (misal: 2) jika butuh baris ekstra untuk ditandatangani manual.</p>
             </div>
@@ -502,26 +554,33 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
                     <tr>
                       <th scope="col" className="p-4 w-12 text-center border-r border-outline-variant">#</th>
                       <th scope="col" className="px-4 py-3 border-r border-outline-variant">Nama Pegawai</th>
-                      
                       <th scope="col" className="px-4 py-3">Jabatan / Kategori</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y-2 divide-slate-900 font-bold">
-                    {daftarPegawai.map((pegawai) => (
-                      <tr key={pegawai.id} className="hover:bg-primary-container transition-colors">
-                        <td className="w-4 p-4 text-center border-r border-outline-variant">
-                          <input type="checkbox" name="penandatangan[]" value={pegawai.id} 
-                                 className="w-5 h-5 text-indigo-500 bg-surface border border-outline-variant rounded focus:ring-indigo-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
-                        </td>
-                        <td className="px-4 py-3 font-bold text-on-surface border-r border-outline-variant">{pegawai.nama}</td>
-                        
-                        <td className="px-4 py-3">
-                          <span className="inline-flex items-center px-2.5 py-1 rounded bg-surface-container text-on-surface border border-outline-variant shadow-sm hover:shadow-md transition-shadow text-xs font-bold uppercase tracking-wide">
-                            {pegawai.jabatan_dinas || pegawai.kategori || '-'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {daftarPegawai.map((pegawai) => {
+                      let isChecked = false;
+                      try {
+                        if (doc.penandatangan_pemeriksaan) {
+                          const parsed = JSON.parse(doc.penandatangan_pemeriksaan);
+                          if (parsed.includes(pegawai.id.toString())) isChecked = true;
+                        }
+                      } catch(e) {}
+                      return (
+                        <tr key={pegawai.id} className="hover:bg-primary-container transition-colors">
+                          <td className="w-4 p-4 text-center border-r border-outline-variant">
+                            <input type="checkbox" name="penandatangan[]" value={pegawai.id} defaultChecked={isChecked}
+                                   className="w-5 h-5 text-indigo-500 bg-surface border border-outline-variant rounded focus:ring-indigo-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
+                          </td>
+                          <td className="px-4 py-3 font-bold text-on-surface border-r border-outline-variant">{pegawai.nama}</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded bg-surface-container text-on-surface border border-outline-variant shadow-sm hover:shadow-md transition-shadow text-xs font-bold uppercase tracking-wide">
+                              {pegawai.jabatan_dinas || pegawai.kategori || '-'}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -529,11 +588,24 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
             <p className="text-[11px] text-on-surface-variant mt-3 font-bold uppercase">* Kepala Bidang akan otomatis menjadi Penandatangan Utama (Kiri Bawah).</p>
           </div>
 
-          <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
-            className="w-full px-8 py-4 bg-error text-on-error hover:bg-error-container text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
-            {submittingAction !== null ? <LottieLoader size={24} /> : <RotateCcw size={18} />}
-            Simpan BA Rapat & Kembalikan Ke Pemrakarsa
-          </button>
+          <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-outline-variant mt-8">
+            {doc.nomor_ba_pemeriksaan && (
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                disabled={downloadingTemplate}
+                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70"
+              >
+                {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
+                Unduh Berkas BA Pemeriksaan (.docx)
+              </button>
+            )}
+            <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
+              className="w-full sm:w-auto px-8 py-4 bg-error text-on-error hover:bg-error-container text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
+              {submittingAction !== null ? <LottieLoader size={24} /> : <RotateCcw size={18} />}
+              Simpan Data BA Rapat & Kembalikan Ke Pemrakarsa
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -97,7 +97,11 @@ export async function POST(request: Request) {
     if (stage === 'uji-administrasi' && doc.tanggal_uji_berkas) d = new Date(doc.tanggal_uji_berkas);
     else if (stage === 'verifikasi-lapangan' && doc.tanggal_verlap) d = new Date(doc.tanggal_verlap);
     else if (stage === 'pemeriksaan-substansi' && doc.tanggal_pemeriksaan) d = new Date(doc.tanggal_pemeriksaan);
-    else if (stage === 'pemeriksaan-revisi' && doc.tanggal_revisi) d = new Date(doc.tanggal_revisi);
+    else if (stage === 'pemeriksaan-revisi') {
+      const revKe = target_revisi ? String(target_revisi) : (doc.revisi_ke || '1');
+      const tglRev = doc[`tanggal_revisi_${revKe}`] || doc.tanggal_revisi_1 || doc.tanggal_revisi;
+      if (tglRev) d = new Date(tglRev);
+    }
     else if (stage === 'penerimaan-perbaikan') {
       const revKe = target_revisi ? String(target_revisi) : (doc.revisi_ke || '1');
       const tglPhp = doc[`tanggal_php_${revKe}`] || doc.tanggal_php_1;
@@ -262,11 +266,6 @@ export async function POST(request: Request) {
     formattedJenisDokumen = formattedJenisDokumen.replace(/RINTEK LB3/gi, 'Rincian Teknis Penyimpanan Limbah B3');
     formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK EMISI/gi, 'Persetujuan Teknis Pemenuhan Baku Mutu Emisi');
     formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK AIR LIMBAH/gi, 'Persetujuan Teknis Pemenuhan Baku Mutu Air Limbah');
-    // formattedJenisDokumen = formattedJenisDokumen.replace(/^SPPL$/gi, 'Surat Pernyataan Kesanggupan Pengelolaan dan Pemantauan Lingkungan Hidup');
-    // formattedJenisDokumen = formattedJenisDokumen.replace(/^UKLUPL$|^UKL-UPL$/gi, 'Upaya Pengelolaan Lingkungan Hidup dan Upaya Pemantauan Lingkungan Hidup');
-    // formattedJenisDokumen = formattedJenisDokumen.replace(/^AMDAL$/gi, 'Analisis Mengenai Dampak Lingkungan Hidup');
-    // formattedJenisDokumen = formattedJenisDokumen.replace(/^DELH$/gi, 'Dokumen Evaluasi Lingkungan Hidup');
-    // formattedJenisDokumen = formattedJenisDokumen.replace(/^DPLH$/gi, 'Dokumen Pengelolaan Lingkungan Hidup');
 
     let teks_persetujuan = formattedJenisDokumen;
     const lowerJenis = formattedJenisDokumen.toLowerCase();
@@ -293,7 +292,7 @@ export async function POST(request: Request) {
       no_urut: String(doc.no_urut || doc.id).padStart(3, '0'),
       tim_penilai: tim_penilai_lengkap,
       ketua_tim_nama: ketua_tim.nama || '-',
-      ketua_tim_instansi: 'Dinas Lingkungan Hidup Kabupaten Sragen', // Hardcoded DLH or get from db if available
+      ketua_tim_instansi: 'Dinas Lingkungan Hidup Kabupaten Sragen',
       ketua_tim_nip: ketua_tim.nip || '-',
       ketua_tim_jabatan: ketua_tim.jabatan || ketua_tim.jabatan_dinas || '-',
       tim_penilai_anggota: tim_penilai_anggota,
@@ -339,7 +338,7 @@ export async function POST(request: Request) {
         const kodeTahapan = targetRevisi === '1' ? 'PHP' : `PHP${parseInt(targetRevisi) - 1}`;
         return `600.4.5/${seqPadded}.${tglObj.getMonth()+1}/17/${kodeTahapan}.${jenisAcronym}/${doc.tahun || tglObj.getFullYear()}`;
       })(),
-      nomor_revisi_1: doc.nomor_revisi_1 || (() => {
+      nomor_revisi_1: doc[`nomor_revisi_${targetRevisi || '1'}`] || doc.nomor_revisi_1 || (() => {
         if(targetRevisi !== '1') return '';
         const jenisAcronym = ({
   'SPPL': 'SPPL', 'UKLUPL': 'UKLUPL', 'UKL-UPL': 'UKLUPL',
@@ -480,7 +479,7 @@ export async function POST(request: Request) {
         'template_ba_pemeriksaan_revisi': 'file_php1_url',
       };
       
-      const columnToUpdate = typeToColumnMap[type];
+      const columnToUpdate = typeToUpdate(type, typeToColumnMap);
       if (columnToUpdate) {
         await supabase
           .from('dokumens')
@@ -490,7 +489,6 @@ export async function POST(request: Request) {
       }
     } catch (uploadError) {
       console.error('Failed to upload to Google Drive:', uploadError);
-      // We don't throw here because we still want to return the downloaded file to the user
     }
 
     // 4. Return the file as a response
@@ -508,11 +506,16 @@ export async function POST(request: Request) {
   }
 }
 
+function typeToUpdate(type: string, map: Record<string, string>): string | undefined {
+  return map[type];
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   const type = searchParams.get('type');
   const stage = searchParams.get('stage');
+  const target_revisi = searchParams.get('target_revisi');
   
   if (!id || !type || !stage) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -521,9 +524,8 @@ export async function GET(request: Request) {
   // Reuse the exact same logic as POST by passing a fake request object
   const fakeRequest = new Request(request.url, {
     method: 'POST',
-    body: JSON.stringify({ id, type, stage })
+    body: JSON.stringify({ id, type, stage, target_revisi })
   });
   
   return POST(fakeRequest);
 }
-

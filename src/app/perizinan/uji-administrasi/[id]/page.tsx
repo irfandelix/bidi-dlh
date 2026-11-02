@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ClipboardCheck, Send, ListChecks, PenTool, Copy, Check, Zap, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ClipboardCheck, Send, ListChecks, PenTool, Copy, Check, Zap, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -13,6 +13,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [generatingNomor, setGeneratingNomor] = useState(false);
+  const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState('');
   const [isAmdalnet, setIsAmdalnet] = useState(false);
@@ -97,7 +98,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
       alert(err.message);
     } finally {
       setGeneratingNomor(false);
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(''), 4000);
     }
   };
 
@@ -106,6 +107,39 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
     navigator.clipboard.writeText(doc.nomor_uji_berkas);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownloadTemplate = async () => {
+    if (!doc?.nomor_uji_berkas) {
+      alert('Simpan tanggal & generate Nomor BA HUA terlebih dahulu!');
+      return;
+    }
+    setDownloadingTemplate(true);
+    try {
+      const downloadUrl = `/api/generate?stage=uji-administrasi&type=template_ba_uji_admin&id=${unwrappedParams.id}`;
+      const fileRes = await fetch(downloadUrl);
+      if (!fileRes.ok) throw new Error('Gagal men-generate berkas BA HUA');
+
+      const blob = await fileRes.blob();
+      const disposition = fileRes.headers.get('Content-Disposition');
+      let filename = `BA_UJI_ADMIN_${unwrappedParams.id}.docx`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+        if (matches && matches[1]) filename = matches[1].replace(/['"]/g, '');
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(err.message || 'Gagal mengunduh berkas');
+    } finally {
+      setDownloadingTemplate(false);
+    }
   };
 
   const handleUploadArsip = async () => {
@@ -225,33 +259,9 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
       const resData = await res.json();
       
       if(res.ok) {
-        if (!isAmdalnet) {
-          setMessage('Menyiapkan Dokumen BA HUA (Mohon Tunggu)...');
-          
-          try {
-            const downloadUrl = `/api/generate?stage=uji-administrasi&type=template_ba_uji_admin&id=${unwrappedParams.id}`;
-            const fileRes = await fetch(downloadUrl);
-            
-            if (fileRes.ok) {
-              const blob = await fileRes.blob();
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `BA_UJI_ADMIN_${unwrappedParams.id}.docx`;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              window.URL.revokeObjectURL(url);
-            } else {
-              console.error('Gagal generate dokumen BA HUA');
-            }
-          } catch (downloadErr) {
-            console.error('Error saat download otomatis:', downloadErr);
-          }
-        }
-
-        setMessage('Uji Administrasi Berhasil Disimpan!');
-        setTimeout(() => router.push('/perizinan/daftar'), 1500);
+        setDoc(resData.data);
+        setMessage('Data & Nomor BA Uji Administrasi berhasil disimpan! Silakan klik tombol Unduh Berkas BA HUA.');
+        setTimeout(() => setMessage(''), 5000);
       } else {
         alert(`Gagal menyimpan: ${resData.error || 'Server error'}`);
       }
@@ -297,10 +307,22 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
             <p className="font-bold text-on-surface mt-1 uppercase text-sm md:text-base">{doc.nama_kegiatan}</p>
           </div>
           <div>
-            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No Urut / Tahun</div>
-            <p className="font-bold bg-teal-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block mt-1 text-sm shadow-sm hover:shadow-md transition-shadow">
-              #{String(doc.no_urut || doc.id).padStart(3, '0')} / {doc.tahun || '2026'}
-            </p>
+            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No. BA Uji Administrasi (BA HUA)</div>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <p className="font-bold bg-teal-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block text-sm font-mono shadow-sm">
+                {doc.nomor_uji_berkas || 'Belum di-generate'}
+              </p>
+              {doc.nomor_uji_berkas && (
+                <button
+                  type="button"
+                  onClick={handleCopyNomor}
+                  className="px-2.5 py-1 bg-white hover:bg-teal-50 text-teal-900 border border-teal-300 font-bold rounded text-xs uppercase flex items-center gap-1 shadow-sm"
+                >
+                  {copied ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                  {copied ? 'Disalin' : 'Salin'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -370,8 +392,8 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
                 2. Nomor BA Uji Administrasi (BA HUA)
               </label>
               {doc.nomor_uji_berkas ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
+                <div className="space-y-2.5">
+                  <div className="flex flex-wrap items-center gap-2">
                     <div className="flex-1 bg-white border border-teal-300 text-teal-950 font-bold text-sm font-mono rounded-xl px-4 py-3 shadow-sm break-all">
                       {doc.nomor_uji_berkas}
                     </div>
@@ -395,9 +417,20 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
                       <span className="hidden sm:inline">Update Tgl</span>
                     </button>
                   </div>
-                  <p className="text-[11px] text-emerald-800 font-bold">
-                    ✅ Tanggal ({doc.tanggal_uji_berkas}) & Nomor sudah tersimpan.
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <p className="text-[11px] text-emerald-800 font-bold">
+                      ✅ Tanggal ({doc.tanggal_uji_berkas}) & Nomor sudah tersimpan.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleDownloadTemplate}
+                      disabled={downloadingTemplate}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      <Download size={14} />
+                      <span>{downloadingTemplate ? 'Mengunduh...' : 'Unduh Berkas BA HUA (.docx)'}</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <button
@@ -589,10 +622,21 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
           </>
           )}
 
-          <div className="flex justify-end pt-8 border-t border-outline-variant mt-8">
+          <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-outline-variant mt-8">
+            {doc.nomor_uji_berkas && !isAmdalnet && (
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                disabled={downloadingTemplate}
+                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70"
+              >
+                {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
+                Unduh Berkas BA HUA (.docx)
+              </button>
+            )}
             <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-teal-400 hover:bg-teal-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70 disabled:hover:translate-y-0">
               {submitting ? <LottieLoader size={24} /> : <Send size={18} />}
-              Simpan BA HUA
+              Simpan Data BA HUA
             </button>
           </div>
         </form>

@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Printer, FilePlus, ClipboardCheck, Zap, Copy, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Printer, FilePlus, ClipboardCheck, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function DetailRegistrasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -56,9 +56,10 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
         })
       });
       if (res.ok) {
-        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
-        setDoc(newDoc.data);
-        const generated = newDoc.data?.nomor_checklist || '';
+        const resData = await res.json();
+        const updatedDoc = resData.data || (await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json()).data;
+        setDoc(updatedDoc);
+        const generated = updatedDoc?.nomor_checklist || '';
         setInputNomorReg(generated);
         if (generated) {
           try {
@@ -67,7 +68,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
             setTimeout(() => setCopiedNomor(false), 2000);
           } catch {}
         }
-        setMessage('Tanggal berhasil disimpan & Nomor Registrasi berhasil di-generate!');
+        setMessage('Tanggal berhasil disimpan & Nomor Registrasi berhasil di-generate! Silakan unduh berkas registrasi di bawah.');
       } else {
         throw new Error('Gagal menyimpan tanggal & men-generate nomor registrasi');
       }
@@ -75,12 +76,12 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
       alert(err.message);
     } finally {
       setIsGeneratingNomor(false);
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(''), 4000);
     }
   };
 
   const handleCopyNomorReg = async () => {
-    const val = inputNomorReg || doc?.nomor_checklist;
+    const val = doc?.nomor_checklist || inputNomorReg;
     if (!val) return;
     try {
       await navigator.clipboard.writeText(val);
@@ -116,6 +117,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
       a.download = filename;
       document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (e: any) {
       console.error(e);
@@ -167,7 +169,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
         arsip_fisik: updatedArsipFisik,
         tanggal_masuk_dokumen: inputTanggalMasuk,
         nomor_surat_permohonan: inputNomorSurat,
-        nomor_checklist: inputNomorReg
+        nomor_checklist: inputNomorReg || 'AUTO'
       };
 
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
@@ -177,12 +179,13 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
       });
 
       if (res.ok) {
-        alert('Dokumen dan data berhasil disimpan!');
+        const resData = await res.json();
+        const updatedDoc = resData.data || (await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json()).data;
+        setDoc(updatedDoc);
+        setInputNomorReg(updatedDoc?.nomor_checklist || '');
         setFileSuratPermohonan(null);
         setFileRegister(null);
-        // Refresh doc
-        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
-        setDoc(newDoc.data);
+        setMessage('Dokumen dan Nomor Registrasi berhasil disimpan!');
       } else {
         throw new Error('Gagal menyimpan data ke database.');
       }
@@ -190,7 +193,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
       alert(err.message);
     } finally {
       setIsUploadingArsip(false);
-      setMessage('');
+      setTimeout(() => setMessage(''), 4000);
     }
   };
 
@@ -237,7 +240,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
             <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No Checklist Registrasi</div>
             <div className="flex flex-wrap items-center gap-2 mt-1">
               <p className="font-bold bg-slate-200 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block text-sm font-mono shadow-sm">
-                {doc.nomor_checklist || '-'}
+                {doc.nomor_checklist || 'Belum di-generate'}
               </p>
               {doc.nomor_checklist && (
                 <button
@@ -321,54 +324,13 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
           </div>
         </div>
 
-        {/* Download Cetak */}
-        <div className="mb-8 p-6 rounded-2xl border border-slate-200 bg-slate-50">
-          <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase flex items-center gap-2">
-            <Printer size={18} /> Cetak Dokumen Registrasi
-          </h3>
-          <div className="flex flex-col sm:flex-row gap-4">
-            {isAmdalnet ? (
-              <button 
-                type="button"
-                onClick={() => handleDownload('Lembar_Registrasi_Amdalnet')}
-                disabled={downloading === 'Lembar_Registrasi_Amdalnet'}
-                className="w-full sm:w-auto px-6 py-4 bg-emerald-400 hover:bg-emerald-300 text-slate-900 border border-slate-200 font-black rounded-xl text-xs shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
-              >
-                {downloading === 'Lembar_Registrasi_Amdalnet' ? <LottieLoader size={20} /> : <Printer size={16} />}
-                Cetak Lembar Registrasi Amdalnet
-              </button>
-            ) : (
-              <>
-                <button 
-                  type="button"
-                  onClick={() => handleDownload('template_tanda_terima_registrasi')}
-                  disabled={downloading === 'template_tanda_terima_registrasi'}
-                  className="w-full sm:w-auto px-6 py-4 bg-amber-400 hover:bg-amber-300 text-slate-900 border border-slate-200 font-black rounded-xl text-xs shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
-                >
-                  {downloading === 'template_tanda_terima_registrasi' ? <LottieLoader size={20} /> : <Printer size={16} />}
-                  Cetak Tanda Terima
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => handleDownload('template_checklist')}
-                  disabled={downloading === 'template_checklist'}
-                  className="w-full sm:w-auto px-6 py-4 bg-teal-400 hover:bg-teal-300 text-slate-900 border border-slate-200 font-black rounded-xl text-xs shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0"
-                >
-                  {downloading === 'template_checklist' ? <LottieLoader size={20} /> : <Printer size={16} />}
-                  Cetak Checklist
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
         {/* Upload Arsip & Pengaturan Tanggal + Nomor */}
         <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50 space-y-6">
           <div>
             <h3 className="text-sm font-bold text-slate-800 mb-1 uppercase flex items-center gap-2">
-              <ClipboardCheck size={18} /> Pengaturan Nomor & Upload Berkas Digital
+              <ClipboardCheck size={18} /> Pengaturan Nomor & Unduh / Upload Berkas Registrasi
             </h3>
-            <p className="text-xs font-bold text-slate-500 uppercase">Pilih tanggal masuk terlebih dahulu untuk men-generate nomor registrasi, lalu upload dokumen yang sudah ditandatangani.</p>
+            <p className="text-xs font-bold text-slate-500 uppercase">Pilih tanggal masuk terlebih dahulu untuk men-generate nomor registrasi, lalu unduh template berkasnya.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl border border-slate-200 bg-white">
@@ -399,10 +361,10 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
                   className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs uppercase flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50"
                   title="Simpan Tanggal & Generate Nomor Registrasi Otomatis"
                 >
-                  {inputNomorReg ? <RefreshCw size={14} className={isGeneratingNomor ? 'animate-spin' : ''} /> : <Zap size={14} />}
-                  <span>{isGeneratingNomor ? 'Proses...' : inputNomorReg ? 'Update Tgl' : 'Simpan Tgl & Generate'}</span>
+                  {doc.nomor_checklist ? <RefreshCw size={14} className={isGeneratingNomor ? 'animate-spin' : ''} /> : <Zap size={14} />}
+                  <span>{isGeneratingNomor ? 'Proses...' : doc.nomor_checklist ? 'Update Tgl' : 'Simpan Tgl & Generate'}</span>
                 </button>
-                {inputNomorReg && (
+                {doc.nomor_checklist && (
                   <button
                     type="button"
                     onClick={handleCopyNomorReg}
@@ -414,8 +376,60 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
                   </button>
                 )}
               </div>
+              {doc.nomor_checklist && (
+                <p className="text-[11px] text-emerald-700 font-bold">
+                  ✅ Nomor tersimpan: <span className="font-mono">{doc.nomor_checklist}</span>
+                </p>
+              )}
             </div>
           </div>
+
+          {/* Unduh Berkas Template (Hanya muncul setelah nomor disimpan) */}
+          {doc.nomor_checklist ? (
+            <div className="p-5 rounded-xl border border-emerald-300 bg-emerald-50/70 space-y-3">
+              <h4 className="text-xs font-black text-emerald-950 uppercase flex items-center gap-2">
+                <Download size={16} /> Unduh Berkas Template Registrasi (.docx)
+              </h4>
+              <div className="flex flex-col sm:flex-row gap-3">
+                {isAmdalnet ? (
+                  <button 
+                    type="button"
+                    onClick={() => handleDownload('Lembar_Registrasi_Amdalnet')}
+                    disabled={downloading === 'Lembar_Registrasi_Amdalnet'}
+                    className="w-full sm:w-auto px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-70"
+                  >
+                    {downloading === 'Lembar_Registrasi_Amdalnet' ? <LottieLoader size={18} /> : <Download size={15} />}
+                    Unduh Lembar Registrasi Amdalnet (.docx)
+                  </button>
+                ) : (
+                  <>
+                    <button 
+                      type="button"
+                      onClick={() => handleDownload('template_tanda_terima_registrasi')}
+                      disabled={downloading === 'template_tanda_terima_registrasi'}
+                      className="w-full sm:w-auto px-5 py-3 bg-amber-400 hover:bg-amber-300 text-slate-900 border border-amber-500 font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-70"
+                    >
+                      {downloading === 'template_tanda_terima_registrasi' ? <LottieLoader size={18} /> : <Download size={15} />}
+                      Unduh Berkas Tanda Terima (.docx)
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => handleDownload('template_checklist')}
+                      disabled={downloading === 'template_checklist'}
+                      className="w-full sm:w-auto px-5 py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-70"
+                    >
+                      {downloading === 'template_checklist' ? <LottieLoader size={18} /> : <Download size={15} />}
+                      Unduh Berkas Checklist (.docx)
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 rounded-xl border border-amber-200 bg-amber-50 text-xs font-bold text-amber-900">
+              ℹ️ Simpan tanggal & generate Nomor Registrasi terlebih dahulu untuk memunculkan tombol Unduh Berkas Template.
+            </div>
+          )}
 
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-900 uppercase">Nomor Surat Permohonan (Dari Pemrakarsa)</label>
@@ -431,7 +445,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Surat Permohonan */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-900 uppercase">1. Surat Permohonan</label>
+              <label className="block text-xs font-bold text-slate-900 uppercase">1. Surat Permohonan (Scan PDF)</label>
               {(() => {
                 let url = '';
                 try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlSuratPermohonan; } catch(e) {}
@@ -444,7 +458,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
             
             {/* Tanda Terima / Register */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-900 uppercase">2. Lembar Tanda Terima / Registrasi</label>
+              <label className="block text-xs font-bold text-slate-900 uppercase">2. Lembar Tanda Terima / Registrasi (Scan PDF)</label>
               {(() => {
                 let url = '';
                 try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlRegistrasi; } catch(e) {}

@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FilePen, RotateCcw, CheckCircle2, ClipboardList, Zap, Copy, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Loader2, FilePen, RotateCcw, CheckCircle2, ClipboardList, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -13,6 +13,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
   const [loading, setLoading] = useState(true);
   const [submittingAction, setSubmittingAction] = useState<'acc' | 'revisi' | null>(null);
   const [isGeneratingNomor, setIsGeneratingNomor] = useState(false);
+  const [downloadingRev, setDownloadingRev] = useState<string | null>(null);
   const [copiedNomor, setCopiedNomor] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -44,9 +45,10 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
-        setDoc(newDoc.data);
-        const generatedNo = newDoc.data?.[`nomor_revisi_${revisiKe}`];
+        const resData = await res.json();
+        const updatedDoc = resData.data || (await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json()).data;
+        setDoc(updatedDoc);
+        const generatedNo = updatedDoc?.[`nomor_revisi_${revisiKe}`];
         if (generatedNo) {
           try {
             await navigator.clipboard.writeText(generatedNo);
@@ -62,7 +64,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
       alert(err.message);
     } finally {
       setIsGeneratingNomor(false);
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(''), 4000);
     }
   };
 
@@ -73,6 +75,36 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
       setCopiedNomor(true);
       setTimeout(() => setCopiedNomor(false), 2000);
     } catch {}
+  };
+
+  const handleDownloadTemplate = async (targetRev: string = revisiKe) => {
+    setDownloadingRev(targetRev);
+    try {
+      const docUrl = `/api/generate?stage=pemeriksaan-revisi&type=template_ba_pemeriksaan_revisi&id=${unwrappedParams.id}&target_revisi=${targetRev}`;
+      const fileRes = await fetch(docUrl);
+      if (!fileRes.ok) throw new Error('Gagal men-generate berkas BA Pemeriksaan Revisi');
+
+      const blob = await fileRes.blob();
+      const disposition = fileRes.headers.get('Content-Disposition');
+      let filename = `BA_Pemeriksaan_Revisi_${targetRev}_${doc.nama_kegiatan?.replace(/\s+/g, '_') || unwrappedParams.id}.docx`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+        if (matches && matches[1]) filename = matches[1].replace(/['"]/g, '');
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (e: any) {
+      console.error('Download error:', e);
+      alert(e.message || 'Gagal mengunduh berkas');
+    } finally {
+      setDownloadingRev(null);
+    }
   };
 
   useEffect(() => {
@@ -104,7 +136,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
     e.preventDefault();
     
     const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement;
-    const actionType = submitter.value as 'acc' | 'revisi';
+    const actionType = (submitter?.value as 'acc' | 'revisi') || 'revisi';
     
     setSubmittingAction(actionType);
     
@@ -138,8 +170,10 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
       });
       
       if(res.ok) {
-        setMessage(`Revisi berhasil di-${actionType === 'acc' ? 'ACC (Selesai)' : 'Kembalikan untuk Revisi Lanjutan'}.`);
-        setTimeout(() => router.push('/perizinan/daftar'), 1500);
+        const resData = await res.json();
+        setDoc(resData.data);
+        setMessage(`Data & Nomor Revisi ${nomor_revisi} berhasil disimpan (${actionType === 'acc' ? 'ACC / Selesai' : 'Revisi Lanjutan'}). Silakan klik tombol Unduh Berkas BA Revisi.`);
+        setTimeout(() => setMessage(''), 5000);
       }
     } catch (err) {
       console.error(err);
@@ -153,9 +187,9 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
 
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-8 pb-20">
-      <button onClick={() => { if(window.confirm('Tekan Tombol "Simpan" Dahulu agar tersimpan di riwayat perizinan. Yakin ingin kembali?')) router.push('/perizinan/daftar'); }} className="inline-flex items-center gap-2 text-sm text-on-surface font-bold transition-all bg-surface border border-outline-variant px-4 py-2 rounded-xl shadow-sm hover:-translate-y-1 hover:shadow-md uppercase tracking-wide">
+      <Link href="/perizinan/daftar" className="inline-flex items-center gap-2 text-sm text-on-surface font-bold transition-all bg-surface border border-outline-variant px-4 py-2 rounded-xl shadow-sm hover:-translate-y-1 hover:shadow-md uppercase tracking-wide">
         <ArrowLeft size={16} /> Kembali ke Dashboard
-      </button>
+      </Link>
 
       {message && (
         <div className="p-4 bg-emerald-200 text-on-surface rounded-xl shadow-sm hover:shadow-md transition-shadow border border-outline-variant font-bold uppercase tracking-wide">
@@ -182,10 +216,22 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
             <p className="font-bold text-on-surface mt-1 uppercase text-sm md:text-base">{doc.nama_kegiatan}</p>
           </div>
           <div>
-            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No Urut / Tahun</div>
-            <p className="font-bold bg-blue-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block mt-1 text-sm shadow-sm hover:shadow-md transition-shadow">
-              #{String(doc.no_urut || doc.id).padStart(3, '0')} / {doc.tahun || '2026'}
-            </p>
+            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No. BA Pemeriksaan Revisi {revisiKe}</div>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <p className="font-bold bg-blue-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block text-sm font-mono shadow-sm">
+                {currentNomorRevisi || 'Belum di-generate'}
+              </p>
+              {currentNomorRevisi && (
+                <button
+                  type="button"
+                  onClick={handleCopyNomor}
+                  className="px-2.5 py-1 bg-white hover:bg-blue-50 text-blue-900 border border-blue-300 font-bold rounded text-xs uppercase flex items-center gap-1 shadow-sm"
+                >
+                  {copiedNomor ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                  {copiedNomor ? 'Tersalin' : 'Salin'}
+                </button>
+              )}
+            </div>
           </div>
           <div className="md:col-span-2 border-t border-outline-variant pt-4 mt-2">
             <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pemrakarsa</span>
@@ -212,12 +258,23 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                   const nomorRev = doc[`nomor_revisi_${key}`];
                   const tanggal = doc[`tanggal_revisi_${key}`] || (key === '1' ? doc.tanggal_revisi : null);
                   return (
-                    <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 flex justify-between items-center">
+                    <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap justify-between items-center gap-3">
                       <div>
                         <span className="inline-block bg-blue-100 text-blue-800 text-xs font-black px-3 py-1 rounded-full border border-blue-200 mb-2">{label}</span>
                         {nomorRev && <p className="text-xs font-bold text-blue-900 font-mono mb-1">{nomorRev}</p>}
                         {tanggal && <p className="text-sm text-slate-700 font-bold">Pemeriksaan: {new Date(tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
                       </div>
+                      {nomorRev && (
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadTemplate(key)}
+                          disabled={downloadingRev === key}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 uppercase disabled:opacity-50"
+                        >
+                          <Download size={14} />
+                          {downloadingRev === key ? 'Mengunduh...' : `Unduh BA ${label} (.docx)`}
+                        </button>
+                      )}
                     </div>
                   );
                 })}
@@ -263,7 +320,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                 3. Nomor BA Pemeriksaan Revisi {revisiKe} (BA.P.P{revisiKe})
               </label>
               {currentNomorRevisi ? (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="flex-1 bg-white border border-blue-300 text-blue-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
                       {currentNomorRevisi}
@@ -288,9 +345,20 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                       <span className="hidden sm:inline">Update Tgl</span>
                     </button>
                   </div>
-                  <p className="text-[11px] text-emerald-800 font-bold">
-                    ✅ Tanggal ({doc[`tanggal_revisi_${revisiKe}`] || tanggalRevisi}) & Nomor Revisi {revisiKe} sudah tersimpan.
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <p className="text-[11px] text-emerald-800 font-bold">
+                      ✅ Tanggal ({doc[`tanggal_revisi_${revisiKe}`] || tanggalRevisi}) & Nomor Revisi {revisiKe} sudah tersimpan.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadTemplate(revisiKe)}
+                      disabled={downloadingRev === revisiKe}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      <Download size={14} />
+                      <span>{downloadingRev === revisiKe ? 'Mengunduh...' : `Unduh Berkas BA Revisi ${revisiKe} (.docx)`}</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -331,26 +399,33 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                     <tr>
                       <th scope="col" className="p-4 w-12 text-center border-r border-outline-variant">#</th>
                       <th scope="col" className="px-4 py-3 border-r border-outline-variant">Nama Pegawai</th>
-                      
                       <th scope="col" className="px-4 py-3">Jabatan / Kategori</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y-2 divide-slate-900 font-bold">
-                    {daftarPegawai.map((pegawai) => (
-                      <tr key={pegawai.id} className="hover:bg-blue-50 transition-colors">
-                        <td className="w-4 p-4 text-center border-r border-outline-variant">
-                          <input type="checkbox" name="penandatangan[]" value={pegawai.id} 
-                                 className="w-5 h-5 text-blue-500 bg-surface border border-outline-variant rounded focus:ring-blue-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
-                        </td>
-                        <td className="px-4 py-3 font-bold text-on-surface border-r border-outline-variant">{pegawai.nama}</td>
-                        
-                        <td className="px-4 py-3">
-                          <span className="inline-flex items-center px-2.5 py-1 rounded bg-surface-container text-on-surface border border-outline-variant shadow-sm hover:shadow-md transition-shadow text-xs font-bold uppercase tracking-wide">
-                            {pegawai.jabatan_dinas || pegawai.kategori || '-'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {daftarPegawai.map((pegawai) => {
+                      let isChecked = false;
+                      try {
+                        if (doc.penandatangan_revisi) {
+                          const parsed = JSON.parse(doc.penandatangan_revisi);
+                          if (parsed.includes(pegawai.id.toString())) isChecked = true;
+                        }
+                      } catch(e) {}
+                      return (
+                        <tr key={pegawai.id} className="hover:bg-blue-50 transition-colors">
+                          <td className="w-4 p-4 text-center border-r border-outline-variant">
+                            <input type="checkbox" name="penandatangan[]" value={pegawai.id} defaultChecked={isChecked}
+                                   className="w-5 h-5 text-blue-500 bg-surface border border-outline-variant rounded focus:ring-blue-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
+                          </td>
+                          <td className="px-4 py-3 font-bold text-on-surface border-r border-outline-variant">{pegawai.nama}</td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded bg-surface-container text-on-surface border border-outline-variant shadow-sm hover:shadow-md transition-shadow text-xs font-bold uppercase tracking-wide">
+                              {pegawai.jabatan_dinas || pegawai.kategori || '-'}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -359,10 +434,21 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
           </div>
 
           <div className="pt-8 border-t border-outline-variant flex flex-col sm:flex-row justify-end gap-4 mt-8">
+            {currentNomorRevisi && (
+              <button
+                type="button"
+                onClick={() => handleDownloadTemplate(revisiKe)}
+                disabled={downloadingRev === revisiKe}
+                className="w-full sm:w-auto px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 text-sm shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70"
+              >
+                {downloadingRev === revisiKe ? <LottieLoader size={24} /> : <Download size={18} />}
+                Unduh Berkas BA Revisi {revisiKe} (.docx)
+              </button>
+            )}
             <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
               className="w-full sm:w-auto px-6 py-4 bg-error text-on-error hover:bg-error-container text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
               {submittingAction === 'revisi' ? <LottieLoader size={24} /> : <RotateCcw size={18} />}
-              Terbitkan BA Revisi
+              Simpan & Terbitkan BA Revisi
             </button>
 
             <button type="submit" name="action" value="acc" disabled={submittingAction !== null}

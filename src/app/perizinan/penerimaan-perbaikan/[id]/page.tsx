@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FileCheck2, UserCheck, ClipboardCheck, Zap, Copy, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Loader2, FileCheck2, UserCheck, ClipboardCheck, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ id: string }> }) {
@@ -13,6 +13,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [isGeneratingNomor, setIsGeneratingNomor] = useState(false);
+  const [downloadingRev, setDownloadingRev] = useState<string | null>(null);
   const [copiedNomor, setCopiedNomor] = useState(false);
   const [message, setMessage] = useState('');
   const [petugasGerai, setPetugasGerai] = useState<any[]>([]);
@@ -86,9 +87,10 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
-        setDoc(newDoc.data);
-        const generatedNo = revisiKe === '1' ? newDoc.data?.nomor_php : newDoc.data?.[`nomor_php${parseInt(revisiKe, 10) - 1}`];
+        const resData = await res.json();
+        const updatedDoc = resData.data || (await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json()).data;
+        setDoc(updatedDoc);
+        const generatedNo = revisiKe === '1' ? updatedDoc?.nomor_php : updatedDoc?.[`nomor_php${parseInt(revisiKe, 10) - 1}`];
         if (generatedNo) {
           try {
             await navigator.clipboard.writeText(generatedNo);
@@ -104,7 +106,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
       alert(err.message);
     } finally {
       setIsGeneratingNomor(false);
-      setTimeout(() => setMessage(''), 3000);
+      setTimeout(() => setMessage(''), 4000);
     }
   };
 
@@ -115,6 +117,36 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
       setCopiedNomor(true);
       setTimeout(() => setCopiedNomor(false), 2000);
     } catch {}
+  };
+
+  const handleDownloadTemplate = async (targetRev: string = revisiKe) => {
+    setDownloadingRev(targetRev);
+    try {
+      const docUrl = `/api/generate?stage=penerimaan-perbaikan&type=template_tanda_terima_perbaikan&id=${unwrappedParams.id}&target_revisi=${targetRev}`;
+      const fileRes = await fetch(docUrl);
+      if (!fileRes.ok) throw new Error('Gagal men-generate berkas Tanda Terima Perbaikan');
+
+      const blob = await fileRes.blob();
+      const disposition = fileRes.headers.get('Content-Disposition');
+      let filename = `Tanda_Terima_Perbaikan_PHP${targetRev}_${doc.nama_kegiatan?.replace(/\s+/g, '_') || unwrappedParams.id}.docx`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+        if (matches && matches[1]) filename = matches[1].replace(/['"]/g, '');
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (e: any) {
+      console.error('Download error:', e);
+      alert(e.message || 'Gagal mengunduh berkas');
+    } finally {
+      setDownloadingRev(null);
+    }
   };
 
   const handleUploadArsip = async () => {
@@ -185,7 +217,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
     setSubmitting(true);
     
     const formData = new FormData(e.currentTarget);
-    const status_tahapan = 'Penerimaan Perbaikan'; // Ubah dari Selesai / SK menjadi Penerimaan Perbaikan
+    const status_tahapan = 'Penerimaan Perbaikan';
     const nomor_revisi = formData.get('nomor_revisi') as string;
     const tanggal_penyerahan = formData.get('tanggal_penyerahan_perbaikan') as string;
 
@@ -210,21 +242,10 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
       });
       
       if(res.ok) {
-        setMessage('Data Penerimaan Perbaikan Berhasil Disimpan! Sedang mengunduh dokumen...');
-        
-        try {
-          const docUrl = `/api/generate?stage=penerimaan-perbaikan&type=template_tanda_terima_perbaikan&id=${unwrappedParams.id}`;
-          const a = document.createElement('a');
-          a.href = docUrl;
-          a.download = `Tanda_Terima_Perbaikan_${doc.nama_kegiatan?.replace(/\s+/g, '_') || 'KGT'}.docx`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-        } catch (e) {
-          console.error('Download error:', e);
-        }
-
-        setTimeout(() => router.push('/perizinan/daftar'), 2000);
+        const resData = await res.json();
+        setDoc(resData.data);
+        setMessage(`Data & Nomor Penerimaan Perbaikan (PHP ${nomor_revisi}) berhasil disimpan! Silakan klik tombol Unduh Berkas.`);
+        setTimeout(() => setMessage(''), 5000);
       }
     } catch (err) {
       console.error(err);
@@ -271,10 +292,22 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
             <p className="font-bold text-on-surface mt-1 uppercase text-sm md:text-base">{doc.nama_kegiatan}</p>
           </div>
           <div>
-            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No Urut / Tahun</div>
-            <p className="font-bold bg-emerald-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block mt-1 text-sm shadow-sm hover:shadow-md transition-shadow">
-              #{String(doc.no_urut || doc.id).padStart(3, '0')} / {doc.tahun || '2026'}
-            </p>
+            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No. Tanda Terima Perbaikan (PHP {revisiKe})</div>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <p className="font-bold bg-emerald-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block text-sm font-mono shadow-sm">
+                {currentNomorPhp || 'Belum di-generate'}
+              </p>
+              {currentNomorPhp && (
+                <button
+                  type="button"
+                  onClick={handleCopyNomor}
+                  className="px-2.5 py-1 bg-white hover:bg-emerald-50 text-emerald-900 border border-emerald-300 font-bold rounded text-xs uppercase flex items-center gap-1 shadow-sm"
+                >
+                  {copiedNomor ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                  {copiedNomor ? 'Tersalin' : 'Salin'}
+                </button>
+              )}
+            </div>
           </div>
           <div className="md:col-span-2 border-t border-outline-variant pt-4 mt-2">
             <span className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">Pemrakarsa</span>
@@ -313,7 +346,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
                   const urlTandaTerima = arsip[`urlTandaTerimaRevisi_${key}`] || (key === '1' ? arsip.urlTandaTerimaRevisi : '');
                   const tanggalPhp = doc[`tanggal_php_${key}`];
                   return (
-                    <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
+                    <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
                       <div>
                         <span className="inline-block bg-emerald-100 text-emerald-800 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 mb-2">{label}</span>
                         {officialPhp && <p className="text-xs font-bold text-emerald-900 font-mono">{officialPhp}</p>}
@@ -329,11 +362,27 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
                         }
                       </div>
                       <div className="flex flex-col gap-2">
-                        <span className="text-xs font-bold text-slate-500 uppercase">Tanda Terima</span>
+                        <span className="text-xs font-bold text-slate-500 uppercase">Tanda Terima (Scan)</span>
                         {urlTandaTerima
                           ? <a href={urlTandaTerima} target="_blank" className="inline-block bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-200 transition-colors w-fit">Lihat File</a>
                           : <span className="text-xs text-slate-400 italic">Belum diupload</span>
                         }
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <span className="text-xs font-bold text-slate-500 uppercase">Template (.docx)</span>
+                        {officialPhp ? (
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadTemplate(key)}
+                            disabled={downloadingRev === key}
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 w-fit disabled:opacity-50"
+                          >
+                            <Download size={13} />
+                            {downloadingRev === key ? 'Mengunduh...' : `Unduh ${label}`}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-slate-400 italic">Nomor belum ada</span>
+                        )}
                       </div>
                     </div>
                   );
@@ -438,7 +487,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
                 3. Nomor Tanda Terima Perbaikan (PHP {revisiKe})
               </label>
               {currentNomorPhp ? (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="flex-1 bg-white border border-emerald-300 text-emerald-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
                       {currentNomorPhp}
@@ -463,9 +512,20 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
                       <span className="hidden sm:inline">Update Tgl</span>
                     </button>
                   </div>
-                  <p className="text-[11px] text-emerald-800 font-bold">
-                    ✅ Tanggal ({currentTanggalPhp || '-'}) & Nomor PHP {revisiKe} sudah tersimpan.
-                  </p>
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <p className="text-[11px] text-emerald-800 font-bold">
+                      ✅ Tanggal ({currentTanggalPhp || '-'}) & Nomor PHP {revisiKe} sudah tersimpan.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadTemplate(revisiKe)}
+                      disabled={downloadingRev === revisiKe}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      <Download size={14} />
+                      <span>{downloadingRev === revisiKe ? 'Mengunduh...' : `Unduh Berkas Tanda Terima PHP ${revisiKe} (.docx)`}</span>
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -493,7 +553,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <UserCheck className="w-5 h-5 text-on-surface" />
                 </div>
-                <select name="petugas_mpp_id" required defaultValue=""
+                <select name="petugas_mpp_id" required defaultValue={doc.petugas_mpp_id || ''}
                   className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm rounded-xl pl-10 p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none appearance-none font-bold cursor-pointer">
                   <option value="" disabled>-- Pilih Petugas Gerai --</option>
                   {petugasGerai.map(petugas => (
@@ -506,7 +566,18 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
             </div>
           </div>
 
-          <div className="pt-8 border-t border-outline-variant mt-8 flex justify-end">
+          <div className="pt-8 border-t border-outline-variant mt-8 flex flex-col sm:flex-row justify-end gap-4">
+            {currentNomorPhp && (
+              <button
+                type="button"
+                onClick={() => handleDownloadTemplate(revisiKe)}
+                disabled={downloadingRev === revisiKe}
+                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70"
+              >
+                {downloadingRev === revisiKe ? <LottieLoader size={24} /> : <Download size={18} />}
+                Unduh Berkas Tanda Terima PHP {revisiKe} (.docx)
+              </button>
+            )}
             <button type="submit" disabled={submitting} 
               className="w-full sm:w-auto px-10 py-4 bg-secondary text-on-secondary hover:bg-emerald-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0 text-sm">
               {submitting ? <LottieLoader size={24} /> : <FileCheck2 size={18} />}

@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, BookCopy, Info, CheckCircle2, ClipboardCheck } from 'lucide-react';
+import { ArrowLeft, Loader2, BookCopy, Info, CheckCircle2, ClipboardCheck, Download } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -14,6 +14,7 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
   const [petugasList, setPetugasList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [downloadingTemplate, setDownloadingTemplate] = useState(false);
   const [message, setMessage] = useState('');
 
   // State for Arsip Upload
@@ -38,6 +39,35 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
     };
     fetchData();
   }, [unwrappedParams.id]);
+
+  const handleDownloadTemplate = async () => {
+    setDownloadingTemplate(true);
+    try {
+      const downloadUrl = `/api/generate?stage=jilidan&type=template_tanda_terima_jilidan&id=${unwrappedParams.id}`;
+      const fileRes = await fetch(downloadUrl);
+      if (!fileRes.ok) throw new Error('Gagal men-generate berkas Tanda Terima Jilidan');
+
+      const blob = await fileRes.blob();
+      const disposition = fileRes.headers.get('Content-Disposition');
+      let filename = `Tanda_Terima_Jilidan_${unwrappedParams.id}.docx`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+        if (matches && matches[1]) filename = matches[1].replace(/['"]/g, '');
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(err.message || 'Gagal mengunduh berkas');
+    } finally {
+      setDownloadingTemplate(false);
+    }
+  };
 
   const handleUploadArsip = async () => {
     if (!fileDokumenCetak) {
@@ -115,21 +145,10 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
       });
       
       if(res.ok) {
-        setMessage('Menyiapkan Dokumen Tanda Terima...');
-        // Auto Download File
-        const downloadUrl = `/api/generate?stage=jilidan&type=template_tanda_terima_jilidan&id=${unwrappedParams.id}`;
-        
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        
-        setTimeout(() => {
-          document.body.removeChild(a);
-          setMessage('Data Jilidan Berhasil Disimpan!');
-          setTimeout(() => router.push('/perizinan/daftar'), 1500);
-        }, 1000);
+        const resData = await res.json();
+        setDoc(resData.data);
+        setMessage('Data Penerimaan Jilidan berhasil disimpan! Silakan klik tombol Unduh Berkas Tanda Terima Jilidan.');
+        setTimeout(() => setMessage(''), 5000);
       }
     } catch (err) {
       console.error(err);
@@ -172,7 +191,7 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
           <div>
             <h4 className="font-bold text-on-surface uppercase text-sm md:text-base leading-tight">{doc.nama_kegiatan}</h4>
             <p className="text-xs text-on-surface-variant font-bold mt-2 uppercase">{doc.nama_pemrakarsa} • {doc.jenis_dokumen}</p>
-            <p className="text-xs font-bold bg-amber-300 text-on-surface px-2 py-1 rounded border border-outline-variant inline-block mt-2 shadow-sm hover:shadow-md transition-shadow uppercase">No. Registrasi: {doc.nomor_checklist || 'Belum ada'}</p>
+            <p className="text-xs font-bold bg-amber-300 text-on-surface px-2 py-1 rounded border border-outline-variant inline-block mt-2 shadow-sm hover:shadow-md transition-shadow uppercase font-mono">No. Registrasi: {doc.nomor_checklist || 'Belum ada'}</p>
           </div>
         </div>
 
@@ -238,7 +257,18 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
               </div>
             </div>
           </div>
-          <div className="pt-8 border-t border-outline-variant flex justify-end mt-8">
+          <div className="pt-8 border-t border-outline-variant flex flex-col sm:flex-row justify-end gap-4 mt-8">
+            {doc.tanggal_penerimaan_jilidan && (
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                disabled={downloadingTemplate}
+                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 text-sm shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70"
+              >
+                {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
+                Unduh Berkas Tanda Terima Jilidan (.docx)
+              </button>
+            )}
             <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-orange-400 hover:bg-orange-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
               {submitting ? <LottieLoader size={24} /> : <CheckCircle2 size={18} />}
               Simpan Penerimaan Jilidan
