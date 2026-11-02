@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { LayoutDashboard, ShieldCheck, Map, Settings, LogOut, MessageSquareWarning, Archive, PhoneCall } from 'lucide-react'
 import { handleLogout } from '@/app/login/actions'
@@ -8,34 +9,60 @@ import BidiLogo from './BidiLogo'
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isKegiatanOpen, setIsKegiatanOpen] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const kegiatanRef = useRef<HTMLLIElement>(null);
+
+  useEffect(() => {
+    setIsSettingsOpen(false);
+    setIsKegiatanOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setIsSettingsOpen(false);
+      }
+      if (kegiatanRef.current && !kegiatanRef.current.contains(event.target as Node)) {
+        setIsKegiatanOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   if (pathname === '/login') {
     return null;
   }
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border border-slate-200 shadow-md rounded-2xl px-4 sm:px-6 py-3 flex items-center gap-3 sm:gap-4 w-max max-w-[95vw] overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-white border border-slate-200 shadow-md rounded-2xl px-4 sm:px-6 py-3 flex items-center gap-3 sm:gap-4 w-max max-w-[95vw] overflow-visible">
       <div className=""><BidiLogo /></div>
       <div className="h-6 w-1 bg-slate-900 rounded-full"></div>
       <ul className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm font-black text-slate-700 uppercase tracking-widest ">
         {/* Kegiatan Dropdown - Only visible on smaller screens (below lg) */}
-        <li className="relative group block lg:hidden">
-          <button className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-200 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
+        <li ref={kegiatanRef} className="relative group block lg:hidden">
+          <button
+            type="button"
+            onClick={() => setIsKegiatanOpen((prev) => !prev)}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-200 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all"
+          >
             <LayoutDashboard size={18} />
             <span className="hidden sm:inline">KEGIATAN</span>
           </button>
-          <div className="absolute left-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-            <div className="bg-white border border-slate-200 rounded-xl shadow-md flex flex-col overflow-hidden">
-              <Link href="/perizinan/daftar" className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-amber-100 border-b-2 border-slate-200 flex items-center gap-2">
+          <div className={`absolute left-0 top-full pt-2 w-48 transition-all z-50 ${isKegiatanOpen ? 'opacity-100 visible' : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'}`}>
+            <div className="bg-white border border-slate-200 rounded-xl shadow-lg flex flex-col overflow-hidden">
+              <Link href="/perizinan/daftar" onClick={() => setIsKegiatanOpen(false)} className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-amber-100 border-b-2 border-slate-200 flex items-center gap-2">
                 <LayoutDashboard size={16} /> Perizinan
               </Link>
-              <Link href="/pengawasan" className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-rose-100 border-b-2 border-slate-200 flex items-center gap-2">
+              <Link href="/pengawasan" onClick={() => setIsKegiatanOpen(false)} className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-rose-100 border-b-2 border-slate-200 flex items-center gap-2">
                 <ShieldCheck size={16} /> Pengawasan
               </Link>
-              <Link href="/pengaduan" className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-fuchsia-100 border-b-2 border-slate-200 flex items-center gap-2">
+              <Link href="/pengaduan" onClick={() => setIsKegiatanOpen(false)} className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-fuchsia-100 border-b-2 border-slate-200 flex items-center gap-2">
                 <MessageSquareWarning size={16} /> Pengaduan
               </Link>
-              <Link href="/hotline" className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-emerald-100 flex items-center gap-2">
+              <Link href="/hotline" onClick={() => setIsKegiatanOpen(false)} className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-emerald-100 flex items-center gap-2">
                 <PhoneCall size={16} /> Hotline
               </Link>
             </div>
@@ -81,25 +108,30 @@ export default function Navbar() {
         </li>
       </ul>
       <div className="h-6 w-1 bg-slate-900 rounded-full hidden sm:block"></div>
-      <div className="relative group hidden sm:block ">
-        <button className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 shadow-sm transition-all" title="Pengaturan">
+      <div ref={settingsRef} className="relative group hidden sm:block ">
+        <button
+          type="button"
+          onClick={() => setIsSettingsOpen((prev) => !prev)}
+          className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 shadow-sm transition-all"
+          title="Pengaturan"
+        >
           <Settings size={18} className="text-slate-900" />
         </button>
-        <div className="absolute right-0 top-full pt-2 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-          <div className="bg-white border border-slate-200 rounded-xl shadow-md flex flex-col overflow-hidden">
-            <Link href="/pengaturan/tim-penilai" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
+        <div className={`absolute right-0 top-full pt-2 w-48 transition-all z-50 ${isSettingsOpen ? 'opacity-100 visible' : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'}`}>
+          <div className="bg-white border border-slate-200 rounded-xl shadow-lg flex flex-col overflow-hidden">
+            <Link href="/pengaturan/tim-penilai" onClick={() => setIsSettingsOpen(false)} className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
               Tim Penilai
             </Link>
-            <Link href="/pengaturan/tim-pengawas" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
+            <Link href="/pengaturan/tim-pengawas" onClick={() => setIsSettingsOpen(false)} className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
               Tim Pengawas
             </Link>
-            <Link href="/pengaturan/tim-pengaduan" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
+            <Link href="/pengaturan/tim-pengaduan" onClick={() => setIsSettingsOpen(false)} className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
               Tim Pengaduan
             </Link>
-            <Link href="/pengaturan/anggota-bidang" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
+            <Link href="/pengaturan/anggota-bidang" onClick={() => setIsSettingsOpen(false)} className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100 border-b-2 border-slate-200">
               Anggota Bidang
             </Link>
-            <Link href="/pengaturan/petugas-mpp" className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100">
+            <Link href="/pengaturan/petugas-mpp" onClick={() => setIsSettingsOpen(false)} className="px-4 py-3 text-sm font-bold text-slate-900 hover:bg-emerald-100">
               Petugas MPP
             </Link>
           </div>
@@ -114,4 +146,3 @@ export default function Navbar() {
     </nav>
   )
 }
-
