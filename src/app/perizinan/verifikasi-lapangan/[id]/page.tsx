@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Send, Loader2, MapPinned, ClipboardCheck } from 'lucide-react';
+import { ArrowLeft, MapPin, Send, Loader2, MapPinned, ClipboardCheck, Zap, Copy, Check, RefreshCw } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function VerlapPage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +12,8 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
   const [doc, setDoc] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isGeneratingNomor, setIsGeneratingNomor] = useState(false);
+  const [copiedNomor, setCopiedNomor] = useState(false);
   const [message, setMessage] = useState('');
   const [daftarPegawai, setDaftarPegawai] = useState<any[]>([]);
 
@@ -31,6 +33,48 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
       setLoading(false);
     });
   }, [unwrappedParams.id]);
+
+  const handleGenerateNomor = async () => {
+    setIsGeneratingNomor(true);
+    setMessage('Men-generate Nomor BA Verifikasi Lapangan...');
+    try {
+      const dateInput = document.querySelector('input[name="tanggal_verlap"]') as HTMLInputElement;
+      const tgl = dateInput?.value || doc?.tanggal_verlap || new Date().toISOString().split('T')[0];
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nomor_ba_verlap: 'AUTO', tanggal_verlap: tgl })
+      });
+      if (res.ok) {
+        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
+        setDoc(newDoc.data);
+        if (newDoc.data?.nomor_ba_verlap) {
+          try {
+            await navigator.clipboard.writeText(newDoc.data.nomor_ba_verlap);
+            setCopiedNomor(true);
+            setTimeout(() => setCopiedNomor(false), 2000);
+          } catch {}
+        }
+        setMessage('Nomor BA Verlap berhasil di-generate & disalin ke clipboard!');
+      } else {
+        throw new Error('Gagal men-generate nomor');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsGeneratingNomor(false);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  const handleCopyNomor = async () => {
+    if (!doc?.nomor_ba_verlap) return;
+    try {
+      await navigator.clipboard.writeText(doc.nomor_ba_verlap);
+      setCopiedNomor(true);
+      setTimeout(() => setCopiedNomor(false), 2000);
+    } catch {}
+  };
 
   const handleUploadArsip = async () => {
     if (!fileBaVerlap) {
@@ -211,6 +255,50 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="md:col-span-2 border border-amber-200 bg-amber-50 p-4 rounded-xl shadow-sm">
+              <label className="block text-sm font-bold text-amber-900 mb-2 uppercase">Nomor BA Verifikasi Lapangan (BA Verlap)</label>
+              {doc.nomor_ba_verlap ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex-1 bg-white border border-amber-200 text-amber-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono">
+                    {doc.nomor_ba_verlap}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyNomor}
+                    className="px-4 py-3 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
+                    title="Salin Nomor"
+                  >
+                    {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                    {copiedNomor ? 'Tersalin' : 'Salin'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGenerateNomor}
+                    disabled={isGeneratingNomor}
+                    className="px-3 py-3 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1"
+                    title="Perbarui Bulan Nomor Sesuai Tanggal"
+                  >
+                    <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleGenerateNomor}
+                    disabled={isGeneratingNomor}
+                    className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Zap size={16} />
+                    {isGeneratingNomor ? 'Men-generate...' : 'Generate Nomor Dahulu'}
+                  </button>
+                  <span className="text-xs font-bold text-amber-800/80">
+                    * Klik untuk booking & menyalin nomor BA Verlap sebelum mengisi form lengkap.
+                  </span>
+                </div>
+              )}
+            </div>
+
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Verifikasi Lapangan <span className="text-error">*</span></label>
               <input type="date" name="tanggal_verlap" required defaultValue={doc.tanggal_verlap || new Date().toISOString().split('T')[0]}

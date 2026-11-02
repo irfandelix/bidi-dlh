@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, CheckCircle2, Award, BookCopy, FileText, ClipboardCheck } from 'lucide-react';
+import { ArrowLeft, Loader2, CheckCircle2, Award, BookCopy, FileText, ClipboardCheck, Zap, Copy, Check } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function FinalisasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +12,9 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
   const [doc, setDoc] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isGeneratingNomor, setIsGeneratingNomor] = useState(false);
+  const [copiedNomor, setCopiedNomor] = useState(false);
+  const [nomorRisalah, setNomorRisalah] = useState('');
   const [message, setMessage] = useState('');
 
   // State for Arsip Upload
@@ -24,9 +27,54 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
       .then(res => res.json())
       .then(res => {
         setDoc(res.data);
+        setNomorRisalah(res.data?.nomor_risalah || '');
         setLoading(false);
       });
   }, [unwrappedParams.id]);
+
+  const handleGenerateNomorRisalah = async () => {
+    setIsGeneratingNomor(true);
+    setMessage('Men-generate Nomor Risalah (RPD)...');
+    try {
+      const dateInput = document.querySelector('input[name="tanggal_risalah"]') as HTMLInputElement;
+      const tgl = dateInput?.value || doc?.tanggal_risalah || new Date().toISOString().split('T')[0];
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nomor_risalah: 'AUTO', tanggal_risalah: tgl })
+      });
+      if (res.ok) {
+        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
+        setDoc(newDoc.data);
+        const generated = newDoc.data?.nomor_risalah || '';
+        setNomorRisalah(generated);
+        if (generated) {
+          try {
+            await navigator.clipboard.writeText(generated);
+            setCopiedNomor(true);
+            setTimeout(() => setCopiedNomor(false), 2000);
+          } catch {}
+        }
+        setMessage('Nomor Risalah (RPD) berhasil di-generate & disalin ke clipboard!');
+      } else {
+        throw new Error('Gagal men-generate nomor RPD');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsGeneratingNomor(false);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  const handleCopyNomorRisalah = async () => {
+    if (!nomorRisalah) return;
+    try {
+      await navigator.clipboard.writeText(nomorRisalah);
+      setCopiedNomor(true);
+      setTimeout(() => setCopiedNomor(false), 2000);
+    } catch {}
+  };
 
   const handleUploadArsip = async () => {
     if (!fileRpd && !fileSk) {
@@ -97,7 +145,7 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
 
     const payload = {
       tanggal_risalah: formData.get('tanggal_risalah'),
-      nomor_risalah: formData.get('nomor_risalah'),
+      nomor_risalah: formData.get('nomor_risalah') || 'AUTO',
       nomor_sk: formData.get('nomor_sk'),
       tanggal_penyerahan_sk: tglSK,
       arsip_fisik: formData.get('lokasi_arsip'),
@@ -229,40 +277,27 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
 
               <div className="relative z-10">
                 <label className="block text-xs font-bold text-on-surface mb-2 uppercase tracking-wider">Nomor Risalah (RPD)</label>
-                <div className="flex gap-2">
-                  <input type="text" id="nomor_risalah_input" name="nomor_risalah" defaultValue={doc.nomor_risalah || ''} placeholder="Klik generate..."
+                <div className="flex flex-wrap gap-2">
+                  <input type="text" id="nomor_risalah_input" name="nomor_risalah" value={nomorRisalah} onChange={(e) => setNomorRisalah(e.target.value)} placeholder="Klik generate..."
                     readOnly
-                    className="w-full bg-surface-container-low border border-outline-variant text-on-surface-variant text-sm font-bold rounded-xl p-3 focus:outline-none cursor-not-allowed" />
+                    className="flex-1 min-w-[200px] bg-surface-container-low border border-outline-variant text-on-surface-variant text-sm font-bold font-mono rounded-xl p-3 focus:outline-none cursor-not-allowed" />
                   <button type="button" 
-                    onClick={() => {
-                      const input = document.getElementById('nomor_risalah_input') as HTMLInputElement;
-                      const dateInput = document.querySelector('input[name="tanggal_risalah"]') as HTMLInputElement;
-                      if (input) {
-                        const dateVal = dateInput ? dateInput.value : '';
-                        const dateObj = dateVal ? new Date(dateVal) : new Date();
-                        const bulan = dateObj.getMonth() + 1;
-                        const jenisAcronym = ({
-  'SPPL': 'SPPL', 'UKLUPL': 'UKLUPL', 'UKL-UPL': 'UKLUPL',
-  'Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan': 'RT.INT.LB3',
-  'RINTEK LB3': 'RT.LB3', 'PERTEK AIR LIMBAH': 'ST.AL', 'PERTEK EMISI': 'ST.EM',
-  'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
-  'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
-  'DELH': 'DELH', 'AMDAL': 'AMDAL',
-  'Permohonan Arahan': 'ARH',
-  'Integrasi RINTEK LB3 ke Persetujuan Lingkungan': 'INT.LB3',
-  'INTEGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
-  'INTERGRASI RINTEK LB3 KE PERSETUJUAN LINGKUNGAN': 'INT.LB3',
-  'Permohonan Integrasi RINTEK LB3': 'INT.LB3',
-  'Permohonan Intergrasi RINTEK LB3': 'INT.LB3',
-  'Permohonan Perubahan Dokumen Lingkungan': 'PDL',
-  'Permohonan Perubahan Lingkungan': 'PPL'
-} as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
-                        input.value = `600.4.5/${String(doc.no_urut || doc.id).padStart(3, '0')}.${bulan}/17/RPD.${jenisAcronym}/${doc.tahun || dateObj.getFullYear()}`;
-                      }
-                    }}
-                    className="px-4 py-3 bg-indigo-200 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all uppercase tracking-wider text-xs whitespace-nowrap flex items-center gap-2">
-                    <FileText size={16} /> Generate
+                    onClick={handleGenerateNomorRisalah}
+                    disabled={isGeneratingNomor}
+                    className="px-4 py-3 bg-indigo-200 hover:bg-indigo-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-all uppercase tracking-wider text-xs whitespace-nowrap flex items-center gap-1.5 disabled:opacity-50">
+                    <Zap size={15} /> {isGeneratingNomor ? 'Proses...' : 'Generate'}
                   </button>
+                  {nomorRisalah && (
+                    <button
+                      type="button"
+                      onClick={handleCopyNomorRisalah}
+                      className="px-3 py-3 bg-white hover:bg-slate-100 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm transition-all uppercase text-xs flex items-center gap-1"
+                      title="Salin Nomor Risalah"
+                    >
+                      {copiedNomor ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
+                      {copiedNomor ? 'Tersalin' : 'Salin'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

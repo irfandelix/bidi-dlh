@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Users, Loader2, ClipboardCheck, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Users, Loader2, ClipboardCheck, RotateCcw, CheckCircle2, Zap, Copy, Check, RefreshCw } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +12,8 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
   const [doc, setDoc] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submittingAction, setSubmittingAction] = useState<'acc' | 'revisi' | null>(null);
+  const [isGeneratingNomor, setIsGeneratingNomor] = useState(false);
+  const [copiedNomor, setCopiedNomor] = useState(false);
   const [message, setMessage] = useState('');
 
   const [daftarPegawai, setDaftarPegawai] = useState<any[]>([]);
@@ -24,25 +26,45 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
   const [isUploadingBaSidang, setIsUploadingBaSidang] = useState(false);
 
   const handleGenerateNomor = async () => {
+    setIsGeneratingNomor(true);
     setMessage('Men-generate Nomor BA Pemeriksaan...');
     try {
+      const dateInput = document.querySelector('input[name="tanggal_pemeriksaan"]') as HTMLInputElement;
+      const tgl = dateInput?.value || doc?.tanggal_pemeriksaan || new Date().toISOString().split('T')[0];
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nomor_ba_pemeriksaan: doc.nomor_ba_pemeriksaan || 'AUTO' })
+        body: JSON.stringify({ nomor_ba_pemeriksaan: 'AUTO', tanggal_pemeriksaan: tgl })
       });
       if (res.ok) {
         const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
         setDoc(newDoc.data);
-        setMessage('Nomor berhasil di-generate!');
+        if (newDoc.data?.nomor_ba_pemeriksaan) {
+          try {
+            await navigator.clipboard.writeText(newDoc.data.nomor_ba_pemeriksaan);
+            setCopiedNomor(true);
+            setTimeout(() => setCopiedNomor(false), 2000);
+          } catch {}
+        }
+        setMessage('Nomor BA Pemeriksaan berhasil di-generate & disalin ke clipboard!');
       } else {
         throw new Error('Gagal men-generate nomor');
       }
-    } catch (err) {
+    } catch (err: any) {
       alert(err.message);
     } finally {
+      setIsGeneratingNomor(false);
       setTimeout(() => setMessage(''), 3000);
     }
+  };
+
+  const handleCopyNomor = async () => {
+    if (!doc?.nomor_ba_pemeriksaan) return;
+    try {
+      await navigator.clipboard.writeText(doc.nomor_ba_pemeriksaan);
+      setCopiedNomor(true);
+      setTimeout(() => setCopiedNomor(false), 2000);
+    } catch {}
   };
 
   useEffect(() => {
@@ -263,8 +285,6 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
       <button onClick={() => { if(window.confirm('Tekan Tombol "Simpan" Dahulu agar tersimpan di riwayat perizinan. Yakin ingin kembali?')) router.push('/perizinan/daftar'); }} className="inline-flex items-center gap-2 text-sm text-on-surface font-bold transition-all bg-surface border border-outline-variant px-4 py-2 rounded-xl shadow-sm hover:-translate-y-1 hover:shadow-md uppercase tracking-wide">
         <ArrowLeft size={16} /> Kembali ke Dashboard
       </button>
-      
-      {/* existing JSX... */}
 
       {message && (
         <div className="p-4 bg-emerald-200 text-on-surface rounded-xl shadow-sm hover:shadow-md transition-shadow border border-outline-variant font-bold uppercase tracking-wide">
@@ -391,15 +411,46 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
             <div className="md:col-span-2 border border-indigo-200 bg-indigo-50 p-4 rounded-xl shadow-sm mb-2">
-              <label className="block text-sm font-bold text-indigo-900 mb-2 uppercase">Nomor BA Pemeriksaan</label>
+              <label className="block text-sm font-bold text-indigo-900 mb-2 uppercase">Nomor BA Pemeriksaan Substansi</label>
               {doc.nomor_ba_pemeriksaan ? (
-                <div className="w-full bg-white border border-indigo-200 text-indigo-900 font-bold text-sm rounded-xl px-4 py-3 shadow-sm">
-                  {doc.nomor_ba_pemeriksaan}
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex-1 bg-white border border-indigo-200 text-indigo-900 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono">
+                    {doc.nomor_ba_pemeriksaan}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyNomor}
+                    className="px-4 py-3 bg-white hover:bg-indigo-100 text-indigo-900 border border-indigo-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
+                    title="Salin Nomor"
+                  >
+                    {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                    {copiedNomor ? 'Tersalin' : 'Salin'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGenerateNomor}
+                    disabled={isGeneratingNomor}
+                    className="px-3 py-3 bg-indigo-100 hover:bg-indigo-200 text-indigo-900 border border-indigo-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1"
+                    title="Perbarui Bulan Nomor Sesuai Tanggal"
+                  >
+                    <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
+                  </button>
                 </div>
               ) : (
-                <button type="button" onClick={handleGenerateNomor} className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase">
-                  Generate Nomor Dahulu
-                </button>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleGenerateNomor}
+                    disabled={isGeneratingNomor}
+                    className="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Zap size={16} />
+                    {isGeneratingNomor ? 'Men-generate...' : 'Generate Nomor Dahulu'}
+                  </button>
+                  <span className="text-xs font-bold text-indigo-800/80">
+                    * Klik untuk booking & menyalin nomor BA Pemeriksaan sebelum mengisi form lengkap.
+                  </span>
+                </div>
               )}
             </div>
             <div>
@@ -461,13 +512,11 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
             <p className="text-[11px] text-on-surface-variant mt-3 font-bold uppercase">* Kepala Bidang akan otomatis menjadi Penandatangan Utama (Kiri Bawah).</p>
           </div>
 
-
-
-            <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
-              className="w-full px-8 py-4 bg-error text-on-error hover:bg-error-container text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
-              {submittingAction !== null ? <LottieLoader size={24} /> : <RotateCcw size={18} />}
-              Simpan BA Rapat & Kembalikan Ke Pemrakarsa
-            </button>
+          <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
+            className="w-full px-8 py-4 bg-error text-on-error hover:bg-error-container text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
+            {submittingAction !== null ? <LottieLoader size={24} /> : <RotateCcw size={18} />}
+            Simpan BA Rapat & Kembalikan Ke Pemrakarsa
+          </button>
         </form>
       </div>
     </div>

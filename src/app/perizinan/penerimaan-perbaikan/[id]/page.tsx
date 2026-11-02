@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FileCheck2, UserCheck, ClipboardCheck } from 'lucide-react';
+import { ArrowLeft, Loader2, FileCheck2, UserCheck, ClipboardCheck, Zap, Copy, Check, RefreshCw } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +12,8 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
   const [doc, setDoc] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isGeneratingNomor, setIsGeneratingNomor] = useState(false);
+  const [copiedNomor, setCopiedNomor] = useState(false);
   const [message, setMessage] = useState('');
   const [petugasGerai, setPetugasGerai] = useState<any[]>([]);
 
@@ -58,6 +60,56 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
     setFileTandaTerimaRevisi(null);
     setFileSuratPerbaikan(null);
   }, [revisiKe, doc]);
+
+  const currentNomorPhp = revisiKe === '1' ? doc?.nomor_php : doc?.[`nomor_php${parseInt(revisiKe, 10) - 1}`];
+
+  const handleGenerateNomor = async () => {
+    setIsGeneratingNomor(true);
+    setMessage(`Men-generate Nomor Tanda Terima Perbaikan (PHP ${revisiKe})...`);
+    try {
+      const dateInput = document.querySelector('input[name="tanggal_penyerahan_perbaikan"]') as HTMLInputElement;
+      const tgl = dateInput?.value || doc?.[`tanggal_php_${revisiKe}`] || new Date().toISOString().split('T')[0];
+      const payload: any = {
+        nomor_php: 'AUTO',
+        revisi_ke: revisiKe,
+        [`tanggal_php_${revisiKe}`]: tgl,
+      };
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
+        setDoc(newDoc.data);
+        const generatedNo = revisiKe === '1' ? newDoc.data?.nomor_php : newDoc.data?.[`nomor_php${parseInt(revisiKe, 10) - 1}`];
+        if (generatedNo) {
+          try {
+            await navigator.clipboard.writeText(generatedNo);
+            setCopiedNomor(true);
+            setTimeout(() => setCopiedNomor(false), 2000);
+          } catch {}
+        }
+        setMessage(`Nomor PHP ${revisiKe} berhasil di-generate & disalin ke clipboard!`);
+      } else {
+        throw new Error('Gagal men-generate nomor PHP');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsGeneratingNomor(false);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  const handleCopyNomor = async () => {
+    if (!currentNomorPhp) return;
+    try {
+      await navigator.clipboard.writeText(currentNomorPhp);
+      setCopiedNomor(true);
+      setTimeout(() => setCopiedNomor(false), 2000);
+    } catch {}
+  };
 
   const handleUploadArsip = async () => {
     let arsipFisik: any = {};
@@ -132,6 +184,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
     const tanggal_penyerahan = formData.get('tanggal_penyerahan_perbaikan') as string;
 
     const payload: any = {
+      nomor_php: 'AUTO',
       revisi_ke: nomor_revisi,
       petugas_mpp_id: formData.get('petugas_mpp_id'),
       status_tahapan, 
@@ -230,7 +283,8 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
           
           const revisiNames: Record<string, string> = { '1': 'PHP 1', '2': 'PHP 2', '3': 'PHP 3', '4': 'PHP 4' };
           const revisiHistory = Object.entries(revisiNames).filter(([key]) => {
-            const hasData = arsip[`nomorSuratPerbaikan_${key}`] || arsip[`tanggalSuratPerbaikan_${key}`] || arsip[`urlSuratPerbaikan_${key}`] || arsip[`urlTandaTerimaRevisi_${key}`] || doc[`tanggal_php_${key}`];
+            const officialPhp = key === '1' ? doc?.nomor_php : doc?.[`nomor_php${parseInt(key, 10) - 1}`];
+            const hasData = officialPhp || arsip[`nomorSuratPerbaikan_${key}`] || arsip[`tanggalSuratPerbaikan_${key}`] || arsip[`urlSuratPerbaikan_${key}`] || arsip[`urlTandaTerimaRevisi_${key}`] || doc[`tanggal_php_${key}`];
             if (key === '1' && !hasData) {
               return arsip['nomorSuratPerbaikan'] || arsip['tanggalSuratPerbaikan'] || arsip['urlSuratPerbaikan'] || arsip['urlTandaTerimaRevisi'] || doc['tanggal_php_1'];
             }
@@ -246,6 +300,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
               </h3>
               <div className="space-y-3">
                 {revisiHistory.map(([key, label]) => {
+                  const officialPhp = key === '1' ? doc?.nomor_php : doc?.[`nomor_php${parseInt(key, 10) - 1}`];
                   const nomor = arsip[`nomorSuratPerbaikan_${key}`] || (key === '1' ? arsip.nomorSuratPerbaikan : '');
                   const tanggal = arsip[`tanggalSuratPerbaikan_${key}`] || (key === '1' ? arsip.tanggalSuratPerbaikan : '');
                   const urlSurat = arsip[`urlSuratPerbaikan_${key}`] || (key === '1' ? arsip.urlSuratPerbaikan : '');
@@ -255,7 +310,8 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
                     <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
                       <div>
                         <span className="inline-block bg-emerald-100 text-emerald-800 text-xs font-black px-3 py-1 rounded-full border border-emerald-200 mb-2">{label}</span>
-                        {nomor && <p className="text-xs font-bold text-slate-700 uppercase">{nomor}</p>}
+                        {officialPhp && <p className="text-xs font-bold text-emerald-900 font-mono">{officialPhp}</p>}
+                        {nomor && <p className="text-xs font-bold text-slate-700 uppercase">Surat: {nomor}</p>}
                         {tanggal && <p className="text-xs text-slate-500 mt-0.5">{new Date(tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
                         {tanggalPhp && <p className="text-xs text-slate-500 mt-0.5">Penyerahan: {new Date(tanggalPhp).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
                       </div>
@@ -348,6 +404,52 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="md:col-span-2 border border-emerald-200 bg-emerald-50 p-4 rounded-xl shadow-sm">
+              <label className="block text-sm font-bold text-emerald-900 mb-2 uppercase">
+                Nomor Tanda Terima Perbaikan (PHP {revisiKe})
+              </label>
+              {currentNomorPhp ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex-1 bg-white border border-emerald-200 text-emerald-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono">
+                    {currentNomorPhp}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyNomor}
+                    className="px-4 py-3 bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
+                    title="Salin Nomor"
+                  >
+                    {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                    {copiedNomor ? 'Tersalin' : 'Salin'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGenerateNomor}
+                    disabled={isGeneratingNomor}
+                    className="px-3 py-3 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1"
+                    title="Perbarui Bulan Nomor Sesuai Tanggal"
+                  >
+                    <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleGenerateNomor}
+                    disabled={isGeneratingNomor}
+                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Zap size={16} />
+                    {isGeneratingNomor ? 'Men-generate...' : `Generate Nomor PHP ${revisiKe} Dahulu`}
+                  </button>
+                  <span className="text-xs font-bold text-emerald-800/80">
+                    * Klik untuk booking & menyalin nomor PHP {revisiKe} sebelum menyimpan form.
+                  </span>
+                </div>
+              )}
+            </div>
+
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Penerimaan Revisi Ke-</label>
               <select 

@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Calendar
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -21,6 +21,108 @@ export default function DaftarPerizinanPage() {
   const [filterTahun, setFilterTahun] = useState('');
   const [filterJenis, setFilterJenis] = useState('');
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
+
+  // Quick Nomor Generation & Copy states inside Modal
+  const [quickDate, setQuickDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [generatingStageId, setGeneratingStageId] = useState<number | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [quickFeedback, setQuickFeedback] = useState<string>('');
+
+  const handleCopyText = (text: string, key: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => {
+      setCopiedKey(prev => (prev === key ? null : prev));
+    }, 2000);
+  };
+
+  const getStageDocNumber = (doc: any, stageId: number): string => {
+    if (!doc) return '';
+    if (stageId === 1) return doc.nomor_checklist || '';
+    if (stageId === 2) return doc.nomor_uji_berkas || '';
+    if (stageId === 3) return doc.nomor_ba_verlap || '';
+    if (stageId === 4) return doc.nomor_ba_pemeriksaan || '';
+    if (stageId === 6) return doc.nomor_php || '';
+    if (stageId === 7) {
+      return doc.nomor_revisi_5 || doc.nomor_revisi_4 || doc.nomor_revisi_3 || doc.nomor_revisi_2 || doc.nomor_revisi_1 || doc.nomor_revisi || '';
+    }
+    if (stageId === 9) {
+      return doc.nomor_php4 || doc.nomor_php3 || doc.nomor_php2 || doc.nomor_php1 || '';
+    }
+    if (stageId === 10) {
+      return doc.nomor_risalah || doc.nomor_sk || '';
+    }
+    return '';
+  };
+
+  const handleQuickGenerateNomor = async (stageId: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!selectedDoc || generatingStageId !== null) return;
+
+    setGeneratingStageId(stageId);
+    setQuickFeedback('');
+
+    const tgl = quickDate || new Date().toISOString().split('T')[0];
+    let payload: Record<string, any> = {};
+
+    if (stageId === 1) {
+      payload = { nomor_checklist: 'AUTO', tanggal_masuk_dokumen: selectedDoc.tanggal_masuk_dokumen || tgl };
+    } else if (stageId === 2) {
+      payload = { nomor_uji_berkas: 'AUTO', tanggal_uji_berkas: selectedDoc.tanggal_uji_berkas || tgl };
+    } else if (stageId === 3) {
+      payload = { nomor_ba_verlap: 'AUTO', tanggal_verlap: selectedDoc.tanggal_verlap || tgl };
+    } else if (stageId === 4) {
+      payload = { nomor_ba_pemeriksaan: 'AUTO', tanggal_pemeriksaan: selectedDoc.tanggal_pemeriksaan || tgl };
+    } else if (stageId === 6) {
+      payload = { nomor_php: 'AUTO', revisi_ke: '1', tanggal_php_1: selectedDoc.tanggal_php_1 || tgl };
+    } else if (stageId === 7) {
+      const rev = String(selectedDoc.revisi_ke || '1');
+      payload = {
+        generate_nomor_revisi: true,
+        revisi_ke: rev,
+        [`tanggal_revisi_${rev}`]: selectedDoc[`tanggal_revisi_${rev}`] || tgl
+      };
+    } else if (stageId === 9) {
+      payload = { nomor_php: 'AUTO', revisi_ke: '2', tanggal_php_2: selectedDoc.tanggal_php_2 || tgl };
+    } else if (stageId === 10) {
+      payload = { nomor_risalah: 'AUTO', tanggal_risalah: selectedDoc.tanggal_risalah || tgl };
+    } else {
+      setGeneratingStageId(null);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/perizinan/${selectedDoc.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const resData = await res.json();
+      if (!res.ok) throw new Error(resData.error || 'Gagal men-generate nomor');
+
+      const updatedDoc = resData.data;
+      setSelectedDoc(updatedDoc);
+      setDocs(prev => prev.map(d => (d.id === updatedDoc.id ? updatedDoc : d)));
+
+      const generatedNumber = getStageDocNumber(updatedDoc, stageId);
+      if (generatedNumber) {
+        navigator.clipboard.writeText(generatedNumber);
+        setCopiedKey(`stage-${stageId}`);
+        setQuickFeedback(`Nomor ${generatedNumber} berhasil dibuat & disalin!`);
+        setTimeout(() => setCopiedKey(null), 2500);
+        setTimeout(() => setQuickFeedback(''), 4000);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Gagal men-generate nomor');
+    } finally {
+      setGeneratingStageId(null);
+    }
+  };
 
   const toggleRow = (id: number) => {
     setExpandedRows(prev => prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]);
@@ -83,14 +185,16 @@ export default function DaftarPerizinanPage() {
       }
     } catch (e) {}
 
+    const nomorRevisiStr = d.nomor_revisi_5 || d.nomor_revisi_4 || d.nomor_revisi_3 || d.nomor_revisi_2 || d.nomor_revisi_1 || d.nomor_revisi;
+
     const sections = [
       { title: '1. Dokumen Lingkungan Final', number: fisik?.noDokumenCetak, url: fisik?.urlDokumenCetak, status: fisik?.dokumenCetak || fisik?.urlDokumenCetak },
-      { title: '2. PKPLH Arsip', number: fisik?.noPkplhArsip, url: fisik?.urlPkplh, status: fisik?.pkplhArsip || fisik?.urlPkplh },
+      { title: '2. PKPLH Arsip', number: fisik?.noPkplhArsip || d.nomor_sk, url: fisik?.urlPkplh || fisik?.urlSk, status: fisik?.pkplhArsip || fisik?.urlPkplh || d.nomor_sk },
       { title: '3. BA Uji Administrasi', number: d.nomor_uji_berkas, url: fisik?.urlUjiAdmin, status: d.nomor_uji_berkas || fisik?.urlUjiAdmin },
       { title: '4. BA Verlap', number: d.nomor_ba_verlap, url: fisik?.urlBaVerlap, status: d.nomor_ba_verlap || fisik?.urlBaVerlap },
       { title: '5. BA Pemeriksaan/Sidang', number: d.nomor_ba_pemeriksaan, url: fisik?.urlBaSidang, status: d.nomor_ba_pemeriksaan || fisik?.urlBaSidang },
-      { title: '6. BA Pemeriksaan Revisi', number: d.nomor_revisi, url: fisik?.urlRevisi, status: d.nomor_revisi || fisik?.urlRevisi },
-      { title: '7. Surat Permohonan (Awal)', number: fisik?.noSuratPermohonan, url: fisik?.urlSuratPermohonan, status: fisik?.suratPermohonan || fisik?.urlSuratPermohonan },
+      { title: '6. BA Pemeriksaan Revisi', number: nomorRevisiStr, url: fisik?.urlRevisi, status: nomorRevisiStr || fisik?.urlRevisi },
+      { title: '7. Surat Permohonan (Awal)', number: fisik?.noSuratPermohonan || d.nomor_surat_permohonan, url: fisik?.urlSuratPermohonan, status: fisik?.suratPermohonan || fisik?.urlSuratPermohonan || d.nomor_surat_permohonan },
       { title: '8. Lembar Registrasi', number: d.nomor_checklist, url: fisik?.urlRegistrasi, status: d.nomor_checklist || fisik?.urlRegistrasi },
       { title: '9. Lembar Pengembalian', number: d.tanggal_pengembalian, url: fisik?.urlPengembalian, status: d.tanggal_pengembalian || fisik?.urlPengembalian },
       { title: '10. Penerimaan Perbaikan / PHP', number: d.nomor_php, url: fisik?.urlPhp, status: d.nomor_php || fisik?.urlPhp },
@@ -149,11 +253,11 @@ export default function DaftarPerizinanPage() {
                 </li>
                 <li className="flex justify-between items-center border-b border-slate-100 pb-1">
                   <span className="text-[10px] font-bold text-slate-500 uppercase">Tgl Verlap</span>
-                  <span className="text-[10px] font-black text-slate-900">{d.tanggal_ba_verlap || '-'}</span>
+                  <span className="text-[10px] font-black text-slate-900">{d.tanggal_verlap || d.tanggal_ba_verlap || '-'}</span>
                 </li>
                 <li className="flex justify-between items-center border-b border-slate-100 pb-1">
                   <span className="text-[10px] font-bold text-slate-500 uppercase">Tgl Sidang</span>
-                  <span className="text-[10px] font-black text-slate-900">{d.tanggal_ba_pemeriksaan || '-'}</span>
+                  <span className="text-[10px] font-black text-slate-900">{d.tanggal_pemeriksaan || d.tanggal_ba_pemeriksaan || '-'}</span>
                 </li>
               </ul>
            </div>
@@ -166,8 +270,22 @@ export default function DaftarPerizinanPage() {
                    <div className="mt-0.5">{s.status ? <CheckCircle size={16} className="text-emerald-600"/> : <CircleDashed size={16} className="text-slate-300"/>}</div>
                    <div className="flex-1">
                       <p className="text-xs font-black uppercase text-slate-800 leading-tight mb-2">{s.title}</p>
-                      <div className="bg-white/60 px-2 py-1.5 rounded border border-slate-200/60 min-h-7 flex items-center">
-                         {s.number ? <p className="text-[10px] font-bold text-slate-700 uppercase break-all">{s.number}</p> : <p className="text-[10px] font-bold text-slate-400 uppercase">BELUM ADA NOMOR</p>}
+                      <div className="bg-white/60 px-2 py-1.5 rounded border border-slate-200/60 min-h-7 flex items-center justify-between gap-2">
+                         {s.number ? (
+                           <>
+                             <p className="text-[10px] font-bold text-slate-700 uppercase break-all">{s.number}</p>
+                             <button
+                               type="button"
+                               onClick={(e) => handleCopyText(s.number, `acc-${d.id}-${s.title}`, e)}
+                               className="shrink-0 p-1 rounded hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors"
+                               title="Salin Nomor"
+                             >
+                               {copiedKey === `acc-${d.id}-${s.title}` ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                             </button>
+                           </>
+                         ) : (
+                           <p className="text-[10px] font-bold text-slate-400 uppercase">BELUM ADA NOMOR</p>
+                         )}
                       </div>
                       
                       <div className="mt-3 pt-3 border-t border-slate-200/50">
@@ -201,24 +319,6 @@ export default function DaftarPerizinanPage() {
       return stages.find(s => s.id === 11) || stages[10];
     }
     return stages.find(s => s.statuses.includes(status)) || stages[1]; // default to Uji Admin if not found
-  };
-
-  const getFiles = (d: any) => {
-    if (!d.arsip_fisik) return [];
-    let parsed: any = {};
-    try {
-      parsed = JSON.parse(d.arsip_fisik);
-      if (typeof parsed === 'string') parsed = JSON.parse(parsed);
-    } catch(e) { return []; }
-    
-    const files = [];
-    if (parsed.urlDokumenCetak) files.push({ name: 'Dok. Final', url: parsed.urlDokumenCetak });
-    if (parsed.urlPkplh) files.push({ name: 'PKPLH', url: parsed.urlPkplh });
-    if (parsed.urlUjiAdmin) files.push({ name: 'Uji Admin', url: parsed.urlUjiAdmin });
-    if (parsed.urlBaVerlap) files.push({ name: 'BA Verlap', url: parsed.urlBaVerlap });
-    if (parsed.urlBaSidang) files.push({ name: 'BA Sidang', url: parsed.urlBaSidang });
-    if (parsed.urlRpd) files.push({ name: 'RPD', url: parsed.urlRpd });
-    return files;
   };
 
   // Filter docs based on active group
@@ -263,8 +363,8 @@ export default function DaftarPerizinanPage() {
         "STATUS TAHAPAN": d.status_tahapan || '-',
         "TANGGAL MASUK": d.tanggal_masuk_dokumen || '-',
         "TANGGAL UJI ADMIN": d.tanggal_uji_berkas || '-',
-        "TANGGAL VERLAP": d.tanggal_ba_verlap || '-',
-        "TANGGAL SIDANG": d.tanggal_ba_pemeriksaan || '-',
+        "TANGGAL VERLAP": d.tanggal_verlap || d.tanggal_ba_verlap || '-',
+        "TANGGAL SIDANG": d.tanggal_pemeriksaan || d.tanggal_ba_pemeriksaan || '-',
         "NOMOR CHECKLIST": d.nomor_checklist || '-',
         "NOMOR BA UJI": d.nomor_uji_berkas || '-',
         "NOMOR BA VERLAP": d.nomor_ba_verlap || '-',
@@ -284,6 +384,8 @@ export default function DaftarPerizinanPage() {
   // Pagination
   const totalPages = Math.ceil(activeDocs.length / itemsPerPage);
   const paginatedDocs = activeDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const quickNumberStages = [1, 2, 3, 4, 6, 7, 9, 10];
 
   return (
     <div className="max-w-7xl mx-auto py-8 space-y-8 pb-20 px-4">
@@ -443,6 +545,7 @@ export default function DaftarPerizinanPage() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedDoc(d);
+                              setQuickFeedback('');
                               setIsActionModalOpen(true);
                             }}
                             className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all uppercase"
@@ -488,7 +591,7 @@ export default function DaftarPerizinanPage() {
                                           if (stepId === 6) hasData = !!(d.nomor_php || d.tanggal_php_1 || d.nomor_php1 || d.tanggal_php || fisik?.urlPhp);
                                           if (stepId === 7) hasData = !!(d.nomor_revisi || d.nomor_revisi_1 || d.tanggal_revisi_1 || d.tanggal_revisi || fisik?.urlRevisi);
                                           if (stepId === 8) hasData = !!(d.tanggal_pengembalian_1 || d.tanggal_pengembalian_2);
-                                          if (stepId === 9) hasData = !!(d.nomor_php_1 || d.nomor_php_2 || d.tanggal_php_2);
+                                          if (stepId === 9) hasData = !!(d.nomor_php_1 || d.nomor_php_2 || d.nomor_php1 || d.tanggal_php_2);
                                           if (stepId === 10) hasData = !!(d.nomor_risalah || d.nomor_sk || fisik?.rpdArsip || fisik?.urlRpd);
                                           if (stepId === 11) hasData = !!(d.tanggal_penerimaan_jilidan || fisik?.dokumenCetak || fisik?.urlDokumenCetak);
                                           if (stepId === 12) hasData = !!(fisik?.pkplhArsip || fisik?.urlPkplh);
@@ -649,43 +752,61 @@ export default function DaftarPerizinanPage() {
         )}
       </div>
 
-      {/* Modal Pilih Tahapan */}
+      {/* Modal Pilih Tahapan + Ambil Nomor Cepat */}
       {isActionModalOpen && selectedDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col border-4 border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-6 py-4 border-b-4 border-slate-200 bg-emerald-50 flex justify-between items-center">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col border-4 border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b-4 border-slate-200 bg-emerald-50 flex justify-between items-center gap-4">
               <div>
                 <h3 className="font-black text-slate-900 text-lg uppercase tracking-wide flex items-center gap-2">
-                  <LayoutDashboard size={20} className="text-emerald-600" /> BUKA TAHAPAN DOKUMEN
+                  <LayoutDashboard size={20} className="text-emerald-600" /> BUKA TAHAPAN & AMBIL NOMOR CEPAT
                 </h3>
                 <p className="text-xs font-bold text-slate-500 mt-1 uppercase">#{selectedDoc.no_urut || selectedDoc.id} - {selectedDoc.nama_kegiatan}</p>
               </div>
-              <button onClick={() => { setIsActionModalOpen(false); setSelectedDoc(null); }} className="w-8 h-8 rounded-full bg-slate-200 hover:bg-rose-200 hover:text-rose-700 flex items-center justify-center font-bold text-slate-600 transition-colors shrink-0">
+              <button onClick={() => { setIsActionModalOpen(false); setSelectedDoc(null); setQuickFeedback(''); }} className="w-8 h-8 rounded-full bg-slate-200 hover:bg-rose-200 hover:text-rose-700 flex items-center justify-center font-bold text-slate-600 transition-colors shrink-0">
                 ✕
               </button>
             </div>
+
+            {/* Bar Tanggal untuk Booking Nomor Cepat */}
+            <div className="px-6 py-3 bg-indigo-50/80 border-b-2 border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-black text-indigo-900 uppercase">
+                <Calendar size={15} className="text-indigo-600 shrink-0" />
+                <span>Tanggal Patokan Ambil Nomor:</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={quickDate}
+                  onChange={(e) => setQuickDate(e.target.value)}
+                  className="bg-white border border-indigo-200 rounded-lg px-3 py-1.5 text-xs font-black text-slate-800 focus:outline-none focus:border-indigo-500 shadow-sm cursor-pointer"
+                />
+                <span className="text-[10px] font-bold text-slate-500 hidden md:inline">
+                  (Klik &quot;Ambil Nomor&quot; pada tahapan untuk langsung booking & salin)
+                </span>
+              </div>
+            </div>
+
+            {quickFeedback && (
+              <div className="px-6 py-2.5 bg-emerald-100 border-b border-emerald-200 text-emerald-900 text-xs font-black uppercase tracking-wide flex items-center gap-2">
+                <CheckCircle size={15} className="text-emerald-600 shrink-0" />
+                <span>{quickFeedback}</span>
+              </div>
+            )}
             
             <div className="p-4 flex-1 overflow-y-auto bg-slate-50">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {stages.map((stage) => {
                   const Icon = stage.icon;
                   const isCurrent = stage.statuses.includes(selectedDoc.status_tahapan);
-                  const currentStageId = getStageForStatus(selectedDoc.status_tahapan, selectedDoc).id;
-                  let isDisabled = false; // Membuka semua tombol agar bisa diinput tidak urut
-                  
-                  let docNumber = '';
-                  if (stage.id === 1 && selectedDoc.nomor_checklist) docNumber = selectedDoc.nomor_checklist;
-                  if (stage.id === 2 && selectedDoc.nomor_uji_berkas) docNumber = selectedDoc.nomor_uji_berkas;
-                  if (stage.id === 3 && selectedDoc.nomor_ba_verlap) docNumber = selectedDoc.nomor_ba_verlap;
-                  if (stage.id === 4 && selectedDoc.nomor_ba_pemeriksaan) docNumber = selectedDoc.nomor_ba_pemeriksaan;
-                  if (stage.id === 10) {
-                    if (selectedDoc.nomor_risalah) docNumber = selectedDoc.nomor_risalah;
-                    else if (selectedDoc.nomor_sk) docNumber = selectedDoc.nomor_sk;
-                  }
+                  const isDisabled = false;
+                  const docNumber = getStageDocNumber(selectedDoc, stage.id);
+                  const canQuickGenerate = quickNumberStages.includes(stage.id);
+                  const isGeneratingThis = generatingStageId === stage.id;
+                  const isCopiedThis = copiedKey === `stage-${stage.id}`;
 
                   const isMPP = stage.title.includes('(MPP)');
                   const cleanTitle = stage.title.replace(' (MPP)', '').replace(' (DLH)', '');
-                  const stageColor = stage.color || 'slate';
 
                   const iconBg = isCurrent ? 'bg-emerald-100 text-emerald-600 border-emerald-200' : 
                                isDisabled ? 'bg-slate-50 text-slate-300 border-slate-200' : 
@@ -715,39 +836,53 @@ export default function DaftarPerizinanPage() {
                         </div>
                         
                         {docNumber ? (
-                          <p className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5 truncate" title={docNumber}>
-                             <FileText size={12} className="shrink-0 text-indigo-500" /> {docNumber}
-                          </p>
+                          <div className="flex items-center justify-between gap-1.5 bg-slate-100/80 px-2 py-1 rounded-lg border border-slate-200/80">
+                            <p className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5 truncate" title={docNumber}>
+                              <FileText size={12} className="shrink-0 text-indigo-500" />
+                              <span className="truncate">{docNumber}</span>
+                            </p>
+                            <button
+                              type="button"
+                              onClick={(e) => handleCopyText(docNumber, `stage-${stage.id}`, e)}
+                              className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase border transition-colors ${
+                                isCopiedThis
+                                  ? 'bg-emerald-500 text-white border-emerald-600'
+                                  : 'bg-white hover:bg-indigo-50 text-indigo-700 border-indigo-200'
+                              }`}
+                              title="Salin Nomor"
+                            >
+                              {isCopiedThis ? <Check size={11} /> : <Copy size={11} />}
+                              <span>{isCopiedThis ? 'Disalin' : 'Salin'}</span>
+                            </button>
+                          </div>
                         ) : (
-                          <p className="text-[10px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                             <CircleDashed size={10} /> Belum Ada Dokumen
-                          </p>
-                        )}
-
-                        {isDisabled && (
-                          <span className="inline-block mt-0.5 text-[9px] font-black uppercase text-slate-400 bg-slate-100 px-2 py-0.5 rounded tracking-widest w-fit">Belum Tersedia</span>
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                              <CircleDashed size={10} /> Belum Ada Nomor
+                            </p>
+                            {canQuickGenerate && (
+                              <button
+                                type="button"
+                                disabled={generatingStageId !== null}
+                                onClick={(e) => handleQuickGenerateNomor(stage.id, e)}
+                                className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-indigo-500 hover:bg-indigo-600 text-white border border-indigo-600 shadow-sm transition-all disabled:opacity-50"
+                                title="Booking & Salin Nomor Otomatis"
+                              >
+                                <Zap size={11} />
+                                <span>{isGeneratingThis ? 'Proses...' : 'Ambil Nomor'}</span>
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </>
                   );
 
-
-                  if (isDisabled) {
-                    return (
-                      <div 
-                        key={stage.id}
-                        className="p-4 bg-slate-50/50 rounded-xl border-2 border-dashed border-slate-200 flex items-center gap-3 cursor-not-allowed opacity-70"
-                      >
-                        {content}
-                      </div>
-                    );
-                  }
-
                   return (
                     <Link 
                       key={stage.id}
                       href={`${stage.link}/${selectedDoc.id}`}
-                      className={`group p-4 bg-white rounded-xl border-2 transition-all flex items-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-1 ${
+                      className={`group p-4 bg-white rounded-xl border-2 transition-all flex items-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 ${
                         isCurrent 
                           ? 'border-emerald-400 bg-emerald-50/50 ring-2 ring-emerald-400/20' 
                           : 'border-slate-200 hover:border-indigo-300'
@@ -755,7 +890,7 @@ export default function DaftarPerizinanPage() {
                     >
                       {content}
                     </Link>
-                  )
+                  );
                 })}
               </div>
             </div>

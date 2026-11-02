@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Printer, FilePlus, ClipboardCheck } from 'lucide-react';
+import { ArrowLeft, Printer, FilePlus, ClipboardCheck, Zap, Copy, Check } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function DetailRegistrasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -17,6 +17,8 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
   const [fileSuratPermohonan, setFileSuratPermohonan] = useState<File | null>(null);
   const [fileRegister, setFileRegister] = useState<File | null>(null);
   const [isUploadingArsip, setIsUploadingArsip] = useState(false);
+  const [isGeneratingNomor, setIsGeneratingNomor] = useState(false);
+  const [copiedNomor, setCopiedNomor] = useState(false);
   const [message, setMessage] = useState('');
   
   // State for Nomor
@@ -33,6 +35,49 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
         setLoading(false);
       });
   }, [unwrappedParams.id]);
+
+  const handleGenerateNomorReg = async () => {
+    setIsGeneratingNomor(true);
+    setMessage('Men-generate Nomor Registrasi / Checklist...');
+    try {
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nomor_checklist: 'AUTO' })
+      });
+      if (res.ok) {
+        const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
+        setDoc(newDoc.data);
+        const generated = newDoc.data?.nomor_checklist || '';
+        setInputNomorReg(generated);
+        if (generated) {
+          try {
+            await navigator.clipboard.writeText(generated);
+            setCopiedNomor(true);
+            setTimeout(() => setCopiedNomor(false), 2000);
+          } catch {}
+        }
+        setMessage('Nomor Registrasi berhasil di-generate & disalin ke clipboard!');
+      } else {
+        throw new Error('Gagal men-generate nomor registrasi');
+      }
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsGeneratingNomor(false);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  const handleCopyNomorReg = async () => {
+    const val = inputNomorReg || doc?.nomor_checklist;
+    if (!val) return;
+    try {
+      await navigator.clipboard.writeText(val);
+      setCopiedNomor(true);
+      setTimeout(() => setCopiedNomor(false), 2000);
+    } catch {}
+  };
 
   const handleDownload = async (type: string) => {
     if (!doc?.id) return;
@@ -139,6 +184,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
   if (!doc) return <div className="text-center py-20 text-error font-bold bg-error-container text-on-error-container border border-outline-variant m-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">DATA TIDAK DITEMUKAN!</div>;
 
   const isAmdalnet = doc.sumber_data === 'AMDALNET';
+  const isNomorChanged = inputNomorSurat !== (doc.nomor_surat_permohonan || '') || inputNomorReg !== (doc.nomor_checklist || '');
 
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-8 pb-20">
@@ -172,9 +218,22 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
           </div>
           <div>
             <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No Checklist Registrasi</div>
-            <p className="font-bold bg-slate-200 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block mt-1 text-sm shadow-sm hover:shadow-md transition-shadow">
-              {doc.nomor_checklist || '-'}
-            </p>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <p className="font-bold bg-slate-200 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block text-sm font-mono shadow-sm">
+                {doc.nomor_checklist || '-'}
+              </p>
+              {doc.nomor_checklist && (
+                <button
+                  type="button"
+                  onClick={handleCopyNomorReg}
+                  className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold rounded text-xs uppercase flex items-center gap-1 shadow-sm"
+                  title="Salin Nomor Registrasi"
+                >
+                  {copiedNomor ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                  {copiedNomor ? 'Tersalin' : 'Salin'}
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="md:col-span-2 border-t border-outline-variant pt-4"></div>
@@ -306,13 +365,34 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
             </div>
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-900 uppercase">Nomor Registrasi / Checklist</label>
-              <input 
-                type="text" 
-                value={inputNomorReg} 
-                onChange={(e) => setInputNomorReg(e.target.value)} 
-                placeholder="/" 
-                className="w-full text-sm px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 font-bold text-slate-700" 
-              />
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={inputNomorReg} 
+                  onChange={(e) => setInputNomorReg(e.target.value)} 
+                  placeholder="/" 
+                  className="flex-1 text-sm px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 font-bold font-mono text-slate-700" 
+                />
+                <button
+                  type="button"
+                  onClick={handleGenerateNomorReg}
+                  disabled={isGeneratingNomor}
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs uppercase flex items-center gap-1 whitespace-nowrap disabled:opacity-50"
+                  title="Generate Nomor Registrasi Otomatis"
+                >
+                  <Zap size={14} /> {isGeneratingNomor ? '...' : 'Auto'}
+                </button>
+                {inputNomorReg && (
+                  <button
+                    type="button"
+                    onClick={handleCopyNomorReg}
+                    className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold rounded-xl text-xs uppercase flex items-center gap-1"
+                    title="Salin Nomor"
+                  >
+                    {copiedNomor ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -347,10 +427,10 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
           <button 
             type="button" 
             onClick={handleUploadArsip}
-            disabled={isUploadingArsip || (!fileSuratPermohonan && !fileRegister)}
+            disabled={isUploadingArsip || (!fileSuratPermohonan && !fileRegister && !isNomorChanged)}
             className="px-6 py-2 bg-slate-700 hover:bg-slate-800 text-white font-bold rounded-xl shadow border border-slate-800 transition-all text-xs uppercase disabled:opacity-50"
           >
-            {isUploadingArsip ? 'Mengunggah...' : 'Simpan Berkas ke Arsip'}
+            {isUploadingArsip ? 'Mengunggah...' : 'Simpan Berkas & Nomor ke Arsip'}
           </button>
         </div>
 

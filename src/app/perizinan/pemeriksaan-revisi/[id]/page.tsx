@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FilePen, RotateCcw, CheckCircle2, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Loader2, FilePen, RotateCcw, CheckCircle2, ClipboardList, Zap, Copy, Check, RefreshCw } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -12,6 +12,8 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
   const [doc, setDoc] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submittingAction, setSubmittingAction] = useState<'acc' | 'revisi' | null>(null);
+  const [isGeneratingNomor, setIsGeneratingNomor] = useState(false);
+  const [copiedNomor, setCopiedNomor] = useState(false);
   const [message, setMessage] = useState('');
 
   const [daftarPegawai, setDaftarPegawai] = useState<any[]>([]);
@@ -19,14 +21,17 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
   const [revisiKe, setRevisiKe] = useState<string>('1');
   const [tanggalRevisi, setTanggalRevisi] = useState<string>('');
 
+  const currentNomorRevisi = doc?.[`nomor_revisi_${revisiKe}`];
+
   const handleGenerateNomor = async () => {
-    setMessage('Men-generate Nomor BA Pemeriksaan Revisi...');
+    setIsGeneratingNomor(true);
+    setMessage(`Men-generate Nomor BA Pemeriksaan Revisi ${revisiKe}...`);
     try {
       const payload: any = {
+        generate_nomor_revisi: true,
         revisi_ke: revisiKe,
-        status_tahapan: 'Pemeriksaan Revisi', // This triggers generation without finalizing
+        [`tanggal_revisi_${revisiKe}`]: tanggalRevisi || new Date().toISOString().split('T')[0],
       };
-      payload[`tanggal_revisi_${revisiKe}`] = tanggalRevisi || new Date().toISOString().split('T')[0];
 
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
         method: 'PUT',
@@ -36,15 +41,33 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
       if (res.ok) {
         const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
         setDoc(newDoc.data);
-        setMessage('Nomor berhasil di-generate!');
+        const generatedNo = newDoc.data?.[`nomor_revisi_${revisiKe}`];
+        if (generatedNo) {
+          try {
+            await navigator.clipboard.writeText(generatedNo);
+            setCopiedNomor(true);
+            setTimeout(() => setCopiedNomor(false), 2000);
+          } catch {}
+        }
+        setMessage(`Nomor BA Pemeriksaan Revisi ${revisiKe} berhasil di-generate & disalin ke clipboard!`);
       } else {
         throw new Error('Gagal men-generate nomor');
       }
     } catch (err: any) {
       alert(err.message);
     } finally {
+      setIsGeneratingNomor(false);
       setTimeout(() => setMessage(''), 3000);
     }
+  };
+
+  const handleCopyNomor = async () => {
+    if (!currentNomorRevisi) return;
+    try {
+      await navigator.clipboard.writeText(currentNomorRevisi);
+      setCopiedNomor(true);
+      setTimeout(() => setCopiedNomor(false), 2000);
+    } catch {}
   };
 
   useEffect(() => {
@@ -89,6 +112,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
     const tanggal_revisi = formData.get('tanggal_revisi') as string;
 
     const payload: any = {
+      generate_nomor_revisi: true,
       revisi_ke: nomor_revisi,
       penandatangan_revisi: JSON.stringify(penandatangan),
       nomor_registrasi_amdalnet: formData.get('nomor_registrasi_amdalnet'),
@@ -141,7 +165,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
         </div>
         <div>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface uppercase">Input Pemeriksaan Revisi</h2>
-          <p className="text-sm font-bold text-on-surface-variant mt-1 uppercase">TAHUN {doc.tahun || '2026'} | TAHAP 5: PERBAIKAN</p>
+          <p className="text-sm font-bold text-on-surface-variant mt-1 uppercase">TAHUN {doc.tahun || '2026'} | TAHAP 7: PERBAIKAN</p>
         </div>
       </div>
       
@@ -166,9 +190,9 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
 
         {/* Riwayat Pemeriksaan Revisi */}
         {(() => {
-          const revisiNames: Record<string, string> = { '1': 'Revisi 1', '2': 'Revisi 2', '3': 'Revisi 3', '4': 'Revisi 4' };
+          const revisiNames: Record<string, string> = { '1': 'Revisi 1', '2': 'Revisi 2', '3': 'Revisi 3', '4': 'Revisi 4', '5': 'Revisi 5' };
           const revisiHistory = Object.entries(revisiNames).filter(([key]) => {
-            return doc[`tanggal_revisi_${key}`] || (key === '1' && doc.tanggal_revisi);
+            return doc[`nomor_revisi_${key}`] || doc[`tanggal_revisi_${key}`] || (key === '1' && doc.tanggal_revisi);
           });
 
           if (revisiHistory.length === 0) return null;
@@ -180,11 +204,13 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
               </h3>
               <div className="space-y-3">
                 {revisiHistory.map(([key, label]) => {
+                  const nomorRev = doc[`nomor_revisi_${key}`];
                   const tanggal = doc[`tanggal_revisi_${key}`] || (key === '1' ? doc.tanggal_revisi : null);
                   return (
                     <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 flex justify-between items-center">
                       <div>
                         <span className="inline-block bg-blue-100 text-blue-800 text-xs font-black px-3 py-1 rounded-full border border-blue-200 mb-2">{label}</span>
+                        {nomorRev && <p className="text-xs font-bold text-blue-900 font-mono mb-1">{nomorRev}</p>}
                         {tanggal && <p className="text-sm text-slate-700 font-bold">Pemeriksaan: {new Date(tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
                       </div>
                     </div>
@@ -197,6 +223,52 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="md:col-span-2 border border-blue-200 bg-blue-50 p-4 rounded-xl shadow-sm">
+              <label className="block text-sm font-bold text-blue-900 mb-2 uppercase">
+                Nomor BA Pemeriksaan Revisi {revisiKe} (BA.P.P{revisiKe})
+              </label>
+              {currentNomorRevisi ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="flex-1 bg-white border border-blue-200 text-blue-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono">
+                    {currentNomorRevisi}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyNomor}
+                    className="px-4 py-3 bg-white hover:bg-blue-100 text-blue-900 border border-blue-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
+                    title="Salin Nomor"
+                  >
+                    {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                    {copiedNomor ? 'Tersalin' : 'Salin'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGenerateNomor}
+                    disabled={isGeneratingNomor}
+                    className="px-3 py-3 bg-blue-100 hover:bg-blue-200 text-blue-900 border border-blue-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1"
+                    title="Perbarui Bulan Nomor Sesuai Tanggal"
+                  >
+                    <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleGenerateNomor}
+                    disabled={isGeneratingNomor}
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Zap size={16} />
+                    {isGeneratingNomor ? 'Men-generate...' : `Generate Nomor Revisi ${revisiKe} Dahulu`}
+                  </button>
+                  <span className="text-xs font-bold text-blue-800/80">
+                    * Klik untuk booking & menyalin nomor BA Pemeriksaan Revisi {revisiKe} sebelum mengisi form lengkap.
+                  </span>
+                </div>
+              )}
+            </div>
+
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Dokumen Revisi Ke- <span className="text-error">*</span></label>
               <select 
