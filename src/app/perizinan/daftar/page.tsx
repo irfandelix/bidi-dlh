@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Calendar
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -21,12 +21,7 @@ export default function DaftarPerizinanPage() {
   const [filterTahun, setFilterTahun] = useState('');
   const [filterJenis, setFilterJenis] = useState('');
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
-
-  // Quick Nomor Generation & Copy states inside Modal
-  const [quickDate, setQuickDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
-  const [generatingStageId, setGeneratingStageId] = useState<number | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [quickFeedback, setQuickFeedback] = useState<string>('');
 
   const handleCopyText = (text: string, key: string, e?: React.MouseEvent) => {
     if (e) {
@@ -57,71 +52,6 @@ export default function DaftarPerizinanPage() {
       return doc.nomor_risalah || doc.nomor_sk || '';
     }
     return '';
-  };
-
-  const handleQuickGenerateNomor = async (stageId: number, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!selectedDoc || generatingStageId !== null) return;
-
-    setGeneratingStageId(stageId);
-    setQuickFeedback('');
-
-    const tgl = quickDate || new Date().toISOString().split('T')[0];
-    let payload: Record<string, any> = {};
-
-    if (stageId === 1) {
-      payload = { nomor_checklist: 'AUTO', tanggal_masuk_dokumen: selectedDoc.tanggal_masuk_dokumen || tgl };
-    } else if (stageId === 2) {
-      payload = { nomor_uji_berkas: 'AUTO', tanggal_uji_berkas: selectedDoc.tanggal_uji_berkas || tgl };
-    } else if (stageId === 3) {
-      payload = { nomor_ba_verlap: 'AUTO', tanggal_verlap: selectedDoc.tanggal_verlap || tgl };
-    } else if (stageId === 4) {
-      payload = { nomor_ba_pemeriksaan: 'AUTO', tanggal_pemeriksaan: selectedDoc.tanggal_pemeriksaan || tgl };
-    } else if (stageId === 6) {
-      payload = { nomor_php: 'AUTO', revisi_ke: '1', tanggal_php_1: selectedDoc.tanggal_php_1 || tgl };
-    } else if (stageId === 7) {
-      const rev = String(selectedDoc.revisi_ke || '1');
-      payload = {
-        generate_nomor_revisi: true,
-        revisi_ke: rev,
-        [`tanggal_revisi_${rev}`]: selectedDoc[`tanggal_revisi_${rev}`] || tgl
-      };
-    } else if (stageId === 9) {
-      payload = { nomor_php: 'AUTO', revisi_ke: '2', tanggal_php_2: selectedDoc.tanggal_php_2 || tgl };
-    } else if (stageId === 10) {
-      payload = { nomor_risalah: 'AUTO', tanggal_risalah: selectedDoc.tanggal_risalah || tgl };
-    } else {
-      setGeneratingStageId(null);
-      return;
-    }
-
-    try {
-      const res = await fetch(`/api/perizinan/${selectedDoc.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const resData = await res.json();
-      if (!res.ok) throw new Error(resData.error || 'Gagal men-generate nomor');
-
-      const updatedDoc = resData.data;
-      setSelectedDoc(updatedDoc);
-      setDocs(prev => prev.map(d => (d.id === updatedDoc.id ? updatedDoc : d)));
-
-      const generatedNumber = getStageDocNumber(updatedDoc, stageId);
-      if (generatedNumber) {
-        navigator.clipboard.writeText(generatedNumber);
-        setCopiedKey(`stage-${stageId}`);
-        setQuickFeedback(`Nomor ${generatedNumber} berhasil dibuat & disalin!`);
-        setTimeout(() => setCopiedKey(null), 2500);
-        setTimeout(() => setQuickFeedback(''), 4000);
-      }
-    } catch (err: any) {
-      alert(err.message || 'Gagal men-generate nomor');
-    } finally {
-      setGeneratingStageId(null);
-    }
   };
 
   const toggleRow = (id: number) => {
@@ -385,8 +315,6 @@ export default function DaftarPerizinanPage() {
   const totalPages = Math.ceil(activeDocs.length / itemsPerPage);
   const paginatedDocs = activeDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const quickNumberStages = [1, 2, 3, 4, 6, 7, 9, 10];
-
   return (
     <div className="max-w-7xl mx-auto py-8 space-y-8 pb-20 px-4">
       
@@ -545,7 +473,6 @@ export default function DaftarPerizinanPage() {
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedDoc(d);
-                              setQuickFeedback('');
                               setIsActionModalOpen(true);
                             }}
                             className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all uppercase"
@@ -694,7 +621,7 @@ export default function DaftarPerizinanPage() {
                             <Link 
                               href={`/perizinan/cetak/${d.id}`}
                               onClick={e => e.stopPropagation()}
-                              className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center justify-center gap-1 uppercase"
+                              className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-4 py-2 rounded-lg border border-slate-200 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all flex items-center gap-1 uppercase"
                               title="Pusat Cetak Dokumen"
                             >
                               <Printer size={14} /> Cetak
@@ -752,47 +679,21 @@ export default function DaftarPerizinanPage() {
         )}
       </div>
 
-      {/* Modal Pilih Tahapan + Ambil Nomor Cepat */}
+      {/* Modal Pilih Tahapan */}
       {isActionModalOpen && selectedDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm transition-opacity">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col border-4 border-slate-200 overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="px-6 py-4 border-b-4 border-slate-200 bg-emerald-50 flex justify-between items-center gap-4">
               <div>
                 <h3 className="font-black text-slate-900 text-lg uppercase tracking-wide flex items-center gap-2">
-                  <LayoutDashboard size={20} className="text-emerald-600" /> BUKA TAHAPAN & AMBIL NOMOR CEPAT
+                  <LayoutDashboard size={20} className="text-emerald-600" /> BUKA TAHAPAN DOKUMEN
                 </h3>
                 <p className="text-xs font-bold text-slate-500 mt-1 uppercase">#{selectedDoc.no_urut || selectedDoc.id} - {selectedDoc.nama_kegiatan}</p>
               </div>
-              <button onClick={() => { setIsActionModalOpen(false); setSelectedDoc(null); setQuickFeedback(''); }} className="w-8 h-8 rounded-full bg-slate-200 hover:bg-rose-200 hover:text-rose-700 flex items-center justify-center font-bold text-slate-600 transition-colors shrink-0">
+              <button onClick={() => { setIsActionModalOpen(false); setSelectedDoc(null); }} className="w-8 h-8 rounded-full bg-slate-200 hover:bg-rose-200 hover:text-rose-700 flex items-center justify-center font-bold text-slate-600 transition-colors shrink-0">
                 ✕
               </button>
             </div>
-
-            {/* Bar Tanggal untuk Booking Nomor Cepat */}
-            <div className="px-6 py-3 bg-indigo-50/80 border-b-2 border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs font-black text-indigo-900 uppercase">
-                <Calendar size={15} className="text-indigo-600 shrink-0" />
-                <span>Tanggal Patokan Ambil Nomor:</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="date"
-                  value={quickDate}
-                  onChange={(e) => setQuickDate(e.target.value)}
-                  className="bg-white border border-indigo-200 rounded-lg px-3 py-1.5 text-xs font-black text-slate-800 focus:outline-none focus:border-indigo-500 shadow-sm cursor-pointer"
-                />
-                <span className="text-[10px] font-bold text-slate-500 hidden md:inline">
-                  (Klik &quot;Ambil Nomor&quot; pada tahapan untuk langsung booking & salin)
-                </span>
-              </div>
-            </div>
-
-            {quickFeedback && (
-              <div className="px-6 py-2.5 bg-emerald-100 border-b border-emerald-200 text-emerald-900 text-xs font-black uppercase tracking-wide flex items-center gap-2">
-                <CheckCircle size={15} className="text-emerald-600 shrink-0" />
-                <span>{quickFeedback}</span>
-              </div>
-            )}
             
             <div className="p-4 flex-1 overflow-y-auto bg-slate-50">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -801,8 +702,6 @@ export default function DaftarPerizinanPage() {
                   const isCurrent = stage.statuses.includes(selectedDoc.status_tahapan);
                   const isDisabled = false;
                   const docNumber = getStageDocNumber(selectedDoc, stage.id);
-                  const canQuickGenerate = quickNumberStages.includes(stage.id);
-                  const isGeneratingThis = generatingStageId === stage.id;
                   const isCopiedThis = copiedKey === `stage-${stage.id}`;
 
                   const isMPP = stage.title.includes('(MPP)');
@@ -856,23 +755,9 @@ export default function DaftarPerizinanPage() {
                             </button>
                           </div>
                         ) : (
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                              <CircleDashed size={10} /> Belum Ada Nomor
-                            </p>
-                            {canQuickGenerate && (
-                              <button
-                                type="button"
-                                disabled={generatingStageId !== null}
-                                onClick={(e) => handleQuickGenerateNomor(stage.id, e)}
-                                className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase bg-indigo-500 hover:bg-indigo-600 text-white border border-indigo-600 shadow-sm transition-all disabled:opacity-50"
-                                title="Booking & Salin Nomor Otomatis"
-                              >
-                                <Zap size={11} />
-                                <span>{isGeneratingThis ? 'Proses...' : 'Ambil Nomor'}</span>
-                              </button>
-                            )}
-                          </div>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <CircleDashed size={10} /> Belum Ada Nomor
+                          </p>
                         )}
                       </div>
                     </>

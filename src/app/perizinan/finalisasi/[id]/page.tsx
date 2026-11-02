@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, CheckCircle2, Award, BookCopy, FileText, ClipboardCheck, Zap, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Loader2, CheckCircle2, Award, BookCopy, FileText, ClipboardCheck, Zap, Copy, Check, RefreshCw } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function FinalisasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -32,16 +32,21 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
       });
   }, [unwrappedParams.id]);
 
-  const handleGenerateNomorRisalah = async () => {
+  const handleSimpanTanggalDanGenerateNomorRisalah = async () => {
+    const dateInput = document.querySelector('input[name="tanggal_risalah"]') as HTMLInputElement;
+    const tgl = dateInput?.value;
+    if (!tgl) {
+      alert('Pilih Tanggal Pembuatan Risalah terlebih dahulu!');
+      return;
+    }
+
     setIsGeneratingNomor(true);
-    setMessage('Men-generate Nomor Risalah (RPD)...');
+    setMessage('Menyimpan tanggal & men-generate Nomor Risalah (RPD)...');
     try {
-      const dateInput = document.querySelector('input[name="tanggal_risalah"]') as HTMLInputElement;
-      const tgl = dateInput?.value || doc?.tanggal_risalah || new Date().toISOString().split('T')[0];
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nomor_risalah: 'AUTO', tanggal_risalah: tgl })
+        body: JSON.stringify({ tanggal_risalah: tgl, nomor_risalah: 'AUTO' })
       });
       if (res.ok) {
         const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
@@ -55,9 +60,9 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
             setTimeout(() => setCopiedNomor(false), 2000);
           } catch {}
         }
-        setMessage('Nomor Risalah (RPD) berhasil di-generate & disalin ke clipboard!');
+        setMessage('Tanggal berhasil disimpan & Nomor Risalah (RPD) berhasil di-generate!');
       } else {
-        throw new Error('Gagal men-generate nomor RPD');
+        throw new Error('Gagal menyimpan tanggal & men-generate nomor RPD');
       }
     } catch (err: any) {
       alert(err.message);
@@ -270,35 +275,51 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
               </h3>
               
               <div className="relative z-10">
-                <label className="block text-xs font-bold text-on-surface mb-2 uppercase tracking-wider">Tanggal Pembuatan Risalah</label>
+                <label className="block text-xs font-bold text-on-surface mb-2 uppercase tracking-wider">1. Tanggal Pembuatan Risalah</label>
                 <input type="date" name="tanggal_risalah" defaultValue={doc.tanggal_risalah || new Date().toISOString().split('T')[0]}
                   className="w-full bg-surface border border-outline-variant text-on-surface text-sm font-bold rounded-xl p-3 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
 
-              <div className="relative z-10">
-                <label className="block text-xs font-bold text-on-surface mb-2 uppercase tracking-wider">Nomor Risalah (RPD)</label>
-                <div className="flex flex-wrap gap-2">
-                  <input type="text" id="nomor_risalah_input" name="nomor_risalah" value={nomorRisalah} onChange={(e) => setNomorRisalah(e.target.value)} placeholder="Klik generate..."
-                    readOnly
-                    className="flex-1 min-w-[200px] bg-surface-container-low border border-outline-variant text-on-surface-variant text-sm font-bold font-mono rounded-xl p-3 focus:outline-none cursor-not-allowed" />
+              <div className="relative z-10 space-y-2">
+                <label className="block text-xs font-bold text-on-surface uppercase tracking-wider">2. Nomor Risalah (RPD)</label>
+                <input type="hidden" id="nomor_risalah_input" name="nomor_risalah" value={nomorRisalah} />
+                {nomorRisalah ? (
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex-1 min-w-[180px] bg-white border border-outline-variant text-on-surface text-sm font-bold font-mono rounded-xl p-3 shadow-sm break-all">
+                        {nomorRisalah}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleCopyNomorRisalah}
+                        className="px-3 py-3 bg-white hover:bg-slate-100 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm transition-all uppercase text-xs flex items-center gap-1"
+                        title="Salin Nomor Risalah"
+                      >
+                        {copiedNomor ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
+                        {copiedNomor ? 'Tersalin' : 'Salin'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSimpanTanggalDanGenerateNomorRisalah}
+                        disabled={isGeneratingNomor}
+                        className="px-3 py-3 bg-indigo-200 hover:bg-indigo-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm transition-all uppercase text-xs flex items-center gap-1 disabled:opacity-50"
+                        title="Simpan perubahan tanggal & perbarui nomor RPD"
+                      >
+                        <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-on-surface font-bold">
+                      ✅ Tanggal ({doc.tanggal_risalah || '-'}) & Nomor RPD sudah tersimpan.
+                    </p>
+                  </div>
+                ) : (
                   <button type="button" 
-                    onClick={handleGenerateNomorRisalah}
+                    onClick={handleSimpanTanggalDanGenerateNomorRisalah}
                     disabled={isGeneratingNomor}
-                    className="px-4 py-3 bg-indigo-200 hover:bg-indigo-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-all uppercase tracking-wider text-xs whitespace-nowrap flex items-center gap-1.5 disabled:opacity-50">
-                    <Zap size={15} /> {isGeneratingNomor ? 'Proses...' : 'Generate'}
+                    className="w-full px-4 py-3 bg-indigo-200 hover:bg-indigo-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-all uppercase tracking-wider text-xs flex items-center justify-center gap-2 disabled:opacity-50">
+                    <Zap size={16} /> {isGeneratingNomor ? 'Menyimpan & Generate...' : 'Simpan Tanggal & Generate Nomor RPD'}
                   </button>
-                  {nomorRisalah && (
-                    <button
-                      type="button"
-                      onClick={handleCopyNomorRisalah}
-                      className="px-3 py-3 bg-white hover:bg-slate-100 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm transition-all uppercase text-xs flex items-center gap-1"
-                      title="Salin Nomor Risalah"
-                    >
-                      {copiedNomor ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
-                      {copiedNomor ? 'Tersalin' : 'Salin'}
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
             </div>
 

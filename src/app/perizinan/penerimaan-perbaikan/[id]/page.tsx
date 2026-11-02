@@ -62,13 +62,19 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
   }, [revisiKe, doc]);
 
   const currentNomorPhp = revisiKe === '1' ? doc?.nomor_php : doc?.[`nomor_php${parseInt(revisiKe, 10) - 1}`];
+  const currentTanggalPhp = doc?.[`tanggal_php_${revisiKe}`] || (revisiKe === '1' ? doc?.tanggal_penyerahan_perbaikan : '');
 
-  const handleGenerateNomor = async () => {
+  const handleSimpanTanggalDanGenerateNomor = async () => {
+    const dateInput = document.querySelector('input[name="tanggal_penyerahan_perbaikan"]') as HTMLInputElement;
+    const tgl = dateInput?.value;
+    if (!tgl) {
+      alert('Pilih Tanggal Penyerahan Berkas terlebih dahulu!');
+      return;
+    }
+
     setIsGeneratingNomor(true);
-    setMessage(`Men-generate Nomor Tanda Terima Perbaikan (PHP ${revisiKe})...`);
+    setMessage(`Menyimpan tanggal & men-generate Nomor Tanda Terima Perbaikan (PHP ${revisiKe})...`);
     try {
-      const dateInput = document.querySelector('input[name="tanggal_penyerahan_perbaikan"]') as HTMLInputElement;
-      const tgl = dateInput?.value || doc?.[`tanggal_php_${revisiKe}`] || new Date().toISOString().split('T')[0];
       const payload: any = {
         nomor_php: 'AUTO',
         revisi_ke: revisiKe,
@@ -90,9 +96,9 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
             setTimeout(() => setCopiedNomor(false), 2000);
           } catch {}
         }
-        setMessage(`Nomor PHP ${revisiKe} berhasil di-generate & disalin ke clipboard!`);
+        setMessage(`Tanggal berhasil disimpan & Nomor PHP ${revisiKe} berhasil di-generate!`);
       } else {
-        throw new Error('Gagal men-generate nomor PHP');
+        throw new Error('Gagal menyimpan tanggal & men-generate nomor PHP');
       }
     } catch (err: any) {
       alert(err.message);
@@ -403,73 +409,84 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="md:col-span-2 border border-emerald-200 bg-emerald-50 p-4 rounded-xl shadow-sm">
-              <label className="block text-sm font-bold text-emerald-900 mb-2 uppercase">
-                Nomor Tanda Terima Perbaikan (PHP {revisiKe})
+          {/* Langkah 1: Pilih Revisi & Tanggal -> Langkah 2: Simpan Tanggal & Generate Nomor */}
+          <div className="p-5 rounded-2xl border border-emerald-200 bg-emerald-50/70 shadow-sm space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-bold text-emerald-950 mb-2 uppercase">1. Penerimaan Revisi Ke-</label>
+                <select 
+                  name="nomor_revisi" 
+                  value={revisiKe}
+                  onChange={(e) => setRevisiKe(e.target.value)}
+                  className="w-full bg-white border border-emerald-300 rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm transition-all outline-none cursor-pointer">
+                  <option value="1">Revisi 1 (PHP1)</option>
+                  <option value="2">Revisi 2 (PHP2)</option>
+                  <option value="3">Revisi 3 (PHP3)</option>
+                  <option value="4">Revisi 4 (PHP4)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-emerald-950 mb-2 uppercase">2. Tanggal Penyerahan Berkas <span className="text-error">*</span></label>
+                <input type="date" name="tanggal_penyerahan_perbaikan" required key={revisiKe} defaultValue={currentTanggalPhp || new Date().toISOString().split('T')[0]}
+                  className="w-full bg-white border border-emerald-300 text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm transition-all outline-none cursor-pointer" />
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-emerald-200/80">
+              <label className="block text-sm font-bold text-emerald-950 mb-2 uppercase">
+                3. Nomor Tanda Terima Perbaikan (PHP {revisiKe})
               </label>
               {currentNomorPhp ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex-1 bg-white border border-emerald-200 text-emerald-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono">
-                    {currentNomorPhp}
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex-1 bg-white border border-emerald-300 text-emerald-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
+                      {currentNomorPhp}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleCopyNomor}
+                      className="px-4 py-3 bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
+                      title="Salin Nomor"
+                    >
+                      {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                      {copiedNomor ? 'Tersalin' : 'Salin'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSimpanTanggalDanGenerateNomor}
+                      disabled={isGeneratingNomor}
+                      className="px-3 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
+                      title="Simpan perubahan tanggal & perbarui nomor"
+                    >
+                      <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
+                      <span className="hidden sm:inline">Update Tgl</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleCopyNomor}
-                    className="px-4 py-3 bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
-                    title="Salin Nomor"
-                  >
-                    {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
-                    {copiedNomor ? 'Tersalin' : 'Salin'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleGenerateNomor}
-                    disabled={isGeneratingNomor}
-                    className="px-3 py-3 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border border-emerald-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1"
-                    title="Perbarui Bulan Nomor Sesuai Tanggal"
-                  >
-                    <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
-                  </button>
+                  <p className="text-[11px] text-emerald-800 font-bold">
+                    ✅ Tanggal ({currentTanggalPhp || '-'}) & Nomor PHP {revisiKe} sudah tersimpan.
+                  </p>
                 </div>
               ) : (
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <button
                     type="button"
-                    onClick={handleGenerateNomor}
+                    onClick={handleSimpanTanggalDanGenerateNomor}
                     disabled={isGeneratingNomor}
-                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center gap-2 disabled:opacity-50"
+                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <Zap size={16} />
-                    {isGeneratingNomor ? 'Men-generate...' : `Generate Nomor PHP ${revisiKe} Dahulu`}
+                    {isGeneratingNomor ? 'Menyimpan & Generate...' : `Simpan Tanggal & Generate Nomor PHP ${revisiKe}`}
                   </button>
-                  <span className="text-xs font-bold text-emerald-800/80">
-                    * Klik untuk booking & menyalin nomor PHP {revisiKe} sebelum menyimpan form.
+                  <span className="text-xs font-bold text-emerald-800/90">
+                    * Pilih tanggal penyerahan di atas, lalu klik untuk menyimpan tanggal & menerbitkan nomor PHP {revisiKe}.
                   </span>
                 </div>
               )}
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Penerimaan Revisi Ke-</label>
-              <select 
-                name="nomor_revisi" 
-                value={revisiKe}
-                onChange={(e) => setRevisiKe(e.target.value)}
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer">
-                <option value="1">Revisi 1 (PHP1)</option>
-                <option value="2">Revisi 2 (PHP2)</option>
-                <option value="3">Revisi 3 (PHP3)</option>
-                <option value="4">Revisi 4 (PHP4)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Penyerahan Berkas <span className="text-error">*</span></label>
-              <input type="date" name="tanggal_penyerahan_perbaikan" required defaultValue={doc.tanggal_penyerahan_perbaikan || new Date().toISOString().split('T')[0]}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="md:col-span-2">
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Petugas Penerima (MPP/Loket) <span className="text-error">*</span></label>
               <div className="relative">

@@ -23,14 +23,19 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
 
   const currentNomorRevisi = doc?.[`nomor_revisi_${revisiKe}`];
 
-  const handleGenerateNomor = async () => {
+  const handleSimpanTanggalDanGenerateNomor = async () => {
+    if (!tanggalRevisi) {
+      alert('Pilih Tanggal Pengembalian Revisi terlebih dahulu!');
+      return;
+    }
+
     setIsGeneratingNomor(true);
-    setMessage(`Men-generate Nomor BA Pemeriksaan Revisi ${revisiKe}...`);
+    setMessage(`Menyimpan tanggal & men-generate Nomor BA Pemeriksaan Revisi ${revisiKe}...`);
     try {
       const payload: any = {
         generate_nomor_revisi: true,
         revisi_ke: revisiKe,
-        [`tanggal_revisi_${revisiKe}`]: tanggalRevisi || new Date().toISOString().split('T')[0],
+        [`tanggal_revisi_${revisiKe}`]: tanggalRevisi,
       };
 
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
@@ -49,9 +54,9 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
             setTimeout(() => setCopiedNomor(false), 2000);
           } catch {}
         }
-        setMessage(`Nomor BA Pemeriksaan Revisi ${revisiKe} berhasil di-generate & disalin ke clipboard!`);
+        setMessage(`Tanggal berhasil disimpan & Nomor BA Pemeriksaan Revisi ${revisiKe} berhasil di-generate!`);
       } else {
-        throw new Error('Gagal men-generate nomor');
+        throw new Error('Gagal menyimpan tanggal & men-generate nomor');
       }
     } catch (err: any) {
       alert(err.message);
@@ -222,80 +227,91 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
         })()}
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="md:col-span-2 border border-blue-200 bg-blue-50 p-4 rounded-xl shadow-sm">
-              <label className="block text-sm font-bold text-blue-900 mb-2 uppercase">
-                Nomor BA Pemeriksaan Revisi {revisiKe} (BA.P.P{revisiKe})
+          {/* Langkah 1: Pilih Revisi & Tanggal -> Langkah 2: Simpan Tanggal & Generate Nomor */}
+          <div className="p-5 rounded-2xl border border-blue-200 bg-blue-50/70 shadow-sm space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-bold text-blue-950 mb-2 uppercase">1. Dokumen Revisi Ke- <span className="text-error">*</span></label>
+                <select 
+                  name="nomor_revisi" 
+                  required 
+                  value={revisiKe}
+                  onChange={(e) => setRevisiKe(e.target.value)}
+                  className="w-full bg-white border border-blue-300 rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm transition-all outline-none cursor-pointer">
+                  <option value="1">Revisi 1 (PHP1)</option>
+                  <option value="2">Revisi 2 (PHP2)</option>
+                  <option value="3">Revisi 3 (PHP3)</option>
+                  <option value="4">Revisi 4 (PHP4)</option>
+                  <option value="5">Revisi 5 (PHP5)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-blue-950 mb-2 uppercase">2. Tanggal Pengembalian Revisi <span className="text-error">*</span></label>
+                <input 
+                  type="date" 
+                  name="tanggal_revisi" 
+                  required 
+                  value={tanggalRevisi}
+                  onChange={(e) => setTanggalRevisi(e.target.value)}
+                  className="w-full bg-white border border-blue-300 rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm transition-all outline-none cursor-pointer" />
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-blue-200/80">
+              <label className="block text-sm font-bold text-blue-950 mb-2 uppercase">
+                3. Nomor BA Pemeriksaan Revisi {revisiKe} (BA.P.P{revisiKe})
               </label>
               {currentNomorRevisi ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex-1 bg-white border border-blue-200 text-blue-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono">
-                    {currentNomorRevisi}
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex-1 bg-white border border-blue-300 text-blue-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
+                      {currentNomorRevisi}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleCopyNomor}
+                      className="px-4 py-3 bg-white hover:bg-blue-100 text-blue-900 border border-blue-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
+                      title="Salin Nomor"
+                    >
+                      {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                      {copiedNomor ? 'Tersalin' : 'Salin'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSimpanTanggalDanGenerateNomor}
+                      disabled={isGeneratingNomor}
+                      className="px-3 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
+                      title="Simpan perubahan tanggal & perbarui nomor"
+                    >
+                      <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
+                      <span className="hidden sm:inline">Update Tgl</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleCopyNomor}
-                    className="px-4 py-3 bg-white hover:bg-blue-100 text-blue-900 border border-blue-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
-                    title="Salin Nomor"
-                  >
-                    {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
-                    {copiedNomor ? 'Tersalin' : 'Salin'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleGenerateNomor}
-                    disabled={isGeneratingNomor}
-                    className="px-3 py-3 bg-blue-100 hover:bg-blue-200 text-blue-900 border border-blue-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1"
-                    title="Perbarui Bulan Nomor Sesuai Tanggal"
-                  >
-                    <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
-                  </button>
+                  <p className="text-[11px] text-emerald-800 font-bold">
+                    ✅ Tanggal ({doc[`tanggal_revisi_${revisiKe}`] || tanggalRevisi}) & Nomor Revisi {revisiKe} sudah tersimpan.
+                  </p>
                 </div>
               ) : (
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <button
                     type="button"
-                    onClick={handleGenerateNomor}
+                    onClick={handleSimpanTanggalDanGenerateNomor}
                     disabled={isGeneratingNomor}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center gap-2 disabled:opacity-50"
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <Zap size={16} />
-                    {isGeneratingNomor ? 'Men-generate...' : `Generate Nomor Revisi ${revisiKe} Dahulu`}
+                    {isGeneratingNomor ? 'Menyimpan & Generate...' : `Simpan Tanggal & Generate Nomor Revisi ${revisiKe}`}
                   </button>
-                  <span className="text-xs font-bold text-blue-800/80">
-                    * Klik untuk booking & menyalin nomor BA Pemeriksaan Revisi {revisiKe} sebelum mengisi form lengkap.
+                  <span className="text-xs font-bold text-blue-800/90">
+                    * Pilih tanggal revisi di atas, lalu klik untuk menyimpan tanggal & menerbitkan nomor BA Revisi {revisiKe}.
                   </span>
                 </div>
               )}
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Dokumen Revisi Ke- <span className="text-error">*</span></label>
-              <select 
-                name="nomor_revisi" 
-                required 
-                value={revisiKe}
-                onChange={(e) => setRevisiKe(e.target.value)}
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer">
-                <option value="1">Revisi 1 (PHP1)</option>
-                <option value="2">Revisi 2 (PHP2)</option>
-                <option value="3">Revisi 3 (PHP3)</option>
-                <option value="4">Revisi 4 (PHP4)</option>
-                <option value="5">Revisi 5 (PHP5)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Pengembalian Revisi <span className="text-error">*</span></label>
-              <input 
-                type="date" 
-                name="tanggal_revisi" 
-                required 
-                value={tanggalRevisi}
-                onChange={(e) => setTanggalRevisi(e.target.value)}
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
-            </div>
-            
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Nomor Registrasi Amdalnet (Opsional)</label>
               <input type="text" name="nomor_registrasi_amdalnet" defaultValue={doc.nomor_registrasi_amdalnet || ''} placeholder="Contoh: 698E43852228D"

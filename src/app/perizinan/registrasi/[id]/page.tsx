@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Printer, FilePlus, ClipboardCheck, Zap, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Printer, FilePlus, ClipboardCheck, Zap, Copy, Check, RefreshCw } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function DetailRegistrasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +21,8 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
   const [copiedNomor, setCopiedNomor] = useState(false);
   const [message, setMessage] = useState('');
   
-  // State for Nomor
+  // State for Tanggal & Nomor
+  const [inputTanggalMasuk, setInputTanggalMasuk] = useState('');
   const [inputNomorSurat, setInputNomorSurat] = useState('');
   const [inputNomorReg, setInputNomorReg] = useState('');
 
@@ -30,20 +31,29 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
       .then(res => res.json())
       .then(res => {
         setDoc(res.data);
+        setInputTanggalMasuk(res.data.tanggal_masuk_dokumen || new Date().toISOString().split('T')[0]);
         setInputNomorSurat(res.data.nomor_surat_permohonan || '');
         setInputNomorReg(res.data.nomor_checklist || '');
         setLoading(false);
       });
   }, [unwrappedParams.id]);
 
-  const handleGenerateNomorReg = async () => {
+  const handleSimpanTanggalDanGenerateNomorReg = async () => {
+    if (!inputTanggalMasuk) {
+      alert('Pilih Tanggal Masuk Dokumen terlebih dahulu!');
+      return;
+    }
+
     setIsGeneratingNomor(true);
-    setMessage('Men-generate Nomor Registrasi / Checklist...');
+    setMessage('Menyimpan tanggal & men-generate Nomor Registrasi / Checklist...');
     try {
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nomor_checklist: 'AUTO' })
+        body: JSON.stringify({
+          tanggal_masuk_dokumen: inputTanggalMasuk,
+          nomor_checklist: 'AUTO'
+        })
       });
       if (res.ok) {
         const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
@@ -57,9 +67,9 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
             setTimeout(() => setCopiedNomor(false), 2000);
           } catch {}
         }
-        setMessage('Nomor Registrasi berhasil di-generate & disalin ke clipboard!');
+        setMessage('Tanggal berhasil disimpan & Nomor Registrasi berhasil di-generate!');
       } else {
-        throw new Error('Gagal men-generate nomor registrasi');
+        throw new Error('Gagal menyimpan tanggal & men-generate nomor registrasi');
       }
     } catch (err: any) {
       alert(err.message);
@@ -116,8 +126,11 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
   };
 
   const handleUploadArsip = async () => {
-    const isNomorChanged = inputNomorSurat !== (doc.nomor_surat_permohonan || '') || inputNomorReg !== (doc.nomor_checklist || '');
-    if (!fileSuratPermohonan && !fileRegister && !isNomorChanged) {
+    const isDataChanged =
+      inputTanggalMasuk !== (doc.tanggal_masuk_dokumen || '') ||
+      inputNomorSurat !== (doc.nomor_surat_permohonan || '') ||
+      inputNomorReg !== (doc.nomor_checklist || '');
+    if (!fileSuratPermohonan && !fileRegister && !isDataChanged) {
       alert('Tidak ada file yang dipilih atau data yang diubah.');
       return;
     }
@@ -152,6 +165,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
 
       const payload: any = { 
         arsip_fisik: updatedArsipFisik,
+        tanggal_masuk_dokumen: inputTanggalMasuk,
         nomor_surat_permohonan: inputNomorSurat,
         nomor_checklist: inputNomorReg
       };
@@ -184,7 +198,10 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
   if (!doc) return <div className="text-center py-20 text-error font-bold bg-error-container text-on-error-container border border-outline-variant m-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">DATA TIDAK DITEMUKAN!</div>;
 
   const isAmdalnet = doc.sumber_data === 'AMDALNET';
-  const isNomorChanged = inputNomorSurat !== (doc.nomor_surat_permohonan || '') || inputNomorReg !== (doc.nomor_checklist || '');
+  const isDataChanged =
+    inputTanggalMasuk !== (doc.tanggal_masuk_dokumen || '') ||
+    inputNomorSurat !== (doc.nomor_surat_permohonan || '') ||
+    inputNomorReg !== (doc.nomor_checklist || '');
 
   return (
     <div className="max-w-5xl mx-auto py-8 space-y-8 pb-20">
@@ -345,58 +362,73 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
           </div>
         </div>
 
-        {/* Upload Arsip */}
-        <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50">
-          <h3 className="text-sm font-bold text-slate-800 mb-4 uppercase flex items-center gap-2">
-            <ClipboardCheck size={18} /> Upload Berkas Digital
-          </h3>
-          <p className="text-xs font-bold text-slate-500 mb-6 uppercase">Sesuaikan nomor surat jika diperlukan dan upload dokumen yang sudah ditandatangani untuk Arsip.</p>
+        {/* Upload Arsip & Pengaturan Tanggal + Nomor */}
+        <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50 space-y-6">
+          <div>
+            <h3 className="text-sm font-bold text-slate-800 mb-1 uppercase flex items-center gap-2">
+              <ClipboardCheck size={18} /> Pengaturan Nomor & Upload Berkas Digital
+            </h3>
+            <p className="text-xs font-bold text-slate-500 uppercase">Pilih tanggal masuk terlebih dahulu untuk men-generate nomor registrasi, lalu upload dokumen yang sudah ditandatangani.</p>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-xl border border-slate-200 bg-white">
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-900 uppercase">Nomor Surat Permohonan</label>
+              <label className="block text-xs font-bold text-slate-900 uppercase">1. Tanggal Masuk Dokumen</label>
               <input 
-                type="text" 
-                value={inputNomorSurat} 
-                onChange={(e) => setInputNomorSurat(e.target.value)} 
-                placeholder="/" 
-                className="w-full text-sm px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 font-bold text-slate-700" 
+                type="date" 
+                value={inputTanggalMasuk} 
+                onChange={(e) => setInputTanggalMasuk(e.target.value)} 
+                className="w-full text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 font-bold text-slate-700 cursor-pointer" 
               />
             </div>
+
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-900 uppercase">Nomor Registrasi / Checklist</label>
-              <div className="flex gap-2">
+              <label className="block text-xs font-bold text-slate-900 uppercase">2. Nomor Registrasi / Checklist</label>
+              <div className="flex flex-wrap gap-2">
                 <input 
                   type="text" 
                   value={inputNomorReg} 
                   onChange={(e) => setInputNomorReg(e.target.value)} 
-                  placeholder="/" 
-                  className="flex-1 text-sm px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 font-bold font-mono text-slate-700" 
+                  placeholder="Klik Simpan Tanggal & Generate..." 
+                  className="flex-1 min-w-[180px] text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 font-bold font-mono text-slate-700" 
                 />
                 <button
                   type="button"
-                  onClick={handleGenerateNomorReg}
+                  onClick={handleSimpanTanggalDanGenerateNomorReg}
                   disabled={isGeneratingNomor}
-                  className="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs uppercase flex items-center gap-1 whitespace-nowrap disabled:opacity-50"
-                  title="Generate Nomor Registrasi Otomatis"
+                  className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs uppercase flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50"
+                  title="Simpan Tanggal & Generate Nomor Registrasi Otomatis"
                 >
-                  <Zap size={14} /> {isGeneratingNomor ? '...' : 'Auto'}
+                  {inputNomorReg ? <RefreshCw size={14} className={isGeneratingNomor ? 'animate-spin' : ''} /> : <Zap size={14} />}
+                  <span>{isGeneratingNomor ? 'Proses...' : inputNomorReg ? 'Update Tgl' : 'Simpan Tgl & Generate'}</span>
                 </button>
                 {inputNomorReg && (
                   <button
                     type="button"
                     onClick={handleCopyNomorReg}
-                    className="px-3 py-2 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold rounded-xl text-xs uppercase flex items-center gap-1"
+                    className="px-3 py-2.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold rounded-xl text-xs uppercase flex items-center gap-1"
                     title="Salin Nomor"
                   >
                     {copiedNomor ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+                    <span>{copiedNomor ? 'Tersalin' : 'Salin'}</span>
                   </button>
                 )}
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="space-y-2">
+            <label className="block text-xs font-bold text-slate-900 uppercase">Nomor Surat Permohonan (Dari Pemrakarsa)</label>
+            <input 
+              type="text" 
+              value={inputNomorSurat} 
+              onChange={(e) => setInputNomorSurat(e.target.value)} 
+              placeholder="/" 
+              className="w-full md:w-1/2 text-sm px-4 py-2 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 focus:ring-1 focus:ring-slate-500 font-bold text-slate-700 bg-white" 
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Surat Permohonan */}
             <div className="space-y-2">
               <label className="block text-xs font-bold text-slate-900 uppercase">1. Surat Permohonan</label>
@@ -427,7 +459,7 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
           <button 
             type="button" 
             onClick={handleUploadArsip}
-            disabled={isUploadingArsip || (!fileSuratPermohonan && !fileRegister && !isNomorChanged)}
+            disabled={isUploadingArsip || (!fileSuratPermohonan && !fileRegister && !isDataChanged)}
             className="px-6 py-2 bg-slate-700 hover:bg-slate-800 text-white font-bold rounded-xl shadow border border-slate-800 transition-all text-xs uppercase disabled:opacity-50"
           >
             {isUploadingArsip ? 'Mengunggah...' : 'Simpan Berkas & Nomor ke Arsip'}

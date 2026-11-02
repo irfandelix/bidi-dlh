@@ -60,27 +60,38 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
     });
   }, [unwrappedParams.id]);
 
-  const handleGenerateNomor = async () => {
-    setGeneratingNomor(true);
-    setMessage('Men-generate Nomor BA Uji Administrasi...');
-    try {
-      const dateInput = document.querySelector('input[name="tanggal_uji_berkas"]') as HTMLInputElement;
-      const tanggalUji = dateInput?.value || doc?.tanggal_uji_berkas || new Date().toISOString().split('T')[0];
+  const handleSimpanTanggalDanGenerateNomor = async () => {
+    const dateInput = document.querySelector('input[name="tanggal_uji_berkas"]') as HTMLInputElement;
+    const tanggalUji = dateInput?.value;
+    if (!tanggalUji) {
+      alert('Pilih Tanggal BA Uji Administrasi terlebih dahulu!');
+      return;
+    }
 
+    setGeneratingNomor(true);
+    setMessage('Menyimpan tanggal & men-generate Nomor BA Uji Administrasi...');
+    try {
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          nomor_uji_berkas: 'AUTO',
-          tanggal_uji_berkas: tanggalUji
+          tanggal_uji_berkas: tanggalUji,
+          nomor_uji_berkas: 'AUTO'
         })
       });
       if (res.ok) {
         const resData = await res.json();
         setDoc(resData.data);
-        setMessage('Nomor BA Uji Administrasi berhasil di-generate!');
+        if (resData.data?.nomor_uji_berkas) {
+          try {
+            await navigator.clipboard.writeText(resData.data.nomor_uji_berkas);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          } catch {}
+        }
+        setMessage('Tanggal berhasil disimpan & Nomor BA HUA berhasil di-generate!');
       } else {
-        throw new Error('Gagal men-generate nomor');
+        throw new Error('Gagal menyimpan tanggal & men-generate nomor');
       }
     } catch (err: any) {
       alert(err.message);
@@ -341,52 +352,64 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
 
           {!isAmdalnet && (
             <>
-          {/* Nomor & Tanggal BA Uji Administrasi */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div className="border border-teal-200 bg-teal-50 p-4 rounded-xl shadow-sm">
-              <label className="block text-sm font-bold text-teal-900 mb-2 uppercase">Nomor BA Uji Administrasi (BA HUA)</label>
+          {/* Langkah 1: Tanggal -> Langkah 2: Simpan Tanggal & Generate Nomor */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 p-5 rounded-2xl border border-teal-200 bg-teal-50/70 shadow-sm">
+            <div>
+              <label className="block text-sm font-bold text-teal-950 mb-2 uppercase">
+                1. Tanggal BA Uji Administrasi <span className="text-error">*</span>
+              </label>
+              <input type="date" name="tanggal_uji_berkas" required defaultValue={doc.tanggal_uji_berkas || new Date().toISOString().split('T')[0]}
+                className="w-full bg-white border border-teal-300 text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm transition-all outline-none cursor-pointer" />
+              <p className="text-[11px] text-teal-800 mt-1.5 font-bold">
+                * Tentukan tanggal terlebih dahulu, lalu klik tombol di samping untuk menyimpan tanggal & menerbitkan nomor.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-teal-950 mb-2 uppercase">
+                2. Nomor BA Uji Administrasi (BA HUA)
+              </label>
               {doc.nomor_uji_berkas ? (
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-white border border-teal-200 text-teal-900 font-bold text-sm rounded-xl px-4 py-3 shadow-sm break-all">
-                    {doc.nomor_uji_berkas}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-white border border-teal-300 text-teal-950 font-bold text-sm font-mono rounded-xl px-4 py-3 shadow-sm break-all">
+                      {doc.nomor_uji_berkas}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleCopyNomor}
+                      className="px-4 py-3 bg-white hover:bg-teal-100 text-teal-900 border border-teal-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 shrink-0"
+                      title="Salin Nomor"
+                    >
+                      {copied ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                      <span>{copied ? 'Disalin' : 'Salin'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSimpanTanggalDanGenerateNomor}
+                      disabled={generatingNomor}
+                      className="px-3 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                      title="Simpan perubahan tanggal & perbarui nomor"
+                    >
+                      <RefreshCw size={15} className={generatingNomor ? 'animate-spin' : ''} />
+                      <span className="hidden sm:inline">Update Tgl</span>
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleCopyNomor}
-                    className="px-4 py-3 bg-white hover:bg-teal-100 text-teal-800 border border-teal-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 shrink-0"
-                    title="Salin Nomor"
-                  >
-                    {copied ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
-                    <span>{copied ? 'Disalin' : 'Salin'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleGenerateNomor}
-                    disabled={generatingNomor}
-                    className="p-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl shadow-sm transition-colors shrink-0 disabled:opacity-50"
-                    title="Perbarui Nomor Sesuai Tanggal"
-                  >
-                    <RefreshCw size={16} className={generatingNomor ? 'animate-spin' : ''} />
-                  </button>
+                  <p className="text-[11px] text-emerald-800 font-bold">
+                    ✅ Tanggal ({doc.tanggal_uji_berkas}) & Nomor sudah tersimpan.
+                  </p>
                 </div>
               ) : (
                 <button
                   type="button"
-                  onClick={handleGenerateNomor}
+                  onClick={handleSimpanTanggalDanGenerateNomor}
                   disabled={generatingNomor}
-                  className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center gap-2 disabled:opacity-50"
+                  className="w-full px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <Zap size={16} />
-                  <span>{generatingNomor ? 'Men-generate...' : 'Generate Nomor Dahulu'}</span>
+                  <span>{generatingNomor ? 'Menyimpan & Generate...' : 'Simpan Tanggal & Generate Nomor'}</span>
                 </button>
               )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal BA Uji Administrasi <span className="text-error">*</span></label>
-              <input type="date" name="tanggal_uji_berkas" required defaultValue={doc.tanggal_uji_berkas || new Date().toISOString().split('T')[0]}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
-              <p className="text-[10px] text-on-surface-variant mt-1 uppercase font-bold">* Pilih tanggal terlebih dahulu sebelum klik Generate Nomor</p>
             </div>
           </div>
 

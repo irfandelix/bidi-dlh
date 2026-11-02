@@ -34,16 +34,21 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
     });
   }, [unwrappedParams.id]);
 
-  const handleGenerateNomor = async () => {
+  const handleSimpanTanggalDanGenerateNomor = async () => {
+    const dateInput = document.querySelector('input[name="tanggal_verlap"]') as HTMLInputElement;
+    const tgl = dateInput?.value;
+    if (!tgl) {
+      alert('Pilih Tanggal Verifikasi Lapangan terlebih dahulu!');
+      return;
+    }
+
     setIsGeneratingNomor(true);
-    setMessage('Men-generate Nomor BA Verifikasi Lapangan...');
+    setMessage('Menyimpan tanggal & men-generate Nomor BA Verifikasi Lapangan...');
     try {
-      const dateInput = document.querySelector('input[name="tanggal_verlap"]') as HTMLInputElement;
-      const tgl = dateInput?.value || doc?.tanggal_verlap || new Date().toISOString().split('T')[0];
       const res = await fetch(`/api/perizinan/${unwrappedParams.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nomor_ba_verlap: 'AUTO', tanggal_verlap: tgl })
+        body: JSON.stringify({ tanggal_verlap: tgl, nomor_ba_verlap: 'AUTO' })
       });
       if (res.ok) {
         const newDoc = await (await fetch(`/api/perizinan/${unwrappedParams.id}`)).json();
@@ -55,9 +60,9 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
             setTimeout(() => setCopiedNomor(false), 2000);
           } catch {}
         }
-        setMessage('Nomor BA Verlap berhasil di-generate & disalin ke clipboard!');
+        setMessage('Tanggal berhasil disimpan & Nomor BA Verlap berhasil di-generate!');
       } else {
-        throw new Error('Gagal men-generate nomor');
+        throw new Error('Gagal menyimpan tanggal & men-generate nomor');
       }
     } catch (err: any) {
       alert(err.message);
@@ -254,57 +259,68 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="md:col-span-2 border border-amber-200 bg-amber-50 p-4 rounded-xl shadow-sm">
-              <label className="block text-sm font-bold text-amber-900 mb-2 uppercase">Nomor BA Verifikasi Lapangan (BA Verlap)</label>
-              {doc.nomor_ba_verlap ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="flex-1 bg-white border border-amber-200 text-amber-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono">
-                    {doc.nomor_ba_verlap}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCopyNomor}
-                    className="px-4 py-3 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
-                    title="Salin Nomor"
-                  >
-                    {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
-                    {copiedNomor ? 'Tersalin' : 'Salin'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleGenerateNomor}
-                    disabled={isGeneratingNomor}
-                    className="px-3 py-3 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1"
-                    title="Perbarui Bulan Nomor Sesuai Tanggal"
-                  >
-                    <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleGenerateNomor}
-                    disabled={isGeneratingNomor}
-                    className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center gap-2 disabled:opacity-50"
-                  >
-                    <Zap size={16} />
-                    {isGeneratingNomor ? 'Men-generate...' : 'Generate Nomor Dahulu'}
-                  </button>
-                  <span className="text-xs font-bold text-amber-800/80">
-                    * Klik untuk booking & menyalin nomor BA Verlap sebelum mengisi form lengkap.
-                  </span>
-                </div>
-              )}
+          {/* Langkah 1: Tanggal -> Langkah 2: Simpan Tanggal & Generate Nomor */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 rounded-2xl border border-amber-200 bg-amber-50/70 shadow-sm">
+            <div>
+              <label className="block text-sm font-bold text-amber-950 mb-2 uppercase">
+                1. Tanggal Verifikasi Lapangan <span className="text-error">*</span>
+              </label>
+              <input type="date" name="tanggal_verlap" required defaultValue={doc.tanggal_verlap || new Date().toISOString().split('T')[0]}
+                className="w-full bg-white border border-amber-300 text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm transition-all outline-none cursor-pointer" />
+              <p className="text-[11px] text-amber-900 mt-1.5 font-bold">
+                * Tentukan tanggal terlebih dahulu, lalu klik tombol di samping untuk menyimpan tanggal & menerbitkan nomor.
+              </p>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Verifikasi Lapangan <span className="text-error">*</span></label>
-              <input type="date" name="tanggal_verlap" required defaultValue={doc.tanggal_verlap || new Date().toISOString().split('T')[0]}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
+              <label className="block text-sm font-bold text-amber-950 mb-2 uppercase">
+                2. Nomor BA Verifikasi Lapangan (BA Verlap)
+              </label>
+              {doc.nomor_ba_verlap ? (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex-1 bg-white border border-amber-300 text-amber-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
+                      {doc.nomor_ba_verlap}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleCopyNomor}
+                      className="px-4 py-3 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
+                      title="Salin Nomor"
+                    >
+                      {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                      {copiedNomor ? 'Tersalin' : 'Salin'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSimpanTanggalDanGenerateNomor}
+                      disabled={isGeneratingNomor}
+                      className="px-3 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
+                      title="Simpan perubahan tanggal & perbarui nomor"
+                    >
+                      <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
+                      <span className="hidden sm:inline">Update Tgl</span>
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-emerald-800 font-bold">
+                    ✅ Tanggal ({doc.tanggal_verlap}) & Nomor sudah tersimpan.
+                  </p>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleSimpanTanggalDanGenerateNomor}
+                  disabled={isGeneratingNomor}
+                  className="w-full px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <Zap size={16} />
+                  {isGeneratingNomor ? 'Menyimpan & Generate...' : 'Simpan Tanggal & Generate Nomor'}
+                </button>
+              )}
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Tambahan Data Pemrakarsa */}
             <div className="md:col-span-2 pt-4 border-t border-outline-variant">
               <h4 className="text-sm font-bold text-on-surface mb-4 uppercase bg-blue-200 inline-block px-3 py-1 rounded border border-outline-variant shadow-sm hover:shadow-md transition-shadow">Lengkapi Data Pemrakarsa (Untuk BA)</h4>
