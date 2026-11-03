@@ -317,44 +317,42 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
               </label>
               {doc.nomor_ba_verlap ? (
                 <div className="space-y-2.5">
+                  <div className="w-full bg-white border border-amber-300 text-amber-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
+                    {doc.nomor_ba_verlap}
+                  </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex-1 bg-white border border-amber-300 text-amber-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
-                      {doc.nomor_ba_verlap}
-                    </div>
                     <button
                       type="button"
                       onClick={handleCopyNomor}
-                      className="px-4 py-3 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-white hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center justify-center gap-1.5"
                       title="Salin Nomor"
                     >
-                      {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
-                      {copiedNomor ? 'Tersalin' : 'Salin'}
+                      {copiedNomor ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
+                      <span>{copiedNomor ? 'Tersalin' : 'Salin'}</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleSimpanTanggalDanGenerateNomor}
                       disabled={isGeneratingNomor}
-                      className="px-3 py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center justify-center gap-1.5 disabled:opacity-50"
                       title="Simpan perubahan tanggal & perbarui nomor"
                     >
                       <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
-                      <span className="hidden sm:inline">Update Tgl</span>
+                      <span>{isGeneratingNomor ? 'Proses...' : 'Update Tanggal'}</span>
                     </button>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                    <p className="text-[11px] text-emerald-800 font-bold">
-                      ✅ Tanggal ({doc.tanggal_verlap}) & Nomor sudah tersimpan.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleDownloadTemplate}
-                      disabled={downloadingTemplate}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
-                    >
-                      <Download size={14} />
-                      <span>{downloadingTemplate ? 'Mengunduh...' : 'Unduh Berkas BA Verlap (.docx)'}</span>
-                    </button>
-                  </div>
+                  <p className="text-[11px] text-emerald-800 font-bold">
+                    ✅ {doc.tanggal_verlap ? `Tanggal (${doc.tanggal_verlap}) & Nomor sudah tersimpan.` : 'Nomor sudah tersimpan.'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleDownloadTemplate}
+                    disabled={downloadingTemplate}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Download size={14} />
+                    <span>{downloadingTemplate ? 'Mengunduh...' : 'Unduh Berkas BA Verlap (.docx)'}</span>
+                  </button>
                 </div>
               ) : (
                 <button

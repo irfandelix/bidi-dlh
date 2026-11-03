@@ -488,44 +488,42 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
               </label>
               {currentNomorPhp ? (
                 <div className="space-y-2.5">
+                  <div className="w-full bg-white border border-emerald-300 text-emerald-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
+                    {currentNomorPhp}
+                  </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex-1 bg-white border border-emerald-300 text-emerald-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
-                      {currentNomorPhp}
-                    </div>
                     <button
                       type="button"
                       onClick={handleCopyNomor}
-                      className="px-4 py-3 bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5"
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center justify-center gap-1.5"
                       title="Salin Nomor"
                     >
-                      {copiedNomor ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
-                      {copiedNomor ? 'Tersalin' : 'Salin'}
+                      {copiedNomor ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
+                      <span>{copiedNomor ? 'Tersalin' : 'Salin'}</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleSimpanTanggalDanGenerateNomor}
                       disabled={isGeneratingNomor}
-                      className="px-3 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center justify-center gap-1.5 disabled:opacity-50"
                       title="Simpan perubahan tanggal & perbarui nomor"
                     >
                       <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
-                      <span className="hidden sm:inline">Update Tgl</span>
+                      <span>{isGeneratingNomor ? 'Proses...' : 'Update Tanggal'}</span>
                     </button>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                    <p className="text-[11px] text-emerald-800 font-bold">
-                      ✅ Tanggal ({currentTanggalPhp || '-'}) & Nomor PHP {revisiKe} sudah tersimpan.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => handleDownloadTemplate(revisiKe)}
-                      disabled={downloadingRev === revisiKe}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
-                    >
-                      <Download size={14} />
-                      <span>{downloadingRev === revisiKe ? 'Mengunduh...' : `Unduh Berkas Tanda Terima PHP ${revisiKe} (.docx)`}</span>
-                    </button>
-                  </div>
+                  <p className="text-[11px] text-emerald-800 font-bold">
+                    ✅ {currentTanggalPhp ? `Tanggal (${currentTanggalPhp}) & Nomor PHP ${revisiKe} sudah tersimpan.` : `Nomor PHP ${revisiKe} sudah tersimpan.`}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadTemplate(revisiKe)}
+                    disabled={downloadingRev === revisiKe}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Download size={14} />
+                    <span>{downloadingRev === revisiKe ? 'Mengunduh...' : `Unduh Berkas Tanda Terima PHP ${revisiKe} (.docx)`}</span>
+                  </button>
                 </div>
               ) : (
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">

@@ -393,44 +393,42 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
               </label>
               {doc.nomor_uji_berkas ? (
                 <div className="space-y-2.5">
+                  <div className="w-full bg-white border border-teal-300 text-teal-950 font-bold text-sm font-mono rounded-xl px-4 py-3 shadow-sm break-all">
+                    {doc.nomor_uji_berkas}
+                  </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex-1 bg-white border border-teal-300 text-teal-950 font-bold text-sm font-mono rounded-xl px-4 py-3 shadow-sm break-all">
-                      {doc.nomor_uji_berkas}
-                    </div>
                     <button
                       type="button"
                       onClick={handleCopyNomor}
-                      className="px-4 py-3 bg-white hover:bg-teal-100 text-teal-900 border border-teal-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 shrink-0"
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-white hover:bg-teal-100 text-teal-900 border border-teal-300 font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center justify-center gap-1.5"
                       title="Salin Nomor"
                     >
-                      {copied ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                      {copied ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
                       <span>{copied ? 'Disalin' : 'Salin'}</span>
                     </button>
                     <button
                       type="button"
                       onClick={handleSimpanTanggalDanGenerateNomor}
                       disabled={generatingNomor}
-                      className="px-3 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                      className="flex-1 sm:flex-none px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center justify-center gap-1.5 disabled:opacity-50"
                       title="Simpan perubahan tanggal & perbarui nomor"
                     >
                       <RefreshCw size={15} className={generatingNomor ? 'animate-spin' : ''} />
-                      <span className="hidden sm:inline">Update Tgl</span>
+                      <span>{generatingNomor ? 'Proses...' : 'Update Tanggal'}</span>
                     </button>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                    <p className="text-[11px] text-emerald-800 font-bold">
-                      ✅ Tanggal ({doc.tanggal_uji_berkas}) & Nomor sudah tersimpan.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleDownloadTemplate}
-                      disabled={downloadingTemplate}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center gap-1.5 disabled:opacity-50"
-                    >
-                      <Download size={14} />
-                      <span>{downloadingTemplate ? 'Mengunduh...' : 'Unduh Berkas BA HUA (.docx)'}</span>
-                    </button>
-                  </div>
+                  <p className="text-[11px] text-emerald-800 font-bold">
+                    ✅ {doc.tanggal_uji_berkas ? `Tanggal (${doc.tanggal_uji_berkas}) & Nomor sudah tersimpan.` : 'Nomor sudah tersimpan.'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleDownloadTemplate}
+                    disabled={downloadingTemplate}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Download size={14} />
+                    <span>{downloadingTemplate ? 'Mengunduh...' : 'Unduh Berkas BA HUA (.docx)'}</span>
+                  </button>
                 </div>
               ) : (
                 <button

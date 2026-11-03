@@ -298,36 +298,37 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
                   className="w-full bg-surface border border-outline-variant text-on-surface text-sm font-bold rounded-xl p-3 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
 
-              <div className="relative z-10 space-y-2">
+              <div className="relative z-10 space-y-2.5">
                 <label className="block text-xs font-bold text-on-surface uppercase tracking-wider">2. Nomor Risalah (RPD)</label>
                 <input type="hidden" id="nomor_risalah_input" name="nomor_risalah" value={nomorRisalah} />
                 {nomorRisalah ? (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
+                    <div className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold font-mono rounded-xl p-3 shadow-sm break-all">
+                      {nomorRisalah}
+                    </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <div className="flex-1 min-w-[180px] bg-white border border-outline-variant text-on-surface text-sm font-bold font-mono rounded-xl p-3 shadow-sm break-all">
-                        {nomorRisalah}
-                      </div>
                       <button
                         type="button"
                         onClick={handleCopyNomorRisalah}
-                        className="px-3 py-3 bg-white hover:bg-slate-100 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm transition-all uppercase text-xs flex items-center gap-1"
+                        className="flex-1 sm:flex-none px-4 py-2.5 bg-white hover:bg-slate-100 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm transition-all uppercase text-xs flex items-center justify-center gap-1.5"
                         title="Salin Nomor Risalah"
                       >
                         {copiedNomor ? <Check size={15} className="text-emerald-600" /> : <Copy size={15} />}
-                        {copiedNomor ? 'Tersalin' : 'Salin'}
+                        <span>{copiedNomor ? 'Tersalin' : 'Salin'}</span>
                       </button>
                       <button
                         type="button"
                         onClick={handleSimpanTanggalDanGenerateNomorRisalah}
                         disabled={isGeneratingNomor}
-                        className="px-3 py-3 bg-indigo-200 hover:bg-indigo-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm transition-all uppercase text-xs flex items-center gap-1 disabled:opacity-50"
+                        className="flex-1 sm:flex-none px-4 py-2.5 bg-indigo-200 hover:bg-indigo-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm transition-all uppercase text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
                         title="Simpan perubahan tanggal & perbarui nomor RPD"
                       >
                         <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
+                        <span>{isGeneratingNomor ? 'Proses...' : 'Update Tanggal'}</span>
                       </button>
                     </div>
                     <p className="text-[11px] text-on-surface font-bold">
-                      ✅ Tanggal ({doc.tanggal_risalah || '-'}) & Nomor RPD sudah tersimpan.
+                      ✅ {doc.tanggal_risalah ? `Tanggal (${doc.tanggal_risalah}) & Nomor RPD sudah tersimpan.` : 'Nomor RPD sudah tersimpan.'}
                     </p>
                   </div>
                 ) : (

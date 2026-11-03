@@ -344,92 +344,81 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <label className="block text-xs font-bold text-slate-900 uppercase">2. Nomor Registrasi / Checklist</label>
-              <div className="flex flex-wrap gap-2">
-                <input 
-                  type="text" 
-                  value={inputNomorReg} 
-                  onChange={(e) => setInputNomorReg(e.target.value)} 
-                  placeholder="Klik Simpan Tanggal & Generate..." 
-                  className="flex-1 min-w-[180px] text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 font-bold font-mono text-slate-700" 
-                />
-                <button
-                  type="button"
-                  onClick={handleSimpanTanggalDanGenerateNomorReg}
-                  disabled={isGeneratingNomor}
-                  className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs uppercase flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50"
-                  title="Simpan Tanggal & Generate Nomor Registrasi Otomatis"
-                >
-                  {doc.nomor_checklist ? <RefreshCw size={14} className={isGeneratingNomor ? 'animate-spin' : ''} /> : <Zap size={14} />}
-                  <span>{isGeneratingNomor ? 'Proses...' : doc.nomor_checklist ? 'Update Tgl' : 'Simpan Tgl & Generate'}</span>
-                </button>
+              <input 
+                type="text" 
+                value={inputNomorReg} 
+                onChange={(e) => setInputNomorReg(e.target.value)} 
+                placeholder="Klik Simpan Tanggal & Generate..." 
+                className="w-full text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-slate-500 font-bold font-mono text-slate-700" 
+              />
+              <div className="flex flex-wrap items-center gap-2">
                 {doc.nomor_checklist && (
                   <button
                     type="button"
                     onClick={handleCopyNomorReg}
-                    className="px-3 py-2.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold rounded-xl text-xs uppercase flex items-center gap-1"
+                    className="flex-1 sm:flex-none px-4 py-2.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-bold rounded-xl text-xs uppercase flex items-center justify-center gap-1.5 shadow-sm"
                     title="Salin Nomor"
                   >
                     {copiedNomor ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
                     <span>{copiedNomor ? 'Tersalin' : 'Salin'}</span>
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={handleSimpanTanggalDanGenerateNomorReg}
+                  disabled={isGeneratingNomor}
+                  className="flex-1 sm:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl text-xs uppercase flex items-center justify-center gap-1.5 whitespace-nowrap disabled:opacity-50 shadow-sm"
+                  title="Simpan Tanggal & Generate Nomor Registrasi Otomatis"
+                >
+                  {doc.nomor_checklist ? <RefreshCw size={14} className={isGeneratingNomor ? 'animate-spin' : ''} /> : <Zap size={14} />}
+                  <span>{isGeneratingNomor ? 'Proses...' : doc.nomor_checklist ? 'Update Tanggal' : 'Simpan Tanggal & Generate'}</span>
+                </button>
               </div>
               {doc.nomor_checklist && (
-                <p className="text-[11px] text-emerald-700 font-bold">
-                  ✅ Nomor tersimpan: <span className="font-mono">{doc.nomor_checklist}</span>
-                </p>
+                <>
+                  <p className="text-[11px] text-emerald-700 font-bold">
+                    ✅ {doc.tanggal_masuk_dokumen ? `Tanggal (${doc.tanggal_masuk_dokumen}) & Nomor sudah tersimpan.` : 'Nomor sudah tersimpan.'}
+                  </p>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {isAmdalnet ? (
+                      <button 
+                        type="button"
+                        onClick={() => handleDownload('Lembar_Registrasi_Amdalnet')}
+                        disabled={downloading === 'Lembar_Registrasi_Amdalnet'}
+                        className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 uppercase disabled:opacity-70"
+                      >
+                        {downloading === 'Lembar_Registrasi_Amdalnet' ? <LottieLoader size={16} /> : <Download size={14} />}
+                        Unduh Lembar Registrasi Amdalnet (.docx)
+                      </button>
+                    ) : (
+                      <>
+                        <button 
+                          type="button"
+                          onClick={() => handleDownload('template_tanda_terima_registrasi')}
+                          disabled={downloading === 'template_tanda_terima_registrasi'}
+                          className="w-full sm:w-auto px-4 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-900 border border-amber-500 font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 uppercase disabled:opacity-70"
+                        >
+                          {downloading === 'template_tanda_terima_registrasi' ? <LottieLoader size={16} /> : <Download size={14} />}
+                          Unduh Berkas Tanda Terima (.docx)
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => handleDownload('template_checklist')}
+                          disabled={downloading === 'template_checklist'}
+                          className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 uppercase disabled:opacity-70"
+                        >
+                          {downloading === 'template_checklist' ? <LottieLoader size={16} /> : <Download size={14} />}
+                          Unduh Berkas Checklist (.docx)
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           </div>
-
-          {/* Unduh Berkas Template (Hanya muncul setelah nomor disimpan) */}
-          {doc.nomor_checklist ? (
-            <div className="p-5 rounded-xl border border-emerald-300 bg-emerald-50/70 space-y-3">
-              <h4 className="text-xs font-black text-emerald-950 uppercase flex items-center gap-2">
-                <Download size={16} /> Unduh Berkas Template Registrasi (.docx)
-              </h4>
-              <div className="flex flex-col sm:flex-row gap-3">
-                {isAmdalnet ? (
-                  <button 
-                    type="button"
-                    onClick={() => handleDownload('Lembar_Registrasi_Amdalnet')}
-                    disabled={downloading === 'Lembar_Registrasi_Amdalnet'}
-                    className="w-full sm:w-auto px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-70"
-                  >
-                    {downloading === 'Lembar_Registrasi_Amdalnet' ? <LottieLoader size={18} /> : <Download size={15} />}
-                    Unduh Lembar Registrasi Amdalnet (.docx)
-                  </button>
-                ) : (
-                  <>
-                    <button 
-                      type="button"
-                      onClick={() => handleDownload('template_tanda_terima_registrasi')}
-                      disabled={downloading === 'template_tanda_terima_registrasi'}
-                      className="w-full sm:w-auto px-5 py-3 bg-amber-400 hover:bg-amber-300 text-slate-900 border border-amber-500 font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-70"
-                    >
-                      {downloading === 'template_tanda_terima_registrasi' ? <LottieLoader size={18} /> : <Download size={15} />}
-                      Unduh Berkas Tanda Terima (.docx)
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => handleDownload('template_checklist')}
-                      disabled={downloading === 'template_checklist'}
-                      className="w-full sm:w-auto px-5 py-3 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider disabled:opacity-70"
-                    >
-                      {downloading === 'template_checklist' ? <LottieLoader size={18} /> : <Download size={15} />}
-                      Unduh Berkas Checklist (.docx)
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 rounded-xl border border-amber-200 bg-amber-50 text-xs font-bold text-amber-900">
-              ℹ️ Simpan tanggal & generate Nomor Registrasi terlebih dahulu untuk memunculkan tombol Unduh Berkas Template.
-            </div>
-          )}
 
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-900 uppercase">Nomor Surat Permohonan (Dari Pemrakarsa)</label>
