@@ -313,9 +313,12 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
             <tbody className="divide-y-2 divide-slate-200">
               
               {/* 1. DATA PEMRAKARSA & KONTAK */}
-              <tr className="bg-surface-container-low">
-                <td colSpan={2} className="py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider flex items-center gap-2">
-                  <User size={14} className="text-primary" /> Data Pemrakarsa & Kontak
+              <tr className="bg-slate-100">
+                <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
+                  <div className="flex items-center gap-2">
+                    <User size={14} className="text-primary shrink-0" />
+                    <span>Data Pemrakarsa & Kontak</span>
+                  </div>
                 </td>
               </tr>
               <tr className="hover:bg-surface-container-lowest">
@@ -358,9 +361,12 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               )}
 
               {/* 2. DATA USAHA & KEGIATAN */}
-              <tr className="bg-surface-container-low">
-                <td colSpan={2} className="py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider flex items-center gap-2">
-                  <Building2 size={14} className="text-primary" /> Data Usaha & Rencana Kegiatan
+              <tr className="bg-slate-100">
+                <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
+                  <div className="flex items-center gap-2">
+                    <Building2 size={14} className="text-primary shrink-0" />
+                    <span>Data Usaha & Rencana Kegiatan</span>
+                  </div>
                 </td>
               </tr>
               <tr className="hover:bg-surface-container-lowest">
@@ -391,9 +397,12 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               </tr>
 
               {/* 3. ADMINISTRASI & KLASIFIKASI DOKUMEN */}
-              <tr className="bg-surface-container-low">
-                <td colSpan={2} className="py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider flex items-center gap-2">
-                  <FileCheck size={14} className="text-primary" /> Administrasi & Klasifikasi Dokumen
+              <tr className="bg-slate-100">
+                <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
+                  <div className="flex items-center gap-2">
+                    <FileCheck size={14} className="text-primary shrink-0" />
+                    <span>Administrasi & Klasifikasi Dokumen</span>
+                  </div>
                 </td>
               </tr>
               <tr className="hover:bg-surface-container-lowest">
@@ -419,9 +428,12 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               </tr>
 
               {/* 4. TAHAP 1 - REGISTRASI & PENERIMAAN */}
-              <tr className="bg-surface-container-low">
-                <td colSpan={2} className="py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider flex items-center gap-2">
-                  <Layers size={14} className="text-primary" /> Tahap 1: Registrasi Dokumen Masuk
+              <tr className="bg-slate-100">
+                <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
+                  <div className="flex items-center gap-2">
+                    <Layers size={14} className="text-primary shrink-0" />
+                    <span>Tahap 1: Registrasi Dokumen Masuk</span>
+                  </div>
                 </td>
               </tr>
               {doc.nomor_surat_permohonan && (
@@ -462,9 +474,12 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               {/* 5. TAHAP 2 - UJI ADMINISTRASI (HUA) */}
               {(doc.nomor_uji_berkas || doc.tanggal_uji_berkas || showAllStages) && (
                 <>
-                  <tr className="bg-surface-container-low">
-                    <td colSpan={2} className="py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider flex items-center gap-2">
-                      <Layers size={14} className="text-primary" /> Tahap 2: Uji Kelengkapan Administrasi (BA HUA)
+                  <tr className="bg-slate-100">
+                    <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Layers size={14} className="text-primary shrink-0" />
+                        <span>Tahap 2: Uji Kelengkapan Administrasi (BA HUA)</span>
+                      </div>
                     </td>
                   </tr>
                   <tr className="hover:bg-surface-container-lowest">
@@ -501,9 +516,12 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               {/* 6. TAHAP 3 - VERIFIKASI LAPANGAN (VERLAP) */}
               {(doc.nomor_ba_verlap || doc.tanggal_verlap || showAllStages) && (
                 <>
-                  <tr className="bg-surface-container-low">
-                    <td colSpan={2} className="py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider flex items-center gap-2">
-                      <Layers size={14} className="text-primary" /> Tahap 3: Verifikasi Lapangan (Verlap)
+                  <tr className="bg-slate-100">
+                    <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Layers size={14} className="text-primary shrink-0" />
+                        <span>Tahap 3: Verifikasi Lapangan (Verlap)</span>
+                      </div>
                     </td>
                   </tr>
                   <tr className="hover:bg-surface-container-lowest">
@@ -537,9 +555,12 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               {/* 7. TAHAP 4 & 5 - PEMERIKSAAN SUBSTANSI & PENGEMBALIAN */}
               {(doc.nomor_ba_pemeriksaan || doc.tanggal_pemeriksaan || doc.tanggal_pengembalian || showAllStages) && (
                 <>
-                  <tr className="bg-surface-container-low">
-                    <td colSpan={2} className="py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider flex items-center gap-2">
-                      <Layers size={14} className="text-primary" /> Tahap 4 & 5: Pemeriksaan Substansi & Penyerahan BA
+                  <tr className="bg-slate-100">
+                    <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Layers size={14} className="text-primary shrink-0" />
+                        <span>Tahap 4 & 5: Pemeriksaan Substansi & Penyerahan BA</span>
+                      </div>
                     </td>
                   </tr>
                   <tr className="hover:bg-surface-container-lowest">
@@ -588,8 +609,11 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               {(doc.nomor_php || doc.nomor_php1 || doc.nomor_revisi_1 || doc.nomor_revisi || doc.tanggal_php_1 || doc.tanggal_revisi_1 || showAllStages) && (
                 <>
                   <tr className="bg-primary-container text-on-primary-container">
-                    <td colSpan={2} className="py-2.5 px-6 font-black text-indigo-900 text-xs uppercase tracking-wider flex items-center gap-2">
-                      <Layers size={14} className="text-indigo-900" /> Tahap 6–9: Riwayat Perbaikan Dokumen (Revisi)
+                    <td colSpan={2} className="w-full py-2.5 px-6 font-black text-indigo-900 text-xs uppercase tracking-wider bg-indigo-100">
+                      <div className="flex items-center gap-2">
+                        <Layers size={14} className="text-indigo-900 shrink-0" />
+                        <span>Tahap 6–9: Riwayat Perbaikan Dokumen (Revisi)</span>
+                      </div>
                     </td>
                   </tr>
                   {[1, 2, 3, 4, 5].map((rev) => {
@@ -653,9 +677,12 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               {/* 9. TAHAP 10 - FINALISASI (RPD & SK) */}
               {(doc.nomor_risalah || doc.nomor_sk || doc.tanggal_risalah || doc.tanggal_penyerahan_sk || showAllStages) && (
                 <>
-                  <tr className="bg-tertiary-container text-on-tertiary-container">
-                    <td colSpan={2} className="py-2.5 px-6 font-black text-amber-900 text-xs uppercase tracking-wider flex items-center gap-2">
-                      <Layers size={14} className="text-amber-900" /> Tahap 10: Finalisasi (Risalah RPD & SK)
+                  <tr className="bg-amber-100 text-amber-900">
+                    <td colSpan={2} className="w-full py-2.5 px-6 font-black text-amber-900 text-xs uppercase tracking-wider bg-amber-100">
+                      <div className="flex items-center gap-2">
+                        <Layers size={14} className="text-amber-900 shrink-0" />
+                        <span>Tahap 10: Finalisasi (Risalah RPD & SK)</span>
+                      </div>
                     </td>
                   </tr>
                   <tr className="hover:bg-surface-container-lowest">
@@ -688,9 +715,12 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               {/* 10. TAHAP 11 - PENERIMAAN JILIDAN */}
               {(doc.tanggal_penerimaan_jilidan || doc.pengirim_jilidan || showAllStages) && (
                 <>
-                  <tr className="bg-surface-container-low">
-                    <td colSpan={2} className="py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider flex items-center gap-2">
-                      <Layers size={14} className="text-primary" /> Tahap 11: Penerimaan Dokumen Fisik Jilidan
+                  <tr className="bg-slate-100">
+                    <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Layers size={14} className="text-primary shrink-0" />
+                        <span>Tahap 11: Penerimaan Dokumen Fisik Jilidan</span>
+                      </div>
                     </td>
                   </tr>
                   <tr className="hover:bg-surface-container-lowest bg-tertiary-container/30">
@@ -710,9 +740,12 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               {/* 11. TAHAP 12 - PENGARSIPAN */}
               {(doc.arsip_fisik || doc.file_arsip_url || showAllStages) && (
                 <>
-                  <tr className="bg-surface-container-low">
-                    <td colSpan={2} className="py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider flex items-center gap-2">
-                      <Layers size={14} className="text-primary" /> Tahap 12: Pengarsipan Berkas
+                  <tr className="bg-slate-100">
+                    <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Layers size={14} className="text-primary shrink-0" />
+                        <span>Tahap 12: Pengarsipan Berkas</span>
+                      </div>
                     </td>
                   </tr>
                   <tr className="hover:bg-surface-container-lowest">
