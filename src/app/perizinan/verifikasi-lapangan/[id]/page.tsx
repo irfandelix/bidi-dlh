@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Send, Loader2, MapPinned, ClipboardCheck, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MapPin, Send, Loader2, MapPinned, ClipboardCheck, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function VerlapPage({ params }: { params: Promise<{ id: string }> }) {
@@ -413,22 +413,30 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-outline-variant mt-8">
-            {doc.nomor_ba_verlap && (
-              <button
-                type="button"
-                onClick={handleDownloadTemplate}
-                disabled={downloadingTemplate}
-                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70"
-              >
-                {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
-                Unduh Berkas BA Verlap (.docx)
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-outline-variant mt-8">
+            <Link
+              href={`/perizinan/pemeriksaan-substansi/${doc.id}`}
+              className="w-full sm:w-auto px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border border-indigo-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 tracking-wider uppercase text-sm"
+            >
+              Lanjut ke Tahap 4: Pemeriksaan <ArrowRight size={18} />
+            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-end">
+              {doc.nomor_ba_verlap && (
+                <button
+                  type="button"
+                  onClick={handleDownloadTemplate}
+                  disabled={downloadingTemplate}
+                  className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70"
+                >
+                  {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
+                  Unduh Berkas BA Verlap (.docx)
+                </button>
+              )}
+              <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-tertiary text-on-tertiary hover:bg-amber-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70 disabled:hover:translate-y-0">
+                {submitting ? <LottieLoader size={24} /> : <Send size={18} />}
+                Simpan Data BA Verlap
               </button>
-            )}
-            <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-tertiary text-on-tertiary hover:bg-amber-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70 disabled:hover:translate-y-0">
-              {submitting ? <LottieLoader size={24} /> : <Send size={18} />}
-              Simpan Data BA Verlap
-            </button>
+            </div>
           </div>
         </form>
       </div>

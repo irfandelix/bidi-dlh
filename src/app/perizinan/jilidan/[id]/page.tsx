@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, BookCopy, Info, CheckCircle2, ClipboardCheck, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, BookCopy, Info, CheckCircle2, ClipboardCheck, Download } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -257,22 +257,30 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
               </div>
             </div>
           </div>
-          <div className="pt-8 border-t border-outline-variant flex flex-col sm:flex-row justify-end gap-4 mt-8">
-            {doc.tanggal_penerimaan_jilidan && (
-              <button
-                type="button"
-                onClick={handleDownloadTemplate}
-                disabled={downloadingTemplate}
-                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 text-sm shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70"
-              >
-                {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
-                Unduh Berkas Tanda Terima Jilidan (.docx)
+          <div className="pt-8 border-t border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4 mt-8">
+            <Link
+              href={`/perizinan/arsip/${doc.id}`}
+              className="w-full sm:w-auto px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border border-indigo-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-sm"
+            >
+              Lanjut ke Tahap 12: Arsip Perizinan <ArrowRight size={18} />
+            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-end">
+              {doc.tanggal_penerimaan_jilidan && (
+                <button
+                  type="button"
+                  onClick={handleDownloadTemplate}
+                  disabled={downloadingTemplate}
+                  className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 text-sm shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70"
+                >
+                  {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
+                  Unduh Berkas Tanda Terima Jilidan (.docx)
+                </button>
+              )}
+              <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-orange-400 hover:bg-orange-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
+                {submitting ? <LottieLoader size={24} /> : <CheckCircle2 size={18} />}
+                Simpan Penerimaan Jilidan
               </button>
-            )}
-            <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-orange-400 hover:bg-orange-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
-              {submitting ? <LottieLoader size={24} /> : <CheckCircle2 size={18} />}
-              Simpan Penerimaan Jilidan
-            </button>
+            </div>
           </div>
         </form>
       </div>

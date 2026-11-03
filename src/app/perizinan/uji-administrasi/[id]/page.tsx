@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ClipboardCheck, Send, ListChecks, PenTool, Copy, Check, Zap, RefreshCw, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ClipboardCheck, Send, ListChecks, PenTool, Copy, Check, Zap, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -620,22 +620,30 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
           </>
           )}
 
-          <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-outline-variant mt-8">
-            {doc.nomor_uji_berkas && !isAmdalnet && (
-              <button
-                type="button"
-                onClick={handleDownloadTemplate}
-                disabled={downloadingTemplate}
-                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70"
-              >
-                {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
-                Unduh Berkas BA HUA (.docx)
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-outline-variant mt-8">
+            <Link
+              href={`/perizinan/verifikasi-lapangan/${doc.id}`}
+              className="w-full sm:w-auto px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border border-indigo-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 tracking-wider uppercase text-sm"
+            >
+              Lanjut ke Tahap 3: Verlap <ArrowRight size={18} />
+            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-end">
+              {doc.nomor_uji_berkas && !isAmdalnet && (
+                <button
+                  type="button"
+                  onClick={handleDownloadTemplate}
+                  disabled={downloadingTemplate}
+                  className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70"
+                >
+                  {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
+                  Unduh Berkas BA HUA (.docx)
+                </button>
+              )}
+              <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-teal-400 hover:bg-teal-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70 disabled:hover:translate-y-0">
+                {submitting ? <LottieLoader size={24} /> : <Send size={18} />}
+                Simpan Data BA HUA
               </button>
-            )}
-            <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-teal-400 hover:bg-teal-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70 disabled:hover:translate-y-0">
-              {submitting ? <LottieLoader size={24} /> : <Send size={18} />}
-              Simpan Data BA HUA
-            </button>
+            </div>
           </div>
         </form>
       </div>

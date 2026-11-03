@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FileCheck2, UserCheck, ClipboardCheck, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, FileCheck2, UserCheck, ClipboardCheck, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ id: string }> }) {
@@ -564,23 +564,31 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
             </div>
           </div>
 
-          <div className="pt-8 border-t border-outline-variant mt-8 flex flex-col sm:flex-row justify-end gap-4">
-            {currentNomorPhp && (
-              <button
-                type="button"
-                onClick={() => handleDownloadTemplate(revisiKe)}
-                disabled={downloadingRev === revisiKe}
-                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70"
-              >
-                {downloadingRev === revisiKe ? <LottieLoader size={24} /> : <Download size={18} />}
-                Unduh Berkas Tanda Terima PHP {revisiKe} (.docx)
+          <div className="pt-8 border-t border-outline-variant mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <Link
+              href={`/perizinan/pemeriksaan-revisi/${doc.id}`}
+              className="w-full sm:w-auto px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border border-indigo-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-sm"
+            >
+              Lanjut ke Tahap 7: Pemeriksaan Revisi <ArrowRight size={18} />
+            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-end">
+              {currentNomorPhp && (
+                <button
+                  type="button"
+                  onClick={() => handleDownloadTemplate(revisiKe)}
+                  disabled={downloadingRev === revisiKe}
+                  className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70"
+                >
+                  {downloadingRev === revisiKe ? <LottieLoader size={24} /> : <Download size={18} />}
+                  Unduh Berkas Tanda Terima PHP {revisiKe} (.docx)
+                </button>
+              )}
+              <button type="submit" disabled={submitting} 
+                className="w-full sm:w-auto px-10 py-4 bg-secondary text-on-secondary hover:bg-emerald-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0 text-sm">
+                {submitting ? <LottieLoader size={24} /> : <FileCheck2 size={18} />}
+                Simpan Data Penerimaan
               </button>
-            )}
-            <button type="submit" disabled={submitting} 
-              className="w-full sm:w-auto px-10 py-4 bg-secondary text-on-secondary hover:bg-emerald-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0 text-sm">
-              {submitting ? <LottieLoader size={24} /> : <FileCheck2 size={18} />}
-              Simpan Data Penerimaan
-            </button>
+            </div>
           </div>
         </form>
       </div>

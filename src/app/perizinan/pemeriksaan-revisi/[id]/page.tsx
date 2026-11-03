@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FilePen, RotateCcw, CheckCircle2, ClipboardList, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, FilePen, RotateCcw, CheckCircle2, ClipboardList, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -455,6 +455,21 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
               {submittingAction === 'acc' ? <LottieLoader size={24} /> : <CheckCircle2 size={18} />}
               ACC & Lanjut Selesai
             </button>
+          </div>
+
+          <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <Link
+              href={`/perizinan/pengembalian/${doc.id}`}
+              className="w-full sm:w-auto px-5 py-3 bg-rose-100 hover:bg-rose-200 text-rose-900 border border-rose-300 font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+            >
+              Ke Tahap 8: Penyerahan BA Revisi <ArrowRight size={15} />
+            </Link>
+            <Link
+              href={`/perizinan/finalisasi/${doc.id}`}
+              className="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-700 font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+            >
+              Lanjut ke Tahap 10: Finalisasi (RPD & SK) <ArrowRight size={15} />
+            </Link>
           </div>
         </form>
       </div>

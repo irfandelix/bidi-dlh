@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Send, Loader2, Monitor, Globe, FilePlus, MapPin, UserCheck, CheckCircle, Printer, ArrowRight, ArrowLeft, Copy, Check, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -318,14 +319,22 @@ export default function RegistrasiPage() {
             )}
           </div>
 
-          <div className="pt-6 mt-6 border-t border-slate-200">
+          <div className="pt-6 mt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button 
               type="button"
               onClick={() => router.push('/perizinan/daftar')}
-              className="px-8 py-3 bg-slate-900 text-white border border-slate-200 font-black rounded-xl text-sm shadow-sm hover:-translate-y-1 transition-all uppercase"
+              className="w-full sm:w-auto px-8 py-3 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 font-black rounded-xl text-sm shadow-sm hover:-translate-y-0.5 transition-all uppercase flex items-center justify-center gap-2"
             >
-              Kembali ke Dashboard
+              <ArrowLeft size={16} /> Kembali ke Dashboard
             </button>
+            {createdDocId && (
+              <Link
+                href={`/perizinan/uji-administrasi/${createdDocId}`}
+                className="w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-700 font-black rounded-xl text-sm shadow-sm hover:-translate-y-0.5 transition-all uppercase flex items-center justify-center gap-2"
+              >
+                Lanjut ke Tahap 2: Uji Administrasi <ArrowRight size={16} />
+              </Link>
+            )}
           </div>
         </div>
       )}

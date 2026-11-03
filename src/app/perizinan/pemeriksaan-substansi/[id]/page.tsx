@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Users, Loader2, ClipboardCheck, RotateCcw, CheckCircle2, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Users, Loader2, ClipboardCheck, RotateCcw, CheckCircle2, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -586,23 +586,31 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
             <p className="text-[11px] text-on-surface-variant mt-3 font-bold uppercase">* Kepala Bidang akan otomatis menjadi Penandatangan Utama (Kiri Bawah).</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-outline-variant mt-8">
-            {doc.nomor_ba_pemeriksaan && (
-              <button
-                type="button"
-                onClick={handleDownloadTemplate}
-                disabled={downloadingTemplate}
-                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70"
-              >
-                {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
-                Unduh Berkas BA Pemeriksaan (.docx)
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-outline-variant mt-8">
+            <Link
+              href={`/perizinan/pengembalian/${doc.id}`}
+              className="w-full sm:w-auto px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border border-indigo-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 tracking-wider uppercase text-sm"
+            >
+              Lanjut ke Tahap 5: Penyerahan BA <ArrowRight size={18} />
+            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-end">
+              {doc.nomor_ba_pemeriksaan && (
+                <button
+                  type="button"
+                  onClick={handleDownloadTemplate}
+                  disabled={downloadingTemplate}
+                  className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-sm disabled:opacity-70"
+                >
+                  {downloadingTemplate ? <LottieLoader size={24} /> : <Download size={18} />}
+                  Unduh Berkas BA Pemeriksaan (.docx)
+                </button>
+              )}
+              <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
+                className="w-full sm:w-auto px-8 py-4 bg-error text-on-error hover:bg-error-container text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
+                {submittingAction !== null ? <LottieLoader size={24} /> : <RotateCcw size={18} />}
+                Simpan Data BA Rapat & Kembalikan Ke Pemrakarsa
               </button>
-            )}
-            <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
-              className="w-full sm:w-auto px-8 py-4 bg-error text-on-error hover:bg-error-container text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
-              {submittingAction !== null ? <LottieLoader size={24} /> : <RotateCcw size={18} />}
-              Simpan Data BA Rapat & Kembalikan Ke Pemrakarsa
-            </button>
+            </div>
           </div>
         </form>
       </div>

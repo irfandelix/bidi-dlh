@@ -3,14 +3,46 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Printer, Loader2, ArrowLeft, FileText, CheckCircle } from 'lucide-react';
+import { Printer, Loader2, ArrowLeft, FileText, CheckCircle, Copy, Check } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function CetakClient({ doc }: { doc: any }) {
   const router = useRouter();
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
-  const isAmdalnet = !!doc.nomor_registrasi_amdalnet || (() => {
+  const handleCopy = (text: string, key: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => {
+      setCopiedKey(prev => (prev === key ? null : prev));
+    }, 2000);
+  };
+
+  const renderNumberBadge = (numberText: string | null | undefined, copyKey: string) => {
+    if (!numberText) return null;
+    const isCopied = copiedKey === copyKey;
+    return (
+      <div className="mb-4 p-2.5 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-between gap-2">
+        <span className="text-xs font-bold font-mono text-on-surface break-all">{numberText}</span>
+        <button
+          type="button"
+          onClick={() => handleCopy(numberText, copyKey)}
+          className={`shrink-0 px-2.5 py-1 rounded-lg text-xs font-bold uppercase border flex items-center gap-1 transition-colors ${
+            isCopied
+              ? 'bg-emerald-500 text-white border-emerald-600'
+              : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300'
+          }`}
+        >
+          {isCopied ? <Check size={13} /> : <Copy size={13} />}
+          <span>{isCopied ? 'Tersalin' : 'Salin'}</span>
+        </button>
+      </div>
+    );
+  };
+
+  const isAmdalnet = !!doc.nomor_registrasi_amdalnet || doc.sumber_data === 'AMDALNET' || (() => {
     try {
       if (!doc.extra_data) return false;
       const extra = typeof doc.extra_data === 'string' ? JSON.parse(doc.extra_data) : doc.extra_data;
@@ -51,6 +83,7 @@ export default function CetakClient({ doc }: { doc: any }) {
       a.download = filename;
       document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (e: any) {
       console.error(e);
@@ -180,16 +213,16 @@ export default function CetakClient({ doc }: { doc: any }) {
               )}
               
               {/* Revisi 1 - 5 */}
-              {(doc.nomor_php || doc.nomor_revisi_1) && (
+              {(doc.nomor_php || doc.nomor_revisi_1 || doc.nomor_revisi) && (
                 <tr className="bg-primary-container text-on-primary-container">
                   <td colSpan={2} className="py-2 px-6 font-bold text-indigo-900 text-xs uppercase tracking-wider">Tahap Perbaikan (Revisi)</td>
                 </tr>
               )}
               {[1, 2, 3, 4, 5].map((rev) => {
-                const phpNum = rev === 1 ? doc.nomor_php : doc[`nomor_php${rev}`];
+                const phpNum = rev === 1 ? doc.nomor_php : doc[`nomor_php${rev - 1}`];
                 const phpDate = doc[`tanggal_php_${rev}`];
-                const baNum = doc[`nomor_revisi_${rev}`];
-                const baDate = doc[`tanggal_revisi_${rev}`];
+                const baNum = doc[`nomor_revisi_${rev}`] || (rev === 1 ? doc.nomor_revisi : null);
+                const baDate = doc[`tanggal_revisi_${rev}`] || (rev === 1 ? doc.tanggal_revisi : null);
                 
                 if (!phpNum && !baNum) return null;
                 
@@ -200,13 +233,13 @@ export default function CetakClient({ doc }: { doc: any }) {
                       <div className="flex flex-col gap-1">
                         {phpNum && (
                           <div className="flex justify-between items-start border-b border-indigo-100 pb-1">
-                            <span className="text-primary">PHP: {phpNum}</span>
+                            <span className="text-primary font-mono">PHP: {phpNum}</span>
                             <span className="text-xs bg-surface px-2 py-0.5 rounded border border-outline-variant ml-4 shrink-0">{formatDate(phpDate)}</span>
                           </div>
                         )}
                         {baNum && (
                           <div className="flex justify-between items-start pt-1">
-                            <span className="text-emerald-700">BA: {baNum}</span>
+                            <span className="text-emerald-700 font-mono">BA: {baNum}</span>
                             <span className="text-xs bg-surface px-2 py-0.5 rounded border border-outline-variant ml-4 shrink-0">{formatDate(baDate)}</span>
                           </div>
                         )}
@@ -239,8 +272,8 @@ export default function CetakClient({ doc }: { doc: any }) {
                   <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs">Tanda Terima Jilidan</th>
                   <td className="py-3 px-6 font-bold text-on-surface text-sm">
                     Tgl Diterima: {formatDate(doc.tanggal_penerimaan_jilidan)} <br/>
-                    Pengirim: {doc.nama_pengirim || '-'} <br/>
-                    Penerima: {doc.petugas_mpp?.nama || '-'}
+                    Pengirim: {doc.pengirim_jilidan || doc.nama_pengirim || '-'} <br/>
+                    Penerima: {doc.petugas_mpp?.nama || doc.petugas_mpp || '-'}
                   </td>
                 </tr>
               )}
@@ -256,7 +289,7 @@ export default function CetakClient({ doc }: { doc: any }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           
           {isAmdalnet ? (
-            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-start">
+            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-lg bg-emerald-200 border border-outline-variant flex items-center justify-center">
@@ -264,12 +297,13 @@ export default function CetakClient({ doc }: { doc: any }) {
                   </div>
                   <h5 className="font-bold text-on-surface uppercase">Lembar Registrasi Amdalnet</h5>
                 </div>
-                <p className="text-xs font-bold text-on-surface-variant mb-6">Bukti registrasi via sistem Amdalnet.</p>
+                <p className="text-xs font-bold text-on-surface-variant mb-4">Bukti registrasi via sistem Amdalnet.</p>
+                {renderNumberBadge(doc.nomor_checklist, 'reg-amdalnet')}
               </div>
               <button 
                 onClick={() => handleDownload('Lembar_Registrasi_Amdalnet', 'registrasi')}
                 disabled={downloading === 'Lembar_Registrasi_Amdalnet'}
-                className="w-full px-4 py-3 bg-secondary text-on-secondary hover:bg-emerald-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                className="w-full px-4 py-3 bg-secondary text-on-secondary hover:bg-emerald-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
               >
                 {downloading === 'Lembar_Registrasi_Amdalnet' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Dokumen
@@ -278,7 +312,7 @@ export default function CetakClient({ doc }: { doc: any }) {
           ) : (
             <>
               {/* Tanda Terima Registrasi */}
-              <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-start">
+              <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-lg bg-teal-200 border border-outline-variant flex items-center justify-center">
@@ -286,12 +320,13 @@ export default function CetakClient({ doc }: { doc: any }) {
                     </div>
                     <h5 className="font-bold text-on-surface uppercase">Tanda Terima Registrasi</h5>
                   </div>
-                  <p className="text-xs font-bold text-on-surface-variant mb-6">Bukti penerimaan awal dokumen masuk (MPP / DLH).</p>
+                  <p className="text-xs font-bold text-on-surface-variant mb-4">Bukti penerimaan awal dokumen masuk (MPP / DLH).</p>
+                  {renderNumberBadge(doc.nomor_checklist, 'reg-tt')}
                 </div>
                 <button 
                   onClick={() => handleDownload('template_tanda_terima_registrasi', 'registrasi')}
                   disabled={downloading === 'template_tanda_terima_registrasi'}
-                  className="w-full px-4 py-3 bg-teal-400 hover:bg-teal-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                  className="w-full px-4 py-3 bg-teal-400 hover:bg-teal-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
                 >
                   {downloading === 'template_tanda_terima_registrasi' ? <LottieLoader size={24} /> : <Printer size={18} />}
                   Cetak Dokumen
@@ -299,7 +334,7 @@ export default function CetakClient({ doc }: { doc: any }) {
               </div>
 
               {/* Checklist Registrasi */}
-              <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-start">
+              <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-lg bg-blue-200 border border-outline-variant flex items-center justify-center">
@@ -307,12 +342,13 @@ export default function CetakClient({ doc }: { doc: any }) {
                     </div>
                     <h5 className="font-bold text-on-surface uppercase">Checklist Kelengkapan</h5>
                   </div>
-                  <p className="text-xs font-bold text-on-surface-variant mb-6">Daftar periksa kelengkapan berkas administrasi.</p>
+                  <p className="text-xs font-bold text-on-surface-variant mb-4">Daftar periksa kelengkapan berkas administrasi.</p>
+                  {renderNumberBadge(doc.nomor_checklist, 'reg-chk')}
                 </div>
                 <button 
                   onClick={() => handleDownload('template_checklist', 'registrasi')}
                   disabled={downloading === 'template_checklist'}
-                  className="w-full px-4 py-3 bg-blue-400 hover:bg-blue-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                  className="w-full px-4 py-3 bg-blue-400 hover:bg-blue-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
                 >
                   {downloading === 'template_checklist' ? <LottieLoader size={24} /> : <Printer size={18} />}
                   Cetak Dokumen
@@ -323,7 +359,7 @@ export default function CetakClient({ doc }: { doc: any }) {
 
           {/* BA Uji Administrasi (Conditional) */}
           {(doc.nomor_uji_berkas || doc.status_tahapan === 'Uji Administrasi Selesai' || doc.status_tahapan === 'Verlap Selesai' || doc.status_tahapan === 'Pemeriksaan Selesai') && (
-            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-start">
+            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-lg bg-indigo-200 border border-outline-variant flex items-center justify-center">
@@ -331,12 +367,13 @@ export default function CetakClient({ doc }: { doc: any }) {
                   </div>
                   <h5 className="font-bold text-on-surface uppercase">BA Uji Administrasi</h5>
                 </div>
-                <p className="text-xs font-bold text-on-surface-variant mb-6">Berita Acara Hasil Uji Kelengkapan Administrasi (BA HUA).</p>
+                <p className="text-xs font-bold text-on-surface-variant mb-4">Berita Acara Hasil Uji Kelengkapan Administrasi (BA HUA).</p>
+                {renderNumberBadge(doc.nomor_uji_berkas, 'uji-admin')}
               </div>
               <button 
                 onClick={() => handleDownload('template_ba_uji_admin', 'uji-administrasi')}
                 disabled={downloading === 'template_ba_uji_admin'}
-                className="w-full px-4 py-3 bg-indigo-400 hover:bg-indigo-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                className="w-full px-4 py-3 bg-indigo-400 hover:bg-indigo-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
               >
                 {downloading === 'template_ba_uji_admin' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Dokumen
@@ -346,7 +383,7 @@ export default function CetakClient({ doc }: { doc: any }) {
 
           {/* BA Verlap (Conditional) */}
           {(doc.nomor_ba_verlap || doc.status_tahapan === 'Verlap Selesai' || doc.status_tahapan === 'Pemeriksaan Selesai') && (
-            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-start">
+            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-lg bg-amber-200 border border-outline-variant flex items-center justify-center">
@@ -354,12 +391,13 @@ export default function CetakClient({ doc }: { doc: any }) {
                   </div>
                   <h5 className="font-bold text-on-surface uppercase">BA Verifikasi Lapangan</h5>
                 </div>
-                <p className="text-xs font-bold text-on-surface-variant mb-6">Berita Acara Hasil Verifikasi Lapangan (Verlap).</p>
+                <p className="text-xs font-bold text-on-surface-variant mb-4">Berita Acara Hasil Verifikasi Lapangan (Verlap).</p>
+                {renderNumberBadge(doc.nomor_ba_verlap, 'ba-verlap')}
               </div>
               <button 
                 onClick={() => handleDownload('template_ba_verlap', 'verifikasi-lapangan')}
                 disabled={downloading === 'template_ba_verlap'}
-                className="w-full px-4 py-3 bg-tertiary text-on-tertiary hover:bg-amber-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                className="w-full px-4 py-3 bg-tertiary text-on-tertiary hover:bg-amber-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
               >
                 {downloading === 'template_ba_verlap' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Dokumen
@@ -369,7 +407,7 @@ export default function CetakClient({ doc }: { doc: any }) {
 
           {/* BA Pemeriksaan / Rapat (Conditional) */}
           {(doc.nomor_ba_pemeriksaan || doc.status_tahapan === 'Pemeriksaan Selesai' || doc.status_tahapan === 'Menunggu Finalisasi' || doc.status_tahapan === 'Selesai' || doc.status_tahapan === 'Revisi' || doc.status_tahapan === 'Revisi Lanjutan') && (
-            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-start">
+            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-lg bg-emerald-200 border border-outline-variant flex items-center justify-center">
@@ -377,12 +415,13 @@ export default function CetakClient({ doc }: { doc: any }) {
                   </div>
                   <h5 className="font-bold text-on-surface uppercase">BA Pemeriksaan</h5>
                 </div>
-                <p className="text-xs font-bold text-on-surface-variant mb-6">Berita Acara Hasil Rapat Pemeriksaan Substansi.</p>
+                <p className="text-xs font-bold text-on-surface-variant mb-4">Berita Acara Hasil Rapat Pemeriksaan Substansi.</p>
+                {renderNumberBadge(doc.nomor_ba_pemeriksaan, 'ba-sidang')}
               </div>
               <button 
                 onClick={() => handleDownload('template_ba_substansi', 'pemeriksaan-substansi')}
                 disabled={downloading === 'template_ba_substansi'}
-                className="w-full px-4 py-3 bg-secondary text-on-secondary hover:bg-emerald-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                className="w-full px-4 py-3 bg-secondary text-on-secondary hover:bg-emerald-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
               >
                 {downloading === 'template_ba_substansi' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Dokumen
@@ -390,71 +429,22 @@ export default function CetakClient({ doc }: { doc: any }) {
             </div>
           )}
 
-          {/* BA Pemeriksaan Revisi / PHP (Conditional - Multiple Versions) */}
-          {(doc.nomor_php || doc.status_tahapan === 'Revisi Lanjutan') && (
-            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-start">
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-pink-200 border border-outline-variant flex items-center justify-center">
-                    <FileText size={20} className="text-on-surface" />
-                  </div>
-                  <h5 className="font-bold text-on-surface uppercase">BA Pemeriksaan Revisi</h5>
-                </div>
-                <p className="text-xs font-bold text-on-surface-variant mb-6">Berita Acara / Pengembalian Hasil Pemeriksaan (Revisi).</p>
-              </div>
-              <div className="flex flex-col">
-                {(() => {
-                  const maxRev = parseInt(doc.revisi_ke || '1');
-                  const revs = Array.from({ length: maxRev }).map((_, i) => i + 1);
-                  const latest = revs[revs.length - 1];
-                  const prevs = revs.slice(0, -1);
-                  return (
-                    <>
-                      <button 
-                        onClick={() => handleDownload('template_ba_pemeriksaan_revisi', 'pemeriksaan-revisi', latest)}
-                        disabled={downloading === `template_ba_pemeriksaan_revisi_${latest}`}
-                        className="w-full px-4 py-3 bg-pink-400 hover:bg-pink-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
-                      >
-                        {downloading === `template_ba_pemeriksaan_revisi_${latest}` ? <LottieLoader size={24} /> : <Printer size={18} />}
-                        Cetak BA.P.P{latest}
-                      </button>
-
-                      {prevs.length > 0 && (
-                        <div className="mt-4 pt-4 border-t-2 border-outline-variant">
-                          <p className="text-xs font-bold text-on-surface-variant mb-2 uppercase">Versi Sebelumnya:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {prevs.map(rev => (
-                              <button
-                                key={`php-prev-${rev}`}
-                                onClick={() => handleDownload('template_ba_pemeriksaan_revisi', 'pemeriksaan-revisi', rev)}
-                                disabled={downloading === `template_ba_pemeriksaan_revisi_${rev}`}
-                                className="px-3 py-1.5 bg-surface hover:bg-surface-container-low text-on-surface-variant border border-outline-variant font-bold rounded-lg text-xs shadow-sm hover:shadow-md transition-shadow hover:-translate-y-0.5 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center gap-1 uppercase disabled:opacity-70"
-                              >
-                                {downloading === `template_ba_pemeriksaan_revisi_${rev}` ? <LottieLoader size={24} /> : <Printer size={14} />}
-                                BA.P.P{rev}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-          )}
-
-          {/* Tanda Terima Penerimaan Perbaikan (Conditional - Multiple Versions) */}
-          {(doc.tanggal_revisi_1 || doc.tanggal_revisi_2 || doc.status_tahapan === 'Penerimaan Perbaikan' || doc.status_tahapan === 'Pemeriksaan Revisi') && (
-            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-start">
+          {/* Tanda Terima Penerimaan Perbaikan / PHP (Conditional - Multiple Versions) */}
+          {(doc.nomor_php || doc.nomor_php1 || doc.tanggal_php_1 || doc.status_tahapan === 'Penerimaan Perbaikan') && (
+            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-lg bg-fuchsia-200 border border-outline-variant flex items-center justify-center">
                     <FileText size={20} className="text-on-surface" />
                   </div>
-                  <h5 className="font-bold text-on-surface uppercase">Penerimaan Hasil Perbaikan</h5>
+                  <h5 className="font-bold text-on-surface uppercase">Penerimaan Hasil Perbaikan (PHP)</h5>
                 </div>
-                <p className="text-xs font-bold text-on-surface-variant mb-6">Tanda terima dokumen perbaikan/revisi dari pemrakarsa.</p>
+                <p className="text-xs font-bold text-on-surface-variant mb-4">Tanda terima dokumen perbaikan/revisi dari pemrakarsa.</p>
+                {(() => {
+                  const maxRev = parseInt(doc.revisi_ke || '1');
+                  const latestPhp = maxRev === 1 ? doc.nomor_php : (doc[`nomor_php${maxRev - 1}`] || doc.nomor_php);
+                  return renderNumberBadge(latestPhp, 'php-latest');
+                })()}
               </div>
               <div className="flex flex-col">
                 {(() => {
@@ -467,7 +457,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                       <button 
                         onClick={() => handleDownload('template_tanda_terima_perbaikan', 'penerimaan-perbaikan', latest)}
                         disabled={downloading === `template_tanda_terima_perbaikan_${latest}`}
-                        className="w-full px-4 py-3 bg-fuchsia-400 hover:bg-fuchsia-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                        className="w-full px-4 py-3 bg-fuchsia-400 hover:bg-fuchsia-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
                       >
                         {downloading === `template_tanda_terima_perbaikan_${latest}` ? <LottieLoader size={24} /> : <Printer size={18} />}
                         Cetak PHP{latest}
@@ -482,7 +472,7 @@ export default function CetakClient({ doc }: { doc: any }) {
                                 key={`ttp-prev-${rev}`}
                                 onClick={() => handleDownload('template_tanda_terima_perbaikan', 'penerimaan-perbaikan', rev)}
                                 disabled={downloading === `template_tanda_terima_perbaikan_${rev}`}
-                                className="px-3 py-1.5 bg-surface hover:bg-surface-container-low text-on-surface-variant border border-outline-variant font-bold rounded-lg text-xs shadow-sm hover:shadow-md transition-shadow hover:-translate-y-0.5 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center gap-1 uppercase disabled:opacity-70"
+                                className="px-3 py-1.5 bg-surface hover:bg-surface-container-low text-on-surface-variant border border-outline-variant font-bold rounded-lg text-xs shadow-sm hover:shadow-md transition-shadow hover:-translate-y-0.5 transition-all flex items-center gap-1 uppercase disabled:opacity-70"
                               >
                                 {downloading === `template_tanda_terima_perbaikan_${rev}` ? <LottieLoader size={24} /> : <Printer size={14} />}
                                 PHP{rev}
@@ -498,9 +488,68 @@ export default function CetakClient({ doc }: { doc: any }) {
             </div>
           )}
 
+          {/* BA Pemeriksaan Revisi (Conditional - Multiple Versions) */}
+          {(doc.nomor_revisi_1 || doc.nomor_revisi || doc.tanggal_revisi_1 || doc.status_tahapan === 'Pemeriksaan Revisi' || doc.status_tahapan === 'Revisi Lanjutan') && (
+            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-pink-200 border border-outline-variant flex items-center justify-center">
+                    <FileText size={20} className="text-on-surface" />
+                  </div>
+                  <h5 className="font-bold text-on-surface uppercase">BA Pemeriksaan Revisi</h5>
+                </div>
+                <p className="text-xs font-bold text-on-surface-variant mb-4">Berita Acara Hasil Pemeriksaan Revisi (BA.P.P).</p>
+                {(() => {
+                  const maxRev = parseInt(doc.revisi_ke || '1');
+                  const latestBaRev = doc[`nomor_revisi_${maxRev}`] || doc.nomor_revisi_1 || doc.nomor_revisi;
+                  return renderNumberBadge(latestBaRev, 'ba-rev-latest');
+                })()}
+              </div>
+              <div className="flex flex-col">
+                {(() => {
+                  const maxRev = parseInt(doc.revisi_ke || '1');
+                  const revs = Array.from({ length: maxRev }).map((_, i) => i + 1);
+                  const latest = revs[revs.length - 1];
+                  const prevs = revs.slice(0, -1);
+                  return (
+                    <>
+                      <button 
+                        onClick={() => handleDownload('template_ba_pemeriksaan_revisi', 'pemeriksaan-revisi', latest)}
+                        disabled={downloading === `template_ba_pemeriksaan_revisi_${latest}`}
+                        className="w-full px-4 py-3 bg-pink-400 hover:bg-pink-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                      >
+                        {downloading === `template_ba_pemeriksaan_revisi_${latest}` ? <LottieLoader size={24} /> : <Printer size={18} />}
+                        Cetak BA.P.P{latest}
+                      </button>
+
+                      {prevs.length > 0 && (
+                        <div className="mt-4 pt-4 border-t-2 border-outline-variant">
+                          <p className="text-xs font-bold text-on-surface-variant mb-2 uppercase">Versi Sebelumnya:</p>
+                          <div className="flex flex-wrap gap-2">
+                            {prevs.map(rev => (
+                              <button
+                                key={`php-prev-${rev}`}
+                                onClick={() => handleDownload('template_ba_pemeriksaan_revisi', 'pemeriksaan-revisi', rev)}
+                                disabled={downloading === `template_ba_pemeriksaan_revisi_${rev}`}
+                                className="px-3 py-1.5 bg-surface hover:bg-surface-container-low text-on-surface-variant border border-outline-variant font-bold rounded-lg text-xs shadow-sm hover:shadow-md transition-shadow hover:-translate-y-0.5 transition-all flex items-center gap-1 uppercase disabled:opacity-70"
+                              >
+                                {downloading === `template_ba_pemeriksaan_revisi_${rev}` ? <LottieLoader size={24} /> : <Printer size={14} />}
+                                BA.P.P{rev}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          )}
+
           {/* Tanda Terima Penerimaan Final / Jilidan (Conditional) */}
           {(doc.tanggal_penerimaan_jilidan || doc.status_tahapan === 'Penerimaan Jilidan') && (
-            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-start">
+            <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 rounded-lg bg-orange-200 border border-outline-variant flex items-center justify-center">
@@ -513,7 +562,7 @@ export default function CetakClient({ doc }: { doc: any }) {
               <button 
                 onClick={() => handleDownload('template_tanda_terima_jilidan', 'jilidan')}
                 disabled={downloading === 'template_tanda_terima_jilidan'}
-                className="w-full px-4 py-3 bg-orange-400 hover:bg-orange-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                className="w-full px-4 py-3 bg-orange-400 hover:bg-orange-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
               >
                 {downloading === 'template_tanda_terima_jilidan' ? <LottieLoader size={24} /> : <Printer size={18} />}
                 Cetak Dokumen

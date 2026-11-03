@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Loader2
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -22,6 +22,7 @@ export default function DaftarPerizinanPage() {
   const [filterJenis, setFilterJenis] = useState('');
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [downloadingStageKey, setDownloadingStageKey] = useState<string | null>(null);
 
   const handleCopyText = (text: string, key: string, e?: React.MouseEvent) => {
     if (e) {
@@ -52,6 +53,90 @@ export default function DaftarPerizinanPage() {
       return doc.nomor_risalah || doc.nomor_sk || '';
     }
     return '';
+  };
+
+  const getStageTemplateConfig = (doc: any, stageId: number): { stage: string; type: string; target_revisi?: number } | null => {
+    if (!doc) return null;
+    const isAmdalnet = doc.sumber_data === 'AMDALNET' || !!doc.nomor_registrasi_amdalnet;
+    if (stageId === 1 && doc.nomor_checklist) {
+      return {
+        stage: 'registrasi',
+        type: isAmdalnet ? 'Lembar_Registrasi_Amdalnet' : 'template_tanda_terima_registrasi',
+      };
+    }
+    if (stageId === 2 && doc.nomor_uji_berkas) {
+      return { stage: 'uji-administrasi', type: 'template_ba_uji_admin' };
+    }
+    if (stageId === 3 && doc.nomor_ba_verlap) {
+      return { stage: 'verifikasi-lapangan', type: 'template_ba_verlap' };
+    }
+    if (stageId === 4 && doc.nomor_ba_pemeriksaan) {
+      return { stage: 'pemeriksaan-substansi', type: 'template_ba_substansi' };
+    }
+    if (stageId === 6 && doc.nomor_php) {
+      return { stage: 'penerimaan-perbaikan', type: 'template_tanda_terima_perbaikan', target_revisi: 1 };
+    }
+    if (stageId === 7) {
+      for (let rev = 5; rev >= 1; rev--) {
+        if (doc[`nomor_revisi_${rev}`] || (rev === 1 && doc.nomor_revisi)) {
+          return { stage: 'pemeriksaan-revisi', type: 'template_ba_pemeriksaan_revisi', target_revisi: rev };
+        }
+      }
+    }
+    if (stageId === 9) {
+      for (let rev = 5; rev >= 2; rev--) {
+        if (doc[`nomor_php${rev - 1}`]) {
+          return { stage: 'penerimaan-perbaikan', type: 'template_tanda_terima_perbaikan', target_revisi: rev };
+        }
+      }
+    }
+    if (stageId === 11 && doc.tanggal_penerimaan_jilidan) {
+      return { stage: 'jilidan', type: 'template_tanda_terima_jilidan' };
+    }
+    return null;
+  };
+
+  const handleDownloadStageDoc = async (doc: any, stageId: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const cfg = getStageTemplateConfig(doc, stageId);
+    if (!cfg) return;
+
+    const key = `dl-${doc.id}-${stageId}`;
+    setDownloadingStageKey(key);
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: doc.id,
+          stage: cfg.stage,
+          type: cfg.type,
+          target_revisi: cfg.target_revisi,
+        }),
+      });
+      if (!res.ok) throw new Error('Gagal men-generate berkas Word (.docx)');
+
+      const blob = await res.blob();
+      const disposition = res.headers.get('Content-Disposition');
+      let filename = `${cfg.type}_${doc.id}.docx`;
+      if (disposition && disposition.indexOf('filename=') !== -1) {
+        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+        if (matches && matches[1]) filename = matches[1].replace(/['"]/g, '');
+      }
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(err.message || 'Gagal mengunduh berkas');
+    } finally {
+      setDownloadingStageKey(null);
+    }
   };
 
   const toggleRow = (id: number) => {
@@ -265,8 +350,30 @@ export default function DaftarPerizinanPage() {
       const matchLokasi = d.lokasi_kegiatan?.toLowerCase().includes(query);
       const matchTanggal = d.tanggal_masuk_dokumen?.toLowerCase().includes(query) || d.created_at?.toLowerCase().includes(query);
       const matchPemrakarsa = d.nama_pemrakarsa?.toLowerCase().includes(query);
+      const matchNomor = [
+        d.no_urut ? `#${d.no_urut}` : '',
+        d.nomor_checklist,
+        d.nomor_surat_permohonan,
+        d.nomor_registrasi_amdalnet,
+        d.nomor_uji_berkas,
+        d.nomor_ba_verlap,
+        d.nomor_ba_pemeriksaan,
+        d.nomor_php,
+        d.nomor_php1,
+        d.nomor_php2,
+        d.nomor_php3,
+        d.nomor_php4,
+        d.nomor_revisi,
+        d.nomor_revisi_1,
+        d.nomor_revisi_2,
+        d.nomor_revisi_3,
+        d.nomor_revisi_4,
+        d.nomor_revisi_5,
+        d.nomor_risalah,
+        d.nomor_sk,
+      ].some(val => val && String(val).toLowerCase().includes(query));
       
-      if (!matchNama && !matchLokasi && !matchTanggal && !matchPemrakarsa) return false;
+      if (!matchNama && !matchLokasi && !matchTanggal && !matchPemrakarsa && !matchNomor) return false;
     }
     
     return true;
@@ -287,6 +394,7 @@ export default function DaftarPerizinanPage() {
         "TAHUN": d.tahun || '-',
         "NO URUT": d.no_urut || d.id,
         "NAMA PEMRAKARSA": d.nama_pemrakarsa || '-',
+        "NAMA KEGIATAN": d.nama_kegiatan || '-',
         "JENIS KEGIATAN": d.jenis_kegiatan || '-',
         "LOKASI KEGIATAN": d.lokasi_kegiatan || '-',
         "JENIS DOKUMEN": d.jenis_dokumen || '-',
@@ -295,11 +403,19 @@ export default function DaftarPerizinanPage() {
         "TANGGAL UJI ADMIN": d.tanggal_uji_berkas || '-',
         "TANGGAL VERLAP": d.tanggal_verlap || d.tanggal_ba_verlap || '-',
         "TANGGAL SIDANG": d.tanggal_pemeriksaan || d.tanggal_ba_pemeriksaan || '-',
-        "NOMOR CHECKLIST": d.nomor_checklist || '-',
+        "NOMOR SURAT PERMOHONAN": d.nomor_surat_permohonan || '-',
+        "NOMOR CHECKLIST / REGISTRASI": d.nomor_checklist || '-',
         "NOMOR BA UJI": d.nomor_uji_berkas || '-',
         "NOMOR BA VERLAP": d.nomor_ba_verlap || '-',
         "NOMOR BA SIDANG": d.nomor_ba_pemeriksaan || '-',
-        "LOKASI ARSIP": d.lokasi_arsip || '-',
+        "NOMOR PHP 1": d.nomor_php || '-',
+        "NOMOR PHP LANJUTAN": [d.nomor_php1, d.nomor_php2, d.nomor_php3, d.nomor_php4].filter(Boolean).join(', ') || '-',
+        "NOMOR BA REVISI": [d.nomor_revisi_1 || d.nomor_revisi, d.nomor_revisi_2, d.nomor_revisi_3, d.nomor_revisi_4, d.nomor_revisi_5].filter(Boolean).join(', ') || '-',
+        "NOMOR RISALAH (RPD)": d.nomor_risalah || '-',
+        "TANGGAL RISALAH": d.tanggal_risalah || '-',
+        "NOMOR SK / PKPLH": d.nomor_sk || '-',
+        "TANGGAL SK": d.tanggal_penyerahan_sk || '-',
+        "LOKASI ARSIP": d.lokasi_arsip || fisik?.lokasiArsip || '-',
         "KOORDINAT": (d.latitude && d.longitude) ? `${d.latitude}, ${d.longitude}` : '-'
       };
     });
@@ -414,11 +530,11 @@ export default function DaftarPerizinanPage() {
               <option value="AMDAL">AMDAL</option>
             </select>
 
-            <div className="relative flex-1 md:min-w-[200px]">
+            <div className="relative flex-1 md:min-w-[260px]">
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input 
                 type="text" 
-                placeholder="Cari nama, lokasi..." 
+                placeholder="Cari kegiatan, pemrakarsa, nomor surat/SK..." 
                 value={searchQuery}
                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 className="w-full bg-white border-2 border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:border-indigo-400 shadow-sm transition-colors"
@@ -702,7 +818,9 @@ export default function DaftarPerizinanPage() {
                   const isCurrent = stage.statuses.includes(selectedDoc.status_tahapan);
                   const isDisabled = false;
                   const docNumber = getStageDocNumber(selectedDoc, stage.id);
+                  const templateCfg = getStageTemplateConfig(selectedDoc, stage.id);
                   const isCopiedThis = copiedKey === `stage-${stage.id}`;
+                  const isDownloadingThis = downloadingStageKey === `dl-${selectedDoc.id}-${stage.id}`;
 
                   const isMPP = stage.title.includes('(MPP)');
                   const cleanTitle = stage.title.replace(' (MPP)', '').replace(' (DLH)', '');
@@ -735,23 +853,51 @@ export default function DaftarPerizinanPage() {
                         </div>
                         
                         {docNumber ? (
-                          <div className="flex items-center justify-between gap-1.5 bg-slate-100/80 px-2 py-1 rounded-lg border border-slate-200/80">
+                          <div className="space-y-1.5 bg-slate-100/80 px-2.5 py-1.5 rounded-lg border border-slate-200/80">
                             <p className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5 truncate" title={docNumber}>
                               <FileText size={12} className="shrink-0 text-indigo-500" />
-                              <span className="truncate">{docNumber}</span>
+                              <span className="truncate font-mono">{docNumber}</span>
                             </p>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={(e) => handleCopyText(docNumber, `stage-${stage.id}`, e)}
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase border transition-colors ${
+                                  isCopiedThis
+                                    ? 'bg-emerald-500 text-white border-emerald-600'
+                                    : 'bg-white hover:bg-indigo-50 text-indigo-700 border-indigo-200'
+                                }`}
+                                title="Salin Nomor"
+                              >
+                                {isCopiedThis ? <Check size={11} /> : <Copy size={11} />}
+                                <span>{isCopiedThis ? 'Disalin' : 'Salin'}</span>
+                              </button>
+                              {templateCfg && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleDownloadStageDoc(selectedDoc, stage.id, e)}
+                                  disabled={isDownloadingThis}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase border bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 transition-colors disabled:opacity-60"
+                                  title="Unduh Berkas Word (.docx)"
+                                >
+                                  {isDownloadingThis ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
+                                  <span>{isDownloadingThis ? 'Unduh...' : 'Unduh (.docx)'}</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ) : templateCfg ? (
+                          <div className="flex items-center justify-between gap-1.5 bg-slate-100/80 px-2 py-1 rounded-lg border border-slate-200/80">
+                            <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Tersedia</p>
                             <button
                               type="button"
-                              onClick={(e) => handleCopyText(docNumber, `stage-${stage.id}`, e)}
-                              className={`shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase border transition-colors ${
-                                isCopiedThis
-                                  ? 'bg-emerald-500 text-white border-emerald-600'
-                                  : 'bg-white hover:bg-indigo-50 text-indigo-700 border-indigo-200'
-                              }`}
-                              title="Salin Nomor"
+                              onClick={(e) => handleDownloadStageDoc(selectedDoc, stage.id, e)}
+                              disabled={isDownloadingThis}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black uppercase border bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 transition-colors disabled:opacity-60"
+                              title="Unduh Berkas Word (.docx)"
                             >
-                              {isCopiedThis ? <Check size={11} /> : <Copy size={11} />}
-                              <span>{isCopiedThis ? 'Disalin' : 'Salin'}</span>
+                              {isDownloadingThis ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
+                              <span>{isDownloadingThis ? 'Unduh...' : 'Unduh (.docx)'}</span>
                             </button>
                           </div>
                         ) : (

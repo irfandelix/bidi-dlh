@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, CheckCircle2, Award, BookCopy, FileText, ClipboardCheck, Zap, Copy, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, CheckCircle2, Award, BookCopy, FileText, ClipboardCheck, Zap, Copy, Check, RefreshCw } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function FinalisasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -363,7 +363,13 @@ export default function FinalisasiPage({ params }: { params: Promise<{ id: strin
             </div>
           </div>
 
-          <div className="pt-8 border-t border-outline-variant mt-8 flex justify-end">
+          <div className="pt-8 border-t border-outline-variant mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <Link
+              href={`/perizinan/jilidan/${doc.id}`}
+              className="w-full sm:w-auto px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border border-indigo-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-sm"
+            >
+              Lanjut ke Tahap 11: Jilidan Final <ArrowRight size={18} />
+            </Link>
             <button type="submit" disabled={submitting} 
               className="w-full sm:w-auto px-10 py-4 bg-tertiary text-on-tertiary hover:bg-amber-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0 text-sm">
               {submitting ? <LottieLoader size={24} /> : <CheckCircle2 size={18} />}

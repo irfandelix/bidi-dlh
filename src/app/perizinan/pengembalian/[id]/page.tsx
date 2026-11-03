@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, RotateCcw, Save } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, RotateCcw, Save } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PengembalianPage({ params }: { params: Promise<{ id: string }> }) {
@@ -40,7 +40,6 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
     try { if (doc.arsip_fisik) fisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; } catch(e) {}
     if (typeof fisik === 'string') fisik = JSON.parse(fisik);
 
-    // isRevisi already declared above
     const keySuffix = isRevisi ? `_revisi_${revisiKe}` : '';
 
     fisik[`penerima_ba${keySuffix}`] = formData.get('penerima_ba');
@@ -62,8 +61,10 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
       });
       
       if(res.ok) {
-        setMessage('Status Penyerahan Berhasil Disimpan!');
-        setTimeout(() => router.push('/perizinan/daftar'), 1500);
+        const resData = await res.json();
+        setDoc(resData.data);
+        setMessage('Status Penyerahan BA Berhasil Disimpan!');
+        setTimeout(() => setMessage(''), 5000);
       }
     } catch (err) {
       console.error(err);
@@ -193,7 +194,13 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
               </div>
             );
           })()}
-          <div className="pt-8 border-t border-outline-variant mt-8 flex justify-end">
+          <div className="pt-8 border-t border-outline-variant mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <Link
+              href={`/perizinan/penerimaan-perbaikan/${doc.id}`}
+              className="w-full sm:w-auto px-6 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl border border-indigo-700 shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-sm"
+            >
+              Lanjut ke Terima Perbaikan (PHP) <ArrowRight size={18} />
+            </Link>
             <button type="submit" disabled={submitting} 
               className="w-full sm:w-auto px-10 py-4 bg-error text-on-error hover:bg-error-container text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0 text-sm">
               {submitting ? <LottieLoader size={24} /> : <Save size={18} />}

@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Printer, FilePlus, ClipboardCheck, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Printer, FilePlus, ClipboardCheck, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function DetailRegistrasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -467,6 +467,22 @@ export default function DetailRegistrasiPage({ params }: { params: Promise<{ id:
           >
             {isUploadingArsip ? 'Mengunggah...' : 'Simpan Berkas & Nomor ke Arsip'}
           </button>
+        </div>
+
+        {/* Navigasi Tahapan */}
+        <div className="pt-8 mt-8 border-t border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
+          <Link
+            href="/perizinan/daftar"
+            className="w-full sm:w-auto px-6 py-3.5 bg-surface hover:bg-slate-100 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+          >
+            <ArrowLeft size={16} /> Kembali ke Dashboard
+          </Link>
+          <Link
+            href={`/perizinan/uji-administrasi/${doc.id}`}
+            className="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-700 font-bold rounded-xl text-sm shadow-sm hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+          >
+            Lanjut ke Tahap 2: Uji Administrasi <ArrowRight size={16} />
+          </Link>
         </div>
 
       </div>
