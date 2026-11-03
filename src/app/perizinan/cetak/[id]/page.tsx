@@ -17,5 +17,10 @@ export default async function CetakPage({ params }: { params: Promise<{ id: stri
     notFound();
   }
 
-  return <CetakClient doc={doc} />;
+  // Fetch tim_penilais to resolve officer names for penandatangan & petugas
+  const { data: timPenilai } = await supabase
+    .from('tim_penilais')
+    .select('id, nama, nip, pangkat_gol, jabatan_dinas, peran, urutan_hierarki');
+
+  return <CetakClient doc={doc} timPenilai={timPenilai || []} />;
 }
