@@ -526,22 +526,22 @@ export default function DatabaseGabungan() {
                                   e.stopPropagation();
                                   toggleExpandRow(item.key);
                                 }}
-                                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border transition-all shadow-md hover:-translate-y-0.5 hover:shadow-lg ${
+                                className={`inline-flex items-center justify-center gap-2 w-44 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border transition-all shadow-md hover:-translate-y-0.5 hover:shadow-lg ${
                                   isExpanded
                                     ? 'bg-indigo-600 text-white border-indigo-600'
                                     : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200'
                                 }`}
                               >
-                                <Archive size={16} strokeWidth={2.5} />
+                                <Archive size={16} strokeWidth={2.5} className="shrink-0" />
                                 <span>{item.permits.length} Arsip Izin</span>
-                                {isExpanded ? <ChevronUp size={16} strokeWidth={2.5} /> : <ChevronDown size={16} strokeWidth={2.5} />}
+                                {isExpanded ? <ChevronUp size={15} strokeWidth={2.5} className="shrink-0" /> : <ChevronDown size={15} strokeWidth={2.5} className="shrink-0" />}
                               </button>
                             ) : (
                               <Link
                                 href={`/pengawasan/database/arsip/${item.permits[0]?.id}`}
-                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all"
+                                className="inline-flex items-center justify-center gap-2 w-44 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all"
                               >
-                                <Archive size={16} strokeWidth={2.5} />
+                                <Archive size={16} strokeWidth={2.5} className="shrink-0" />
                                 <span>Arsip Izin</span>
                               </Link>
                             )}
