@@ -126,11 +126,11 @@ export default function DatabaseGabungan() {
   ];
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest p-4 md:p-8">
+    <div className="min-h-screen bg-white p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-8 font-sans pb-20">
         
         {/* Header */}
-        <div className="bg-surface border border-outline-variant rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col md:flex-row items-start gap-6">
+        <div className="bg-white border border-outline-variant rounded-[2rem] p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col md:flex-row items-start gap-6">
           <Link href="/pengawasan" className="w-16 h-16 shrink-0 bg-indigo-500 text-on-primary rounded-2xl border border-outline-variant flex items-center justify-center shadow-sm hover:shadow-md transition-shadow hover:bg-primary text-on-primary hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all">
             <ArrowLeft size={32} />
           </Link>
@@ -144,10 +144,10 @@ export default function DatabaseGabungan() {
         </div>
 
         {/* Main Card */}
-        <div className="bg-surface rounded-[2rem] border border-outline-variant overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-[2rem] border border-outline-variant overflow-hidden shadow-sm hover:shadow-md transition-shadow">
           
           {/* Tabs */}
-          <div className="flex overflow-x-auto border-b-4 border-outline-variant bg-surface-container-low custom-scrollbar">
+          <div className="flex overflow-x-auto border-b-4 border-outline-variant bg-white custom-scrollbar">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -155,7 +155,7 @@ export default function DatabaseGabungan() {
                 className={`flex items-center gap-3 px-8 py-5 text-sm md:text-base font-bold uppercase tracking-widest whitespace-nowrap transition-colors border-r-4 border-outline-variant last:border-r-0 ${
                   activeTab === tab.id
                     ? 'bg-amber-300 text-on-surface shadow-md'
-                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
+                    : 'bg-white text-on-surface-variant hover:text-on-surface hover:bg-slate-50'
                 }`}
               >
                 {tab.icon} {tab.id}
@@ -190,14 +190,14 @@ export default function DatabaseGabungan() {
                   <button 
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="w-10 h-10 flex items-center justify-center bg-surface border border-outline-variant rounded-xl text-on-surface shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:shadow-none hover:bg-surface-container-low transition-all active:translate-y-1 active:shadow-none"
+                    className="w-10 h-10 flex items-center justify-center bg-white border border-outline-variant rounded-xl text-on-surface shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:shadow-none hover:bg-slate-100 transition-all active:translate-y-1 active:shadow-none"
                   >
                     <ChevronLeft size={20} strokeWidth={3} />
                   </button>
                   <button 
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="w-10 h-10 flex items-center justify-center bg-surface border border-outline-variant rounded-xl text-on-surface shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:shadow-none hover:bg-surface-container-low transition-all active:translate-y-1 active:shadow-none"
+                    className="w-10 h-10 flex items-center justify-center bg-white border border-outline-variant rounded-xl text-on-surface shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:shadow-none hover:bg-slate-100 transition-all active:translate-y-1 active:shadow-none"
                   >
                     <ChevronRight size={20} strokeWidth={3} />
                   </button>
@@ -216,7 +216,7 @@ export default function DatabaseGabungan() {
                   <th className="p-5 uppercase text-xs tracking-widest text-center whitespace-nowrap">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y-4 divide-slate-900 bg-surface">
+              <tbody className="divide-y-4 divide-slate-900 bg-white">
                 {loading ? (
                   <tr>
                     <td colSpan={4} className="p-10 text-center text-on-surface font-bold uppercase text-lg"><LottieLoader size={150} text="MEMUAT DATA..." /></td>
@@ -234,7 +234,7 @@ export default function DatabaseGabungan() {
                   </tr>
                 ) : (
                   paginatedData.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-surface-container-low transition-colors">
+                    <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                       <td className="p-5 text-center font-bold text-on-surface-variant border-r-4 border-outline-variant">
                         {(currentPage - 1) * itemsPerPage + index + 1}
                       </td>

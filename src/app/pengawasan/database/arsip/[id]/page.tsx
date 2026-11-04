@@ -89,7 +89,7 @@ export default function ArsipIzinDetailPage({ params }: { params: Promise<{ id: 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-surface-container-lowest flex items-center justify-center p-6">
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
         <LottieLoader size={160} text="MEMUAT BERKAS ARSIP IZIN..." />
       </div>
     );
@@ -97,7 +97,7 @@ export default function ArsipIzinDetailPage({ params }: { params: Promise<{ id: 
 
   if (!doc) {
     return (
-      <div className="min-h-screen bg-surface-container-lowest p-6 flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-white p-6 flex flex-col items-center justify-center">
         <div className="bg-surface border border-outline-variant p-8 rounded-3xl max-w-lg text-center shadow-sm">
           <Archive size={48} className="mx-auto text-error mb-4" />
           <h2 className="text-2xl font-bold uppercase text-on-surface mb-2">Data Tidak Ditemukan</h2>
@@ -331,7 +331,7 @@ export default function ArsipIzinDetailPage({ params }: { params: Promise<{ id: 
   const hasCoordinates = Boolean(doc.latitude && doc.longitude);
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest p-4 md:p-8">
+    <div className="min-h-screen bg-white p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6 font-sans pb-24">
         
         {/* NAVIGASI & HEADER */}
