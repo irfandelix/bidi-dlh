@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Database, Inbox, ArrowLeft, Archive, Factory, Building2, 
   Home, ShoppingCart, ChevronLeft, ChevronRight, Layers, Search, 
-  ChevronDown, ChevronUp, FileText, X, ExternalLink
+  ChevronDown, ChevronUp, Sparkles, Link2, Unlink, Check
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -18,6 +18,118 @@ interface GroupedFacility {
   permits: any[];
 }
 
+// Levenshtein distance for fuzzy typo comparison
+function levenshtein(a: string, b: string): number {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix: number[][] = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b.charAt(i - 1) === a.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+function stringSimilarity(s1: string, s2: string): number {
+  const longer = s1.length > s2.length ? s1 : s2;
+  const shorter = s1.length > s2.length ? s2 : s1;
+  if (longer.length === 0) return 1.0;
+  return (longer.length - levenshtein(longer, shorter)) / longer.length;
+}
+
+function cleanTokens(str: string): string[] {
+  const stopWords = new Set([
+    'pt', 'cv', 'ud', 'tbk', 'oleh', 'kegiatan', 'pembangunan', 
+    'operasional', 'rencana', 'dan', 'di', 'ke', 'yang', 'pada', 
+    'untuk', 'sarana', 'prasarana', 'fasilitas', 'titik'
+  ]);
+  
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 1 && !stopWords.has(w));
+}
+
+// Intelligent matching that detects typos & corporate variations
+function areFacilitiesMatching(itemA: any, itemB: any): boolean {
+  const nameA = (itemA.nama_kegiatan || '').toLowerCase();
+  const nameB = (itemB.nama_kegiatan || '').toLowerCase();
+  
+  if (nameA.trim() === nameB.trim() && nameA.trim().length > 0) return true;
+
+  const pemA = (itemA.nama_pemrakarsa || '').toLowerCase().trim();
+  const pemB = (itemB.nama_pemrakarsa || '').toLowerCase().trim();
+  
+  // Clean PT, CV, UD
+  const pemCleanA = pemA.replace(/^(pt|cv|ud)\.?\s+/i, '');
+  const pemCleanB = pemB.replace(/^(pt|cv|ud)\.?\s+/i, '');
+  if (pemCleanA.length > 5 && pemCleanA === pemCleanB) {
+    return true;
+  }
+
+  // Cross check company name appearing in activity name
+  if (pemCleanA.length > 5 && nameB.includes(pemCleanA)) return true;
+  if (pemCleanB.length > 5 && nameA.includes(pemCleanB)) return true;
+
+  // Token-based fuzzy matching
+  const tokensA = cleanTokens(nameA);
+  const tokensB = cleanTokens(nameB);
+
+  if (tokensA.length === 0 || tokensB.length === 0) return false;
+
+  let matchedA = 0;
+  for (const tA of tokensA) {
+    let bestSim = 0;
+    for (const tB of tokensB) {
+      if (tA === tB) {
+        bestSim = 1.0;
+        break;
+      }
+      const sim = stringSimilarity(tA, tB);
+      if (sim > bestSim) bestSim = sim;
+    }
+    // High similarity threshold (e.g. pertama vs pratama is 86%)
+    if (bestSim >= 0.8) matchedA++;
+  }
+
+  let matchedB = 0;
+  for (const tB of tokensB) {
+    let bestSim = 0;
+    for (const tA of tokensA) {
+      if (tA === tB) {
+        bestSim = 1.0;
+        break;
+      }
+      const sim = stringSimilarity(tA, tB);
+      if (sim > bestSim) bestSim = sim;
+    }
+    if (bestSim >= 0.8) matchedB++;
+  }
+
+  const scoreA = matchedA / tokensA.length;
+  const scoreB = matchedB / tokensB.length;
+  const avgScore = (scoreA + scoreB) / 2;
+
+  const commonCount = Math.min(matchedA, matchedB);
+  if (commonCount >= 3 && avgScore >= 0.72) return true;
+  if (tokensA.length <= 3 && tokensB.length <= 3 && avgScore >= 0.8) return true;
+
+  return false;
+}
+
 export default function DatabaseGabungan() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +139,13 @@ export default function DatabaseGabungan() {
   const [groupByFacility, setGroupByFacility] = useState(true);
   const [selectedFacility, setSelectedFacility] = useState<GroupedFacility | null>(null);
   const [expandedRowKeys, setExpandedRowKeys] = useState<Record<string, boolean>>({});
+  
+  // Manual merges and unmerges stored in state & localStorage
+  const [manualMerges, setManualMerges] = useState<Record<string, string>>({});
+  const [unmergedIds, setUnmergedIds] = useState<Record<string, boolean>>({});
+  const [mergeTargetKey, setMergeTargetKey] = useState<string>('');
+  const [showMergeDropdown, setShowMergeDropdown] = useState(false);
+
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -42,7 +161,42 @@ export default function DatabaseGabungan() {
         console.error(err);
         setLoading(false);
       });
+
+    // Load saved manual merges/unmerges from localStorage
+    try {
+      const savedMerges = localStorage.getItem('bidi_facility_merges');
+      if (savedMerges) setManualMerges(JSON.parse(savedMerges));
+      const savedUnmerges = localStorage.getItem('bidi_facility_unmerges');
+      if (savedUnmerges) setUnmergedIds(JSON.parse(savedUnmerges));
+    } catch (e) {}
   }, []);
+
+  // Save manual merges
+  const handleSaveMerge = (fromPermitId: string, toTargetKey: string) => {
+    const updated = { ...manualMerges, [fromPermitId]: toTargetKey };
+    setManualMerges(updated);
+    try {
+      localStorage.setItem('bidi_facility_merges', JSON.stringify(updated));
+    } catch (e) {}
+    setShowMergeDropdown(false);
+    setMergeTargetKey('');
+    setSelectedFacility(null);
+  };
+
+  // Unmerge a permit to stand alone
+  const handleUnmerge = (permitId: string) => {
+    const updatedMerges = { ...manualMerges };
+    delete updatedMerges[permitId];
+    setManualMerges(updatedMerges);
+
+    const updatedUnmerges = { ...unmergedIds, [permitId]: true };
+    setUnmergedIds(updatedUnmerges);
+    try {
+      localStorage.setItem('bidi_facility_merges', JSON.stringify(updatedMerges));
+      localStorage.setItem('bidi_facility_unmerges', JSON.stringify(updatedUnmerges));
+    } catch (e) {}
+    setSelectedFacility(null);
+  };
 
   // Reset pagination when tab or search or group changes
   useEffect(() => {
@@ -132,7 +286,7 @@ export default function DatabaseGabungan() {
     });
   }, [data, activeTab, searchQuery]);
 
-  // Group by facility name & pemrakarsa
+  // Group by facility with Smart Fuzzy Matching & Manual Merge override
   const processedData: GroupedFacility[] = useMemo(() => {
     if (!groupByFacility) {
       return filteredData.map(item => ({
@@ -145,27 +299,67 @@ export default function DatabaseGabungan() {
       }));
     }
 
-    const groupMap = new Map<string, GroupedFacility>();
-    for (const item of filteredData) {
-      const rawName = (item.nama_kegiatan || '').trim();
-      const rawPem = (item.nama_pemrakarsa || '').trim();
-      const key = `${rawName.toLowerCase()}|${rawPem.toLowerCase()}`;
+    const groups: GroupedFacility[] = [];
 
-      if (groupMap.has(key)) {
-        groupMap.get(key)!.permits.push(item);
-      } else {
-        groupMap.set(key, {
-          key,
-          id: item.id,
-          nama_kegiatan: rawName || 'Tanpa Nama Kegiatan',
-          nama_pemrakarsa: rawPem || '—',
-          kategori: item.kategori,
-          permits: [item],
-        });
+    for (const item of filteredData) {
+      const itemIdStr = String(item.id);
+      const isExplicitlyUnmerged = Boolean(unmergedIds[itemIdStr]);
+      const manualTargetKey = manualMerges[itemIdStr];
+
+      let placed = false;
+
+      // 1. Manual merge if configured
+      if (!isExplicitlyUnmerged && manualTargetKey) {
+        const targetGroup = groups.find(g => g.key === manualTargetKey || g.permits.some(p => String(p.id) === manualTargetKey));
+        if (targetGroup) {
+          targetGroup.permits.push(item);
+          placed = true;
+        }
+      }
+
+      // 2. Intelligent fuzzy & similarity match
+      if (!placed) {
+        let matchedGroup: GroupedFacility | null = null;
+
+        if (!isExplicitlyUnmerged) {
+          for (const g of groups) {
+            const isMatch = g.permits.some(existingPermit => areFacilitiesMatching(item, existingPermit));
+            if (isMatch) {
+              matchedGroup = g;
+              break;
+            }
+          }
+        }
+
+        if (matchedGroup) {
+          matchedGroup.permits.push(item);
+          // Update display name to the more complete/standard name
+          const currentName = matchedGroup.nama_kegiatan;
+          const candidateName = (item.nama_kegiatan || '').trim();
+          if (
+            candidateName.length > currentName.length && 
+            !candidateName.toLowerCase().includes('pertama') // prefer 'pratama' over typo 'pertama'
+          ) {
+            matchedGroup.nama_kegiatan = candidateName;
+          }
+          if (item.nama_pemrakarsa && !matchedGroup.nama_pemrakarsa.startsWith('PT') && item.nama_pemrakarsa.startsWith('PT')) {
+            matchedGroup.nama_pemrakarsa = item.nama_pemrakarsa;
+          }
+        } else {
+          groups.push({
+            key: `group-${item.id}`,
+            id: item.id,
+            nama_kegiatan: (item.nama_kegiatan || '').trim() || 'Tanpa Nama Kegiatan',
+            nama_pemrakarsa: (item.nama_pemrakarsa || '').trim() || '—',
+            kategori: item.kategori,
+            permits: [item],
+          });
+        }
       }
     }
-    return Array.from(groupMap.values());
-  }, [filteredData, groupByFacility]);
+
+    return groups;
+  }, [filteredData, groupByFacility, manualMerges, unmergedIds]);
 
   const totalPages = Math.max(1, Math.ceil(processedData.length / itemsPerPage));
   const paginatedData = processedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -198,8 +392,13 @@ export default function DatabaseGabungan() {
             <Database size={32} strokeWidth={2.5} />
           </div>
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-on-surface uppercase">Database Sasaran</h2>
-            <p className="text-sm md:text-base font-bold text-on-surface-variant mt-2 tracking-wide uppercase">Daftar objek pengawasan yang bersumber dari riwayat data Perizinan.</p>
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-on-surface uppercase">Database Sasaran</h2>
+              <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 flex items-center gap-1 shadow-sm">
+                <Sparkles size={12} /> Auto-Smart Grouping
+              </span>
+            </div>
+            <p className="text-sm md:text-base font-bold text-on-surface-variant tracking-wide uppercase">Daftar objek pengawasan yang bersumber dari riwayat data Perizinan.</p>
           </div>
         </div>
 
@@ -431,12 +630,22 @@ export default function DatabaseGabungan() {
                                         </div>
                                       </div>
 
-                                      <Link
-                                        href={`/pengawasan/database/arsip/${p.id}`}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-200 hover:bg-rose-300 text-on-surface border border-outline-variant rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-sm transition-all self-start sm:self-center shrink-0"
-                                      >
-                                        <Archive size={14} /> Buka Arsip Ini ↗
-                                      </Link>
+                                      <div className="flex items-center gap-2">
+                                        <Link
+                                          href={`/pengawasan/database/arsip/${p.id}`}
+                                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-200 hover:bg-rose-300 text-on-surface border border-outline-variant rounded-xl text-[11px] font-bold uppercase tracking-wider shadow-sm transition-all self-start sm:self-center shrink-0"
+                                        >
+                                          <Archive size={14} /> Buka Arsip Ini ↗
+                                        </Link>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleUnmerge(String(p.id))}
+                                          className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
+                                          title="Pisahkan izin ini dari grup"
+                                        >
+                                          <Unlink size={14} />
+                                        </button>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
@@ -454,7 +663,7 @@ export default function DatabaseGabungan() {
         </div>
       </div>
 
-      {/* Modal Picker for Facility with Multiple Permits */}
+      {/* Modal Picker for Facility with Multiple Permits & Manual Merge Action */}
       {selectedFacility && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-3xl border-4 border-slate-900 p-6 md:p-8 max-w-xl w-full shadow-2xl space-y-5 max-h-[85vh] flex flex-col">
@@ -481,9 +690,63 @@ export default function DatabaseGabungan() {
               </button>
             </div>
 
-            <p className="text-xs font-bold text-slate-500 uppercase">
-              Fasilitas ini memiliki <strong>{selectedFacility.permits.length} berkas izin</strong>. Silakan pilih arsip yang ingin dibuka:
-            </p>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <p className="text-xs font-bold text-slate-500 uppercase">
+                Fasilitas ini memiliki <strong>{selectedFacility.permits.length} berkas izin</strong> terdaftar:
+              </p>
+              
+              <button
+                type="button"
+                onClick={() => setShowMergeDropdown(!showMergeDropdown)}
+                className="text-[11px] font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1 uppercase"
+              >
+                <Link2 size={13} /> Gabung dengan fasilitas lain
+              </button>
+            </div>
+
+            {/* Manual Merge Dropdown Form */}
+            {showMergeDropdown && (
+              <div className="p-3 bg-indigo-50 border-2 border-indigo-200 rounded-xl space-y-2 animate-in fade-in">
+                <label className="text-xs font-bold text-indigo-900 uppercase block">
+                  Pilih fasilitas sasaran lain untuk digabung menjadi 1:
+                </label>
+                <select
+                  value={mergeTargetKey}
+                  onChange={e => setMergeTargetKey(e.target.value)}
+                  className="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs font-bold text-slate-900 uppercase outline-none"
+                >
+                  <option value="">-- Pilih Fasilitas Sasaran --</option>
+                  {processedData
+                    .filter(g => g.key !== selectedFacility.key)
+                    .map(g => (
+                      <option key={g.key} value={g.key}>
+                        {g.nama_kegiatan} ({g.nama_pemrakarsa})
+                      </option>
+                    ))}
+                </select>
+                <div className="flex justify-end gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowMergeDropdown(false)}
+                    className="px-3 py-1 bg-slate-200 text-slate-700 font-bold text-xs rounded-lg"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!mergeTargetKey}
+                    onClick={() => {
+                      if (mergeTargetKey && selectedFacility) {
+                        handleSaveMerge(String(selectedFacility.id), mergeTargetKey);
+                      }
+                    }}
+                    className="px-3 py-1 bg-indigo-600 disabled:opacity-50 text-white font-bold text-xs rounded-lg flex items-center gap-1"
+                  >
+                    <Check size={14} /> Terapkan Gabung
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-3 overflow-y-auto flex-1 pr-1 custom-scrollbar">
               {selectedFacility.permits.map((p, idx) => (
@@ -491,7 +754,7 @@ export default function DatabaseGabungan() {
                   key={p.id}
                   className="p-4 rounded-2xl border-2 border-slate-900 bg-white hover:bg-indigo-50/50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
                 >
-                  <div>
+                  <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <span className="text-sm font-black text-slate-900 uppercase">
                         {p.jenis_dokumen || 'Dokumen Lingkungan'}
@@ -506,20 +769,34 @@ export default function DatabaseGabungan() {
                     <p className="text-xs font-bold text-slate-600 uppercase">
                       Status: <span className="text-slate-900">{p.status_tahapan || 'Dalam Proses'}</span>
                     </p>
-                    {p.nomor_checklist && (
-                      <p className="text-[11px] font-bold text-slate-500 uppercase mt-0.5">
-                        Reg: {p.nomor_checklist}
-                      </p>
-                    )}
+                    <p className="text-[11px] font-bold text-slate-500 uppercase mt-0.5 line-clamp-1">
+                      Kegiatan: {p.nama_kegiatan}
+                    </p>
+                    <p className="text-[11px] font-bold text-slate-500 uppercase">
+                      Pemrakarsa: {p.nama_pemrakarsa || '—'}
+                    </p>
                   </div>
 
-                  <Link
-                    href={`/pengawasan/database/arsip/${p.id}`}
-                    onClick={() => setSelectedFacility(null)}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-black text-xs uppercase tracking-wider rounded-xl border-2 border-slate-900 shadow-sm transition-all hover:-translate-y-0.5 whitespace-nowrap"
-                  >
-                    <Archive size={14} /> Buka Arsip Ini ↗
-                  </Link>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      href={`/pengawasan/database/arsip/${p.id}`}
+                      onClick={() => setSelectedFacility(null)}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-black text-xs uppercase tracking-wider rounded-xl border-2 border-slate-900 shadow-sm transition-all hover:-translate-y-0.5 whitespace-nowrap"
+                    >
+                      <Archive size={14} /> Buka Arsip ↗
+                    </Link>
+
+                    {selectedFacility.permits.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleUnmerge(String(p.id))}
+                        className="p-2 border-2 border-slate-900 rounded-xl hover:bg-rose-100 text-slate-600 hover:text-rose-700 transition-colors"
+                        title="Pisahkan izin ini menjadi baris tersendiri"
+                      >
+                        <Unlink size={16} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
