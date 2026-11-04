@@ -59,11 +59,8 @@ export default function Navbar() {
               <Link href="/pengawasan" onClick={() => setIsKegiatanOpen(false)} className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-rose-100 border-b-2 border-slate-200 flex items-center gap-2">
                 <ShieldCheck size={16} /> Pengawasan
               </Link>
-              <Link href="/pengaduan" onClick={() => setIsKegiatanOpen(false)} className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-fuchsia-100 border-b-2 border-slate-200 flex items-center gap-2">
+              <Link href="/pengaduan" onClick={() => setIsKegiatanOpen(false)} className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-fuchsia-100 flex items-center gap-2">
                 <MessageSquareWarning size={16} /> Pengaduan
-              </Link>
-              <Link href="/hotline" onClick={() => setIsKegiatanOpen(false)} className="px-4 py-3 text-xs sm:text-sm font-bold text-slate-900 hover:bg-emerald-100 flex items-center gap-2">
-                <PhoneCall size={16} /> Hotline
               </Link>
             </div>
           </div>
@@ -86,12 +83,6 @@ export default function Navbar() {
           <Link href="/pengaduan" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-fuchsia-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
             <MessageSquareWarning size={18} />
             <span>Pengaduan</span>
-          </Link>
-        </li>
-        <li className="hidden lg:block ">
-          <Link href="/hotline" className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-emerald-100 hover:text-slate-900 hover:shadow-sm hover:border-slate-200 border-2 border-transparent transition-all">
-            <PhoneCall size={18} />
-            <span>Hotline</span>
           </Link>
         </li>
         <li className="">
