@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Database, Inbox, ArrowLeft, Archive, Factory, Building2, Home, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Database, Inbox, ArrowLeft, Archive, Factory, Building2, Home, ShoppingCart, ChevronLeft, ChevronRight, Layers, Search } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function DatabaseGabungan() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('Industri');
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -27,29 +28,89 @@ export default function DatabaseGabungan() {
       });
   }, []);
 
-  // Reset pagination when tab changes
+  // Reset pagination when tab or search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeTab]);
+  }, [activeTab, searchQuery]);
 
-  // Filter Data based on activeTab
+  // Helper matching functions
+  const isFasyankes = (nama: string, pemrakarsa: string, kategori: string) => {
+    return (
+      nama.includes('klinik') ||
+      nama.includes('rs') ||
+      nama.includes('rumah sakit') ||
+      nama.includes('apotek') ||
+      nama.includes('puskesmas') ||
+      kategori.includes('fasyankes')
+    );
+  };
+
+  const isPerumahan = (nama: string, pemrakarsa: string, kategori: string) => {
+    return (
+      nama.includes('perumahan') ||
+      nama.includes('cluster') ||
+      nama.includes('kavling') ||
+      kategori.includes('perumahan')
+    );
+  };
+
+  const isTokoModern = (nama: string, pemrakarsa: string, kategori: string) => {
+    return (
+      nama.includes('toko') ||
+      nama.includes('minimarket') ||
+      nama.includes('supermarket') ||
+      nama.includes('swalayan') ||
+      nama.includes('mart') ||
+      kategori.includes('toko')
+    );
+  };
+
+  const isIndustri = (nama: string, pemrakarsa: string, kategori: string) => {
+    return (
+      nama.includes('industri') ||
+      nama.includes('pabrik') ||
+      nama.includes('pt') ||
+      nama.includes('cv') ||
+      pemrakarsa.includes('pt') ||
+      pemrakarsa.includes('cv') ||
+      kategori.includes('industri')
+    );
+  };
+
+  // Filter Data based on activeTab and searchQuery
   const filteredData = data.filter((item: any) => {
     const nama = (item.nama_kegiatan || '').toLowerCase();
     const pemrakarsa = (item.nama_pemrakarsa || '').toLowerCase();
     const kategori = (item.kategori || '').toLowerCase();
 
+    let matchTab = false;
     if (activeTab === 'Industri') {
-      return nama.includes('industri') || nama.includes('pabrik') || nama.includes('pt') || nama.includes('cv') || pemrakarsa.includes('pt') || pemrakarsa.includes('cv') || kategori.includes('industri');
+      matchTab = isIndustri(nama, pemrakarsa, kategori);
+    } else if (activeTab === 'Fasyankes') {
+      matchTab = isFasyankes(nama, pemrakarsa, kategori);
+    } else if (activeTab === 'Perumahan') {
+      matchTab = isPerumahan(nama, pemrakarsa, kategori);
+    } else if (activeTab === 'Toko Modern') {
+      matchTab = isTokoModern(nama, pemrakarsa, kategori);
+    } else if (activeTab === 'Lainnya') {
+      matchTab =
+        kategori.includes('lain') ||
+        kategori.includes('sppg') ||
+        (!isIndustri(nama, pemrakarsa, kategori) &&
+          !isFasyankes(nama, pemrakarsa, kategori) &&
+          !isPerumahan(nama, pemrakarsa, kategori) &&
+          !isTokoModern(nama, pemrakarsa, kategori));
+    } else {
+      matchTab = true;
     }
-    if (activeTab === 'Fasyankes') {
-      return nama.includes('klinik') || nama.includes('rs') || nama.includes('rumah sakit') || nama.includes('apotek') || nama.includes('puskesmas') || kategori.includes('fasyankes');
+
+    if (!matchTab) return false;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return nama.includes(q) || pemrakarsa.includes(q) || kategori.includes(q);
     }
-    if (activeTab === 'Perumahan') {
-      return nama.includes('perumahan') || nama.includes('cluster') || nama.includes('kavling') || kategori.includes('perumahan');
-    }
-    if (activeTab === 'Toko Modern') {
-      return nama.includes('toko') || nama.includes('minimarket') || nama.includes('supermarket') || nama.includes('swalayan') || nama.includes('mart') || kategori.includes('toko');
-    }
+
     return true;
   });
 
@@ -61,6 +122,7 @@ export default function DatabaseGabungan() {
     { id: 'Fasyankes', icon: <Building2 size={20} strokeWidth={2.5} /> },
     { id: 'Perumahan', icon: <Home size={20} strokeWidth={2.5} /> },
     { id: 'Toko Modern', icon: <ShoppingCart size={20} strokeWidth={2.5} /> },
+    { id: 'Lainnya', icon: <Layers size={20} strokeWidth={2.5} /> },
   ];
 
   return (
@@ -102,7 +164,21 @@ export default function DatabaseGabungan() {
           </div>
 
           <div className="p-5 bg-secondary-container text-on-secondary-container border-b-4 border-outline-variant flex justify-between items-center flex-wrap gap-4">
-            <span className="text-sm font-bold text-on-surface uppercase tracking-widest">Total Terdata: {loading ? '...' : filteredData.length} Lokasi</span>
+            <div className="flex items-center gap-4 flex-wrap">
+              <span className="text-sm font-bold text-on-surface uppercase tracking-widest">
+                Total Terdata: {loading ? '...' : filteredData.length} Lokasi
+              </span>
+              <div className="relative w-64">
+                <Search className="absolute left-3 top-2.5 text-on-surface-variant" size={16} />
+                <input
+                  type="text"
+                  placeholder="Cari kegiatan / nama..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full bg-surface border border-outline-variant rounded-xl pl-9 pr-3 py-1.5 text-xs font-bold text-on-surface outline-none focus:ring-2 focus:ring-amber-300 shadow-sm"
+                />
+              </div>
+            </div>
             
             {/* Pagination Controls */}
             {!loading && filteredData.length > 0 && (
@@ -150,7 +226,9 @@ export default function DatabaseGabungan() {
                     <td colSpan={4} className="p-10 text-center text-on-surface-variant font-bold uppercase">
                       <div className="flex flex-col items-center justify-center gap-4">
                         <Inbox className="w-12 h-12 opacity-50" />
-                        Tidak ada data {activeTab} yang ditemukan di riwayat perizinan.
+                        {searchQuery 
+                          ? `Tidak ada data ${activeTab} yang cocok dengan pencarian "${searchQuery}".`
+                          : `Tidak ada data ${activeTab} yang ditemukan di riwayat perizinan.`}
                       </div>
                     </td>
                   </tr>
