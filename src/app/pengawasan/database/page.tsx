@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Database, Inbox, ArrowLeft, Archive, Factory, Building2, 
   Home, ShoppingCart, ChevronLeft, ChevronRight, Layers, Search, 
-  ChevronDown, ChevronUp, Sparkles, ExternalLink
+  ChevronDown, ChevronUp, Zap, Sparkles
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -308,156 +308,157 @@ export default function DatabaseGabungan() {
   };
 
   const tabs = [
-    { id: 'Industri', icon: <Factory size={20} strokeWidth={2.5} /> },
-    { id: 'Fasyankes', icon: <Building2 size={20} strokeWidth={2.5} /> },
-    { id: 'Perumahan', icon: <Home size={20} strokeWidth={2.5} /> },
-    { id: 'Toko Modern', icon: <ShoppingCart size={20} strokeWidth={2.5} /> },
-    { id: 'Lainnya', icon: <Layers size={20} strokeWidth={2.5} /> },
+    { id: 'Industri', icon: <Factory size={18} strokeWidth={2.5} /> },
+    { id: 'Fasyankes', icon: <Building2 size={18} strokeWidth={2.5} /> },
+    { id: 'Perumahan', icon: <Home size={18} strokeWidth={2.5} /> },
+    { id: 'Toko Modern', icon: <ShoppingCart size={18} strokeWidth={2.5} /> },
+    { id: 'Lainnya', icon: <Layers size={18} strokeWidth={2.5} /> },
   ];
 
   return (
     <div className="min-h-screen bg-white p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-8 font-sans pb-20">
+      <div className="max-w-5xl mx-auto space-y-6 font-sans pb-20">
         
-        {/* Header - Iconic Neo-Brutalist Card */}
-        <div className="bg-white border-4 border-slate-900 rounded-[2rem] p-6 md:p-8 shadow-[8px_8px_0_0_#0f172a] relative overflow-hidden flex flex-col md:flex-row items-start gap-6">
-          <Link 
-            href="/pengawasan" 
-            className="w-16 h-16 shrink-0 bg-indigo-500 text-white rounded-2xl border-4 border-slate-900 flex items-center justify-center shadow-[4px_4px_0_0_#0f172a] hover:bg-indigo-600 hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all"
-            title="Kembali ke Dashboard Pengawasan"
-          >
-            <ArrowLeft size={32} />
-          </Link>
-          <div className="w-16 h-16 rounded-2xl bg-teal-300 border-4 border-slate-900 flex items-center justify-center text-slate-900 shadow-[4px_4px_0_0_#0f172a] shrink-0">
-            <Database size={32} strokeWidth={2.5} />
-          </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h2 className="text-3xl md:text-4xl font-black tracking-tight text-slate-900 uppercase">
-                Database Sasaran
-              </h2>
-              <span className="text-[11px] font-black px-3 py-1 rounded-full bg-emerald-200 text-slate-900 border-2 border-slate-900 uppercase shadow-[2px_2px_0_0_#0f172a] flex items-center gap-1.5">
-                <Sparkles size={12} strokeWidth={3} /> Terpadu
-              </span>
+        {/* HEADER CARD - SAMA DENGAN DASHBOARD PENGAWASAN */}
+        <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-lg relative overflow-hidden">
+          {/* Decorative Circle */}
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-50 rounded-full border border-slate-200 opacity-50"></div>
+          
+          <div className="flex flex-col md:flex-row gap-5 items-start relative z-10">
+            <Link 
+              href="/pengawasan" 
+              className="w-16 h-16 shrink-0 bg-indigo-500 text-white rounded-2xl border border-slate-200 flex items-center justify-center shadow-md hover:bg-indigo-600 hover:-translate-y-1 hover:shadow-md transition-all"
+              title="Kembali ke Dashboard Pengawasan"
+            >
+              <ArrowLeft size={32} />
+            </Link>
+
+            <div className="w-16 h-16 rounded-2xl bg-teal-100 text-teal-700 border-[3px] border-slate-200 flex items-center justify-center shadow-sm shrink-0">
+              <Database size={32} strokeWidth={2.5} />
             </div>
-            <p className="text-sm md:text-base font-bold text-slate-600 mt-2 tracking-wide uppercase">
-              Daftar objek pengawasan yang bersumber dari riwayat data Perizinan.
-            </p>
+
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">Database Sasaran</h1>
+              <p className="text-sm font-bold text-slate-600 mt-2 tracking-wide">Daftar objek pengawasan yang bersumber dari riwayat data Perizinan.</p>
+              
+              <div className="flex flex-wrap gap-3 mt-6">
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 text-slate-900 font-black text-sm uppercase tracking-widest border-[3px] border-slate-200 rounded-xl shadow-md">
+                  <Zap size={18} className="text-emerald-500" /> Total {loading ? '...' : `${processedData.length} Lokasi`}
+                  {groupByFacility && filteredData.length !== processedData.length && (
+                    <span className="text-slate-600 font-bold ml-1 text-xs">
+                      ({filteredData.length} Berkas)
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setGroupByFacility(prev => !prev)}
+                  className={`inline-flex items-center gap-2 px-5 py-2.5 font-black text-sm uppercase tracking-widest border-[3px] rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-md transition-all ${
+                    groupByFacility 
+                      ? 'bg-teal-50 text-teal-800 border-teal-300' 
+                      : 'bg-white text-slate-700 border-slate-200'
+                  }`}
+                  title="Satukan izin dari perusahaan/fasilitas yang sama menjadi 1 baris"
+                >
+                  <Layers size={18} />
+                  <span>{groupByFacility ? 'Gabung Fasilitas: Aktif' : 'Per Izin: Aktif'}</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Main Card - Neo-Brutalist Frame */}
-        <div className="bg-white rounded-[2rem] border-4 border-slate-900 overflow-hidden shadow-[8px_8px_0_0_#0f172a]">
+        {/* MAIN CARD - SAMA DENGAN GAYA DASHBOARD PENGAWASAN */}
+        <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-lg">
           
-          {/* Tabs */}
-          <div className="flex overflow-x-auto border-b-4 border-slate-900 bg-slate-100 custom-scrollbar">
+          {/* TABS MENU */}
+          <div className="flex overflow-x-auto border-b border-slate-200 bg-slate-50/70 p-3 gap-2 custom-scrollbar">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-3 px-6 md:px-8 py-5 text-sm md:text-base font-black uppercase tracking-widest whitespace-nowrap transition-all border-r-4 border-slate-900 last:border-r-0 ${
+                className={`flex items-center gap-2.5 px-6 py-3.5 text-xs md:text-sm font-black uppercase tracking-wider rounded-xl transition-all whitespace-nowrap ${
                   activeTab === tab.id
-                    ? 'bg-amber-300 text-slate-900 shadow-[inset_0_-4px_0_0_#0f172a]'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                    ? 'bg-white text-slate-900 border-[2px] border-slate-200 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
                 }`}
               >
-                {tab.icon} {tab.id}
+                <span className={activeTab === tab.id ? 'text-teal-700' : 'text-slate-400'}>
+                  {tab.icon}
+                </span>
+                <span>{tab.id}</span>
               </button>
             ))}
           </div>
 
-          {/* Subheader Toolbar */}
-          <div className="p-5 bg-emerald-100 border-b-4 border-slate-900 flex justify-between items-center flex-wrap gap-4">
-            <div className="flex items-center gap-4 flex-wrap">
-              <span className="text-sm font-black text-slate-900 uppercase tracking-widest">
-                Total Terdata: {loading ? '...' : `${processedData.length} Lokasi`}
-                {groupByFacility && filteredData.length !== processedData.length && (
-                  <span className="text-slate-700 font-bold ml-1.5 text-xs">
-                    ({filteredData.length} berkas izin)
-                  </span>
-                )}
-              </span>
-
-              {/* Search Box */}
-              <div className="relative">
-                <Search className="absolute left-3 top-3 text-slate-500" size={16} strokeWidth={2.5} />
-                <input
-                  type="text"
-                  placeholder="Cari kegiatan / nama..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="bg-white border-2 border-slate-900 rounded-xl pl-9 pr-4 py-1.5 text-xs font-bold text-slate-900 uppercase tracking-wide placeholder:text-slate-400 placeholder:normal-case shadow-[2px_2px_0_0_#0f172a] outline-none focus:ring-2 focus:ring-slate-900 w-56 md:w-64"
-                />
-              </div>
-
-              {/* Grouping Toggle Button */}
-              <button
-                type="button"
-                onClick={() => setGroupByFacility(prev => !prev)}
-                className={`px-3 py-1.5 rounded-xl border-2 border-slate-900 text-xs font-black uppercase tracking-wider transition-all shadow-[2px_2px_0_0_#0f172a] flex items-center gap-1.5 ${
-                  groupByFacility 
-                    ? 'bg-amber-200 text-slate-900' 
-                    : 'bg-white text-slate-600 hover:bg-slate-50'
-                }`}
-                title="Satukan izin dari perusahaan/fasilitas yang sama menjadi 1 baris"
-              >
-                <Layers size={14} strokeWidth={2.5} />
-                <span>{groupByFacility ? 'Gabung Fasilitas: On' : 'Per Izin: On'}</span>
-              </button>
+          {/* SUB-HEADER TOOLBAR */}
+          <div className="p-5 border-b border-slate-200 flex justify-between items-center flex-wrap gap-4 bg-white">
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-4 top-3 text-slate-400" size={18} />
+              <input
+                type="text"
+                placeholder="Cari kegiatan atau pemrakarsa..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+              />
             </div>
             
             {/* Pagination Controls */}
             {!loading && processedData.length > 0 && (
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <div className="flex items-center gap-4">
+                <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
                   Halaman {currentPage} dari {totalPages}
                 </span>
                 <div className="flex gap-2">
                   <button 
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="w-10 h-10 flex items-center justify-center bg-white border-4 border-slate-900 rounded-xl text-slate-900 shadow-[2px_2px_0_0_#0f172a] disabled:opacity-50 disabled:shadow-none hover:bg-slate-100 transition-all active:translate-y-1 active:shadow-none"
+                    className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow-md transition-all disabled:opacity-40"
                   >
-                    <ChevronLeft size={20} strokeWidth={3} />
+                    <ChevronLeft size={18} strokeWidth={2.5} />
                   </button>
                   <button 
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="w-10 h-10 flex items-center justify-center bg-white border-4 border-slate-900 rounded-xl text-slate-900 shadow-[2px_2px_0_0_#0f172a] disabled:opacity-50 disabled:shadow-none hover:bg-slate-100 transition-all active:translate-y-1 active:shadow-none"
+                    className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-xl text-slate-700 shadow-sm hover:bg-slate-50 hover:shadow-md transition-all disabled:opacity-40"
                   >
-                    <ChevronRight size={20} strokeWidth={3} />
+                    <ChevronRight size={18} strokeWidth={2.5} />
                   </button>
                 </div>
               </div>
             )}
           </div>
           
-          {/* Table */}
+          {/* TABEL DATA */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-indigo-200 text-slate-900 font-black border-b-4 border-slate-900">
+              <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-700 text-xs font-black uppercase tracking-widest">
                 <tr>
-                  <th className="p-5 uppercase text-xs tracking-widest w-16 text-center border-r-4 border-slate-900 whitespace-nowrap">No</th>
-                  <th className="p-5 uppercase text-xs tracking-widest border-r-4 border-slate-900 whitespace-nowrap">Nama Fasilitas / Kegiatan</th>
-                  <th className="p-5 uppercase text-xs tracking-widest border-r-4 border-slate-900 whitespace-nowrap">Nama Pemrakarsa</th>
-                  <th className="p-5 uppercase text-xs tracking-widest text-center whitespace-nowrap">Aksi</th>
+                  <th className="py-4 px-5 text-center w-16">No</th>
+                  <th className="py-4 px-5">Nama Fasilitas / Kegiatan</th>
+                  <th className="py-4 px-5">Nama Pemrakarsa</th>
+                  <th className="py-4 px-5 text-center w-52">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y-4 divide-slate-900 bg-white">
+              <tbody className="divide-y divide-slate-100 bg-white">
                 {loading ? (
                   <tr>
-                    <td colSpan={4} className="p-10 text-center text-slate-900 font-black uppercase text-lg">
-                      <LottieLoader size={150} text="MEMUAT DATA..." />
+                    <td colSpan={4} className="p-12 text-center text-slate-500 font-bold text-sm">
+                      <LottieLoader size={140} text="MEMUAT DATABASE SASARAN..." />
                     </td>
                   </tr>
                 ) : paginatedData.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-10 text-center text-slate-600 font-black uppercase">
-                      <div className="flex flex-col items-center justify-center gap-4">
-                        <Inbox className="w-12 h-12 opacity-50" />
-                        {searchQuery 
-                          ? `Tidak ada data ${activeTab} yang cocok dengan pencarian "${searchQuery}".`
-                          : `Tidak ada data ${activeTab} yang ditemukan di riwayat perizinan.`}
+                    <td colSpan={4} className="p-12 text-center text-slate-500 font-bold text-sm">
+                      <div className="flex flex-col items-center justify-center gap-3">
+                        <Inbox className="w-12 h-12 text-slate-300" />
+                        <span className="uppercase tracking-wider">
+                          {searchQuery 
+                            ? `Tidak ada data ${activeTab} yang cocok dengan pencarian "${searchQuery}".`
+                            : `Tidak ada data ${activeTab} yang ditemukan di riwayat perizinan.`}
+                        </span>
                       </div>
                     </td>
                   </tr>
@@ -471,53 +472,53 @@ export default function DatabaseGabungan() {
                         <tr 
                           className={`transition-colors ${
                             hasMultiplePermits 
-                              ? 'cursor-pointer hover:bg-amber-50/50' 
-                              : 'hover:bg-slate-50'
-                          } ${isExpanded ? 'bg-amber-50/40' : ''}`}
+                              ? 'cursor-pointer hover:bg-slate-50/80' 
+                              : 'hover:bg-slate-50/60'
+                          } ${isExpanded ? 'bg-slate-50/90' : ''}`}
                           onClick={() => {
                             if (hasMultiplePermits) {
                               toggleExpandRow(item.key);
                             }
                           }}
                         >
-                          <td className="p-5 text-center font-black text-slate-600 border-r-4 border-slate-900">
+                          <td className="py-4 px-5 text-center font-bold text-slate-400 text-xs">
                             {(currentPage - 1) * itemsPerPage + index + 1}
                           </td>
-                          <td className="p-5 font-black text-slate-900 uppercase text-sm border-r-4 border-slate-900 whitespace-normal break-words min-w-[200px]">
-                            <div>
-                              <span className="block leading-snug">
+                          <td className="py-4 px-5 whitespace-normal break-words min-w-[260px]">
+                            <div className="space-y-1.5">
+                              <span className="font-black text-slate-900 text-sm block leading-snug uppercase">
                                 {item.nama_kegiatan}
                               </span>
-
+                              
                               {/* Badges for permits */}
                               {hasMultiplePermits ? (
-                                <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                                  <span className="text-[10px] font-black px-2.5 py-1 rounded-md bg-amber-200 text-slate-900 border-2 border-slate-900 uppercase inline-flex items-center gap-1 shadow-[2px_2px_0_0_#0f172a]">
+                                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                  <span className="text-[11px] font-black px-3 py-1 rounded-lg bg-teal-50 text-teal-800 border border-teal-200 uppercase inline-flex items-center gap-1.5 shadow-sm">
                                     📁 {item.permits.length} Izin Terdaftar
-                                    {isExpanded ? <ChevronUp size={12} strokeWidth={3} /> : <ChevronDown size={12} strokeWidth={3} />}
+                                    {isExpanded ? <ChevronUp size={13} strokeWidth={2.5} /> : <ChevronDown size={13} strokeWidth={2.5} />}
                                   </span>
                                   {item.permits.slice(0, 3).map((p: any) => (
-                                    <span key={p.id} className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-900 uppercase">
+                                    <span key={p.id} className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 uppercase">
                                       {p.jenis_dokumen || 'Dokumen'} {p.tahun ? `(${p.tahun})` : ''}
                                     </span>
                                   ))}
                                   {item.permits.length > 3 && (
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase">
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase">
                                       +{item.permits.length - 3} lainnya
                                     </span>
                                   )}
                                 </div>
                               ) : (
-                                <span className="text-[11px] font-bold text-slate-500 uppercase block mt-1">
+                                <span className="text-xs text-slate-500 font-bold uppercase block">
                                   {item.permits[0]?.jenis_dokumen || 'Dokumen'} {item.permits[0]?.tahun ? `• Tahun ${item.permits[0].tahun}` : ''}
                                 </span>
                               )}
                             </div>
                           </td>
-                          <td className="p-5 font-bold text-slate-700 uppercase text-xs border-r-4 border-slate-900 whitespace-normal break-words min-w-[150px]">
+                          <td className="py-4 px-5 text-xs font-bold text-slate-700 uppercase whitespace-normal break-words min-w-[160px]">
                             {item.nama_pemrakarsa}
                           </td>
-                          <td className="p-5 text-center whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                          <td className="py-4 px-5 text-center whitespace-nowrap" onClick={e => e.stopPropagation()}>
                             {hasMultiplePermits ? (
                               <button
                                 type="button"
@@ -525,38 +526,39 @@ export default function DatabaseGabungan() {
                                   e.stopPropagation();
                                   toggleExpandRow(item.key);
                                 }}
-                                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border-4 border-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all ${
+                                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border transition-all shadow-md hover:-translate-y-0.5 hover:shadow-lg ${
                                   isExpanded
-                                    ? 'bg-amber-300 text-slate-900'
-                                    : 'bg-rose-200 hover:bg-rose-300 text-slate-900'
+                                    ? 'bg-indigo-600 text-white border-indigo-600'
+                                    : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200'
                                 }`}
                               >
                                 <Archive size={16} strokeWidth={2.5} />
                                 <span>{item.permits.length} Arsip Izin</span>
-                                {isExpanded ? <ChevronUp size={16} strokeWidth={3} /> : <ChevronDown size={16} strokeWidth={3} />}
+                                {isExpanded ? <ChevronUp size={16} strokeWidth={2.5} /> : <ChevronDown size={16} strokeWidth={2.5} />}
                               </button>
                             ) : (
-                              <Link 
+                              <Link
                                 href={`/pengawasan/database/arsip/${item.permits[0]?.id}`}
-                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-200 hover:bg-rose-300 border-4 border-slate-900 rounded-xl text-xs font-black uppercase tracking-widest text-slate-900 shadow-[4px_4px_0_0_#0f172a] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#0f172a] transition-all"
+                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-black uppercase tracking-widest shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all"
                               >
-                                <Archive size={16} strokeWidth={2.5} /> Arsip Izin
+                                <Archive size={16} strokeWidth={2.5} />
+                                <span>Arsip Izin</span>
                               </Link>
                             )}
                           </td>
                         </tr>
 
-                        {/* Accordion In-Place Row */}
+                        {/* ACCORDION IN-PLACE ROW */}
                         {isExpanded && hasMultiplePermits && (
-                          <tr className="bg-slate-50 border-b-4 border-slate-900 animate-in fade-in duration-150">
-                            <td colSpan={4} className="p-5 pl-8 md:pl-16">
-                              <div className="bg-white border-4 border-slate-900 rounded-2xl p-5 shadow-[6px_6px_0_0_#0f172a] space-y-4">
-                                <div className="flex items-center justify-between border-b-2 border-slate-900 pb-3 flex-wrap gap-2">
+                          <tr className="bg-slate-50/60 border-b border-slate-200/80 animate-in fade-in duration-150">
+                            <td colSpan={4} className="p-4 pl-8 md:pl-16">
+                              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-md space-y-4">
+                                <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
                                   <span className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                                    <Archive size={16} strokeWidth={2.5} className="text-indigo-600" />
+                                    <Archive size={16} strokeWidth={2.5} className="text-teal-600" />
                                     Daftar Berkas Izin Terdaftar ({item.permits.length} Dokumen)
                                   </span>
-                                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                  <span className="text-xs font-bold text-slate-500 uppercase">
                                     Pilih arsip izin yang ingin dilihat
                                   </span>
                                 </div>
@@ -565,10 +567,10 @@ export default function DatabaseGabungan() {
                                   {item.permits.map((p: any, pIdx: number) => (
                                     <div 
                                       key={p.id} 
-                                      className="p-4 rounded-xl border-2 border-slate-900 bg-slate-50 hover:bg-indigo-50/60 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[2px_2px_0_0_#0f172a]"
+                                      className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-teal-50/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
                                     >
                                       <div className="flex items-start gap-3">
-                                        <span className="w-8 h-8 rounded-lg bg-amber-300 border-2 border-slate-900 text-slate-900 font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-[1px_1px_0_0_#0f172a]">
+                                        <span className="w-8 h-8 rounded-xl bg-teal-100 text-teal-800 border border-teal-200 font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                                           {pIdx + 1}
                                         </span>
                                         <div>
@@ -576,26 +578,26 @@ export default function DatabaseGabungan() {
                                             <span className="text-sm font-black text-slate-900 uppercase">
                                               {p.jenis_dokumen || 'Dokumen Lingkungan'}
                                             </span>
-                                            <span className="text-[10px] font-black px-2 py-0.5 rounded bg-emerald-200 text-slate-900 border border-slate-900 uppercase">
+                                            <span className="text-[10px] font-black px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
                                               Tahun {p.tahun || '—'}
                                             </span>
-                                            <span className="text-[10px] font-black px-2 py-0.5 rounded bg-indigo-100 text-slate-900 border border-slate-900 uppercase">
+                                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 uppercase">
                                               #{String(p.no_urut || p.id).padStart(3, '0')}
                                             </span>
                                           </div>
                                           <p className="text-xs font-bold text-slate-600 uppercase">
-                                            Status: <span className="text-slate-900">{p.status_tahapan || 'Dalam Proses'}</span>
+                                            Status: <span className="text-slate-900 font-black">{p.status_tahapan || 'Dalam Proses'}</span>
                                             {p.nomor_checklist ? ` • No. Reg: ${p.nomor_checklist}` : ''}
                                           </p>
                                           <p className="text-[11px] font-bold text-slate-500 uppercase mt-0.5 line-clamp-1">
-                                            Nama Kegiatan: {p.nama_kegiatan}
+                                            Kegiatan: {p.nama_kegiatan}
                                           </p>
                                         </div>
                                       </div>
 
                                       <Link
                                         href={`/pengawasan/database/arsip/${p.id}`}
-                                        className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-black text-xs uppercase tracking-wider rounded-xl border-2 border-slate-900 shadow-[3px_3px_0_0_#0f172a] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_#0f172a] transition-all shrink-0 self-start sm:self-center"
+                                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white font-black text-xs uppercase tracking-wider rounded-xl border border-slate-200 shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all shrink-0 self-start sm:self-center"
                                       >
                                         <Archive size={14} strokeWidth={2.5} />
                                         <span>Buka Arsip ↗</span>
