@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Database, Inbox, ArrowLeft, Archive, Factory, Building2, 
   Home, ShoppingCart, ChevronLeft, ChevronRight, Layers, Search, 
-  ChevronDown, ChevronUp, Zap, Sparkles
+  ChevronDown, ChevronUp, Zap, Sparkles, Utensils
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -203,6 +203,17 @@ export default function DatabaseGabungan() {
     );
   };
 
+  const isSppg = (nama: string, pemrakarsa: string, kategori: string) => {
+    return (
+      nama.includes('sppg') ||
+      nama.includes('makan bergizi') ||
+      nama.includes('mbg') ||
+      nama.includes('dapur umum') ||
+      kategori.includes('sppg') ||
+      kategori.includes('mbg')
+    );
+  };
+
   // Filter Data based on activeTab and searchQuery
   const filteredData = useMemo(() => {
     return data.filter((item: any) => {
@@ -219,14 +230,16 @@ export default function DatabaseGabungan() {
         matchTab = isPerumahan(nama, pemrakarsa, kategori);
       } else if (activeTab === 'Toko Modern') {
         matchTab = isTokoModern(nama, pemrakarsa, kategori);
+      } else if (activeTab === 'SPPG') {
+        matchTab = isSppg(nama, pemrakarsa, kategori);
       } else if (activeTab === 'Lainnya') {
         matchTab =
           kategori.includes('lain') ||
-          kategori.includes('sppg') ||
           (!isIndustri(nama, pemrakarsa, kategori) &&
             !isFasyankes(nama, pemrakarsa, kategori) &&
             !isPerumahan(nama, pemrakarsa, kategori) &&
-            !isTokoModern(nama, pemrakarsa, kategori));
+            !isTokoModern(nama, pemrakarsa, kategori) &&
+            !isSppg(nama, pemrakarsa, kategori));
       } else {
         matchTab = true;
       }
@@ -312,6 +325,7 @@ export default function DatabaseGabungan() {
     { id: 'Fasyankes', icon: <Building2 size={18} strokeWidth={2.5} /> },
     { id: 'Perumahan', icon: <Home size={18} strokeWidth={2.5} /> },
     { id: 'Toko Modern', icon: <ShoppingCart size={18} strokeWidth={2.5} /> },
+    { id: 'SPPG', icon: <Utensils size={18} strokeWidth={2.5} /> },
     { id: 'Lainnya', icon: <Layers size={18} strokeWidth={2.5} /> },
   ];
 
