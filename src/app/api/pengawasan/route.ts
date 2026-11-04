@@ -25,9 +25,6 @@ export async function GET(request: Request) {
         
       if (error) throw error;
       
-      // Filter manually for "doesn't have BAP" since Supabase JS doesn't have `doesntHave` easily without a join
-      // Actually we can do a join: `*, bap_pengawasans!inner(*)` to get those with BAP.
-      // To get those WITHOUT BAP, it's easier to fetch all, and then fetch all BAPs, or just fetch `bap_pengawasans(id)` and filter where it's null.
       const { data: agendaData, error: agendaError } = await supabase
         .from('pengawasan_lapangans')
         .select('*, bap_pengawasans(id)')
@@ -60,7 +57,6 @@ export async function GET(request: Request) {
       if (errRiwayat) throw errRiwayat;
 
       // 2. Agenda Hari Ini (Where tanggal_kunjungan == today)
-      // For simplicity, we just fetch all and filter by today's date string
       const todayStr = new Date().toISOString().split('T')[0];
       const { data: agendaHariIni, error: errAgenda } = await supabase
         .from('pengawasan_lapangans')
@@ -124,6 +120,38 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data });
   } catch (error: any) {
     console.error('Error creating agenda:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const cookieStore = await cookies();
+    if (!cookieStore.get('bidi_session')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ error: 'ID agenda wajib diisi' }, { status: 400 });
+    }
+
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error } = await supabaseAdmin
+      .from('pengawasan_lapangans')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error('Error deleting agenda:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
