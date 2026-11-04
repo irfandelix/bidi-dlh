@@ -5,6 +5,7 @@ import { use } from 'react';
 import { MapPin, Calendar, Clock, FileText, User, Camera, CheckCircle2, AlertCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import LottieLoader from '@/components/LottieLoader';
+import { getDriveImageUrl, getDriveWebLink } from '@/lib/driveImage';
 
 const supabase = createClient();
 
@@ -69,6 +70,7 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
   let fotosToPass = Array.isArray(data.foto_verlap_list) ? [...data.foto_verlap_list] : [];
   if (data.foto1_url && fotosToPass.length === 0) fotosToPass.push({ url: data.foto1_url, keterangan: data.ket_foto1 || '' });
   if (data.foto2_url && fotosToPass.length === 0) fotosToPass.push({ url: data.foto2_url, keterangan: data.ket_foto2 || '' });
+  if (data.dokumentasi_url && fotosToPass.length === 0) fotosToPass.push({ url: data.dokumentasi_url, keterangan: 'Dokumentasi Verifikasi Lapangan' });
 
   const hasVerlap = data.status_tahapan === 'Sudah Diverifikasi Lapangan' || data.catatan_verlap || data.hasil_verlap;
 
@@ -186,22 +188,32 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
                 </h3>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {fotosToPass.map((foto, idx) => (
-                    <div key={idx} className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm group">
-                      <div className="aspect-w-4 aspect-h-3 bg-gray-100 relative">
-                        <img 
-                          src={foto.url} 
-                          alt={foto.keterangan || `Dokumentasi ${idx+1}`} 
-                          className="object-cover w-full h-48 group-hover:scale-105 transition-transform duration-300"
-                        />
+                  {fotosToPass.map((foto, idx) => {
+                    const directImg = getDriveImageUrl(foto.url);
+                    const driveWeb = getDriveWebLink(foto.url);
+                    return (
+                      <div key={idx} className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm group">
+                        <div className="aspect-w-4 aspect-h-3 bg-gray-100 relative">
+                          <img 
+                            src={directImg} 
+                            alt={foto.keterangan || `Dokumentasi ${idx+1}`} 
+                            className="object-cover w-full h-48 group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="p-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                          <p className="text-xs text-gray-700 font-medium truncate">
+                            {foto.keterangan || `Foto Dokumentasi ${idx+1}`}
+                          </p>
+                          {driveWeb && (
+                            <a href={driveWeb} target="_blank" rel="noreferrer" className="text-[10px] font-bold text-teal-700 hover:text-teal-900 bg-teal-50 px-2 py-1 rounded border border-teal-200 shrink-0">
+                              Drive ↗
+                            </a>
+                          )}
+                        </div>
                       </div>
-                      <div className="p-4 bg-gray-50 border-t border-gray-100">
-                        <p className="text-sm text-gray-700 text-center font-medium">
-                          {foto.keterangan || `Foto Dokumentasi ${idx+1}`}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
