@@ -167,7 +167,7 @@ export default function DatabaseGabungan() {
                         {item.nama_pemrakarsa}
                       </td>
                       <td className="p-5 text-center whitespace-nowrap">
-                        <Link href={`/perizinan/arsip/${item.id}`} className="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-200 hover:bg-error-container border border-outline-variant rounded-xl text-xs font-bold uppercase tracking-widest text-on-surface shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all">
+                        <Link href={`/pengawasan/database/arsip/${item.id}`} className="inline-flex items-center gap-2 px-5 py-2.5 bg-rose-200 hover:bg-error-container border border-outline-variant rounded-xl text-xs font-bold uppercase tracking-widest text-on-surface shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all">
                           <Archive size={16} strokeWidth={2.5} /> Arsip Izin
                         </Link>
                       </td>
