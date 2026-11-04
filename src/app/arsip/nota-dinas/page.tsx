@@ -251,7 +251,7 @@ export default function DaftarArsipNotaDinasPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant font-bold bg-surface-container-lowest">
+                  <td colSpan={6} className="px-6 py-12 text-center text-on-surface-variant font-bold bg-white">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <Archive size={32} className="text-slate-300" />
                       <p className="uppercase tracking-widest">BELUM ADA BUKU REGISTER ATAU TIDAK DITEMUKAN.</p>
@@ -299,7 +299,7 @@ export default function DaftarArsipNotaDinasPage() {
             </p>
             
             <div className="space-y-4">
-              <label className="block w-full border-2 border-dashed border-outline-variant rounded-xl p-8 text-center cursor-pointer hover:bg-surface-container-lowest transition-colors">
+              <label className="block w-full border-2 border-dashed border-outline-variant rounded-xl p-8 text-center cursor-pointer hover:bg-white transition-colors">
                 <input 
                   type="file" 
                   accept=".xlsx, .xls, .csv" 

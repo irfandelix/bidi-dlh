@@ -152,7 +152,7 @@ export default function TimPenilaiPage() {
                 <tr><td colSpan={4} className="p-8 text-center font-bold text-on-surface-variant">Belum ada personil terdaftar.</td></tr>
               ) : (
                 personil.map((p, index) => (
-                  <tr key={p.id} className="border-b border-outline-variant hover:bg-surface-container-lowest transition-colors">
+                  <tr key={p.id} className="border-b border-outline-variant hover:bg-white transition-colors">
                     <td className="p-4 font-bold text-on-surface border-r border-outline-variant text-center">{index + 1}</td>
                     <td className="p-4 border-r border-outline-variant">
                       <div className="font-bold text-on-surface text-base">{p.nama}</div>
@@ -189,17 +189,17 @@ export default function TimPenilaiPage() {
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Nama Lengkap (beserta gelar)</label>
-                <input required type="text" value={formData.nama} onChange={e => setFormData({...formData, nama: e.target.value})} className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Cth: Dr. Ir. Budi Santoso, M.T." />
+                <input required type="text" value={formData.nama} onChange={e => setFormData({...formData, nama: e.target.value})} className="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Cth: Dr. Ir. Budi Santoso, M.T." />
               </div>
               
               <div>
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">NIP / NIK (Opsional)</label>
-                <input type="text" value={formData.nip} onChange={e => setFormData({...formData, nip: e.target.value})} className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Cth: 198001012005011001" />
+                <input type="text" value={formData.nip} onChange={e => setFormData({...formData, nip: e.target.value})} className="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Cth: 198001012005011001" />
               </div>
               
               <div>
                 <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Jabatan Dinas</label>
-                <input type="text" value={formData.jabatan_dinas} onChange={e => setFormData({...formData, jabatan_dinas: e.target.value})} className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Cth: Kepala Bidang Perencanaan..." />
+                <input type="text" value={formData.jabatan_dinas} onChange={e => setFormData({...formData, jabatan_dinas: e.target.value})} className="w-full px-4 py-3 bg-white border border-outline-variant rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-400/20 font-bold" placeholder="Cth: Kepala Bidang Perencanaan..." />
               </div>
 
               <div className="pt-6 flex gap-3 border-t-2 border-outline-variant mt-6">

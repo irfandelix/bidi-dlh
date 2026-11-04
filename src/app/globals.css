@@ -10,8 +10,10 @@
   --color-foreground: var(--foreground);
   --color-surface: #ffffff;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f1f5f9;
-  --color-surface-container: #e2e8f0;
+  --color-surface-container-low: #ffffff;
+  --color-slate-50: #ffffff;
+  --color-gray-50: #ffffff;
+  --color-surface-container: #ffffff;
   --color-primary: #0f172a;
   --color-on-primary: #ffffff;
   --color-secondary: #0d9488;

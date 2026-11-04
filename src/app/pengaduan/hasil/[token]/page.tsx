@@ -42,7 +42,7 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
         <LottieLoader size={24} />
         <h2 className="text-xl font-bold text-gray-700 uppercase mt-4">Memuat Laporan...</h2>
       </div>
@@ -51,7 +51,7 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
 
   if (errorMsg) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
         <div className="bg-red-50 text-red-600 p-6 rounded-2xl shadow-sm border border-red-100 flex flex-col items-center text-center max-w-md w-full">
           <AlertCircle className="w-12 h-12 mb-4 text-red-500" />
           <h2 className="text-xl font-bold mb-2">Terjadi Kesalahan</h2>
@@ -75,7 +75,7 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
   const hasVerlap = data.status_tahapan === 'Sudah Diverifikasi Lapangan' || data.catatan_verlap || data.hasil_verlap;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto space-y-6">
         
         {/* Header / Kop */}
@@ -110,7 +110,7 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <div className="bg-white p-4 rounded-xl border border-gray-100">
                   <div className="flex items-start gap-3">
                     <User className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
@@ -120,7 +120,7 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
                   </div>
                 </div>
                 
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <div className="bg-white p-4 rounded-xl border border-gray-100">
                   <div className="flex items-start gap-3">
                     <Calendar className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
@@ -130,7 +130,7 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
                   </div>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 md:col-span-2">
+                <div className="bg-white p-4 rounded-xl border border-gray-100 md:col-span-2">
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
                     <div>
@@ -141,7 +141,7 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
                 </div>
               </div>
 
-              <div className="mt-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+              <div className="mt-4 bg-white p-4 rounded-xl border border-gray-100">
                 <p className="text-xs text-gray-500 font-medium uppercase mb-2">Deskripsi Aduan (Perihal)</p>
                 <div className="text-sm text-gray-800 font-medium mb-3 pb-3 border-b border-gray-200">
                   {data.perihal || '-'}
@@ -201,7 +201,7 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
                             loading="lazy"
                           />
                         </div>
-                        <div className="p-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+                        <div className="p-3 bg-white border-t border-gray-100 flex items-center justify-between">
                           <p className="text-xs text-gray-700 font-medium truncate">
                             {foto.keterangan || `Foto Dokumentasi ${idx+1}`}
                           </p>
@@ -220,7 +220,7 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
 
           </div>
           
-          <div className="bg-gray-50 p-4 border-t border-gray-100 text-center text-xs text-gray-400">
+          <div className="bg-white p-4 border-t border-gray-100 text-center text-xs text-gray-400">
             Dihasilkan secara otomatis oleh Sistem BIDI DLH Sragen
           </div>
         </div>

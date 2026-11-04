@@ -128,7 +128,7 @@ export default function BuatAgenda() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest p-6 lg:p-12">
+    <div className="min-h-screen bg-white p-6 lg:p-12">
       <div className="max-w-4xl mx-auto">
         
         <div className="flex items-center gap-4 mb-8">
@@ -182,7 +182,7 @@ export default function BuatAgenda() {
                     required
                     value={formData.tanggal_kunjungan}
                     onChange={e => setFormData({...formData, tanggal_kunjungan: e.target.value})}
-                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-300 focus:bg-surface transition-colors"
+                    className="w-full bg-white border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-300 focus:bg-surface transition-colors"
                   />
                 </div>
               </div>
@@ -193,7 +193,7 @@ export default function BuatAgenda() {
                   required
                   value={formData.kategori}
                   onChange={e => setFormData({...formData, kategori: e.target.value})}
-                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-300 focus:bg-surface transition-colors uppercase"
+                  className="w-full bg-white border border-outline-variant rounded-xl px-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-300 focus:bg-surface transition-colors uppercase"
                 >
                   <option value="" disabled>-- Pilih Kategori --</option>
                   <option value="Fasyankes">Fasyankes</option>
@@ -216,7 +216,7 @@ export default function BuatAgenda() {
                     readOnly={tab === 'db'}
                     value={formData.nama_kegiatan}
                     onChange={e => setFormData({...formData, nama_kegiatan: e.target.value})}
-                    className={`w-full border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none transition-colors uppercase ${tab === 'db' ? 'bg-primary-container focus:ring-0 text-indigo-900' : 'bg-surface-container-lowest focus:ring-4 focus:ring-teal-300 focus:bg-surface'}`}
+                    className={`w-full border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none transition-colors uppercase ${tab === 'db' ? 'bg-primary-container focus:ring-0 text-indigo-900' : 'bg-white focus:ring-4 focus:ring-teal-300 focus:bg-surface'}`}
                     placeholder="Contoh: PEMBANGUNAN KLINIK SEHAT"
                   />
                 </div>
@@ -232,7 +232,7 @@ export default function BuatAgenda() {
                     readOnly={tab === 'db'}
                     value={formData.nama_pemrakarsa}
                     onChange={e => setFormData({...formData, nama_pemrakarsa: e.target.value})}
-                    className={`w-full border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none transition-colors uppercase ${tab === 'db' ? 'bg-primary-container focus:ring-0 text-indigo-900' : 'bg-surface-container-lowest focus:ring-4 focus:ring-teal-300 focus:bg-surface'}`}
+                    className={`w-full border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none transition-colors uppercase ${tab === 'db' ? 'bg-primary-container focus:ring-0 text-indigo-900' : 'bg-white focus:ring-4 focus:ring-teal-300 focus:bg-surface'}`}
                     placeholder="Contoh: PT. MEDIKA KARYA"
                   />
                 </div>
@@ -249,7 +249,7 @@ export default function BuatAgenda() {
                   rows={2}
                   value={formData.alamat_lokasi}
                   onChange={e => setFormData({...formData, alamat_lokasi: e.target.value})}
-                  className={`w-full border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none transition-colors ${tab === 'db' ? 'bg-primary-container focus:ring-0 text-indigo-900' : 'bg-surface-container-lowest focus:ring-4 focus:ring-teal-300 focus:bg-surface'}`}
+                  className={`w-full border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none transition-colors ${tab === 'db' ? 'bg-primary-container focus:ring-0 text-indigo-900' : 'bg-white focus:ring-4 focus:ring-teal-300 focus:bg-surface'}`}
                   placeholder="Detail alamat lapangan..."
                 ></textarea>
               </div>
@@ -263,7 +263,7 @@ export default function BuatAgenda() {
               {pegawai.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {pegawai.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').map(p => (
-                    <label key={`tim-${p.nama}`} className={`flex items-center gap-3 p-4 rounded-xl border-4 cursor-pointer transition-all ${formData.tim_tugas.includes(p.nama) ? 'bg-teal-300 border-outline-variant shadow-sm hover:shadow-md transition-shadow' : 'bg-surface-container-lowest border-outline-variant hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow'}`}>
+                    <label key={`tim-${p.nama}`} className={`flex items-center gap-3 p-4 rounded-xl border-4 cursor-pointer transition-all ${formData.tim_tugas.includes(p.nama) ? 'bg-teal-300 border-outline-variant shadow-sm hover:shadow-md transition-shadow' : 'bg-white border-outline-variant hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow'}`}>
                       <input 
                         type="checkbox" 
                         className="w-5 h-5 accent-teal-600 rounded border border-outline-variant" 
@@ -293,7 +293,7 @@ export default function BuatAgenda() {
               {pegawai.filter(p => p.kategori === 'Saksi').length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {pegawai.filter(p => p.kategori === 'Saksi').map(p => (
-                    <label key={`saksi-${p.nama}`} className={`flex items-center gap-3 p-4 rounded-xl border-4 cursor-pointer transition-all ${formData.saksi.includes(p.nama) ? 'bg-indigo-300 border-outline-variant shadow-sm hover:shadow-md transition-shadow' : 'bg-surface-container-lowest border-outline-variant hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow'}`}>
+                    <label key={`saksi-${p.nama}`} className={`flex items-center gap-3 p-4 rounded-xl border-4 cursor-pointer transition-all ${formData.saksi.includes(p.nama) ? 'bg-indigo-300 border-outline-variant shadow-sm hover:shadow-md transition-shadow' : 'bg-white border-outline-variant hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow'}`}>
                       <input 
                         type="checkbox" 
                         className="w-5 h-5 accent-indigo-600 rounded border border-outline-variant" 

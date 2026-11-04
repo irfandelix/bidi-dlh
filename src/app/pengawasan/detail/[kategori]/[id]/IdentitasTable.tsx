@@ -99,7 +99,7 @@ export default function IdentitasTable({ identitas }: { identitas: any }) {
           </thead>
           <tbody>
             {currentEntries.map(([key, value], idx) => (
-              <tr key={key} className={`border-b-2 border-outline-variant ${idx % 2 === 0 ? 'bg-surface' : 'bg-surface-container-lowest'} last:border-b-0`}>
+              <tr key={key} className={`border-b-2 border-outline-variant ${idx % 2 === 0 ? 'bg-surface' : 'bg-white'} last:border-b-0`}>
                 <td className="px-6 py-4 font-bold text-on-surface-variant border-r-4 border-outline-variant bg-surface-container-low">
                   {formatLabel(key)}
                 </td>

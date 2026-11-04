@@ -288,10 +288,10 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     };
 
   if (loading) return <LottieLoader size={150} text="MEMUAT DATA..." />;
-  if (!agenda) return <div className="min-h-screen bg-surface-container-lowest p-6 flex items-center justify-center font-bold text-xl text-error uppercase tracking-widest">Agenda Tidak Ditemukan</div>;
+  if (!agenda) return <div className="min-h-screen bg-white p-6 flex items-center justify-center font-bold text-xl text-error uppercase tracking-widest">Agenda Tidak Ditemukan</div>;
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest font-sans pb-24 relative">
+    <div className="min-h-screen bg-white font-sans pb-24 relative">
       <div className="sticky top-0 z-40 bg-surface border-b-4 border-outline-variant px-4 py-4 shadow-md">
         <div className="flex items-center gap-4 mb-3 max-w-3xl mx-auto">
           <Link href="/pengawasan/agenda" className="w-10 h-10 rounded-xl bg-surface text-on-surface border border-outline-variant flex items-center justify-center hover:bg-teal-400 hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all">
@@ -887,7 +887,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
             
             <div className="space-y-4 mb-8">
               {komponenPenilaian.map((komp, idx) => (
-                <div key={komp.id} className="flex flex-col md:flex-row gap-3 p-4 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div key={komp.id} className="flex flex-col md:flex-row gap-3 p-4 bg-white border border-outline-variant rounded-xl shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex-none bg-primary text-on-primary text-on-primary font-bold px-3 py-2 rounded-lg text-sm flex items-center justify-center min-w-[50px]">
                     C.{idx + 1}
                   </div>

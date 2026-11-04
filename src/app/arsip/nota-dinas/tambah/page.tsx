@@ -227,7 +227,7 @@ export default function TambahNotaDinasPage() {
                 1. Pemohon (Anggota Bidang) <span className="text-error">*</span>
               </label>
               <select name="pemohon_id" required 
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer">
+                className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer">
                 <option value="">- Pilih Pemohon -</option>
                 {anggota.map((a) => (
                   <option key={a.id} value={a.id}>
@@ -242,7 +242,7 @@ export default function TambahNotaDinasPage() {
                 2. Isi Nota Dinas (Subjek / Hal) <span className="text-error">*</span>
               </label>
               <textarea name="nama_nota" required placeholder="Contoh: Permohonan izin pelaksanaan rapat..." rows={3}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
+                className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -251,21 +251,21 @@ export default function TambahNotaDinasPage() {
                   Yth. Tujuan (Template) <span className="text-error">*</span>
                 </label>
                 <input type="text" name="yth" required defaultValue="Kepala Dinas Lingkungan Hidup Kab. Sragen"
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                   Sifat (Template)
                 </label>
                 <input type="text" name="sifat" defaultValue="Biasa"
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                   Lampiran (Template)
                 </label>
                 <input type="text" name="lampiran" defaultValue="-"
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
             </div>
 
@@ -281,7 +281,7 @@ export default function TambahNotaDinasPage() {
                     <select 
                       value={p}
                       onChange={(e) => updatePetugas(idx, e.target.value)}
-                      className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl pl-10 pr-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none cursor-pointer" 
+                      className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl pl-10 pr-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none cursor-pointer" 
                     >
                       <option value="">- Pilih Petugas -</option>
                       {anggota.map((a) => (
@@ -309,7 +309,7 @@ export default function TambahNotaDinasPage() {
                   2. Tanggal Nota <span className="text-error">*</span>
                 </label>
                 <input type="date" name="tanggal_nota" required value={tanggalNota} onChange={handleTanggalChange}
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
               </div>
 
               <div>
@@ -321,7 +321,7 @@ export default function TambahNotaDinasPage() {
                   required 
                   value={dariBagian}
                   onChange={(e) => setDariBagian(e.target.value)}
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer uppercase">
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer uppercase">
                   <option value="Umum">Umum</option>
                   <option value="Perizinan">Perizinan</option>
                   <option value="Pengaduan">Pengaduan</option>
@@ -431,7 +431,7 @@ export default function TambahNotaDinasPage() {
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                 4. Lampiran Nota Dinas (Opsional)
               </label>
-              <div className="relative overflow-hidden w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
+              <div className="relative overflow-hidden w-full bg-white border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
                 <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
                 <Upload size={32} className="text-slate-400 group-hover:text-on-surface transition-colors" />
                 <p className="text-sm font-bold text-on-surface-variant">
@@ -445,7 +445,7 @@ export default function TambahNotaDinasPage() {
                 5. Keterangan (Opsional)
               </label>
               <textarea name="keterangan" placeholder="Tambahkan catatan khusus jika ada..." rows={2}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
+                className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
             </div>
 
             <div className="pt-8 border-t border-outline-variant mt-8 flex justify-end">

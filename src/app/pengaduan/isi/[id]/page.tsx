@@ -181,14 +181,14 @@ export default function IsiFormPengaduanPage({ params }: { params: Promise<{ id:
                   Nama Lengkap Pelapor <span className="text-error">*</span>
                 </label>
                 <input type="text" name="nama_pelapor" required defaultValue={pengaduan.nama_pelapor}
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                  className="w-full bg-white border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                   No. Telepon / WhatsApp <span className="text-error">*</span>
                 </label>
                 <input type="tel" name="telp_pelapor" required defaultValue={pengaduan.telp_pelapor}
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                  className="w-full bg-white border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
             </div>
           </div>
@@ -203,21 +203,21 @@ export default function IsiFormPengaduanPage({ params }: { params: Promise<{ id:
                 Nama Perusahaan / Pihak Terlapor <span className="text-error">*</span>
               </label>
               <input type="text" name="nama_terlapor" required defaultValue={pengaduan.nama_terlapor}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                className="w-full bg-white border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
             </div>
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                 Lokasi Kejadian / Alamat Terlapor <span className="text-error">*</span>
               </label>
               <textarea name="lokasi_aduan" required rows={3} defaultValue={pengaduan.lokasi_aduan}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
+                className="w-full bg-white border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
             </div>
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                 Deskripsi / Kronologi Kejadian <span className="text-error">*</span>
               </label>
               <textarea name="deskripsi" required rows={5} defaultValue={pengaduan.deskripsi}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
+                className="w-full bg-white border border-outline-variant text-on-surface font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none" />
             </div>
           </div>
 
@@ -240,7 +240,7 @@ export default function IsiFormPengaduanPage({ params }: { params: Promise<{ id:
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                 Unggah File Dokumentasi / Bukti (PDF, Gambar)
               </label>
-              <div className="relative overflow-hidden w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-xl p-8 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-3 group">
+              <div className="relative overflow-hidden w-full bg-white border-2 border-dashed border-outline-variant rounded-xl p-8 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-3 group">
                 <input type="file" onChange={(e) => setFileDokumentasi(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
                 <Upload size={32} className="text-slate-400 group-hover:text-on-surface transition-colors" />
                 <div>

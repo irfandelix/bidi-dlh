@@ -214,7 +214,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                 <h3 className="flex items-center gap-2 text-lg font-bold text-on-surface border-b-4 border-outline-variant pb-2 uppercase tracking-tight mb-4">
                   <User size={20} className="text-purple-600" /> Identitas Pelapor
                 </h3>
-                <div className="bg-surface-container-lowest border-2 border-outline-variant rounded-xl p-5 space-y-4">
+                <div className="bg-white border-2 border-outline-variant rounded-xl p-5 space-y-4">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Nama Pelapor</p>
                     <p className="font-bold text-on-surface text-lg">{data.nama_pelapor || '-'}</p>
@@ -230,7 +230,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                 <h3 className="flex items-center gap-2 text-lg font-bold text-on-surface border-b-4 border-outline-variant pb-2 uppercase tracking-tight mb-4">
                   <MapPin size={20} className="text-purple-600" /> Detail Kasus
                 </h3>
-                <div className="bg-surface-container-lowest border-2 border-outline-variant rounded-xl p-5 space-y-4">
+                <div className="bg-white border-2 border-outline-variant rounded-xl p-5 space-y-4">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Pihak Terlapor</p>
                     <p className="font-bold text-on-surface text-lg">{data.nama_terlapor || '-'}</p>
@@ -255,7 +255,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                 </h3>
                 <div className="space-y-4">
                   
-                  <div className="border-2 border-outline-variant rounded-xl p-4 flex items-center justify-between bg-surface-container-lowest">
+                  <div className="border-2 border-outline-variant rounded-xl p-4 flex items-center justify-between bg-white">
                     <div>
                       <p className="font-bold text-on-surface uppercase">Dokumentasi Pelapor</p>
                       <p className="text-xs font-bold text-on-surface-variant">Diunggah saat mengisi form</p>
@@ -269,7 +269,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                     )}
                   </div>
 
-                  <div className="border-2 border-outline-variant rounded-xl p-4 flex items-center justify-between bg-surface-container-lowest">
+                  <div className="border-2 border-outline-variant rounded-xl p-4 flex items-center justify-between bg-white">
                     <div>
                       <p className="font-bold text-on-surface uppercase">Berita Acara (BA)</p>
                       <p className="text-xs font-bold text-on-surface-variant">Arsip akhir penanganan aduan</p>
@@ -353,7 +353,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                   <select 
                     value={suratData.sifat}
                     onChange={(e) => setSuratData({...suratData, sifat: e.target.value})}
-                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20"
+                    className="w-full bg-white border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20"
                   >
                     <option value="Biasa">Biasa</option>
                     <option value="Terbatas">Terbatas</option>
@@ -458,7 +458,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   
                   {/* Foto 1 */}
-                  <div className="bg-surface-container-lowest p-4 border border-outline-variant rounded-xl space-y-3">
+                  <div className="bg-white p-4 border border-outline-variant rounded-xl space-y-3">
                     <p className="text-xs font-bold text-on-surface-variant uppercase text-center">Foto 1</p>
                     <label className="block w-full border-2 border-dashed border-slate-400 bg-surface rounded-lg p-4 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-colors">
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => setFoto1(e.target.files?.[0] || null)} />
@@ -478,7 +478,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                   </div>
 
                   {/* Foto 2 */}
-                  <div className="bg-surface-container-lowest p-4 border border-outline-variant rounded-xl space-y-3">
+                  <div className="bg-white p-4 border border-outline-variant rounded-xl space-y-3">
                     <p className="text-xs font-bold text-on-surface-variant uppercase text-center">Foto 2</p>
                     <label className="block w-full border-2 border-dashed border-slate-400 bg-surface rounded-lg p-4 text-center cursor-pointer hover:bg-purple-50 hover:border-purple-400 transition-colors">
                       <input type="file" accept="image/*" className="hidden" onChange={(e) => setFoto2(e.target.files?.[0] || null)} />

@@ -96,7 +96,7 @@ export default function NotaDinasPengawasanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
+    <div className="min-h-screen bg-white p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-6 pb-20">
         
         {/* Header */}

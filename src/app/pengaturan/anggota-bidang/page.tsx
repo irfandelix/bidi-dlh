@@ -98,17 +98,17 @@ export default function AnggotaBidangPage() {
 
             <div>
               <label className="block text-xs font-bold text-on-surface mb-1 uppercase tracking-wider">Nama Lengkap <span className="text-error">*</span></label>
-              <input type="text" name="nama" required className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+              <input type="text" name="nama" required className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
             </div>
             
             <div>
               <label className="block text-xs font-bold text-on-surface mb-1 uppercase tracking-wider">NIP</label>
-              <input type="text" name="nip" className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+              <input type="text" name="nip" className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-on-surface mb-1 uppercase tracking-wider">Jabatan</label>
-              <input type="text" name="jabatan" placeholder="Cth: Analis Lingkungan" className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+              <input type="text" name="jabatan" placeholder="Cth: Analis Lingkungan" className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
             </div>
 
             <button type="submit" disabled={submitting} className="w-full mt-4 px-6 py-4 bg-primary text-on-primary text-on-primary font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2">
@@ -141,7 +141,7 @@ export default function AnggotaBidangPage() {
                   </tr>
                 ) : (
                   data.map((item) => (
-                    <tr key={item.id} className="border-b-2 border-slate-100 hover:bg-surface-container-lowest">
+                    <tr key={item.id} className="border-b-2 border-slate-100 hover:bg-white">
                       <td className="p-4 border-r-2 border-slate-100">
                         <p className="font-bold text-on-surface uppercase text-sm">{item.nama}</p>
                         <p className="font-bold text-on-surface-variant text-xs mt-1">NIP: {item.nip || '-'}</p>

@@ -111,7 +111,7 @@ export default function TimPengawasPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest p-6 lg:p-12">
+    <div className="min-h-screen bg-white p-6 lg:p-12">
       <div className="max-w-5xl mx-auto space-y-6">
         
         {/* Header */}
@@ -153,7 +153,7 @@ export default function TimPengawasPage() {
                   <tr><td colSpan={4} className="p-10 text-center text-on-surface-variant font-bold uppercase tracking-widest">Belum ada data tim pengawas.</td></tr>
                 ) : (
                   personil.filter(p => !p.kategori || p.kategori === 'Tim Pengawas').map((item, index) => (
-                    <tr key={item.id} className="hover:bg-surface-container-lowest transition-colors">
+                    <tr key={item.id} className="hover:bg-white transition-colors">
                       <td className="p-5 text-center font-bold text-slate-400 text-base">{index + 1}</td>
                       <td className="p-5">
                         <div className="font-bold text-on-surface">{item.nama}</div>
@@ -200,7 +200,7 @@ export default function TimPengawasPage() {
                   <tr><td colSpan={4} className="p-10 text-center text-on-surface-variant font-bold uppercase tracking-widest">Belum ada data saksi.</td></tr>
                 ) : (
                   personil.filter(p => p.kategori === 'Saksi').map((item, index) => (
-                    <tr key={item.id} className="hover:bg-surface-container-lowest transition-colors">
+                    <tr key={item.id} className="hover:bg-white transition-colors">
                       <td className="p-5 text-center font-bold text-slate-400 text-base">{index + 1}</td>
                       <td className="p-5">
                         <div className="font-bold text-on-surface">{item.nama}</div>

@@ -37,7 +37,7 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
   const identitas = bapData?.formData || bapData?.identitas || {};
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest p-4 md:p-8 pb-20">
+    <div className="min-h-screen bg-white p-4 md:p-8 pb-20">
       <div className="max-w-5xl mx-auto space-y-6">
         
         {/* HEADER CARD */}
@@ -98,7 +98,7 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
             <div className="space-y-4 relative z-10">
               <div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tanggal Kunjungan</div>
-                <div className="flex items-center gap-2 text-on-surface font-bold bg-surface-container-lowest border-2 border-outline-variant p-2.5 rounded-xl text-sm">
+                <div className="flex items-center gap-2 text-on-surface font-bold bg-white border-2 border-outline-variant p-2.5 rounded-xl text-sm">
                   <Calendar size={16} className="text-secondary" />
                   {new Date(agenda.tanggal_kunjungan).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </div>
@@ -106,7 +106,7 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
 
               <div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Alamat Lokasi</div>
-                <div className="flex items-start gap-2 text-on-surface font-bold bg-surface-container-lowest border-2 border-outline-variant p-2.5 rounded-xl text-sm">
+                <div className="flex items-start gap-2 text-on-surface font-bold bg-white border-2 border-outline-variant p-2.5 rounded-xl text-sm">
                   <MapPin size={16} className="text-error mt-0.5 shrink-0" />
                   <span>{agenda.alamat_lokasi || '-'}</span>
                 </div>
@@ -115,7 +115,7 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
               {agenda.latitude && agenda.longitude && (
                 <div>
                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Koordinat GPS</div>
-                  <div className="flex items-center gap-2 text-on-surface font-bold bg-surface-container-lowest border-2 border-outline-variant p-2.5 rounded-xl text-sm">
+                  <div className="flex items-center gap-2 text-on-surface font-bold bg-white border-2 border-outline-variant p-2.5 rounded-xl text-sm">
                     <MapPin size={16} className="text-indigo-500 shrink-0" />
                     <span>{agenda.latitude}, {agenda.longitude}</span>
                   </div>
@@ -136,7 +136,7 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
             <div className="space-y-4 relative z-10">
               <div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pemrakarsa / Penanggung Jawab</div>
-                <div className="flex items-center gap-2 text-on-surface font-bold bg-surface-container-lowest border-2 border-outline-variant p-2.5 rounded-xl text-sm">
+                <div className="flex items-center gap-2 text-on-surface font-bold bg-white border-2 border-outline-variant p-2.5 rounded-xl text-sm">
                   <Building2 size={16} className="text-sky-500" />
                   {agenda.nama_pemrakarsa}
                 </div>
@@ -144,7 +144,7 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
 
               <div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Saksi (Jika ada)</div>
-                <div className="flex items-center gap-2 text-on-surface font-bold bg-surface-container-lowest border-2 border-outline-variant p-2.5 rounded-xl text-sm">
+                <div className="flex items-center gap-2 text-on-surface font-bold bg-white border-2 border-outline-variant p-2.5 rounded-xl text-sm">
                   <User size={16} className="text-slate-400" />
                   {agenda.saksi || <span className="text-slate-400 italic font-normal">Tidak ada saksi</span>}
                 </div>
@@ -152,7 +152,7 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
 
               <div>
                 <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Tim Pengawas</div>
-                <div className="bg-surface-container-lowest border-2 border-outline-variant p-3 rounded-xl">
+                <div className="bg-white border-2 border-outline-variant p-3 rounded-xl">
                   <ul className="space-y-1.5">
                     {agenda.tim_tugas ? agenda.tim_tugas.split('|').map((person: string, idx: number) => (
                       <li key={idx} className="flex items-start gap-2 text-xs font-bold text-on-surface-variant">
@@ -184,26 +184,26 @@ export default async function DetailArsipPage({ params }: { params: Promise<{ ka
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 relative z-10">
-            <div className="bg-surface-container-lowest p-4 rounded-xl border-2 border-outline-variant">
+            <div className="bg-white p-4 rounded-xl border-2 border-outline-variant">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Token Verifikasi</div>
               <div className="font-mono text-base font-bold text-on-surface">{agenda.token || '-'}</div>
             </div>
             
-            <div className="bg-surface-container-lowest p-4 rounded-xl border-2 border-outline-variant">
+            <div className="bg-white p-4 rounded-xl border-2 border-outline-variant">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Dibuat Pada</div>
               <div className="text-sm font-bold text-on-surface">
                 {agenda.created_at ? new Date(agenda.created_at).toLocaleString('id-ID') : '-'}
               </div>
             </div>
 
-            <div className="bg-surface-container-lowest p-4 rounded-xl border-2 border-outline-variant">
+            <div className="bg-white p-4 rounded-xl border-2 border-outline-variant">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Diperbarui Pada</div>
               <div className="text-sm font-bold text-on-surface">
                 {agenda.updated_at ? new Date(agenda.updated_at).toLocaleString('id-ID') : '-'}
               </div>
             </div>
 
-            <div className="bg-surface-container-lowest p-4 rounded-xl border-2 border-outline-variant flex flex-col justify-center">
+            <div className="bg-white p-4 rounded-xl border-2 border-outline-variant flex flex-col justify-center">
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Nilai Pengawasan</div>
               <div className="text-xl md:text-2xl font-bold text-amber-500">
                 {agenda.total_skor !== null && agenda.total_skor !== undefined ? agenda.total_skor : '-'}

@@ -382,7 +382,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Nomor Registrasi Amdalnet (Opsional)</label>
               <input type="text" name="nomor_registrasi_amdalnet" defaultValue={doc.nomor_registrasi_amdalnet || ''} placeholder="Contoh: 698E43852228D"
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                className="w-full bg-white border border-outline-variant rounded-xl p-3 text-sm text-on-surface font-bold focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               <p className="text-[10px] text-on-surface-variant mt-1 uppercase font-bold">* Kosongkan jika tidak memakai sistem Amdalnet.</p>
             </div>
           </div>

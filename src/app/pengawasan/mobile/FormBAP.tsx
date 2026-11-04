@@ -541,7 +541,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                 ].map((field) => (
                   <div key={field.key} className="mb-4">
                     <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                    <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                    <input className="w-full bg-white border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                   </div>
                 ))}
               </div>
@@ -555,7 +555,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                 ].map((field) => (
                   <div key={field.key} className="mb-4">
                     <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                    <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                    <input className="w-full bg-white border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                   </div>
                 ))}
               </div>
@@ -586,7 +586,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   ].map((field) => (
                     <div key={field.key} className="mb-4">
                       <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                      <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                      <input className="w-full bg-white border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                     </div>
                   ))}
                 </>
@@ -609,7 +609,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   ].map((field) => (
                     <div key={field.key} className="mb-4">
                       <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                      <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                      <input className="w-full bg-white border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                     </div>
                   ))}
                 </>
@@ -634,7 +634,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   ].map((field) => (
                     <div key={field.key} className="mb-4">
                       <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                      <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                      <input className="w-full bg-white border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                     </div>
                   ))}
                 </>
@@ -652,7 +652,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                 ].map((field) => (
                   <div key={field.key} className="mb-4">
                     <span className="text-xs font-bold text-on-surface uppercase tracking-widest mb-2 ml-1">{field.label}</span>
-                    <input className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
+                    <input className="w-full bg-white border border-outline-variant rounded-xl px-4 py-3 text-on-surface font-bold" placeholder={`Isi ${field.label}...`}  value={formData[field.key] || ''} onChange={(e: any) => { const v = e.target.value; updateFormData(field.key, v) }} />
                   </div>
                 ))}
               </div>
@@ -671,7 +671,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   <div key={dok.id} className="flex flex-row gap-2 mb-3 items-center">
                     <span className="font-bold text-slate-400">{i + 1}.</span>
                     <input
-                      className="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold"
+                      className="flex-1 bg-white border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold"
                       placeholder="Nama Dokumen/Izin..."
                       
                       value={dok.value}
@@ -704,7 +704,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                       <span className="font-bold text-on-surface mb-2">{item.no}. {item.point}</span>
                       
                       <input
-                        className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold text-sm mb-2"
+                        className="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold text-sm mb-2"
                         placeholder="Kondisi Eksisting (Hasil Pengamatan)..."
                         
                         value={item.kondisi}
@@ -713,7 +713,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                       />
                       
                       <input
-                        className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold text-sm"
+                        className="w-full bg-white border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold text-sm"
                         placeholder="Keterangan / Temuan..."
                         
                         value={item.keterangan}
@@ -731,7 +731,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
               <span className="text-2xl font-bold text-on-surface mb-6 uppercase">Dokumentasi Lapangan</span>
               
               {photos.map((photo, idx) => (
-                <div key={idx} className="mb-6 border-2 border-outline-variant rounded-xl p-4 bg-surface-container-lowest relative">
+                <div key={idx} className="mb-6 border-2 border-outline-variant rounded-xl p-4 bg-white relative">
                   <button 
                     onClick={() => removePhoto(idx)}
                     className="absolute -top-3 -right-3 bg-rose-500 w-8 h-8 rounded-full border border-outline-variant items-center justify-center z-10 shadow-sm hover:shadow-md transition-shadow"
@@ -761,7 +761,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   <div key={saran.id} className="flex flex-row gap-2 mb-3 items-center">
                     <span className="font-bold text-slate-400">{i + 1}.</span>
                     <input
-                      className="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold"
+                      className="flex-1 bg-white border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold"
                       placeholder="Ketik saran perbaikan kesling..."
                       
                       value={saran.value}
@@ -784,7 +784,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
               <div className="mb-4">
                 <span className="text-lg font-bold text-on-surface mb-4 uppercase">Penilaian & Kesimpulan</span>
                 {komponenPenilaian.map((komp, idx) => (
-                  <div key={komp.id} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
+                  <div key={komp.id} className="bg-white border border-outline-variant rounded-xl p-4 mb-3 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex flex-row justify-between items-center mb-2">
                       <span className="bg-primary text-on-primary text-on-primary font-bold px-2 py-1 rounded-md text-xs">C.{idx + 1}</span>
                     </div>
@@ -830,7 +830,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
               <div className="mb-8">
                 <span className="text-lg font-bold text-on-surface mb-4 uppercase">Pihak Fasyankes / Pemrakarsa</span>
                 {listPerwakilan.map((perw, idx) => (
-                  <div key={perw.id} className="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 mb-4 shadow-sm hover:shadow-md transition-shadow">
+                  <div key={perw.id} className="bg-white border border-outline-variant rounded-xl p-4 mb-4 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex flex-row justify-between mb-2">
                       <span className="font-bold text-slate-400">Perwakilan {idx + 1}</span>
                       {listPerwakilan.length > 1 && (

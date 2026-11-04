@@ -497,7 +497,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
                     const defaultKet = savedKet !== undefined ? savedKet : (chkNotes?.[index] || '');
 
                     return (
-                      <tr key={index} className="hover:bg-surface-container-lowest transition-colors">
+                      <tr key={index} className="hover:bg-white transition-colors">
                         <td className="px-3 py-3 text-center border-r border-outline-variant bg-surface-container-low">{index + 1}</td>
                         <td className="px-3 py-3 border-r border-outline-variant">{item}</td>
                         <td className="px-2 py-3 text-center border-r border-outline-variant bg-secondary-container">
@@ -513,7 +513,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
                           <input type="radio" name={`kesesuaian[${index}]`} value="Tidak Sesuai" defaultChecked={defaultKesesuaian === 'Tidak Sesuai'} className="w-5 h-5 text-error border border-outline-variant focus:ring-rose-500 shadow-sm hover:shadow-md transition-shadow cursor-pointer" />
                         </td>
                         <td className="px-2 py-2">
-                          <input type="text" name={`keterangan_uji[${index}]`} defaultValue={defaultKet} placeholder="..." className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs focus:bg-surface-container-lowest outline-none shadow-sm hover:shadow-md transition-shadow" />
+                          <input type="text" name={`keterangan_uji[${index}]`} defaultValue={defaultKet} placeholder="..." className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs focus:bg-white outline-none shadow-sm hover:shadow-md transition-shadow" />
                         </td>
                       </tr>
                     );
@@ -524,7 +524,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
           </div>
 
           {/* Data Tambahan BA HUA */}
-          <div className="mb-8 p-6 bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+          <div className="mb-8 p-6 bg-white border border-outline-variant rounded-2xl shadow-sm hover:shadow-md transition-shadow">
             <h3 className="text-sm font-bold text-on-surface mb-6 uppercase flex items-center gap-2">
               <PenTool size={18} /> Data Tambahan BA HUA
             </h3>
@@ -536,7 +536,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
                   type="text" 
                   name="kewenangan" 
                   defaultValue={(() => { try { return (typeof doc.penandatangan_hua === 'string' ? JSON.parse(doc.penandatangan_hua) : doc.penandatangan_hua)?.kewenangan || 'Kabupaten'; } catch(e) { return 'Kabupaten'; }})()}
-                  className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm focus:bg-surface-container-lowest outline-none shadow-sm hover:shadow-md transition-shadow font-bold" 
+                  className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm focus:bg-white outline-none shadow-sm hover:shadow-md transition-shadow font-bold" 
                 />
               </div>
               <div>
@@ -546,7 +546,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
                   name="kbli" 
                   placeholder="Contoh: 86105 (Aktivitas Klinik Swasta)"
                   defaultValue={(() => { try { return (typeof doc.penandatangan_hua === 'string' ? JSON.parse(doc.penandatangan_hua) : doc.penandatangan_hua)?.kbli || ''; } catch(e) { return ''; }})()}
-                  className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm focus:bg-surface-container-lowest outline-none shadow-sm hover:shadow-md transition-shadow font-bold" 
+                  className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm focus:bg-white outline-none shadow-sm hover:shadow-md transition-shadow font-bold" 
                 />
               </div>
             </div>
@@ -556,7 +556,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
               <select 
                 name="hasil_verifikasi_uji" 
                 defaultValue={(() => { try { return (typeof doc.penandatangan_hua === 'string' ? JSON.parse(doc.penandatangan_hua) : doc.penandatangan_hua)?.hasil_verifikasi_uji || ''; } catch(e) { return ''; }})()}
-                className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm focus:bg-surface-container-lowest outline-none shadow-sm hover:shadow-md transition-shadow font-bold cursor-pointer appearance-none" 
+                className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm focus:bg-white outline-none shadow-sm hover:shadow-md transition-shadow font-bold cursor-pointer appearance-none" 
               >
                 <option value="" disabled>-- Pilih Hasil Verifikasi --</option>
                 <option value="Diterima (Lengkap dan Dilanjutkan)">Diterima (Lengkap dan Dilanjutkan)</option>
@@ -572,7 +572,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
                 rows={4}
                 placeholder={"1. Judul Peta dirubah...\n2. Titik koordinat ditambahkan..."}
                 defaultValue={doc.keterangan || ''}
-                className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm focus:bg-surface-container-lowest outline-none shadow-sm hover:shadow-md transition-shadow font-bold resize-y" 
+                className="w-full bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm focus:bg-white outline-none shadow-sm hover:shadow-md transition-shadow font-bold resize-y" 
               ></textarea>
               <p className="text-[10px] font-bold text-on-surface-variant mt-2 uppercase">* Ketik menurun dengan angka untuk membuatnya menjadi list (1. ..., 2. ...)</p>
             </div>

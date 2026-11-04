@@ -249,7 +249,7 @@ export default function Home() {
                   LIHAT SEMUA <ChevronRight size={14} />
                 </Link>
               </div>
-              <div className="p-4 flex-1 bg-slate-50">
+              <div className="p-4 flex-1 bg-white">
                 {loading ? (
                   <LottieLoader size={150} text="MEMUAT DATA..." />
                 ) : recentDocs.length === 0 ? (
@@ -285,7 +285,7 @@ export default function Home() {
                   LIHAT SEMUA <ChevronRight size={14} />
                 </Link>
               </div>
-              <div className="p-4 flex-1 bg-slate-50">
+              <div className="p-4 flex-1 bg-white">
                 {loading ? (
                   <LottieLoader size={150} text="MEMUAT DATA..." />
                 ) : recentPengawasan.length === 0 ? (
@@ -328,7 +328,7 @@ export default function Home() {
                   LIHAT SEMUA <ChevronRight size={14} />
                 </Link>
               </div>
-              <div className="p-4 flex-1 bg-slate-50">
+              <div className="p-4 flex-1 bg-white">
                 {loading ? (
                   <LottieLoader size={150} text="MEMUAT DATA..." />
                 ) : recentAduan.length === 0 ? (
@@ -408,7 +408,7 @@ export default function Home() {
               </button>
             </div>
             
-            <div className="p-2 flex-1 overflow-y-auto bg-slate-50 space-y-2">
+            <div className="p-2 flex-1 overflow-y-auto bg-white space-y-2">
               {modalData.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-500">
                   <div className="font-black text-4xl mb-2">0</div>

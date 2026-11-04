@@ -395,7 +395,7 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
                 placeholder="Input nomor surat..." 
                 value={nomorUndangan}
                 onChange={(e) => setNomorUndangan(e.target.value)}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none"
+                className="w-full bg-white border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none"
                 required={includeUndangan && !hasUndangan}
               />
               
@@ -529,14 +529,14 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Nama PT / Instansi</label>
               <input type="text" name="nama_perusahaan" defaultValue={ekstraData?.nama_perusahaan || ''} placeholder="Contoh: PT Kasoma Properti Indonesia"
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                className="w-full bg-white border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               <p className="text-[10px] text-on-surface-variant mt-1 uppercase font-bold">* Bedakan dengan nama pemrakarsa (nama orang) saat awal pendaftaran</p>
             </div>
 
             <div>
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tambahan Baris Tanda Tangan Kosong</label>
               <input type="number" name="tambahan_kolom_kosong" min="0" max="10" defaultValue={ekstraData?.tambahan_kolom_kosong || '0'}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                className="w-full bg-white border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               <p className="text-[10px] text-on-surface-variant mt-1 uppercase font-bold">* Isi angka (misal: 2) jika butuh baris ekstra untuk ditandatangani manual.</p>
             </div>
           </div>

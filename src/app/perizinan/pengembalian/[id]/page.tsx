@@ -169,7 +169,7 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
           <div className="max-w-md">
             <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Tanggal Penyerahan Berkas <span className="text-error">*</span></label>
             <input type="date" name="tanggal_pengembalian" required defaultValue={doc.tanggal_pengembalian || new Date().toISOString().split('T')[0]}
-              className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
+              className="w-full bg-white border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
           </div>
 
           
@@ -184,12 +184,12 @@ export default function PengembalianPage({ params }: { params: Promise<{ id: str
                 <div>
                   <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Nama Penerima BA (Pemrakarsa/Konsultan) <span className="text-error">*</span></label>
                   <input type="text" name="penerima_ba" required defaultValue={fisik[`penerima_ba${keySuffix}`] || ''} placeholder="Contoh: Budi Santoso"
-                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none" />
+                    className="w-full bg-white border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Nama Petugas Penyerah BA (MPP) <span className="text-error">*</span></label>
                   <input type="text" name="penyerah_ba" required defaultValue={fisik[`penyerah_ba${keySuffix}`] || ''} placeholder="Contoh: Siti Aminah"
-                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none" />
+                    className="w-full bg-white border border-outline-variant text-on-surface font-bold text-sm rounded-xl p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-all outline-none" />
                 </div>
               </div>
             );

@@ -270,7 +270,7 @@ export default function PetaPengawasan() {
                     <p className="text-xs font-bold text-on-surface-variant uppercase animate-pulse">Memuat data...</p>
                   </div>
                 ) : lokasi.length === 0 ? (
-                  <div className="text-center py-6 border-4 border-dashed border-outline-variant rounded-xl bg-surface-container-lowest">
+                  <div className="text-center py-6 border-4 border-dashed border-outline-variant rounded-xl bg-white">
                     <p className="text-xs font-bold text-on-surface-variant uppercase">Belum ada koordinat tersimpan.</p>
                   </div>
                 ) : (

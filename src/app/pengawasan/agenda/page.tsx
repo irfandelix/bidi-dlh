@@ -60,7 +60,7 @@ export default function DaftarAgenda() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest p-6 lg:p-12">
+    <div className="min-h-screen bg-white p-6 lg:p-12">
       <div className="max-w-[1400px] mx-auto space-y-6">
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -129,7 +129,7 @@ export default function DaftarAgenda() {
           
           <div className="overflow-x-auto pb-4">
             <table className="w-full text-left text-sm">
-              <thead className="bg-surface-container-lowest text-on-surface font-bold border-b-4 border-outline-variant">
+              <thead className="bg-white text-on-surface font-bold border-b-4 border-outline-variant">
                 <tr>
                   <th className="p-5 uppercase text-xs tracking-widest w-12 text-center whitespace-nowrap">No</th>
                   <th className="p-5 uppercase text-xs tracking-widest w-32 whitespace-nowrap">Token</th>

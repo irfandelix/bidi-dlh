@@ -513,7 +513,7 @@ export default function ArsipIzinDetailPage({ params }: { params: Promise<{ id: 
 
                 {/* ACCORDION CONTENT */}
                 {isOpen && (
-                  <div className="p-5 md:p-6 bg-surface-container-lowest/50 divide-y divide-outline-variant">
+                  <div className="p-5 md:p-6 bg-white/50 divide-y divide-outline-variant">
                     {section.items.length === 0 ? (
                       <div className="py-6 text-center text-xs font-bold text-on-surface-variant uppercase">
                         Tidak ada berkas di bagian ini.
@@ -671,7 +671,7 @@ export default function ArsipIzinDetailPage({ params }: { params: Promise<{ id: 
             </button>
 
             {openSections.lokasi_fisik && (
-              <div className="p-6 bg-surface-container-lowest/50 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-6 bg-white/50 grid grid-cols-1 md:grid-cols-2 gap-6">
                 
                 {/* LOKASI RAK FISIK */}
                 <div className="p-5 bg-surface border border-outline-variant rounded-2xl shadow-sm">

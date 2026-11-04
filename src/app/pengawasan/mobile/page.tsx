@@ -266,7 +266,7 @@ export default function MobileApp() {
           <p className="text-lg font-bold text-on-surface mb-6">{new Date(agendaData?.tanggal_kunjungan || new Date()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
 
           <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-2">Tim Bertugas</p>
-          <div className="bg-surface-container-lowest p-4 rounded-xl border-2 border-outline-variant">
+          <div className="bg-white p-4 rounded-xl border-2 border-outline-variant">
             {getParsedTim().length > 0 ? getParsedTim().map((t: string, i: number) => (
               <p key={i} className="font-bold text-on-surface-variant mb-1">• {t}</p>
             )) : <p className="text-slate-400 italic">Belum ada tim yang ditugaskan</p>}

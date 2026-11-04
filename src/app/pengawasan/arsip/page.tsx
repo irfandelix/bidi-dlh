@@ -71,7 +71,7 @@ export default function ArsipPengawasan() {
   const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest p-6 lg:p-12">
+    <div className="min-h-screen bg-white p-6 lg:p-12">
       <div className="max-w-7xl mx-auto">
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
@@ -94,7 +94,7 @@ export default function ArsipPengawasan() {
                 placeholder="Cari kegiatan, pemrakarsa, kategori..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-emerald-200"
+                className="w-full bg-white border border-outline-variant rounded-xl pl-12 pr-4 py-3 font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-emerald-200"
               />
             </div>
             
@@ -134,7 +134,7 @@ export default function ArsipPengawasan() {
           {loading ? (
             <LottieLoader size={150} text="MEMUAT DATA..." />
           ) : paginated.length === 0 ? (
-            <div className="py-20 text-center font-bold text-on-surface-variant border-4 border-dashed border-outline-variant rounded-2xl bg-surface-container-lowest">
+            <div className="py-20 text-center font-bold text-on-surface-variant border-4 border-dashed border-outline-variant rounded-2xl bg-white">
               Tidak ada arsip yang ditemukan.
             </div>
           ) : (

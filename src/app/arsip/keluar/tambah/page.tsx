@@ -153,7 +153,7 @@ export default function TambahArsipKeluarPage() {
                     setShowKlasifikasiDropdown(true);
                   }}
                   onFocus={() => setShowKlasifikasiDropdown(true)}
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl pl-12 pr-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none"
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl pl-12 pr-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none"
                 />
               </div>
               
@@ -190,7 +190,7 @@ export default function TambahArsipKeluarPage() {
                   2. Nomor Surat Keluar <span className="text-error">*</span>
                 </label>
                 <input type="text" name="nomor_surat_keluar" required placeholder="Contoh: 005/123/DLH/2026" 
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
 
               <div>
@@ -198,7 +198,7 @@ export default function TambahArsipKeluarPage() {
                   3. Tujuan Surat <span className="text-error">*</span>
                 </label>
                 <input type="text" name="tujuan" required placeholder="Contoh: Gubernur Prov..." 
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
 
               <div>
@@ -206,7 +206,7 @@ export default function TambahArsipKeluarPage() {
                   4. Tanggal Surat <span className="text-error">*</span>
                 </label>
                 <input type="date" name="tanggal_surat" required defaultValue={new Date().toISOString().split('T')[0]}
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
               </div>
             </div>
 
@@ -215,7 +215,7 @@ export default function TambahArsipKeluarPage() {
                 5. Perihal / Ringkasan Surat <span className="text-error">*</span>
               </label>
               <textarea name="perihal" required rows={3} placeholder="Contoh: Laporan Akhir Tahun..." 
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none"></textarea>
+                className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none resize-none"></textarea>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -224,7 +224,7 @@ export default function TambahArsipKeluarPage() {
                   6. Jumlah Lembar / Berkas
                 </label>
                 <input type="number" name="jumlah" defaultValue={1} min={1}
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
               </div>
 
               <div>
@@ -232,7 +232,7 @@ export default function TambahArsipKeluarPage() {
                   7. Status Surat
                 </label>
                 <select name="status_surat" defaultValue="Biasa"
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer">
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer">
                   <option value="Biasa">Biasa</option>
                   <option value="Terbatas">Terbatas</option>
                   <option value="Rahasia">Rahasia</option>
@@ -247,7 +247,7 @@ export default function TambahArsipKeluarPage() {
               <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                 8. Lampiran File (Opsional)
               </label>
-              <div className="relative overflow-hidden w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
+              <div className="relative overflow-hidden w-full bg-white border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
                 <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 cursor-pointer z-10" />
                 <Upload size={32} className="text-slate-400 group-hover:text-on-surface transition-colors" />
                 <p className="text-sm font-bold text-on-surface-variant">

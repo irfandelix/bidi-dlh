@@ -126,7 +126,7 @@ export default function BuatAgendaPengaduanPage() {
                 1. Perihal / Indikasi Kasus <span className="text-error">*</span>
               </label>
               <input type="text" name="perihal" required placeholder="Contoh: Aduan Pencemaran PT Maju Jaya..." 
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
             </div>
 
             <div>
@@ -134,7 +134,7 @@ export default function BuatAgendaPengaduanPage() {
                 2. Tanggal Pembuatan Tiket <span className="text-error">*</span>
               </label>
               <input type="date" name="tanggal" required defaultValue={new Date().toISOString().split('T')[0]}
-                className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
+                className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none cursor-pointer" />
             </div>
 
             <div className="pt-8 border-t border-outline-variant mt-8 flex justify-end">

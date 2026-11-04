@@ -161,7 +161,7 @@ export default function DaftarArsipPerizinanPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant font-bold bg-surface-container-lowest">
+                  <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant font-bold bg-white">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <Archive size={32} className="text-slate-300" />
                       <p className="uppercase tracking-widest">TIDAK ADA DATA ARSIP YANG DITEMUKAN.</p>

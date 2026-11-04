@@ -97,7 +97,7 @@ function TokenForm() {
 
 export default function VerifikasiTokenPengaduan() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-surface-container-lowest">
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-white">
       <Suspense fallback={<LottieLoader size={150} text="MEMUAT DATA..." />}>
         <TokenForm />
       </Suspense>

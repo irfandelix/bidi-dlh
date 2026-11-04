@@ -241,7 +241,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
       </div>
 
       {/* Info Dokumen */}
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
+      <div className="bg-white border border-outline-variant rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
           <div>
             <div className="bg-indigo-200 text-on-surface text-xs font-bold px-3 py-1 rounded uppercase border border-outline-variant shadow-sm hover:shadow-md transition-shadow inline-block mb-3">
@@ -321,7 +321,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                   </div>
                 </td>
               </tr>
-              <tr className="hover:bg-surface-container-lowest">
+              <tr className="hover:bg-white">
                 <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Identitas Pemrakarsa</th>
                 <td className="py-3 px-6 font-bold text-on-surface text-sm">
                   <div className="space-y-1">
@@ -340,7 +340,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                 </td>
               </tr>
               {(doc.nama_konsultan || doc.telepon_konsultan || showAllStages) && (
-                <tr className="hover:bg-surface-container-lowest">
+                <tr className="hover:bg-white">
                   <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Konsultan Lingkungan</th>
                   <td className="py-3 px-6 font-bold text-on-surface text-sm">
                     <div className="space-y-1">
@@ -351,7 +351,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                 </tr>
               )}
               {(doc.nama_pengirim || doc.pengirim_sebagai || showAllStages) && (
-                <tr className="hover:bg-surface-container-lowest">
+                <tr className="hover:bg-white">
                   <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Pengirim Berkas</th>
                   <td className="py-3 px-6 font-bold text-on-surface text-sm">
                     <p><span className="text-on-surface-variant font-medium">Nama Pengirim:</span> {doc.nama_pengirim || '-'}</p>
@@ -369,7 +369,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                   </div>
                 </td>
               </tr>
-              <tr className="hover:bg-surface-container-lowest">
+              <tr className="hover:bg-white">
                 <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Nama & Jenis Kegiatan</th>
                 <td className="py-3 px-6 font-bold text-on-surface text-sm">
                   <div className="space-y-1">
@@ -383,7 +383,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                   </div>
                 </td>
               </tr>
-              <tr className="hover:bg-surface-container-lowest">
+              <tr className="hover:bg-white">
                 <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Lokasi Kegiatan</th>
                 <td className="py-3 px-6 font-bold text-on-surface text-sm">
                   <p>{doc.lokasi_kegiatan || '-'}</p>
@@ -405,7 +405,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                   </div>
                 </td>
               </tr>
-              <tr className="hover:bg-surface-container-lowest">
+              <tr className="hover:bg-white">
                 <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Klasifikasi & Buku Kendali</th>
                 <td className="py-3 px-6 font-bold text-on-surface text-sm">
                   <div className="space-y-1">
@@ -419,7 +419,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                       </div>
                     )}
                     {doc.keterangan && (
-                      <p className="text-xs text-on-surface-variant bg-surface-container-lowest p-2 rounded-lg border border-outline-variant mt-1">
+                      <p className="text-xs text-on-surface-variant bg-white p-2 rounded-lg border border-outline-variant mt-1">
                         <span className="font-bold text-on-surface">Catatan Umum:</span> {doc.keterangan}
                       </p>
                     )}
@@ -437,7 +437,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                 </td>
               </tr>
               {doc.nomor_surat_permohonan && (
-                <tr className="hover:bg-surface-container-lowest">
+                <tr className="hover:bg-white">
                   <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Surat Permohonan</th>
                   <td className="py-3 px-6 font-bold text-on-surface text-sm">
                     <div className="space-y-1">
@@ -451,7 +451,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                   </td>
                 </tr>
               )}
-              <tr className="hover:bg-surface-container-lowest">
+              <tr className="hover:bg-white">
                 <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Checklist & Tanda Terima Masuk</th>
                 <td className="py-3 px-6 font-bold text-on-surface text-sm">
                   <div className="space-y-1">
@@ -482,7 +482,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                       </div>
                     </td>
                   </tr>
-                  <tr className="hover:bg-surface-container-lowest">
+                  <tr className="hover:bg-white">
                     <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">BA Uji Administrasi</th>
                     <td className="py-3 px-6 font-bold text-on-surface text-sm">
                       <div className="space-y-1">
@@ -524,7 +524,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                       </div>
                     </td>
                   </tr>
-                  <tr className="hover:bg-surface-container-lowest">
+                  <tr className="hover:bg-white">
                     <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">BA Verifikasi Lapangan</th>
                     <td className="py-3 px-6 font-bold text-on-surface text-sm">
                       <div className="space-y-1">
@@ -563,7 +563,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                       </div>
                     </td>
                   </tr>
-                  <tr className="hover:bg-surface-container-lowest">
+                  <tr className="hover:bg-white">
                     <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">BA Pemeriksaan Substansi</th>
                     <td className="py-3 px-6 font-bold text-on-surface text-sm">
                       <div className="space-y-1">
@@ -589,7 +589,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                     </td>
                   </tr>
                   {doc.tanggal_pengembalian && (
-                    <tr className="hover:bg-surface-container-lowest bg-red-50/50">
+                    <tr className="hover:bg-white bg-red-50/50">
                       <th className="py-3 px-6 font-bold text-red-700 w-1/3 uppercase text-xs align-top">Penyerahan BA & Pengembalian</th>
                       <td className="py-3 px-6 font-bold text-red-950 text-sm">
                         <div className="space-y-1">
@@ -627,7 +627,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                     if (!phpNum && !baNum && !phpDate && !baDate && !showAllStages) return null;
                     
                     return (
-                      <tr key={rev} className="hover:bg-surface-container-lowest bg-primary-container/20">
+                      <tr key={rev} className="hover:bg-white bg-primary-container/20">
                         <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">
                           Revisi Putaran {rev}
                         </th>
@@ -685,7 +685,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                       </div>
                     </td>
                   </tr>
-                  <tr className="hover:bg-surface-container-lowest">
+                  <tr className="hover:bg-white">
                     <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Risalah Pembahasan (RPD)</th>
                     <td className="py-3 px-6 font-bold text-on-surface text-sm">
                       <div className="space-y-1">
@@ -697,7 +697,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                       </div>
                     </td>
                   </tr>
-                  <tr className="hover:bg-surface-container-lowest">
+                  <tr className="hover:bg-white">
                     <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">SK / Rekomendasi / PKPLH</th>
                     <td className="py-3 px-6 font-bold text-on-surface text-sm">
                       <div className="space-y-1">
@@ -723,7 +723,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                       </div>
                     </td>
                   </tr>
-                  <tr className="hover:bg-surface-container-lowest bg-tertiary-container/30">
+                  <tr className="hover:bg-white bg-tertiary-container/30">
                     <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Tanda Terima Jilidan</th>
                     <td className="py-3 px-6 font-bold text-on-surface text-sm">
                       <div className="space-y-1">
@@ -748,7 +748,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                       </div>
                     </td>
                   </tr>
-                  <tr className="hover:bg-surface-container-lowest">
+                  <tr className="hover:bg-white">
                     <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Arsip Fisik & Digital</th>
                     <td className="py-3 px-6 font-bold text-on-surface text-sm">
                       <div className="space-y-1">

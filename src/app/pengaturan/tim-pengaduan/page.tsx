@@ -112,7 +112,7 @@ export default function TimPengaduanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-surface-container-lowest p-6 lg:p-12">
+    <div className="min-h-screen bg-white p-6 lg:p-12">
       <div className="w-full py-8 space-y-8">
         
         {/* Header */}
@@ -154,7 +154,7 @@ export default function TimPengaduanPage() {
                   <tr><td colSpan={4} className="p-10 text-center text-on-surface-variant font-bold uppercase tracking-widest">Belum ada data tim Pengaduan.</td></tr>
                 ) : (
                   personil.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-surface-container-lowest transition-colors">
+                    <tr key={item.id} className="hover:bg-white transition-colors">
                       <td className="p-5 text-center font-bold text-slate-400 text-base">{index + 1}</td>
                       <td className="p-5">
                         <div className="font-bold text-on-surface">{item.nama}</div>

@@ -552,7 +552,7 @@ export default function PenerimaanPerbaikanPage({ params }: { params: Promise<{ 
                   <UserCheck className="w-5 h-5 text-on-surface" />
                 </div>
                 <select name="petugas_mpp_id" required defaultValue={doc.petugas_mpp_id || ''}
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm rounded-xl pl-10 p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none appearance-none font-bold cursor-pointer">
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm rounded-xl pl-10 p-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none appearance-none font-bold cursor-pointer">
                   <option value="" disabled>-- Pilih Petugas Gerai --</option>
                   {petugasGerai.map(petugas => (
                     <option key={petugas.id} value={petugas.id}>

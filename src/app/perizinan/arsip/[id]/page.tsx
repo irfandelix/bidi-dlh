@@ -276,7 +276,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* 1. DOKUMEN LINGKUNGAN FINAL */}
-            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik.dokumenCetak || fisik.urlDokumenCetak ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik.dokumenCetak || fisik.urlDokumenCetak ? 'bg-emerald-200' : 'bg-white'}`}>
               <div className="flex items-start gap-3 w-full">
                 <input type="checkbox" name="dokumenCetak" value="1" defaultChecked={fisik.dokumenCetak} className="mt-1 w-6 h-6 text-secondary bg-surface border border-outline-variant rounded focus:ring-emerald-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
                 <div className="w-full">
@@ -296,7 +296,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 2. PKPLH ARSIP */}
-            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik.pkplhArsip || fisik.urlPkplh ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik.pkplhArsip || fisik.urlPkplh ? 'bg-emerald-200' : 'bg-white'}`}>
               <div className="flex items-start gap-3 w-full">
                 <input type="checkbox" name="pkplhArsip" value="1" defaultChecked={fisik.pkplhArsip} className="mt-1 w-6 h-6 text-secondary bg-surface border border-outline-variant rounded focus:ring-emerald-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
                 <div className="w-full">
@@ -316,7 +316,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 3. BA UJI ADMINISTRASI */}
-            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.nomor_uji_berkas || isAmdalnet || fisik.urlUjiAdmin ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.nomor_uji_berkas || isAmdalnet || fisik.urlUjiAdmin ? 'bg-emerald-200' : 'bg-white'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.nomor_uji_berkas || isAmdalnet ? <CheckCircle2 size={24} className="text-on-surface" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -348,7 +348,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 4. BA VERLAP */}
-            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.nomor_ba_verlap || fisik.urlBaVerlap ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.nomor_ba_verlap || fisik.urlBaVerlap ? 'bg-emerald-200' : 'bg-white'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.nomor_ba_verlap ? <CheckCircle2 size={24} className="text-on-surface" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -368,7 +368,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 5. BA PEMERIKSAAN SIDANG */}
-            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.nomor_ba_pemeriksaan || fisik.urlBaSidang ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.nomor_ba_pemeriksaan || fisik.urlBaSidang ? 'bg-emerald-200' : 'bg-white'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.nomor_ba_pemeriksaan ? <CheckCircle2 size={24} className="text-on-surface" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -389,7 +389,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
 
                         {/* 6. BA PEMERIKSAAN REVISI */}
             {revisiList.length > 0 ? revisiList.map((rev, idx) => (
-              <div key={rev.key} className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik['urlRevisi' + rev.key] ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+              <div key={rev.key} className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik['urlRevisi' + rev.key] ? 'bg-emerald-200' : 'bg-white'}`}>
                 <div className="flex items-start gap-3 w-full">
                   <div className="mt-1"><CheckCircle2 size={24} className="text-on-surface" /></div>
                   <div className="w-full">
@@ -408,7 +408,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                 </div>
               </div>
             )) : (
-              <div className="p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors bg-surface-container-lowest">
+              <div className="p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors bg-white">
                 <div className="flex items-start gap-3 w-full">
                   <div className="mt-1"><XCircle size={24} className="text-slate-400" /></div>
                   <div className="w-full">
@@ -420,7 +420,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             )}
 
             {/* 7. SURAT PERMOHONAN */}
-            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik.suratPermohonan || fisik.urlSuratPermohonan ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik.suratPermohonan || fisik.urlSuratPermohonan ? 'bg-emerald-200' : 'bg-white'}`}>
               <div className="flex items-start gap-3 w-full">
                 <input type="checkbox" name="suratPermohonan" value="1" defaultChecked={fisik.suratPermohonan} className="mt-1 w-6 h-6 text-secondary bg-surface border border-outline-variant rounded focus:ring-emerald-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
                 <div className="w-full">
@@ -440,7 +440,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 8. LEMBAR REGISTRASI */}
-            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.nomor_checklist || fisik.urlRegistrasi ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.nomor_checklist || fisik.urlRegistrasi ? 'bg-emerald-200' : 'bg-white'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.nomor_checklist ? <CheckCircle2 size={24} className="text-on-surface" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -460,7 +460,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 9. LEMBAR PENGEMBALIAN */}
-            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.tanggal_pengembalian || fisik.urlPengembalian ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.tanggal_pengembalian || fisik.urlPengembalian ? 'bg-emerald-200' : 'bg-white'}`}>
               <div className="flex items-start gap-3 w-full">
                 <div className="mt-1">{doc.tanggal_pengembalian ? <CheckCircle2 size={24} className="text-on-surface" /> : <XCircle size={24} className="text-slate-400" />}</div>
                 <div className="w-full">
@@ -481,7 +481,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
 
                         {/* 10. PHP */}
             {phpList.length > 0 ? phpList.map((php, idx) => (
-              <div key={php.key} className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik['urlPhp' + php.key] ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+              <div key={php.key} className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik['urlPhp' + php.key] ? 'bg-emerald-200' : 'bg-white'}`}>
                 <div className="flex items-start gap-3 w-full">
                   <div className="mt-1"><CheckCircle2 size={24} className="text-on-surface" /></div>
                   <div className="w-full">
@@ -500,7 +500,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
                 </div>
               </div>
             )) : (
-              <div className="p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors bg-surface-container-lowest">
+              <div className="p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors bg-white">
                 <div className="flex items-start gap-3 w-full">
                   <div className="mt-1"><XCircle size={24} className="text-slate-400" /></div>
                   <div className="w-full">
@@ -512,7 +512,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             )}
 
             {/* 11. UNDANGAN SIDANG */}
-            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik.undanganSidang || fisik.urlUndanganSidang ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${fisik.undanganSidang || fisik.urlUndanganSidang ? 'bg-emerald-200' : 'bg-white'}`}>
               <div className="flex items-start gap-3 w-full">
                 <input type="checkbox" name="undanganSidang" value="1" defaultChecked={fisik.undanganSidang} className="mt-1 w-6 h-6 text-secondary bg-surface border border-outline-variant rounded focus:ring-emerald-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />
                 <div className="w-full">
@@ -532,7 +532,7 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
             </div>
 
             {/* 12. RPD */}
-            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.nomor_risalah || fisik.rpdArsip || fisik.urlRpd ? 'bg-emerald-200' : 'bg-surface-container-lowest'}`}>
+            <div className={`p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow transition-colors ${doc.nomor_risalah || fisik.rpdArsip || fisik.urlRpd ? 'bg-emerald-200' : 'bg-white'}`}>
               <div className="flex items-start gap-3 w-full">
                 {doc.jenis_dokumen === 'SPPL' ? (
                   <input type="checkbox" name="rpdArsip" value="1" defaultChecked={fisik.rpdArsip} className="mt-1 w-6 h-6 text-secondary bg-surface border border-outline-variant rounded focus:ring-emerald-500 cursor-pointer shadow-sm hover:shadow-md transition-shadow" />

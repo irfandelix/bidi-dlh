@@ -376,12 +376,12 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
                 <div>
                   <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Email Pemrakarsa</label>
                   <input type="email" name="email_pemrakarsa" defaultValue={ekstraData?.email_pemrakarsa || ''} placeholder="Contoh: info@pt-abc.com"
-                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                    className="w-full bg-white border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Jabatan Pemrakarsa <span className="text-error">*</span></label>
                   <input type="text" name="jabatan_pemrakarsa" required defaultValue={ekstraData?.jabatan_pemrakarsa || 'Penanggungjawab Kegiatan'} placeholder="Contoh: Direktur Utama"
-                    className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
+                    className="w-full bg-white border border-outline-variant text-on-surface font-bold text-sm rounded-xl px-4 py-3 focus:bg-surface focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none" />
                 </div>
               </div>
             </div>
@@ -390,7 +390,7 @@ export default function VerlapPage({ params }: { params: Promise<{ id: string }>
               <label className="block text-sm font-bold text-on-surface mb-4 uppercase bg-amber-200 inline-block px-4 py-2 rounded-lg border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
                 Tim Verifikasi Lapangan (Pilih Petugas) <span className="text-error">*</span>
               </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-inner">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 bg-white border border-outline-variant rounded-2xl p-6 shadow-inner">
                 {daftarPegawai.map((pegawai) => {
                   let isChecked = false;
                   try {

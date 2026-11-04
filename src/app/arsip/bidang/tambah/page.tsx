@@ -165,7 +165,7 @@ export default function TambahArsipBidangPage() {
                   1. Tim <span className="text-error">*</span>
                 </label>
                 <select name="tim" required
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm outline-none cursor-pointer">
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm outline-none cursor-pointer">
                   <option value="">-- Pilih Tim --</option>
                   <option value="Tim Perencanaan">Tim Perencanaan</option>
                   <option value="Tim Pengaduan">Tim Pengaduan</option>
@@ -179,7 +179,7 @@ export default function TambahArsipBidangPage() {
                 </label>
                 <input type="text" name="nama_kegiatan" required placeholder="Contoh: Rapat Koordinasi Tahunan" 
                   value={namaKegiatan} onChange={(e) => setNamaKegiatan(e.target.value)}
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm outline-none" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm outline-none" />
               </div>
 
               <div>
@@ -187,7 +187,7 @@ export default function TambahArsipBidangPage() {
                   3. Tanggal Kegiatan <span className="text-error">*</span>
                 </label>
                 <input type="date" name="tanggal_kegiatan" required 
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm outline-none cursor-pointer" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm outline-none cursor-pointer" />
               </div>
 
               <div>
@@ -195,7 +195,7 @@ export default function TambahArsipBidangPage() {
                   4. Lokasi Kegiatan <span className="text-error">*</span>
                 </label>
                 <input type="text" name="lokasi_kegiatan" required placeholder="Contoh: Ruang Rapat Lt.2" 
-                  className="w-full bg-surface-container-lowest border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm outline-none" />
+                  className="w-full bg-white border border-outline-variant text-on-surface text-sm font-bold rounded-xl px-4 py-4 focus:bg-surface focus:shadow-sm outline-none" />
               </div>
             </div>
 
@@ -211,7 +211,7 @@ export default function TambahArsipBidangPage() {
                   <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                     Dokumentasi Acara (Foto/Video)
                   </label>
-                  <div className="relative overflow-hidden w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
+                  <div className="relative overflow-hidden w-full bg-white border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
                     <input type="file" multiple accept="image/*,video/*" disabled={!namaKegiatan} onChange={(e) => handleFileChange(e, setDokFiles)} className="absolute inset-0 opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed" />
                     <Upload size={24} className="text-slate-400 group-hover:text-on-surface transition-colors" />
                     <p className="text-sm font-bold text-on-surface-variant">
@@ -237,7 +237,7 @@ export default function TambahArsipBidangPage() {
                   <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                     Undangan Acara (PDF/Word/Images)
                   </label>
-                  <div className="relative overflow-hidden w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
+                  <div className="relative overflow-hidden w-full bg-white border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
                     <input type="file" multiple disabled={!namaKegiatan} onChange={(e) => handleFileChange(e, setUndanganFiles)} className="absolute inset-0 opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed" />
                     <Upload size={24} className="text-slate-400 group-hover:text-on-surface transition-colors" />
                     <p className="text-sm font-bold text-on-surface-variant">
@@ -263,7 +263,7 @@ export default function TambahArsipBidangPage() {
                   <label className="block text-sm font-bold text-on-surface mb-2 uppercase tracking-wider">
                     Berkas Lain (Materi/Laporan/dll)
                   </label>
-                  <div className="relative overflow-hidden w-full bg-surface-container-lowest border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
+                  <div className="relative overflow-hidden w-full bg-white border-2 border-dashed border-outline-variant rounded-xl p-6 text-center hover:bg-surface-container-low transition-colors cursor-pointer flex flex-col items-center justify-center gap-2 group">
                     <input type="file" multiple disabled={!namaKegiatan} onChange={(e) => handleFileChange(e, setBerkasFiles)} className="absolute inset-0 opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed" />
                     <Upload size={24} className="text-slate-400 group-hover:text-on-surface transition-colors" />
                     <p className="text-sm font-bold text-on-surface-variant">

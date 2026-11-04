@@ -206,7 +206,7 @@ export default function DaftarArsipMasukPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={10} className="px-6 py-12 text-center text-on-surface-variant font-bold bg-surface-container-lowest">
+                  <td colSpan={10} className="px-6 py-12 text-center text-on-surface-variant font-bold bg-white">
                     <div className="flex flex-col items-center justify-center gap-2">
                       <Inbox size={32} className="text-slate-300" />
                       <p className="uppercase tracking-widest">TIDAK ADA DATA SURAT MASUK.</p>
