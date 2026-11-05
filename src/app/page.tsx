@@ -202,23 +202,23 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Quick Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          {/* Quick Action Buttons (Menurun / Stack Vertikal) */}
+          <div className="flex flex-col gap-2.5 w-full sm:w-auto shrink-0">
             <Link 
               href="/perizinan/registrasi" 
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all w-full sm:w-52"
             >
               <Plus size={15} /> Permohonan Izin
             </Link>
             <Link 
               href="/pengawasan/buat-agenda" 
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all w-full sm:w-52"
             >
               <Plus size={15} /> Agenda Pengawasan
             </Link>
             <Link 
               href="/pengaduan/tambah" 
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all w-full sm:w-52"
             >
               <Plus size={15} /> Catat Aduan
             </Link>
