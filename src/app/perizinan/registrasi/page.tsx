@@ -408,8 +408,8 @@ export default function RegistrasiPage() {
                           <option value="UKL-UPL">UKL-UPL</option>
                           <option value="AMDAL">AMDAL</option>
                           <option value="SPPL">SPPL</option>
-                          <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Air Limbah</option>
-                          <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Emisi</option>
+                          <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Pemenuhan Baku Mutu Air Limbah</option>
+                          <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Pemenuhan Baku Mutu Emisi</option>
                           <option value="Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan">Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan</option>
                           <option value="PERTEK AIR LIMBAH">Standar Teknis Pemenuhan Baku Mutu Air Limbah</option>
                           <option value="PERTEK EMISI">Standar Teknis Pemenuhan Baku Mutu Emisi</option>
@@ -588,8 +588,8 @@ export default function RegistrasiPage() {
                         <option value="UKL-UPL">UKL-UPL</option>
                         <option value="AMDAL">AMDAL</option>
                         <option value="SPPL">SPPL</option>
-                        <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Air Limbah</option>
-                        <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Emisi</option>
+                        <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Pemenuhan Baku Mutu Air Limbah</option>
+                        <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Pemenuhan Baku Mutu Emisi</option>
                         <option value="Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan">Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan</option>
                         <option value="PERTEK AIR LIMBAH">Standar Teknis Pemenuhan Baku Mutu Air Limbah</option>
                         <option value="PERTEK EMISI">Standar Teknis Pemenuhan Baku Mutu Emisi</option>

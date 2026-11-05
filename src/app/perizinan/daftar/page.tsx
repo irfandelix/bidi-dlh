@@ -539,8 +539,8 @@ export default function DaftarPerizinanPage() {
               <option value="AMDAL">AMDAL</option>
               <option value="PERTEK AIR LIMBAH">Standar Teknis Pemenuhan Baku Mutu Air Limbah</option>
               <option value="PERTEK EMISI">Standar Teknis Pemenuhan Baku Mutu Emisi</option>
-              <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Air Limbah</option>
-              <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Emisi</option>
+              <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Pemenuhan Baku Mutu Air Limbah</option>
+              <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Pemenuhan Baku Mutu Emisi</option>
               <option value="RINTEK LB3">Rintek LB3</option>
             </select>
 

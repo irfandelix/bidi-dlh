@@ -268,6 +268,10 @@ export async function POST(request: Request) {
     formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK AIR LIMBAH/gi, 'Standar Teknis Pemenuhan Baku Mutu Air Limbah');
     formattedJenisDokumen = formattedJenisDokumen.replace(/^Standar Teknis Emisi$/i, 'Standar Teknis Pemenuhan Baku Mutu Emisi');
     formattedJenisDokumen = formattedJenisDokumen.replace(/^Standar Teknis Air Limbah$/i, 'Standar Teknis Pemenuhan Baku Mutu Air Limbah');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/KAJIAN TEKNIS EMISI/gi, 'Kajian Teknis Pemenuhan Baku Mutu Emisi');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/KAJIAN TEKNIS AIR LIMBAH/gi, 'Kajian Teknis Pemenuhan Baku Mutu Air Limbah');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/^Kajian Teknis Emisi$/i, 'Kajian Teknis Pemenuhan Baku Mutu Emisi');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/^Kajian Teknis Air Limbah$/i, 'Kajian Teknis Pemenuhan Baku Mutu Air Limbah');
 
     let teks_persetujuan = formattedJenisDokumen;
     const lowerJenis = formattedJenisDokumen.toLowerCase();
@@ -326,6 +330,9 @@ export async function POST(request: Request) {
   'STANDAR TEKNIS PEMENUHAN BAKU MUTU AIR LIMBAH': 'ST.AL', 'STANDAR TEKNIS PEMENUHAN BAKU MUTU EMISI': 'ST.EM',
   'Persetujuan Teknis Air Limbah': 'ST.AL', 'Persetujuan Teknis Emisi': 'ST.EM',
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
+  'Kajian Teknis Air Limbah': 'KT.AL', 'Kajian Teknis Emisi': 'KT.EM',
+  'Kajian Teknis Pemenuhan Baku Mutu Air Limbah': 'KT.AL', 'Kajian Teknis Pemenuhan Baku Mutu Emisi': 'KT.EM',
+  'KAJIAN TEKNIS PEMENUHAN BAKU MUTU AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS PEMENUHAN BAKU MUTU EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL',
   'Permohonan Arahan': 'ARH',
@@ -357,6 +364,9 @@ export async function POST(request: Request) {
   'STANDAR TEKNIS PEMENUHAN BAKU MUTU AIR LIMBAH': 'ST.AL', 'STANDAR TEKNIS PEMENUHAN BAKU MUTU EMISI': 'ST.EM',
   'Persetujuan Teknis Air Limbah': 'ST.AL', 'Persetujuan Teknis Emisi': 'ST.EM',
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
+  'Kajian Teknis Air Limbah': 'KT.AL', 'Kajian Teknis Emisi': 'KT.EM',
+  'Kajian Teknis Pemenuhan Baku Mutu Air Limbah': 'KT.AL', 'Kajian Teknis Pemenuhan Baku Mutu Emisi': 'KT.EM',
+  'KAJIAN TEKNIS PEMENUHAN BAKU MUTU AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS PEMENUHAN BAKU MUTU EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL',
   'Permohonan Arahan': 'ARH',
