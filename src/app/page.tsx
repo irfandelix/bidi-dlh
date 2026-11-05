@@ -202,25 +202,28 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Quick Action Buttons (Menurun / Stack Vertikal) */}
-          <div className="flex flex-col gap-2.5 w-full sm:w-auto shrink-0">
+          {/* Quick Action Buttons (Menurun / Rata Kiri / 1 Baris) */}
+          <div className="flex flex-col gap-2.5 w-full sm:w-[220px] shrink-0">
             <Link 
               href="/perizinan/registrasi" 
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all w-full sm:w-52"
+              className="inline-flex items-center justify-start gap-2.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all whitespace-nowrap"
             >
-              <Plus size={15} /> Permohonan Izin
+              <Plus size={16} className="shrink-0" />
+              <span>Permohonan Izin</span>
             </Link>
             <Link 
               href="/pengawasan/buat-agenda" 
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all w-full sm:w-52"
+              className="inline-flex items-center justify-start gap-2.5 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all whitespace-nowrap"
             >
-              <Plus size={15} /> Agenda Pengawasan
+              <Plus size={16} className="shrink-0" />
+              <span>Agenda Pengawasan</span>
             </Link>
             <Link 
               href="/pengaduan/tambah" 
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all w-full sm:w-52"
+              className="inline-flex items-center justify-start gap-2.5 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all whitespace-nowrap"
             >
-              <Plus size={15} /> Catat Aduan
+              <Plus size={16} className="shrink-0" />
+              <span>Catat Aduan</span>
             </Link>
           </div>
         </div>
