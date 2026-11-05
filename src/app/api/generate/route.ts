@@ -264,12 +264,12 @@ export async function POST(request: Request) {
 
     let formattedJenisDokumen = doc.jenis_dokumen || '';
     formattedJenisDokumen = formattedJenisDokumen.replace(/RINTEK LB3/gi, 'Rincian Teknis Penyimpanan Limbah B3');
-    formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK EMISI/gi, 'Persetujuan Teknis Pemenuhan Baku Mutu Emisi');
-    formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK AIR LIMBAH/gi, 'Persetujuan Teknis Pemenuhan Baku Mutu Air Limbah');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK EMISI/gi, 'Standar Teknis Pemenuhan Baku Mutu Emisi');
+    formattedJenisDokumen = formattedJenisDokumen.replace(/PERTEK AIR LIMBAH/gi, 'Standar Teknis Pemenuhan Baku Mutu Air Limbah');
 
     let teks_persetujuan = formattedJenisDokumen;
     const lowerJenis = formattedJenisDokumen.toLowerCase();
-    if (!lowerJenis.startsWith('persetujuan') && !lowerJenis.startsWith('rincian teknis') && !lowerJenis.startsWith('kajian teknis') && !lowerJenis.startsWith('surat kelayakan')) {
+    if (!lowerJenis.startsWith('persetujuan') && !lowerJenis.startsWith('standar teknis') && !lowerJenis.startsWith('rincian teknis') && !lowerJenis.startsWith('kajian teknis') && !lowerJenis.startsWith('surat kelayakan')) {
         teks_persetujuan = 'Persetujuan ' + formattedJenisDokumen;
     }
 
@@ -318,6 +318,8 @@ export async function POST(request: Request) {
   'SPPL': 'SPPL', 'UKLUPL': 'UKLUPL', 'UKL-UPL': 'UKLUPL',
   'Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan': 'RT.INT.LB3',
   'RINTEK LB3': 'RT.LB3', 'PERTEK AIR LIMBAH': 'ST.AL', 'PERTEK EMISI': 'ST.EM',
+  'STANDAR TEKNIS AIR LIMBAH': 'ST.AL', 'STANDAR TEKNIS EMISI': 'ST.EM',
+  'Standar Teknis Air Limbah': 'ST.AL', 'Standar Teknis Emisi': 'ST.EM',
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL',
@@ -344,6 +346,8 @@ export async function POST(request: Request) {
   'SPPL': 'SPPL', 'UKLUPL': 'UKLUPL', 'UKL-UPL': 'UKLUPL',
   'Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan': 'RT.INT.LB3',
   'RINTEK LB3': 'RT.LB3', 'PERTEK AIR LIMBAH': 'ST.AL', 'PERTEK EMISI': 'ST.EM',
+  'STANDAR TEKNIS AIR LIMBAH': 'ST.AL', 'STANDAR TEKNIS EMISI': 'ST.EM',
+  'Standar Teknis Air Limbah': 'ST.AL', 'Standar Teknis Emisi': 'ST.EM',
   'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
   'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
   'DELH': 'DELH', 'AMDAL': 'AMDAL',

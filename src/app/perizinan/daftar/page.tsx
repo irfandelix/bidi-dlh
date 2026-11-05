@@ -537,6 +537,11 @@ export default function DaftarPerizinanPage() {
               <option value="SPPL">SPPL</option>
               <option value="UKL-UPL">UKL-UPL</option>
               <option value="AMDAL">AMDAL</option>
+              <option value="PERTEK AIR LIMBAH">Standar Teknis Air Limbah</option>
+              <option value="PERTEK EMISI">Standar Teknis Emisi</option>
+              <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Air Limbah</option>
+              <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Emisi</option>
+              <option value="RINTEK LB3">Rintek LB3</option>
             </select>
 
             <div className="relative flex-1 md:min-w-[260px]">

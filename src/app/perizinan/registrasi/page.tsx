@@ -411,8 +411,8 @@ export default function RegistrasiPage() {
                           <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Air Limbah</option>
                           <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Emisi</option>
                           <option value="Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan">Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan</option>
-                          <option value="PERTEK AIR LIMBAH">Persetujuan Teknis Air Limbah</option>
-                          <option value="PERTEK EMISI">Persetujuan Teknis Emisi</option>
+                          <option value="PERTEK AIR LIMBAH">Standar Teknis Air Limbah</option>
+                          <option value="PERTEK EMISI">Standar Teknis Emisi</option>
                           <option value="SLO">SLO</option>
                           <option value="DPLH">DPLH</option>
                           <option value="DELH">DELH</option>
@@ -591,8 +591,8 @@ export default function RegistrasiPage() {
                         <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Air Limbah</option>
                         <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Emisi</option>
                         <option value="Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan">Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan</option>
-                        <option value="PERTEK AIR LIMBAH">Persetujuan Teknis Air Limbah</option>
-                        <option value="PERTEK EMISI">Persetujuan Teknis Emisi</option>
+                        <option value="PERTEK AIR LIMBAH">Standar Teknis Air Limbah</option>
+                        <option value="PERTEK EMISI">Standar Teknis Emisi</option>
                         <option value="SLO">SLO</option>
                         <option value="DPLH">DPLH</option>
                         <option value="DELH">DELH</option>
