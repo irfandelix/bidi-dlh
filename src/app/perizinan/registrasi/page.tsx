@@ -34,10 +34,27 @@ import {
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
+const OPSI_JENIS_DOKUMEN = [
+  { value: "UKL-UPL", label: "UKL-UPL", code: "UKLUPL", desc: "Upaya Pengelolaan & Pemantauan Lingkungan" },
+  { value: "AMDAL", label: "AMDAL", code: "AMDAL", desc: "Analisis Mengenai Dampak Lingkungan" },
+  { value: "SPPL", label: "SPPL", code: "SPPL", desc: "Pernyataan Kesanggupan Lingkungan" },
+  { value: "PERTEK AIR LIMBAH", label: "Standar Teknis Pemenuhan Baku Mutu Air Limbah", code: "ST.AL", desc: "Standar Teknis Baku Mutu Air Limbah" },
+  { value: "PERTEK EMISI", label: "Standar Teknis Pemenuhan Baku Mutu Emisi", code: "ST.EM", desc: "Standar Teknis Baku Mutu Emisi Udara" },
+  { value: "KAJIAN TEKNIS AIR LIMBAH", label: "Kajian Teknis Pemenuhan Baku Mutu Air Limbah", code: "KT.AL", desc: "Kajian Teknis Baku Mutu Air Limbah" },
+  { value: "KAJIAN TEKNIS EMISI", label: "Kajian Teknis Pemenuhan Baku Mutu Emisi", code: "KT.EM", desc: "Kajian Teknis Baku Mutu Emisi Udara" },
+  { value: "Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan", label: "Rincian Teknis dan Integrasi Rincian Teknis Limbah B3", code: "RT.LB3", desc: "Penyimpanan Limbah B3 & Integrasi PL" },
+  { value: "SLO", label: "SLO", code: "SLO", desc: "Surat Kelayakan Operasional" },
+  { value: "DPLH", label: "DPLH", code: "DPLH", desc: "Dokumen Pengelolaan Lingkungan Hidup" },
+  { value: "DELH", label: "DELH", code: "DELH", desc: "Dokumen Evaluasi Lingkungan Hidup" },
+  { value: "Permohonan Arahan", label: "Permohonan Arahan", code: "ARAHAN", desc: "Konsultasi Arahan Dokumen Lingkungan" },
+  { value: "Permohonan Perubahan Dokumen Lingkungan", label: "Permohonan Perubahan Dokumen Lingkungan", code: "PDL", desc: "Perubahan / Adendum Dokumen Lingkungan" },
+];
+
 export default function RegistrasiPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'manual' | 'amdalnet'>('manual');
   const [currentStep, setCurrentStep] = useState(1);
+  const [selectedJenisDokumen, setSelectedJenisDokumen] = useState<string>('UKL-UPL');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -155,6 +172,7 @@ export default function RegistrasiPage() {
     setErrorMsg('');
     setCopiedNomor(false);
     setCurrentStep(1);
+    setSelectedJenisDokumen('UKL-UPL');
     if (formRef.current) {
       formRef.current.reset();
     }
@@ -596,7 +614,7 @@ export default function RegistrasiPage() {
                         />
                       </div>
 
-                      <div className="md:col-span-2">
+                      <div>
                         <label className="block mb-2 text-xs font-black text-slate-800 uppercase tracking-wider">
                           Perihal Surat
                         </label>
@@ -622,30 +640,73 @@ export default function RegistrasiPage() {
                         />
                       </div>
 
-                      <div>
-                        <label className="block mb-2 text-xs font-black text-slate-800 uppercase tracking-wider flex items-center justify-between">
-                          <span>Jenis Dokumen</span>
-                          <span className="text-[10px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded font-black border border-rose-200">Wajib</span>
-                        </label>
-                        <select 
-                          name="jenis_dokumen" 
-                          required 
-                          className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-black text-slate-900 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 outline-none transition-all cursor-pointer"
-                        >
-                          <option value="UKL-UPL">UKL-UPL</option>
-                          <option value="AMDAL">AMDAL</option>
-                          <option value="SPPL">SPPL</option>
-                          <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Pemenuhan Baku Mutu Air Limbah</option>
-                          <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Pemenuhan Baku Mutu Emisi</option>
-                          <option value="Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan">Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan</option>
-                          <option value="PERTEK AIR LIMBAH">Standar Teknis Pemenuhan Baku Mutu Air Limbah</option>
-                          <option value="PERTEK EMISI">Standar Teknis Pemenuhan Baku Mutu Emisi</option>
-                          <option value="SLO">SLO</option>
-                          <option value="DPLH">DPLH</option>
-                          <option value="DELH">DELH</option>
-                          <option value="Permohonan Arahan">Permohonan Arahan</option>
-                          <option value="Permohonan Perubahan Dokumen Lingkungan">Permohonan Perubahan Dokumen Lingkungan</option>
-                        </select>
+                      {/* Pilihan Jenis Dokumen Berbasis Klik Kartu (Bukan Dropdown) */}
+                      <div className="md:col-span-2 space-y-3 pt-2">
+                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                          <div>
+                            <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
+                              Pilih Jenis Dokumen Permohonan
+                            </label>
+                            <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
+                              Klik pada salah satu jenis dokumen berikut untuk memilih
+                            </p>
+                          </div>
+                          <span className="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded font-black border border-rose-200 shrink-0">
+                            Wajib (Pilih 1)
+                          </span>
+                        </div>
+
+                        {/* Hidden input to maintain native form submission */}
+                        <input type="hidden" name="jenis_dokumen" value={selectedJenisDokumen} required />
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                          {OPSI_JENIS_DOKUMEN.map((doc) => {
+                            const isSelected = selectedJenisDokumen === doc.value;
+                            return (
+                              <button
+                                key={doc.value}
+                                type="button"
+                                onClick={() => setSelectedJenisDokumen(doc.value)}
+                                className={`p-3.5 rounded-2xl border-2 text-left transition-all duration-200 flex items-start gap-3 relative cursor-pointer group ${
+                                  isSelected 
+                                    ? 'border-indigo-600 bg-indigo-50/80 text-indigo-950 ring-2 ring-indigo-500/20 shadow-sm scale-[1.01]'
+                                    : 'border-slate-200 bg-slate-50/60 hover:border-slate-300 hover:bg-white text-slate-800'
+                                }`}
+                              >
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                                  isSelected 
+                                    ? 'border-indigo-600 bg-indigo-600 text-white' 
+                                    : 'border-slate-300 bg-white group-hover:border-slate-400'
+                                }`}>
+                                  {isSelected && <Check size={12} strokeWidth={3.5} />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="font-black text-xs uppercase leading-snug">
+                                      {doc.label}
+                                    </span>
+                                    {doc.code && (
+                                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border shrink-0 uppercase tracking-wider ${
+                                        isSelected
+                                          ? 'bg-indigo-200/80 border-indigo-300 text-indigo-900'
+                                          : 'bg-slate-200/60 border-slate-300 text-slate-600'
+                                      }`}>
+                                        {doc.code}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {doc.desc && (
+                                    <p className={`text-[10px] mt-1 font-semibold leading-tight line-clamp-1 ${
+                                      isSelected ? 'text-indigo-700 font-bold' : 'text-slate-400'
+                                    }`}>
+                                      {doc.desc}
+                                    </p>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -993,30 +1054,73 @@ export default function RegistrasiPage() {
                       />
                     </div>
 
-                    <div className="md:col-span-2">
-                      <label className="block mb-2 text-xs font-black text-slate-800 uppercase tracking-wider flex items-center justify-between">
-                        <span>4. Jenis Dokumen</span>
-                        <span className="text-[10px] bg-rose-50 text-rose-600 px-1.5 py-0.5 rounded font-black border border-rose-200">Wajib</span>
-                      </label>
-                      <select 
-                        name="jenis_dokumen" 
-                        required 
-                        className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl px-4 py-3 text-sm font-black text-slate-900 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all cursor-pointer"
-                      >
-                        <option value="UKL-UPL">UKL-UPL</option>
-                        <option value="AMDAL">AMDAL</option>
-                        <option value="SPPL">SPPL</option>
-                        <option value="KAJIAN TEKNIS AIR LIMBAH">Kajian Teknis Pemenuhan Baku Mutu Air Limbah</option>
-                        <option value="KAJIAN TEKNIS EMISI">Kajian Teknis Pemenuhan Baku Mutu Emisi</option>
-                        <option value="Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan">Rincian Teknis dan Intergrasi Rincian Teknis Limbah B3 ke Persetujuan Lingkungan</option>
-                        <option value="PERTEK AIR LIMBAH">Standar Teknis Pemenuhan Baku Mutu Air Limbah</option>
-                        <option value="PERTEK EMISI">Standar Teknis Pemenuhan Baku Mutu Emisi</option>
-                        <option value="SLO">SLO</option>
-                        <option value="DPLH">DPLH</option>
-                        <option value="DELH">DELH</option>
-                        <option value="Permohonan Arahan">Permohonan Arahan</option>
-                        <option value="Permohonan Perubahan Dokumen Lingkungan">Permohonan Perubahan Dokumen Lingkungan</option>
-                      </select>
+                    {/* Pilihan Jenis Dokumen Berbasis Klik Kartu (Amdalnet) */}
+                    <div className="md:col-span-2 space-y-3 pt-2">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <div>
+                          <label className="block text-xs font-black text-slate-800 uppercase tracking-wider">
+                            4. Pilih Jenis Dokumen Permohonan
+                          </label>
+                          <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
+                            Klik pada salah satu jenis dokumen berikut untuk memilih
+                          </p>
+                        </div>
+                        <span className="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded font-black border border-rose-200 shrink-0">
+                          Wajib (Pilih 1)
+                        </span>
+                      </div>
+
+                      {/* Hidden input to maintain native form submission */}
+                      <input type="hidden" name="jenis_dokumen" value={selectedJenisDokumen} required />
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                        {OPSI_JENIS_DOKUMEN.map((doc) => {
+                          const isSelected = selectedJenisDokumen === doc.value;
+                          return (
+                            <button
+                              key={doc.value}
+                              type="button"
+                              onClick={() => setSelectedJenisDokumen(doc.value)}
+                              className={`p-3.5 rounded-2xl border-2 text-left transition-all duration-200 flex items-start gap-3 relative cursor-pointer group ${
+                                isSelected 
+                                  ? 'border-emerald-600 bg-emerald-50/80 text-emerald-950 ring-2 ring-emerald-500/20 shadow-sm scale-[1.01]'
+                                  : 'border-slate-200 bg-slate-50/60 hover:border-slate-300 hover:bg-white text-slate-800'
+                              }`}
+                            >
+                              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                                isSelected 
+                                  ? 'border-emerald-600 bg-emerald-600 text-white' 
+                                  : 'border-slate-300 bg-white group-hover:border-slate-400'
+                              }`}>
+                                {isSelected && <Check size={12} strokeWidth={3.5} />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                  <span className="font-black text-xs uppercase leading-snug">
+                                    {doc.label}
+                                  </span>
+                                  {doc.code && (
+                                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border shrink-0 uppercase tracking-wider ${
+                                      isSelected
+                                        ? 'bg-emerald-200/80 border-emerald-300 text-emerald-900'
+                                        : 'bg-slate-200/60 border-slate-300 text-slate-600'
+                                    }`}>
+                                      {doc.code}
+                                    </span>
+                                  )}
+                                </div>
+                                {doc.desc && (
+                                  <p className={`text-[10px] mt-1 font-semibold leading-tight line-clamp-1 ${
+                                    isSelected ? 'text-emerald-700 font-bold' : 'text-slate-400'
+                                  }`}>
+                                    {doc.desc}
+                                  </p>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
       
                     <div className="md:col-span-2">
