@@ -176,6 +176,15 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
 
   const amdalnetFileUrl = extra?.file_amdalnet_url || doc.file_uji_admin_url || fisik?.urlUjiAdmin || null;
 
+  const lokasiArsip = fisik?.lokasiArsip || doc.lokasi_arsip || null;
+
+  const isArsipDone = doc.status_tahapan === 'Diarsipkan' || 
+                      doc.status_tahapan === 'Selesai' || 
+                      doc.status_tahapan === 'Arsip' ||
+                      !!doc.file_arsip_url ||
+                      !!lokasiArsip ||
+                      Boolean(fisik?.dokumenCetak && fisik?.pkplhArsip);
+
   const isUjiAdminDone = !!doc.nomor_uji_berkas || 
                          isAmdalnet || 
                          !!amdalnetFileUrl || 
@@ -203,7 +212,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
     { id: 9, name: 'Revisi Lanjut', done: !!doc.nomor_revisi_2 || !!doc.nomor_php2, active: doc.status_tahapan === 'Revisi Lanjutan' },
     { id: 10, name: 'RPD & SK', done: !!doc.nomor_sk || !!doc.nomor_risalah, active: doc.status_tahapan === 'Menunggu Finalisasi' || doc.status_tahapan === 'Finalisasi' },
     { id: 11, name: 'Jilidan', done: !!doc.tanggal_penerimaan_jilidan, active: doc.status_tahapan === 'Penerimaan Jilidan' || doc.status_tahapan === 'Jilidan' },
-    { id: 12, name: 'Arsip', done: !!doc.arsip_fisik || doc.status_tahapan === 'Selesai', active: doc.status_tahapan === 'Arsip' || doc.status_tahapan === 'Selesai' }
+    { id: 12, name: 'Arsip', done: isArsipDone, active: doc.status_tahapan === 'Arsip' || doc.status_tahapan === 'Diarsipkan' || doc.status_tahapan === 'Selesai' }
   ];
 
   const handleDownload = async (type: string, stage: string, targetRevisi?: number) => {
@@ -774,7 +783,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               )}
 
               {/* 11. TAHAP 12 - PENGARSIPAN */}
-              {(doc.arsip_fisik || doc.file_arsip_url || showAllStages) && (
+              {(isArsipDone || doc.file_arsip_url || lokasiArsip || showAllStages) && (
                 <>
                   <tr className="bg-slate-100">
                     <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
@@ -788,8 +797,8 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                     <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">Arsip Fisik & Digital</th>
                     <td className="py-3 px-6 font-bold text-on-surface text-sm">
                       <div className="space-y-1">
-                        <p><span className="text-on-surface-variant font-medium">Status Arsip:</span> <span className={doc.arsip_fisik ? "text-emerald-700 font-bold" : "text-amber-700"}>{doc.arsip_fisik ? 'Telah Diarsipkan Fisik' : 'Belum Diarsipkan'}</span></p>
-                        <p><span className="text-on-surface-variant font-medium">Nomor Box / Rak Lemari:</span> <span className="font-mono bg-surface-container px-2 py-0.5 rounded border border-outline-variant">{doc.arsip_fisik || '-'}</span></p>
+                        <p><span className="text-on-surface-variant font-medium">Status Arsip:</span> <span className={isArsipDone ? "text-emerald-700 font-bold" : "text-amber-700 font-medium"}>{isArsipDone ? 'Telah Diarsipkan Fisik' : 'Belum Diarsipkan'}</span></p>
+                        <p><span className="text-on-surface-variant font-medium">Nomor Box / Rak Lemari:</span> <span className="font-mono bg-surface-container px-2 py-0.5 rounded border border-outline-variant">{lokasiArsip || '-'}</span></p>
                         {renderFileLink(doc.file_arsip_url, 'Unduh Dokumen Arsip Digital')}
                       </div>
                     </td>
