@@ -155,13 +155,36 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
     );
   };
 
-  const isAmdalnet = !!doc.nomor_registrasi_amdalnet || doc.sumber_data === 'AMDALNET' || (() => {
-    try {
-      if (!doc.extra_data) return false;
-      const extraD = typeof doc.extra_data === 'string' ? JSON.parse(doc.extra_data) : doc.extra_data;
-      return !!extraD?.is_amdalnet;
-    } catch { return false; }
-  })();
+  let fisik: any = {};
+  try {
+    if (doc.arsip_fisik) {
+      fisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik;
+    }
+  } catch (e) {}
+
+  const isAmdalnet = !!doc.nomor_registrasi_amdalnet || 
+                     doc.sumber_data === 'AMDALNET' || 
+                     !!extra?.is_amdalnet || 
+                     Boolean(doc.keterangan?.includes('Amdalnet')) || 
+                     (() => {
+                       try {
+                         if (!doc.extra_data) return false;
+                         const extraD = typeof doc.extra_data === 'string' ? JSON.parse(doc.extra_data) : doc.extra_data;
+                         return !!extraD?.is_amdalnet;
+                       } catch { return false; }
+                     })();
+
+  const amdalnetFileUrl = extra?.file_amdalnet_url || doc.file_uji_admin_url || fisik?.urlUjiAdmin || null;
+
+  const isUjiAdminDone = !!doc.nomor_uji_berkas || 
+                         isAmdalnet || 
+                         !!amdalnetFileUrl || 
+                         doc.status_tahapan === 'Uji Administrasi Selesai' ||
+                         doc.status_tahapan === 'Verifikasi Lapangan' ||
+                         doc.status_tahapan === 'Verlap Selesai' ||
+                         doc.status_tahapan === 'Pemeriksaan Substansi' ||
+                         doc.status_tahapan === 'Pemeriksaan Selesai' ||
+                         doc.status_tahapan === 'Selesai';
 
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-';
@@ -170,7 +193,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
 
   const stagesPipeline = [
     { id: 1, name: 'Registrasi', done: !!doc.nomor_checklist, active: doc.status_tahapan === 'Registrasi' || doc.status_tahapan === 'Draft' },
-    { id: 2, name: 'Uji Administrasi', done: !!doc.nomor_uji_berkas, active: doc.status_tahapan === 'Uji Administrasi' },
+    { id: 2, name: 'Uji Administrasi', done: isUjiAdminDone, active: doc.status_tahapan === 'Uji Administrasi' },
     { id: 3, name: 'Verlap', done: !!doc.nomor_ba_verlap, active: doc.status_tahapan === 'Verifikasi Lapangan' || doc.status_tahapan === 'Verlap Selesai' },
     { id: 4, name: 'Pemeriksaan', done: !!doc.nomor_ba_pemeriksaan, active: doc.status_tahapan === 'Pemeriksaan Substansi' || doc.status_tahapan === 'Pemeriksaan Selesai' },
     { id: 5, name: 'Penyerahan BA', done: !!doc.tanggal_pengembalian, active: doc.status_tahapan === 'Pengembalian' },
@@ -472,13 +495,18 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
               </tr>
 
               {/* 5. TAHAP 2 - UJI ADMINISTRASI (HUA) */}
-              {(doc.nomor_uji_berkas || doc.tanggal_uji_berkas || showAllStages) && (
+              {(doc.nomor_uji_berkas || doc.tanggal_uji_berkas || isAmdalnet || isUjiAdminDone || showAllStages) && (
                 <>
                   <tr className="bg-slate-100">
                     <td colSpan={2} className="w-full bg-slate-100 py-2.5 px-6 font-black text-on-surface text-xs uppercase tracking-wider">
                       <div className="flex items-center gap-2">
                         <Layers size={14} className="text-primary shrink-0" />
                         <span>Tahap 2: Uji Kelengkapan Administrasi (BA HUA)</span>
+                        {isAmdalnet && (
+                          <span className="ml-2 px-2 py-0.5 rounded text-[10px] font-black bg-emerald-200 text-emerald-900 border border-emerald-300 uppercase">
+                            AMDALNET
+                          </span>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -486,12 +514,20 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                     <th className="py-3 px-6 font-bold text-on-surface-variant w-1/3 uppercase text-xs align-top">BA Uji Administrasi</th>
                     <td className="py-3 px-6 font-bold text-on-surface text-sm">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-on-surface-variant font-medium">Nomor BA:</span>
-                          {renderCopyableNumber(doc.nomor_uji_berkas, 'tbl-ujiadmin')}
-                          {renderFileLink(doc.file_uji_admin_url, 'Unduh Berkas BA')}
+                          {doc.nomor_uji_berkas ? (
+                            renderCopyableNumber(doc.nomor_uji_berkas, 'tbl-ujiadmin')
+                          ) : isAmdalnet ? (
+                            <span className="px-2.5 py-0.5 rounded text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              DIPROSES VIA AMDALNET
+                            </span>
+                          ) : (
+                            renderCopyableNumber(null, 'tbl-ujiadmin')
+                          )}
+                          {renderFileLink(amdalnetFileUrl || doc.file_uji_admin_url, 'Unduh Berkas BA')}
                         </div>
-                        <p><span className="text-on-surface-variant font-medium">Tanggal Uji:</span> {formatDate(doc.tanggal_uji_berkas)}</p>
+                        <p><span className="text-on-surface-variant font-medium">Tanggal Uji:</span> {formatDate(doc.tanggal_uji_berkas || extra?.tanggal_amdalnet)}</p>
                         {extra.hasil_verifikasi_uji && (
                           <p><span className="text-on-surface-variant font-medium">Hasil Verifikasi:</span> <strong className="text-primary">{extra.hasil_verifikasi_uji}</strong></p>
                         )}
@@ -842,7 +878,7 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
           )}
 
           {/* BA Uji Administrasi (Conditional) */}
-          {(doc.nomor_uji_berkas || doc.status_tahapan === 'Uji Administrasi Selesai' || doc.status_tahapan === 'Verlap Selesai' || doc.status_tahapan === 'Pemeriksaan Selesai') && (
+          {(doc.nomor_uji_berkas || isAmdalnet || isUjiAdminDone || doc.status_tahapan === 'Uji Administrasi Selesai' || doc.status_tahapan === 'Verlap Selesai' || doc.status_tahapan === 'Pemeriksaan Selesai') && (
             <div className="bg-surface p-6 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-3">
@@ -852,16 +888,38 @@ export default function CetakClient({ doc, timPenilai = [] }: { doc: any; timPen
                   <h5 className="font-bold text-on-surface uppercase">BA Uji Administrasi</h5>
                 </div>
                 <p className="text-xs font-bold text-on-surface-variant mb-4">Berita Acara Hasil Uji Kelengkapan Administrasi (BA HUA).</p>
-                {renderNumberBadge(doc.nomor_uji_berkas, 'uji-admin')}
+                {doc.nomor_uji_berkas ? (
+                  renderNumberBadge(doc.nomor_uji_berkas, 'uji-admin')
+                ) : isAmdalnet ? (
+                  <div className="mb-4">
+                    <span className="inline-block px-3 py-1.5 bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-black uppercase">
+                      ✓ Selesai via AMDALNET
+                    </span>
+                  </div>
+                ) : (
+                  renderNumberBadge(null, 'uji-admin')
+                )}
               </div>
-              <button 
-                onClick={() => handleDownload('template_ba_uji_admin', 'uji-administrasi')}
-                disabled={downloading === 'template_ba_uji_admin'}
-                className="w-full px-4 py-3 bg-indigo-400 hover:bg-indigo-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
-              >
-                {downloading === 'template_ba_uji_admin' ? <LottieLoader size={24} /> : <Printer size={18} />}
-                Cetak Dokumen
-              </button>
+              {doc.nomor_uji_berkas ? (
+                <button 
+                  onClick={() => handleDownload('template_ba_uji_admin', 'uji-administrasi')}
+                  disabled={downloading === 'template_ba_uji_admin'}
+                  className="w-full px-4 py-3 bg-indigo-400 hover:bg-indigo-300 text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase disabled:opacity-70 disabled:hover:translate-y-0"
+                >
+                  {downloading === 'template_ba_uji_admin' ? <LottieLoader size={24} /> : <Printer size={18} />}
+                  Cetak Dokumen
+                </button>
+              ) : amdalnetFileUrl ? (
+                <a 
+                  href={amdalnetFileUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase"
+                >
+                  <Eye size={18} />
+                  Lihat Dokumen AMDALNET
+                </a>
+              ) : null}
             </div>
           )}
 

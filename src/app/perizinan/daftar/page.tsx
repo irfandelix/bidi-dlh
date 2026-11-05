@@ -200,12 +200,21 @@ export default function DaftarPerizinanPage() {
       }
     } catch (e) {}
 
+    let huaEkstra: any = {};
+    try {
+      if (d.penandatangan_hua) {
+        huaEkstra = typeof d.penandatangan_hua === 'string' ? JSON.parse(d.penandatangan_hua) : d.penandatangan_hua;
+      }
+    } catch (e) {}
+    const isAmdalnetDoc = !!(huaEkstra?.is_amdalnet || d.keterangan?.includes('Amdalnet'));
+    const huaFileUrl = fisik?.urlUjiAdmin || d.file_uji_admin_url || huaEkstra?.file_amdalnet_url || null;
+
     const nomorRevisiStr = d.nomor_revisi_5 || d.nomor_revisi_4 || d.nomor_revisi_3 || d.nomor_revisi_2 || d.nomor_revisi_1 || d.nomor_revisi;
 
     const sections = [
       { title: '1. Dokumen Lingkungan Final', number: fisik?.noDokumenCetak, url: fisik?.urlDokumenCetak, status: fisik?.dokumenCetak || fisik?.urlDokumenCetak },
       { title: '2. PKPLH Arsip', number: fisik?.noPkplhArsip || d.nomor_sk, url: fisik?.urlPkplh || fisik?.urlSk, status: fisik?.pkplhArsip || fisik?.urlPkplh || d.nomor_sk },
-      { title: '3. BA Uji Administrasi', number: d.nomor_uji_berkas, url: fisik?.urlUjiAdmin, status: d.nomor_uji_berkas || fisik?.urlUjiAdmin },
+      { title: '3. BA Uji Administrasi', number: isAmdalnetDoc ? 'AMDALNET' : d.nomor_uji_berkas, url: huaFileUrl, status: d.nomor_uji_berkas || huaFileUrl || isAmdalnetDoc },
       { title: '4. BA Verlap', number: d.nomor_ba_verlap, url: fisik?.urlBaVerlap, status: d.nomor_ba_verlap || fisik?.urlBaVerlap },
       { title: '5. BA Pemeriksaan/Sidang', number: d.nomor_ba_pemeriksaan, url: fisik?.urlBaSidang, status: d.nomor_ba_pemeriksaan || fisik?.urlBaSidang },
       { title: '6. BA Pemeriksaan Revisi', number: nomorRevisiStr, url: fisik?.urlRevisi, status: nomorRevisiStr || fisik?.urlRevisi },
@@ -625,9 +634,12 @@ export default function DaftarPerizinanPage() {
                                           let hasData = false;
                                           let fisik: any = {};
                                           try { if (d.arsip_fisik) fisik = typeof d.arsip_fisik === 'string' ? JSON.parse(d.arsip_fisik) : d.arsip_fisik; } catch(e) {}
+                                          let huaEkstra: any = {};
+                                          try { if (d.penandatangan_hua) huaEkstra = typeof d.penandatangan_hua === 'string' ? JSON.parse(d.penandatangan_hua) : d.penandatangan_hua; } catch(e) {}
+                                          const isAmdalnet = !!(huaEkstra?.is_amdalnet || d.keterangan?.includes('Amdalnet'));
                                           
                                           if (stepId === 1) hasData = true;
-                                          if (stepId === 2) hasData = !!(d.nomor_uji_berkas || d.tanggal_uji_berkas || fisik?.urlUjiAdmin);
+                                          if (stepId === 2) hasData = !!(d.nomor_uji_berkas || d.tanggal_uji_berkas || fisik?.urlUjiAdmin || d.file_uji_admin_url || huaEkstra?.file_amdalnet_url || isAmdalnet);
                                           if (stepId === 3) hasData = !!(d.nomor_ba_verlap || d.tanggal_verlap || d.tanggal_ba_verlap || fisik?.urlBaVerlap);
                                           if (stepId === 4) hasData = !!(d.nomor_ba_pemeriksaan || d.tanggal_pemeriksaan || fisik?.urlBaSidang);
                                           if (stepId === 5) hasData = !!(d.tanggal_pengembalian || fisik?.urlPengembalian);
