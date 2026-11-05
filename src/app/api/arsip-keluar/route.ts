@@ -62,3 +62,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Terjadi kesalahan pada server' }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json({ error: 'ID surat wajib disertakan' }, { status: 400 });
+    }
+
+    const supabase: any = await createClient();
+    const { error } = await supabase
+      .from('arsip_keluar')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Supabase delete error:', error);
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 });
+  } catch (error: any) {
+    console.error('API error:', error);
+    return NextResponse.json({ error: 'Terjadi kesalahan pada server' }, { status: 500 });
+  }
+}

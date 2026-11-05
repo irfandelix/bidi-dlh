@@ -1,9 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { 
-  Send, FileText, ArrowLeft, Plus, Search, Loader2, Download 
+  Send, 
+  FileText, 
+  ArrowLeft, 
+  Plus, 
+  Search, 
+  Download, 
+  Calendar,
+  Building2,
+  Trash2,
+  ExternalLink,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  FileSpreadsheet
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import LottieLoader from '@/components/LottieLoader';
@@ -25,29 +38,80 @@ export default function DaftarArsipKeluarPage() {
   const [docs, setDocs] = useState<ArsipKeluar[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedYear, setSelectedYear] = useState<string>('semua');
 
-  useEffect(() => {
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const fetchDocs = () => {
+    setLoading(true);
     fetch('/api/arsip-keluar')
       .then(res => res.json())
       .then(res => {
         setDocs(res.data || []);
-        setLoading(false);
-      });
+      })
+      .catch(err => console.error('Gagal mengambil data surat keluar:', err))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchDocs();
   }, []);
 
-  const filteredDocs = docs.filter(d => {
-    return (d.perihal || '').toLowerCase().includes(search.toLowerCase()) || 
-           (d.nomor_surat_keluar || '').toLowerCase().includes(search.toLowerCase()) ||
-           (d.tujuan || '').toLowerCase().includes(search.toLowerCase());
-  });
+  // Ambil daftar tahun unik dari tanggal_surat
+  const availableYears = useMemo(() => {
+    const years = new Set<string>();
+    docs.forEach(d => {
+      if (d.tanggal_surat) {
+        const y = d.tanggal_surat.split('-')[0];
+        if (y && y.length === 4) years.add(y);
+      }
+    });
+    return Array.from(years).sort((a, b) => b.localeCompare(a));
+  }, [docs]);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-  
-  const totalPages = Math.ceil(filteredDocs.length / itemsPerPage);
+  // Filter Data
+  const filteredDocs = useMemo(() => {
+    return docs.filter(d => {
+      // Filter Tahun
+      if (selectedYear !== 'semua') {
+        const tgl = d.tanggal_surat || '';
+        if (!tgl.startsWith(selectedYear)) return false;
+      }
+
+      // Filter Search
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        const perihal = (d.perihal || '').toLowerCase();
+        const noSurat = (d.nomor_surat_keluar || '').toLowerCase();
+        const tujuan = (d.tujuan || '').toLowerCase();
+        const kode = (d.kode_klasifikasi || '').toLowerCase();
+
+        return perihal.includes(q) || 
+               noSurat.includes(q) || 
+               tujuan.includes(q) || 
+               kode.includes(q);
+      }
+
+      return true;
+    });
+  }, [docs, selectedYear, search]);
+
+  // Reset pagination when search/year changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, selectedYear]);
+
+  const totalPages = Math.ceil(filteredDocs.length / itemsPerPage) || 1;
   const paginatedDocs = filteredDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   const handleExportExcel = () => {
+    if (filteredDocs.length === 0) {
+      alert('Tidak ada data surat keluar untuk diekspor.');
+      return;
+    }
+
     const dataToExport = filteredDocs.map((d, index) => ({
       "No": index + 1,
       "Nomor Surat Keluar": d.nomor_surat_keluar,
@@ -61,148 +125,284 @@ export default function DaftarArsipKeluarPage() {
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Surat Keluar");
-    XLSX.writeFile(workbook, "Buku_Agenda_Surat_Keluar.xlsx");
+    XLSX.writeFile(workbook, `Buku_Agenda_Surat_Keluar_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  if (loading) {
-    return <div className="min-h-[50vh] flex items-center justify-center"><LottieLoader size={150} text="MEMUAT DATA..." /></div>;
-  }
+  const handleDelete = async (id: number) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus arsip surat keluar ini?')) return;
+    try {
+      const res = await fetch(`/api/arsip-keluar?id=${id}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (res.ok) {
+        fetchDocs();
+      } else {
+        alert(result.error || 'Gagal menghapus data');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan jaringan saat menghapus');
+    }
+  };
 
   return (
-    <div className="max-w-7xl mx-auto py-8 space-y-8 pb-20">
+    <div className="max-w-7xl mx-auto py-8 space-y-8 pb-24 px-4">
       
-      {/* Header Neobrutalism */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-surface p-6 rounded-3xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow text-on-surface relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-200 rounded-full border border-outline-variant opacity-30"></div>
-        <div className="flex items-center gap-4 relative z-10">
-          <Link href="/arsip" className="w-12 h-12 rounded-xl bg-surface text-on-surface border border-outline-variant flex items-center justify-center hover:bg-surface-container hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all shrink-0">
-            <ArrowLeft size={24} />
-          </Link>
-          <div className="w-14 h-14 shrink-0 rounded-2xl bg-secondary text-on-secondary border border-outline-variant flex items-center justify-center text-on-surface shadow-sm hover:shadow-md transition-shadow">
+      {/* Tombol Kembali ke Hub Persuratan */}
+      <Link 
+        href="/arsip/persuratan" 
+        className="inline-flex items-center gap-2 text-sm text-slate-800 font-bold transition-all bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 uppercase tracking-wide"
+      >
+        <ArrowLeft size={16} /> Kembali ke Persuratan
+      </Link>
+
+      {/* Header Halaman (NeoBrutalism Konsisten) */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 shrink-0 rounded-2xl bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center shadow-sm">
             <Send size={28} />
           </div>
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface leading-tight uppercase">Buku Agenda Surat Keluar</h2>
-            <p className="text-sm text-on-surface-variant font-bold mt-1 uppercase">Pencatatan arsip surat yang dikirim ke eksternal.</p>
+            <h2 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 uppercase">
+              Buku Agenda Surat Keluar
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 font-bold mt-1 uppercase">
+              Pencatatan Surat Resmi yang Diterbitkan dan Dikirimkan ke Pihak Eksternal
+            </p>
           </div>
         </div>
         
-        <div className="flex items-center flex-wrap gap-3 relative z-10">
-          <button onClick={handleExportExcel} className="bg-surface hover:bg-surface-container-low hover:-translate-y-1 text-on-surface px-5 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow border border-outline-variant transition-all flex items-center gap-2 uppercase tracking-widest">
-            <Download size={18} /> Export Excel
+        {/* Tombol Aksi Header */}
+        <div className="flex items-center flex-wrap gap-2.5">
+          <button 
+            type="button"
+            onClick={handleExportExcel} 
+            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-900 px-4 py-2.5 rounded-xl text-xs font-black border border-emerald-300 shadow-sm hover:-translate-y-0.5 transition-all flex items-center gap-2 uppercase tracking-wider"
+            title="Unduh seluruh data dalam format Excel"
+          >
+            <Download size={16} /> 
+            <span>Export Excel</span>
           </button>
-          <div className="bg-blue-50 px-5 py-3 rounded-xl border border-outline-variant flex items-center gap-3 text-sm font-bold text-on-surface shadow-sm hover:shadow-md transition-shadow uppercase">
-            <FileText size={18} className="text-blue-500 fill-blue-500" />
-            Total {docs.length} Surat
+
+          <div className="bg-slate-100 px-4 py-2.5 rounded-xl border border-slate-200 flex items-center gap-2 text-xs font-black text-slate-800 uppercase tracking-wider">
+            <FileText size={16} className="text-emerald-600" />
+            <span>Total {docs.length} Surat</span>
           </div>
-          <Link href="/arsip/keluar/tambah" className="bg-secondary text-on-secondary hover:bg-emerald-300 hover:-translate-y-1 text-on-surface px-5 py-3 rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow border border-outline-variant transition-all flex items-center gap-2 uppercase tracking-widest">
-            <Plus size={18} /> Tambah Surat
+
+          <Link 
+            href="/arsip/keluar/tambah" 
+            className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl text-xs font-black shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-2 uppercase tracking-wider"
+          >
+            <Plus size={16} /> 
+            <span>Catat Surat Keluar</span>
           </Link>
         </div>
       </div>
 
-      {/* Filter & Search */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search size={20} className="text-slate-400" />
+      {/* Filter & Search Bar */}
+      <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          
+          {/* Real-time Search Box */}
+          <div className="relative flex-1">
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Cari perihal, nomor surat, tujuan surat, atau kode klasifikasi..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full bg-slate-50 border-2 border-slate-200 text-slate-900 text-sm font-bold rounded-xl pl-11 pr-10 py-3 focus:bg-white focus:border-emerald-600 outline-none transition-all placeholder:text-slate-400"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
-          <input 
-            type="text" 
-            placeholder="CARI PERIHAL, NOMOR SURAT, ATAU TUJUAN SURAT..." 
-            value={search}
-            onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-            className="w-full bg-surface border border-outline-variant text-on-surface text-sm font-bold uppercase rounded-2xl pl-12 pr-4 py-4 focus:shadow-sm hover:shadow-md transition-shadow transition-all outline-none placeholder:text-slate-400"
-          />
+
+          {/* Filter Tahun Surat */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-black text-slate-500 uppercase tracking-wider shrink-0">
+              Tahun:
+            </span>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="bg-slate-50 border-2 border-slate-200 text-slate-900 text-xs font-black rounded-xl px-4 py-3 outline-none focus:bg-white focus:border-emerald-600 cursor-pointer uppercase"
+            >
+              <option value="semua">Semua Tahun</option>
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+
         </div>
       </div>
 
-      {/* Dynamic Data Table (NeoBrutalism) */}
-      <div className="bg-surface border border-outline-variant shadow-sm hover:shadow-md transition-shadow rounded-3xl overflow-hidden mt-8">
+      {/* Tabel Data Surat Keluar (Modern NeoBrutalism) */}
+      <div className="bg-white border border-slate-200 shadow-md rounded-3xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-surface-container-low border-b-4 border-outline-variant">
-              <tr>
-                <th className="px-6 py-4 font-bold text-on-surface uppercase text-xs border-r border-outline-variant min-w-[150px]">Nomor Surat</th>
-                <th className="px-6 py-4 font-bold text-on-surface uppercase text-xs border-r border-outline-variant min-w-[200px]">Tujuan Surat</th>
-                <th className="px-6 py-4 font-bold text-on-surface uppercase text-xs border-r border-outline-variant min-w-[250px]">Perihal & Klasifikasi</th>
-                <th className="px-6 py-4 font-bold text-on-surface uppercase text-xs border-r border-outline-variant">Tanggal</th>
-                <th className="px-6 py-4 font-bold text-on-surface uppercase text-xs">File</th>
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-100 border-b-2 border-slate-200 text-xs font-black text-slate-900 uppercase tracking-wider">
+                <th className="p-4 border-r border-slate-200 w-12 text-center">No</th>
+                <th className="p-4 border-r border-slate-200 w-52">Nomor Surat & Klasifikasi</th>
+                <th className="p-4 border-r border-slate-200">Tujuan & Perihal Surat</th>
+                <th className="p-4 border-r border-slate-200 w-36">Tanggal Surat</th>
+                <th className="p-4 border-r border-slate-200 w-24 text-center">File</th>
+                <th className="p-4 w-20 text-center">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y-2 divide-slate-900">
-              {filteredDocs.length > 0 ? (
-                paginatedDocs.map((d) => (
-                  <tr key={d.id} className="hover:bg-secondary-container transition-colors">
-                    <td className="px-6 py-4 border-r border-outline-variant">
-                      <span className="text-on-surface font-bold text-sm uppercase">
-                        {d.nomor_surat_keluar}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 border-r border-outline-variant">
-                      <p className="font-bold text-on-surface-variant text-sm uppercase">{d.tujuan}</p>
-                    </td>
-                    <td className="px-6 py-4 border-r border-outline-variant">
-                      <p className="font-bold text-on-surface text-sm uppercase mb-1">{d.perihal}</p>
-                      {d.kode_klasifikasi && (
-                         <span className="inline-block bg-surface-container text-on-surface text-[10px] font-bold px-2 py-1 rounded border border-outline-variant">
-                           {d.kode_klasifikasi}
-                         </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 font-bold text-on-surface-variant text-sm border-r border-outline-variant">
-                      <div>Surat: {d.tanggal_surat}</div>
-                    </td>
-                    <td className="px-6 py-4 font-bold text-on-surface-variant text-sm">
-                      {d.file_url ? (
-                        <a href={d.file_url} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline flex items-center gap-1">
-                           <FileText size={16} /> Lihat
-                        </a>
-                      ) : (
-                        <span className="text-slate-400 text-xs italic">-</span>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
+            <tbody className="divide-y divide-slate-100 text-sm">
+              {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-on-surface-variant font-bold bg-white">
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <Send size={32} className="text-slate-300" />
-                      <p className="uppercase tracking-widest">TIDAK ADA DATA SURAT KELUAR.</p>
+                  <td colSpan={6} className="p-12 text-center text-slate-500 font-bold uppercase tracking-widest">
+                    <LottieLoader size={120} text="MEMUAT SURAT KELUAR..." />
+                  </td>
+                </tr>
+              ) : filteredDocs.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-12 text-center text-slate-500 font-bold uppercase tracking-widest">
+                    <div className="max-w-md mx-auto space-y-2">
+                      <Send size={32} className="mx-auto text-slate-300" />
+                      <p className="text-base font-black text-slate-800">Tidak ada data surat keluar.</p>
+                      <p className="text-xs text-slate-400 font-semibold normal-case">
+                        {search ? `Tidak ada hasil dengan kata kunci "${search}".` : 'Belum ada surat keluar yang tercatat pada filter ini.'}
+                      </p>
                     </div>
                   </td>
                 </tr>
+              ) : (
+                paginatedDocs.map((d, index) => {
+                  const itemIndex = (currentPage - 1) * itemsPerPage + index + 1;
+
+                  return (
+                    <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
+                      {/* Nomor Urut */}
+                      <td className="p-4 border-r border-slate-100 text-center font-mono font-black text-slate-800">
+                        {itemIndex}
+                      </td>
+
+                      {/* Nomor Surat & Klasifikasi */}
+                      <td className="p-4 border-r border-slate-100 space-y-1.5">
+                        <span className="font-mono font-bold text-xs bg-slate-100 text-slate-900 border border-slate-300 px-2.5 py-1 rounded-lg block w-fit">
+                          {d.nomor_surat_keluar}
+                        </span>
+                        {d.kode_klasifikasi && (
+                          <span className="inline-block text-[10px] font-mono font-bold bg-emerald-50 text-emerald-900 border border-emerald-200 px-2 py-0.5 rounded">
+                            {d.kode_klasifikasi.split(' - ')[0]}
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Tujuan & Perihal */}
+                      <td className="p-4 border-r border-slate-100 space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-xs font-black text-emerald-700 uppercase">
+                          <Building2 size={13} className="text-emerald-600 shrink-0" />
+                          <span>Tujuan: <strong className="text-slate-900">{d.tujuan}</strong></span>
+                        </div>
+                        <p className="font-bold text-slate-900 text-sm leading-snug">
+                          {d.perihal}
+                        </p>
+                      </td>
+
+                      {/* Tanggal */}
+                      <td className="p-4 border-r border-slate-100 text-xs">
+                        <div className="flex items-center gap-1.5 text-slate-700 font-bold">
+                          <Calendar size={13} className="text-slate-400 shrink-0" />
+                          <span className="font-mono">{d.tanggal_surat || '-'}</span>
+                        </div>
+                      </td>
+
+                      {/* File */}
+                      <td className="p-4 border-r border-slate-100 text-center">
+                        {d.file_url ? (
+                          <a 
+                            href={d.file_url} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2.5 py-1 rounded-lg transition-colors"
+                            title="Buka dokumen surat"
+                          >
+                            <ExternalLink size={12} />
+                            <span>Lihat</span>
+                          </a>
+                        ) : (
+                          <span className="text-slate-400 text-xs italic">-</span>
+                        )}
+                      </td>
+
+                      {/* Aksi */}
+                      <td className="p-4 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(d.id)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
+                          title="Hapus arsip surat ini"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination Controls */}
-        {totalPages > 1 && (
-          <div className="bg-surface-container-low border-t border-outline-variant p-6 flex items-center justify-between">
-            <span className="text-sm font-bold text-on-surface-variant uppercase">
-              Halaman {currentPage} dari {totalPages}
-            </span>
-            <div className="flex gap-4">
-              <button 
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+        {/* Paginasi Data */}
+        {!loading && filteredDocs.length > 0 && (
+          <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-bold text-slate-600">
+            <div>
+              Menampilkan <span className="font-black text-slate-900 font-mono">{(currentPage - 1) * itemsPerPage + 1}</span> - <span className="font-black text-slate-900 font-mono">{Math.min(currentPage * itemsPerPage, filteredDocs.length)}</span> dari <span className="font-black text-slate-900 font-mono">{filteredDocs.length}</span> surat keluar
+            </div>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-5 py-2.5 bg-surface border border-outline-variant rounded-xl text-sm font-bold uppercase shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm hover:shadow-md transition-shadow transition-all"
+                className="p-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 shadow-sm"
+                title="Halaman Sebelumnya"
               >
-                Sebelumnya
+                <ChevronLeft size={16} />
               </button>
-              <button 
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="px-5 py-2.5 bg-secondary text-on-secondary border border-outline-variant rounded-xl text-sm font-bold text-on-surface uppercase shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-sm hover:shadow-md transition-shadow transition-all"
+
+              <div className="flex items-center gap-1 px-2 font-mono">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-7 h-7 rounded-lg text-xs font-black transition-colors ${
+                      currentPage === page 
+                        ? 'bg-emerald-600 text-white shadow-sm' 
+                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                disabled={currentPage >= totalPages}
+                className="p-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 disabled:opacity-40 shadow-sm"
+                title="Halaman Selanjutnya"
               >
-                Selanjutnya
+                <ChevronRight size={16} />
               </button>
             </div>
           </div>
         )}
       </div>
+
     </div>
   );
 }
