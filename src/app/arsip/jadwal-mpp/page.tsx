@@ -1,8 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Printer, Calendar as CalendarIcon, Save, Settings, ChevronUp, ChevronDown } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Printer, 
+  Calendar as CalendarIcon, 
+  Save, 
+  Settings, 
+  ChevronUp, 
+  ChevronDown, 
+  Users, 
+  CheckCircle2, 
+  CalendarCheck,
+  Wand2
+} from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function JadwalMPPPage() {
@@ -165,177 +177,264 @@ export default function JadwalMPPPage() {
     'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
   ];
 
-  if (loading) return <LottieLoader size={150} text="MEMUAT DATA..." />;
+  // Hitung jumlah hari kerja & total shift terisi
+  const workdaysCount = useMemo(() => {
+    let count = 0;
+    for (let day = 1; day <= daysInMonth; day++) {
+      if (!isHoliday(day)) count++;
+    }
+    return count;
+  }, [daysInMonth, selectedYear, selectedMonth, holidays]);
+
+  const assignedCount = useMemo(() => {
+    let count = 0;
+    for (const key in schedule) {
+      if (schedule[key]) {
+        const parts = key.split('_');
+        if (parseInt(parts[1]) === selectedYear && parseInt(parts[2]) === selectedMonth) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }, [schedule, selectedYear, selectedMonth]);
+
+  if (loading) return <div className="min-h-[50vh] flex items-center justify-center"><LottieLoader size={150} text="MEMUAT JADWAL MPP..." /></div>;
 
   return (
-    <div className="max-w-7xl mx-auto py-8 space-y-8 pb-20 px-4 print:p-0 print:m-0 print:max-w-full">
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 space-y-6 pb-20 print:p-0 print:m-0 print:max-w-full">
       
       {/* UI Controls (Hidden on Print) */}
-      <div className="print:hidden space-y-6">
-        <Link href="/arsip" className="inline-flex items-center gap-2 text-sm text-on-surface font-bold transition-all bg-surface border border-outline-variant px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 uppercase tracking-wide">
-          <ArrowLeft size={16} /> Kembali
-        </Link>
-
-        <div className="bg-surface border border-outline-variant rounded-[2rem] p-8 shadow-sm flex flex-col xl:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-4 w-full xl:w-auto text-center md:text-left">
-            <div className="w-14 h-14 rounded-2xl bg-purple-400 border border-outline-variant flex items-center justify-center shrink-0 mx-auto md:mx-0">
-              <CalendarIcon size={28} className="text-on-surface" />
+      <div className="print:hidden space-y-4">
+        
+        {/* Header NeoBrutalism */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-md text-slate-900 relative overflow-hidden">
+          <div className="flex items-center gap-4 relative z-10">
+            <Link 
+              href="/arsip" 
+              className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-700 border border-slate-200 flex items-center justify-center hover:bg-slate-100 hover:text-slate-900 transition-all shrink-0"
+              title="Kembali ke Hub Pusat Arsip"
+            >
+              <ArrowLeft size={22} />
+            </Link>
+            <div className="w-14 h-14 shrink-0 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-sm">
+              <CalendarIcon size={28} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold uppercase tracking-tight text-on-surface">Jadwal Jaga Petugas MPP</h1>
-              <p className="text-on-surface-variant text-sm font-bold uppercase mt-1">Atur penugasan loket MPP DLH</p>
+              <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-900 uppercase">
+                Jadwal Jaga Petugas MPP
+              </h1>
+              <p className="text-xs md:text-sm text-slate-500 font-medium mt-1">
+                Atur rotasi penugasan loket Mal Pelayanan Publik DLH Kab. Sragen & cetak jadwal resmi.
+              </p>
             </div>
           </div>
           
-          <div className="flex flex-wrap justify-end gap-4 items-center w-full xl:w-auto ml-auto">
-            <div className="flex bg-surface-container rounded-xl p-1 border border-outline-variant">
+          {/* Quick Action Buttons */}
+          <div className="flex items-center flex-wrap gap-2.5 relative z-10">
+            <Link 
+              href="/pengaturan/petugas-mpp" 
+              className="bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 px-4 py-2.5 rounded-xl text-xs font-bold border border-slate-200 shadow-sm transition-all flex items-center gap-2 uppercase tracking-wider"
+            >
+              <Settings size={15} /> Atur Petugas
+            </Link>
+            <button 
+              onClick={saveToDatabase}
+              disabled={saving}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-2 uppercase tracking-wider disabled:opacity-50"
+            >
+              {saving ? <LottieLoader size={16} /> : <Save size={15} />} Simpan
+            </button>
+            <button 
+              onClick={() => window.print()}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-2 uppercase tracking-wider"
+            >
+              <Printer size={15} /> Cetak Jadwal
+            </button>
+          </div>
+        </div>
+
+        {/* Filter & Generator Bar */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col xl:flex-row gap-4 items-center justify-between">
+          
+          {/* Month & Year Picker */}
+          <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+            <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl overflow-hidden p-1">
               <select 
                 value={selectedMonth} 
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="bg-transparent text-on-surface font-bold px-3 py-2 outline-none"
+                className="bg-transparent text-slate-900 text-xs font-bold px-3 py-2 outline-none cursor-pointer uppercase"
               >
                 {months.map((m, i) => <option key={i} value={i}>{m}</option>)}
               </select>
-              <div className="flex items-center px-3 gap-2">
-                <span className="font-bold text-on-surface text-lg w-12 text-center">{selectedYear}</span>
-                <div className="flex flex-col bg-surface border border-outline-variant rounded-lg overflow-hidden">
-                  <button onClick={() => setSelectedYear(y => y + 1)} className="hover:bg-slate-200 bg-surface text-slate-700 px-1 py-0.5 border-b border-outline-variant flex items-center justify-center cursor-pointer transition-colors">
-                    <ChevronUp size={16} strokeWidth={3} />
+              
+              <div className="h-6 w-px bg-slate-200 mx-1"></div>
+
+              <div className="flex items-center px-2 gap-1.5">
+                <span className="font-bold text-slate-900 text-xs">{selectedYear}</span>
+                <div className="flex flex-col">
+                  <button 
+                    onClick={() => setSelectedYear(y => y + 1)} 
+                    className="p-0.5 hover:bg-slate-200 rounded text-slate-600 transition-colors"
+                    title="Tahun Depan"
+                  >
+                    <ChevronUp size={12} strokeWidth={3} />
                   </button>
-                  <button onClick={() => setSelectedYear(y => y - 1)} className="hover:bg-slate-200 bg-surface text-slate-700 px-1 py-0.5 flex items-center justify-center cursor-pointer transition-colors">
-                    <ChevronDown size={16} strokeWidth={3} />
+                  <button 
+                    onClick={() => setSelectedYear(y => y - 1)} 
+                    className="p-0.5 hover:bg-slate-200 rounded text-slate-600 transition-colors"
+                    title="Tahun Sebelumnya"
+                  >
+                    <ChevronDown size={12} strokeWidth={3} />
                   </button>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2 bg-blue-50 border border-blue-200 rounded-xl p-2 items-center">
+            {/* Auto Assign Generator */}
+            <div className="flex items-center gap-2 bg-purple-50/60 border border-purple-200 rounded-xl p-1">
               <select 
                 value={startOfficerId} 
                 onChange={(e) => setStartOfficerId(e.target.value === '' ? '' : Number(e.target.value))}
-                className="bg-transparent text-blue-900 text-sm font-bold px-2 py-1 outline-none max-w-[150px]"
+                className="bg-transparent text-purple-900 text-xs font-bold px-2.5 py-1.5 outline-none max-w-[160px] cursor-pointer"
               >
-                <option value="">-- Mulai Dari --</option>
+                <option value="">-- Mulai Dari Petugas --</option>
                 {officers.map(o => <option key={o.id} value={o.id}>{o.nama}</option>)}
               </select>
               <button 
                 onClick={generateOtomatis}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg shadow-sm transition-colors text-xs uppercase tracking-widest whitespace-nowrap"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs uppercase tracking-wider flex items-center gap-1.5 transition-colors"
               >
-                Isi Otomatis
+                <Wand2 size={13} /> Isi Otomatis
               </button>
             </div>
-            
-            <div className="flex gap-2 ml-auto">
-              <Link href="/pengaturan/petugas-mpp" title="Pengaturan Petugas MPP" className="flex items-center gap-2 bg-surface-container hover:bg-surface-container-high border border-outline-variant px-4 py-2 rounded-xl text-sm font-bold text-on-surface uppercase tracking-widest transition-colors shadow-sm cursor-pointer">
-                <Settings size={18} /> Atur Petugas
-              </Link>
-              <button 
-                onClick={saveToDatabase}
-                disabled={saving}
-                className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-bold px-6 py-2 rounded-xl shadow-sm transition-colors uppercase tracking-widest text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {saving ? <LottieLoader size={18} /> : <Save size={18} />} Simpan
-              </button>
-              <button 
-                onClick={() => window.print()}
-                className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-2 rounded-xl shadow-sm transition-colors uppercase tracking-widest text-sm cursor-pointer"
-              >
-                <Printer size={18} /> Cetak
-              </button>
+          </div>
+
+          {/* Quick Metrics */}
+          <div className="flex flex-wrap items-center gap-3 w-full xl:w-auto justify-start xl:justify-end text-xs font-medium text-slate-600">
+            <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-lg">
+              <Users size={14} className="text-slate-500" />
+              <span>Petugas: <strong className="text-slate-900">{officers.length}</strong></span>
             </div>
+            <div className="flex items-center gap-1.5 bg-slate-100 px-3 py-1.5 rounded-lg">
+              <CalendarCheck size={14} className="text-slate-500" />
+              <span>Hari Kerja: <strong className="text-slate-900">{workdaysCount}</strong></span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-purple-50 text-purple-800 border border-purple-200 px-3 py-1.5 rounded-lg font-bold">
+              <CheckCircle2 size={14} />
+              <span>Shift Terisi: {assignedCount}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Info Legend Notice */}
+        <div className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-600 flex flex-wrap items-center gap-4">
+          <span className="font-bold uppercase tracking-wider text-slate-500">Petunjuk:</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3.5 h-3.5 bg-green-500 rounded border border-black"></div>
+            <span>Klik kolom untuk bertugas</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3.5 h-3.5 bg-white rounded border border-black"></div>
+            <span>Tidak bertugas</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3.5 h-3.5 bg-red-600 rounded border border-black"></div>
+            <span>Hari libur / weekend (otomatis)</span>
           </div>
         </div>
       </div>
 
       {/* Printable Area */}
-      <div id="printable-area" className="bg-white print:bg-transparent rounded-2xl border border-slate-200 print:border-none p-8 print:p-0 overflow-x-auto print:overflow-visible">
+      <div id="printable-area" className="bg-white print:bg-transparent rounded-2xl border border-slate-200 print:border-none p-6 md:p-8 print:p-0 overflow-x-auto print:overflow-visible shadow-sm print:shadow-none">
         
-        {/* Header */}
-        <div className="text-center font-bold text-black uppercase mb-8 leading-snug">
-          <h2 className="text-lg">JADWAL PETUGAS GERAI MAL PELAYANAN PUBLIK</h2>
-          <h2 className="text-lg">DINAS LINGKUNGAN HIDUP</h2>
-          <h2 className="text-lg">KABUPATEN SRAGEN</h2>
+        {/* Document Header */}
+        <div className="text-center font-bold text-black uppercase mb-6 leading-tight">
+          <h2 className="text-base md:text-lg">JADWAL PETUGAS GERAI MAL PELAYANAN PUBLIK</h2>
+          <h2 className="text-base md:text-lg">DINAS LINGKUNGAN HIDUP KABUPATEN SRAGEN</h2>
         </div>
 
-        <div className="flex font-bold text-black text-sm mb-4 gap-4 uppercase">
+        <div className="flex font-bold text-black text-xs md:text-sm mb-3 gap-4 uppercase">
           <div className="w-16">BULAN</div>
-          <div className="w-32">{months[selectedMonth]}</div>
+          <div className="w-28">: {months[selectedMonth]}</div>
           <div>{selectedYear}</div>
         </div>
 
         {/* Table */}
-        <table className="w-full border-collapse border-2 border-black text-xs text-black">
-          <thead>
-            <tr>
-              <th className="border-2 border-black py-2 px-2 w-12" rowSpan={2}>No.</th>
-              <th className="border-2 border-black py-2 px-4 w-48" rowSpan={2}>Nama</th>
-              <th className="border-2 border-black py-1 text-center" colSpan={31}>Tanggal</th>
-            </tr>
-            <tr>
-              {Array.from({length: 31}).map((_, i) => (
-                <th key={i} className={`border border-black py-1 text-center w-6 ${i + 1 > daysInMonth ? 'bg-black text-black border-black' : ''}`}>
-                  {i + 1 <= daysInMonth ? i + 1 : ''}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {officers.map((officer, index) => (
-              <tr key={officer.id}>
-                <td className="border border-black text-center py-2">{index + 1}</td>
-                <td className="border border-black px-2">{officer.nama}</td>
-                {Array.from({length: 31}).map((_, i) => {
-                  const day = i + 1;
-                  const key = `${officer.id}_${selectedYear}_${selectedMonth}_${day}`;
-                  const isActive = schedule[key];
-                  const isHol = isHoliday(day);
-                  const isInvalid = day > daysInMonth;
-                  
-                  let bgColorClass = 'bg-white';
-                  if (isInvalid) bgColorClass = 'bg-black print:bg-black';
-                  else if (isHol) bgColorClass = 'bg-red-600 print:bg-red-600';
-                  else if (isActive) bgColorClass = 'bg-green-500 print:bg-green-500';
-
-                  return (
-                    <td 
-                      key={i} 
-                      onClick={() => !isInvalid && toggleSchedule(officer.id, day)}
-                      className={`border border-black print:border-black cursor-pointer print:cursor-auto ${bgColorClass} print-exact-color`}
-                      style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
-                    ></td>
-                  );
-                })}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse border-2 border-black text-xs text-black">
+            <thead>
+              <tr>
+                <th className="border-2 border-black py-2 px-2 w-10 text-center" rowSpan={2}>No.</th>
+                <th className="border-2 border-black py-2 px-3 min-w-[160px] text-left" rowSpan={2}>Nama Petugas</th>
+                <th className="border-2 border-black py-1 text-center" colSpan={31}>Tanggal</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+              <tr>
+                {Array.from({length: 31}).map((_, i) => (
+                  <th key={i} className={`border border-black py-1 text-center w-6 text-[11px] ${i + 1 > daysInMonth ? 'bg-black text-black border-black' : ''}`}>
+                    {i + 1 <= daysInMonth ? i + 1 : ''}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {officers.map((officer, index) => (
+                <tr key={officer.id}>
+                  <td className="border border-black text-center py-1.5 text-xs font-semibold">{index + 1}</td>
+                  <td className="border border-black px-2.5 py-1.5 text-xs font-medium whitespace-nowrap">{officer.nama}</td>
+                  {Array.from({length: 31}).map((_, i) => {
+                    const day = i + 1;
+                    const key = `${officer.id}_${selectedYear}_${selectedMonth}_${day}`;
+                    const isActive = schedule[key];
+                    const isHol = isHoliday(day);
+                    const isInvalid = day > daysInMonth;
+                    
+                    let bgColorClass = 'bg-white';
+                    if (isInvalid) bgColorClass = 'bg-black print:bg-black';
+                    else if (isHol) bgColorClass = 'bg-red-600 print:bg-red-600';
+                    else if (isActive) bgColorClass = 'bg-green-500 print:bg-green-500';
+
+                    return (
+                      <td 
+                        key={i} 
+                        onClick={() => !isInvalid && toggleSchedule(officer.id, day)}
+                        className={`border border-black print:border-black cursor-pointer print:cursor-auto ${bgColorClass} print-exact-color h-7 min-w-[24px] text-center transition-colors`}
+                        style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
+                        title={!isInvalid && !isHol ? `${officer.nama} - Tgl ${day}: ${isActive ? 'Bertugas' : 'Klik untuk jadwalkan'}` : undefined}
+                      ></td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
         {/* Footer Area */}
-        <div className="mt-6 flex justify-between items-start text-black">
+        <div className="mt-6 flex flex-col sm:flex-row justify-between items-start text-black gap-6">
           {/* Legend */}
           <div className="text-xs">
             <div className="font-bold mb-2">Keterangan :</div>
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-8 h-4 bg-green-500 border border-black print-exact-color" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
+              <div className="w-7 h-3.5 bg-green-500 border border-black print-exact-color" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
               <span>: Bertugas</span>
             </div>
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-8 h-4 bg-white border border-black print-exact-color" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
+              <div className="w-7 h-3.5 bg-white border border-black print-exact-color" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
               <span>: Tidak Bertugas</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-4 bg-red-600 border border-black print-exact-color" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
-              <span>: Libur</span>
+              <div className="w-7 h-3.5 bg-red-600 border border-black print-exact-color" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}></div>
+              <span>: Libur / Akhir Pekan</span>
             </div>
           </div>
 
           {/* Signature */}
-          <div className="text-sm text-center mr-12 pt-8">
-            <div className="mb-20">
-              <p>Mengetahui</p>
-              <p>Kepala Bidang Perencanaan, Pengaduan,</p>
-              <p>dan Peningkatan Kapasitas Lingkungan Hidup</p>
+          <div className="text-xs md:text-sm text-center sm:mr-8 pt-4 sm:pt-6">
+            <div className="mb-16">
+              <p>Mengetahui,</p>
+              <p className="font-semibold">Kepala Bidang Perencanaan, Pengaduan,</p>
+              <p className="font-semibold">dan Peningkatan Kapasitas Lingkungan Hidup</p>
             </div>
             <div className="font-bold border-b border-black pb-0.5 inline-block">
               Lukman Farid, S.Hut., M.T.
