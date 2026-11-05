@@ -4,10 +4,67 @@ import fs from 'fs';
 import path from 'path';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
+
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get('action');
+
+    // Endpoint helper untuk mendapatkan pratinjau / nomor urut berikutnya secara real-time
+    if (action === 'next-number') {
+      const tanggal_nota = searchParams.get('tanggal') || new Date().toISOString().split('T')[0];
+      const dari_bagian = searchParams.get('bagian') || 'Umum';
+      const kode_klasifikasi = searchParams.get('kode_klasifikasi') || '';
+      const is_sisipan = searchParams.get('is_sisipan') === 'true';
+      const nomor_sisipan = searchParams.get('nomor_sisipan') || '';
+
+      const tahun = new Date(tanggal_nota).getFullYear().toString();
+      const bulan = new Date(tanggal_nota).getMonth() + 1;
+
+      const supabase: any = await createClient();
+      const { data: lastDoc } = await supabase
+        .from('arsip_nota_dinas')
+        .select('no_urut')
+        .gte('tanggal_nota', `${tahun}-01-01`)
+        .lte('tanggal_nota', `${tahun}-12-31`)
+        .order('no_urut', { ascending: false })
+        .limit(1);
+
+      let nextUrut = 1;
+      if (lastDoc && lastDoc.length > 0) {
+        nextUrut = (lastDoc[0].no_urut || 0) + 1;
+      }
+
+      let urutStr = String(nextUrut).padStart(3, '0');
+      if (is_sisipan && nomor_sisipan.trim() !== '') {
+        urutStr = nomor_sisipan.trim();
+      }
+
+      let nomor_otomatis = '';
+      if (dari_bagian === 'Pengaduan' || dari_bagian === 'Aduan') {
+        nomor_otomatis = `600.4.17.2/${urutStr}.${bulan}/17/PG/${tahun}`;
+      } else if (dari_bagian === 'Pengawasan') {
+        nomor_otomatis = `600.4.6/${urutStr}.${bulan}/17/PW/${tahun}`;
+      } else if (dari_bagian === 'Perizinan') {
+        nomor_otomatis = `600.4.1/${urutStr}.${bulan}/17/PL/${tahun}`;
+      } else {
+        let kodeAwal = '600.4';
+        if (kode_klasifikasi && kode_klasifikasi.trim() !== '') {
+          kodeAwal = kode_klasifikasi.split(' - ')[0].trim();
+        }
+        nomor_otomatis = `${kodeAwal}/${urutStr}.${bulan}/17/${tahun}`;
+      }
+
+      return NextResponse.json({
+        nextUrut,
+        nomor_otomatis,
+        tahun,
+        bulan
+      });
+    }
+
     const supabase: any = await createClient();
     
     // Ambil data dari tabel arsip_nota_dinas beserta relasi ke anggota_bidang (pemohon_id)
@@ -34,7 +91,22 @@ export async function POST(request: Request) {
     const supabase: any = await createClient();
     const body = await request.json();
     
-    const { nama_nota, tanggal_nota, dari_bagian, kode_klasifikasi, file_url, pemohon_id, keterangan, is_sisipan, nomor_sisipan, yth, sifat, lampiran, petugas } = body;
+    const { 
+      nama_nota, 
+      tanggal_nota, 
+      dari_bagian, 
+      kode_klasifikasi, 
+      file_url, 
+      pemohon_id, 
+      keterangan, 
+      is_sisipan, 
+      nomor_sisipan, 
+      yth, 
+      sifat, 
+      lampiran, 
+      petugas,
+      custom_nomor 
+    } = body;
     
     if (!nama_nota || !tanggal_nota || !dari_bagian) {
       return NextResponse.json({ error: 'Semua field wajib diisi' }, { status: 400 });
@@ -43,9 +115,6 @@ export async function POST(request: Request) {
     const tahun = new Date(tanggal_nota).getFullYear().toString();
 
     // Cari no_urut terakhir di tahun yang sama
-    // Catatan: Karena supabase tidak memiliki fungsi max() bawaan sederhana di client, 
-    // kita urutkan no_urut descending dan ambil 1 teratas.
-    // Kita filter juga by tahun (menggunakan ilike tanggal_nota atau ekstract string)
     const { data: lastDoc, error: lastErr } = await supabase
       .from('arsip_nota_dinas')
       .select('no_urut')
@@ -68,21 +137,21 @@ export async function POST(request: Request) {
     let finalUrutToSave = nextUrut;
 
     // Jika ini adalah nomor sisipan, kita timpa urutStr dengan input manual (nomor_sisipan)
-    // dan set no_urut (angka di database) ke 0 agar tidak mengganggu auto-increment normal.
+    // dan set no_urut ke 0 agar tidak mengganggu auto-increment normal.
     if (is_sisipan && nomor_sisipan && nomor_sisipan.trim() !== '') {
       urutStr = nomor_sisipan.trim();
       finalUrutToSave = 0; 
     }
 
-    const bagianUpper = dari_bagian.toUpperCase();
-    
     // Ambil bulan dari tanggal nota (1-12)
     const tglObj = new Date(tanggal_nota);
     const bulan = tglObj.getMonth() + 1;
     
     let nomor_otomatis = '';
 
-    if (dari_bagian === 'Pengaduan' || dari_bagian === 'Aduan') {
+    if (custom_nomor && custom_nomor.trim() !== '') {
+      nomor_otomatis = custom_nomor.trim();
+    } else if (dari_bagian === 'Pengaduan' || dari_bagian === 'Aduan') {
       nomor_otomatis = `600.4.17.2/${urutStr}.${bulan}/17/PG/${tahun}`;
     } else if (dari_bagian === 'Pengawasan') {
       nomor_otomatis = `600.4.6/${urutStr}.${bulan}/17/PW/${tahun}`;
@@ -103,9 +172,9 @@ export async function POST(request: Request) {
       tanggal_nota,
       dari_bagian,
       nomor_otomatis,
-      file_url,
+      file_url: file_url || null,
       pemohon_id: pemohon_id || null,
-      keterangan
+      keterangan: keterangan || null
     };
 
     const { data, error } = await supabase
@@ -138,7 +207,6 @@ export async function POST(request: Request) {
       });
 
       // Format Tanggal
-      const tglObj = new Date(tanggal_nota);
       const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
       const tanggalIndo = tglObj.toLocaleDateString('id-ID', options);
       const hari = tglObj.toLocaleDateString('id-ID', { weekday: 'long' });
@@ -166,16 +234,51 @@ export async function POST(request: Request) {
         headers: {
           'Content-Disposition': `attachment; filename="Nota_Dinas_${dari_bagian}_${nomor_otomatis.replace(/\//g, '_')}.docx"`,
           'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'X-Nota-Id': String(data[0].id),
+          'X-Nomor-Otomatis': encodeURIComponent(nomor_otomatis),
+          'Access-Control-Expose-Headers': 'X-Nota-Id, X-Nomor-Otomatis, Content-Disposition'
         },
       });
     } catch (docxErr) {
       console.error('Docx generation error:', docxErr);
-      // Fallback jika gagal generate file, tetap sukses booking DB
       return NextResponse.json({ success: true, warning: 'Gagal membuat file template', data: data[0] }, { status: 201 });
     }
   } catch (error: any) {
     console.error('API error:', error);
     return NextResponse.json({ error: 'Terjadi kesalahan pada server' }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const supabase: any = await createClient();
+    const body = await request.json();
+    const { id, file_url, keterangan, nomor_otomatis } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
+    const updatePayload: any = {};
+    if (file_url !== undefined) updatePayload.file_url = file_url;
+    if (keterangan !== undefined) updatePayload.keterangan = keterangan;
+    if (nomor_otomatis !== undefined) updatePayload.nomor_otomatis = nomor_otomatis;
+
+    const { data, error } = await supabase
+      .from('arsip_nota_dinas')
+      .update(updatePayload)
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      console.error('Supabase update error:', error);
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ success: true, data: data[0] });
+  } catch (error: any) {
+    console.error('API update error:', error);
+    return NextResponse.json({ error: error.message || 'Terjadi kesalahan pada server' }, { status: 500 });
   }
 }
 
@@ -205,4 +308,3 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: error.message || 'Terjadi kesalahan pada server' }, { status: 500 });
   }
 }
-

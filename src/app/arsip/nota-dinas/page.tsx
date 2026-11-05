@@ -14,7 +14,8 @@ import {
   ExternalLink,
   Building2,
   Filter,
-  Sparkles
+  Sparkles,
+  X
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import LottieLoader from '@/components/LottieLoader';
@@ -35,6 +36,12 @@ type NotaDinas = {
   };
 };
 
+const resolveFileUrl = (url?: string): string => {
+  if (!url) return '#';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `https://drive.google.com/file/d/${url}/view`;
+};
+
 export default function DaftarArsipNotaDinasPage() {
   const [docs, setDocs] = useState<NotaDinas[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +53,11 @@ export default function DaftarArsipNotaDinasPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
+
+  // State untuk modal unggah berkas susulan
+  const [uploadModalDoc, setUploadModalDoc] = useState<NotaDinas | null>(null);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
 
   const fetchDocs = () => {
     fetch('/api/arsip-nota-dinas')
@@ -116,6 +128,45 @@ export default function DaftarArsipNotaDinasPage() {
     }
   };
 
+  // Upload berkas susulan untuk nota dinas yang belum ada lampirannya
+  const handleUploadSusulan = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!uploadModalDoc || !uploadFile) return;
+
+    setIsUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', uploadFile);
+
+      const upRes = await fetch('/api/arsip-nota-dinas/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const upData = await upRes.json();
+      if (!upRes.ok) throw new Error(upData.error || 'Gagal mengunggah file');
+
+      const patchRes = await fetch('/api/arsip-nota-dinas', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: uploadModalDoc.id,
+          file_url: upData.url
+        })
+      });
+      if (!patchRes.ok) throw new Error('Gagal memperbarui tautan berkas');
+
+      // Update state lokal
+      setDocs(prev => prev.map(item => item.id === uploadModalDoc.id ? { ...item, file_url: upData.url } : item));
+      setUploadModalDoc(null);
+      setUploadFile(null);
+      alert('Berkas nota dinas berhasil diunggah!');
+    } catch (err: any) {
+      alert(`Gagal upload: ${err.message}`);
+    } finally {
+      setIsUploadingFile(false);
+    }
+  };
+
   const handleExportExcel = () => {
     const dataToExport = filteredDocs.map((d, index) => ({
       "No": index + 1,
@@ -126,7 +177,7 @@ export default function DaftarArsipNotaDinasPage() {
       "Nomor Nota Dinas": d.nomor_otomatis,
       "Perihal / Isi": d.nama_nota,
       "Keterangan": d.keterangan || '-',
-      "Link File": d.file_url || '-'
+      "Link File": resolveFileUrl(d.file_url)
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -337,8 +388,8 @@ export default function DaftarArsipNotaDinasPage() {
                 <th className="px-5 py-4 min-w-[130px]">Bagian</th>
                 <th className="px-5 py-4 min-w-[260px]">Perihal / Isi Ringkas</th>
                 <th className="px-5 py-4 min-w-[180px]">Pemohon</th>
-                <th className="px-5 py-4 min-w-[100px] text-center">Berkas</th>
-                <th className="px-5 py-4 min-w-[110px] text-center">Aksi</th>
+                <th className="px-5 py-4 min-w-[120px] text-center">Berkas Lampiran</th>
+                <th className="px-5 py-4 min-w-[100px] text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
@@ -397,16 +448,23 @@ export default function DaftarArsipNotaDinasPage() {
                       <td className="px-5 py-4 text-center">
                         {d.file_url ? (
                           <a 
-                            href={d.file_url} 
+                            href={resolveFileUrl(d.file_url)} 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="inline-flex items-center gap-1 px-2.5 py-1 bg-fuchsia-50 text-fuchsia-700 border border-fuchsia-200 rounded-lg text-xs font-bold hover:bg-fuchsia-100 transition-colors"
                             title="Buka Dokumen Nota Dinas"
                           >
-                            <ExternalLink size={12} /> Buka
+                            <ExternalLink size={12} /> Buka File
                           </a>
                         ) : (
-                          <span className="text-xs text-slate-300">-</span>
+                          <button
+                            type="button"
+                            onClick={() => setUploadModalDoc(d)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-50 text-slate-600 hover:text-fuchsia-700 border border-slate-200 hover:border-fuchsia-200 rounded-lg text-xs font-medium hover:bg-fuchsia-50/50 transition-colors"
+                            title="Unggah berkas untuk nota dinas ini"
+                          >
+                            <Upload size={12} /> Unggah
+                          </button>
                         )}
                       </td>
 
@@ -470,6 +528,74 @@ export default function DaftarArsipNotaDinasPage() {
           </div>
         )}
       </div>
+
+      {/* Modal Unggah Berkas Susulan */}
+      {uploadModalDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl max-w-md w-full animate-in zoom-in-95">
+            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center">
+                  <Upload size={20} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 uppercase">Unggah Berkas Nota Dinas</h3>
+                  <p className="text-xs text-slate-500 font-mono">{uploadModalDoc.nomor_otomatis}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setUploadModalDoc(null)} 
+                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 mb-4 line-clamp-2">
+              <strong>Perihal:</strong> {uploadModalDoc.nama_nota}
+            </p>
+
+            <form onSubmit={handleUploadSusulan} className="space-y-4">
+              <label className="block w-full border-2 border-dashed border-slate-300 hover:border-fuchsia-500 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50/50 transition-all">
+                <input 
+                  type="file" 
+                  accept=".pdf, .docx, .doc, .jpg, .png" 
+                  className="hidden" 
+                  onChange={e => setUploadFile(e.target.files?.[0] || null)}
+                  disabled={isUploadingFile}
+                  required
+                />
+                <div className="flex flex-col items-center gap-2">
+                  <Upload className="text-fuchsia-500" size={28} />
+                  <span className="text-xs font-bold text-slate-700">
+                    {uploadFile ? uploadFile.name : 'Pilih Berkas Lampiran / PDF'}
+                  </span>
+                  <span className="text-[11px] text-slate-400">PDF, DOCX, atau Gambar</span>
+                </div>
+              </label>
+
+              <div className="flex gap-2">
+                <button 
+                  type="button"
+                  onClick={() => setUploadModalDoc(null)}
+                  disabled={isUploadingFile}
+                  className="w-1/2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold uppercase transition-all disabled:opacity-50"
+                >
+                  Batal
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isUploadingFile || !uploadFile}
+                  className="w-1/2 px-4 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white rounded-xl text-xs font-bold uppercase transition-all shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
+                >
+                  {isUploadingFile ? <LottieLoader size={16} /> : <Upload size={14} />}
+                  <span>Unggah</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Import Modal */}
       {showImportModal && (
