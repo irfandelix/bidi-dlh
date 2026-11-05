@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Loader2, Eye
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Loader2, Eye, Calendar
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -844,6 +844,8 @@ export default function DaftarPerizinanPage() {
                     ? (fisik?.urlUjiAdmin || selectedDoc.file_uji_admin_url || huaEkstra?.file_amdalnet_url || null)
                     : null;
                   const isUjiAdminUploaded = isUjiAdmin && !!ujiAdminFileUrl;
+                  const isAmdalnetStage = isUjiAdmin && !!(huaEkstra?.is_amdalnet || selectedDoc.keterangan?.includes('Amdalnet'));
+                  const ujiAdminDate = isUjiAdmin ? (selectedDoc.tanggal_uji_berkas || huaEkstra?.tanggal_amdalnet) : null;
 
                   const iconBg = isCurrent ? 'bg-emerald-100 text-emerald-600 border-emerald-200' : 
                                isDisabled ? 'bg-slate-50 text-slate-300 border-slate-200' : 
@@ -906,31 +908,41 @@ export default function DaftarPerizinanPage() {
                               )}
                             </div>
                             {isUjiAdminUploaded && (
-                              <div className="pt-1.5 border-t border-slate-200/60 flex items-center justify-between gap-1">
-                                <span className="text-[10px] font-black text-emerald-700 flex items-center gap-1">
-                                  <CheckCircle size={11} className="text-emerald-600 shrink-0" />
-                                  <span>Sudah upload hasil uji admin</span>
-                                </span>
-                                {ujiAdminFileUrl && (
-                                  <a
-                                    href={ujiAdminFileUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="text-[9px] font-black text-indigo-600 hover:text-indigo-800 underline uppercase shrink-0"
-                                  >
-                                    Lihat
-                                  </a>
+                              <div className="pt-1.5 border-t border-slate-200/60 space-y-1">
+                                <div className="flex items-center justify-between gap-1">
+                                  <span className="text-[10px] font-black text-emerald-700 flex items-center gap-1">
+                                    <CheckCircle size={11} className="text-emerald-600 shrink-0" />
+                                    <span>Sudah upload hasil uji admin {isAmdalnetStage ? '(AMDALNET)' : ''}</span>
+                                  </span>
+                                  {ujiAdminFileUrl && (
+                                    <a
+                                      href={ujiAdminFileUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="text-[9px] font-black text-indigo-600 hover:text-indigo-800 underline uppercase shrink-0"
+                                    >
+                                      Lihat
+                                    </a>
+                                  )}
+                                </div>
+                                {ujiAdminDate && (
+                                  <div className="text-[9px] font-bold text-slate-500 flex items-center gap-1">
+                                    <Calendar size={10} className="shrink-0 text-slate-400" />
+                                    <span>
+                                      Tgl: {new Date(ujiAdminDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                    </span>
+                                  </div>
                                 )}
                               </div>
                             )}
                           </div>
                         ) : isUjiAdminUploaded ? (
-                          <div className="space-y-1.5 bg-emerald-50/90 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+                          <div className="space-y-1 bg-emerald-50/90 px-2.5 py-1.5 rounded-lg border border-emerald-200">
                             <div className="flex items-center justify-between gap-1.5">
                               <span className="text-[10px] font-black text-emerald-800 flex items-center gap-1 leading-snug">
                                 <CheckCircle size={12} className="text-emerald-600 shrink-0" />
-                                <span>Sudah upload hasil uji admin</span>
+                                <span>Sudah upload hasil uji admin {isAmdalnetStage ? '(AMDALNET)' : ''}</span>
                               </span>
                               {ujiAdminFileUrl && (
                                 <a
@@ -944,6 +956,14 @@ export default function DaftarPerizinanPage() {
                                 </a>
                               )}
                             </div>
+                            {ujiAdminDate && (
+                              <div className="text-[9px] font-bold text-emerald-700/90 flex items-center gap-1 pt-0.5 border-t border-emerald-200/60">
+                                <Calendar size={10} className="shrink-0 text-emerald-600" />
+                                <span>
+                                  Tgl: {new Date(ujiAdminDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         ) : templateCfg ? (
                           <div className="flex items-center justify-between gap-1.5 bg-slate-100/80 px-2 py-1 rounded-lg border border-slate-200/80">

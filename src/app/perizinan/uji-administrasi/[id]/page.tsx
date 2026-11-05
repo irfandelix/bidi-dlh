@@ -3,7 +3,11 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, ClipboardCheck, Send, ListChecks, PenTool, Copy, Check, Zap, RefreshCw, Download } from 'lucide-react';
+import { 
+  ArrowLeft, ArrowRight, ClipboardCheck, Send, ListChecks, PenTool, 
+  Copy, Check, Zap, RefreshCw, Download, FileText, Eye, X, ExternalLink, 
+  Calendar, AlertCircle, CheckCircle 
+} from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -17,6 +21,14 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
   const [copied, setCopied] = useState(false);
   const [message, setMessage] = useState('');
   const [isAmdalnet, setIsAmdalnet] = useState(false);
+
+  // States for Amdalnet
+  const [tanggalAmdalnet, setTanggalAmdalnet] = useState<string>('');
+  const [isReplacingAmdalnet, setIsReplacingAmdalnet] = useState<boolean>(false);
+  const [newAmdalnetFile, setNewAmdalnetFile] = useState<File | null>(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [previewModalUrl, setPreviewModalUrl] = useState<string | null>(null);
+  const [previewModalTitle, setPreviewModalTitle] = useState<string>('');
 
   const [daftarPegawai, setDaftarPegawai] = useState<any[]>([]);
 
@@ -54,12 +66,49 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
       fetch(`/api/perizinan/${unwrappedParams.id}`).then(res => res.json()),
       fetch('/api/tim-penilai').then(res => res.json())
     ]).then(([docRes, pegawaiRes]) => {
-      setDoc(docRes.data);
+      const fetchedDoc = docRes.data;
+      setDoc(fetchedDoc);
       const sortedPegawai = (pegawaiRes.data || []).sort((a: any, b: any) => (a.urutan_hierarki || 0) - (b.urutan_hierarki || 0));
       setDaftarPegawai(sortedPegawai);
+
+      let extra: any = {};
+      try {
+        if (fetchedDoc?.penandatangan_hua) {
+          extra = typeof fetchedDoc.penandatangan_hua === 'string' ? JSON.parse(fetchedDoc.penandatangan_hua) : fetchedDoc.penandatangan_hua;
+        }
+      } catch (e) {}
+
+      const amdalnetActive = Boolean(extra?.is_amdalnet || fetchedDoc?.keterangan?.includes('Amdalnet'));
+      setIsAmdalnet(amdalnetActive);
+
+      const initDate = fetchedDoc?.tanggal_uji_berkas || extra?.tanggal_amdalnet || new Date().toISOString().split('T')[0];
+      const cleanDate = (initDate && typeof initDate === 'string') ? initDate.split('T')[0] : new Date().toISOString().split('T')[0];
+      setTanggalAmdalnet(cleanDate);
+
       setLoading(false);
     });
   }, [unwrappedParams.id]);
+
+  useEffect(() => {
+    return () => {
+      if (localPreviewUrl) {
+        URL.revokeObjectURL(localPreviewUrl);
+      }
+    };
+  }, [localPreviewUrl]);
+
+  const handleNewFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setNewAmdalnetFile(file);
+    if (localPreviewUrl) {
+      URL.revokeObjectURL(localPreviewUrl);
+      setLocalPreviewUrl(null);
+    }
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setLocalPreviewUrl(url);
+    }
+  };
 
   const handleSimpanTanggalDanGenerateNomor = async () => {
     const dateInput = document.querySelector('input[name="tanggal_uji_berkas"]') as HTMLInputElement;
@@ -193,6 +242,22 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
     }
   };
 
+  let huaEkstra: any = {};
+  try {
+    if (doc?.penandatangan_hua) {
+      huaEkstra = typeof doc.penandatangan_hua === 'string' ? JSON.parse(doc.penandatangan_hua) : doc.penandatangan_hua;
+    }
+  } catch (e) {}
+
+  let fisikArsip: any = {};
+  try {
+    if (doc?.arsip_fisik) {
+      fisikArsip = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik;
+    }
+  } catch (e) {}
+
+  const currentUploadedAmdalnetUrl = huaEkstra?.file_amdalnet_url || doc?.file_uji_admin_url || fisikArsip?.urlUjiAdmin || null;
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
@@ -207,8 +272,8 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
     };
 
     if (isAmdalnet) {
-      const file = formData.get('file_amdalnet') as File;
-      let amdalnetUrl = null;
+      const file = newAmdalnetFile || (formData.get('file_amdalnet') as File);
+      let amdalnetUrl = currentUploadedAmdalnetUrl || null;
       if (file && file.size > 0) {
         try {
           const fd = new FormData();
@@ -216,15 +281,43 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
           fd.append('folderName', doc.nama_kegiatan || doc.nama_pemrakarsa || 'Arsip Tanpa Nama');
           const uploadRes = await fetch('/api/perizinan/upload', { method: 'POST', body: fd });
           const uploadData = await uploadRes.json();
-          if (uploadData.url) amdalnetUrl = uploadData.url;
-        } catch (err) {
+          if (uploadData.url) {
+            amdalnetUrl = uploadData.url;
+          } else {
+            throw new Error(uploadData.error || 'Upload gagal');
+          }
+        } catch (err: any) {
           console.error('Upload failed', err);
+          alert(`Gagal mengunggah berkas AMDALNET: ${err.message}`);
+          setSubmitting(false);
+          return;
         }
       }
 
-      payload.tanggal_uji_berkas = new Date().toISOString().split('T')[0];
+      const inputTanggal = tanggalAmdalnet || (formData.get('tanggal_amdalnet') as string) || doc.tanggal_uji_berkas || new Date().toISOString().split('T')[0];
+
+      let updatedArsipFisik = {};
+      try { 
+        if (doc.arsip_fisik) {
+          updatedArsipFisik = typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc.arsip_fisik; 
+        } 
+      } catch(e) {}
+      if (amdalnetUrl) {
+        updatedArsipFisik = { ...updatedArsipFisik, urlUjiAdmin: amdalnetUrl };
+      }
+
+      payload.tanggal_uji_berkas = inputTanggal;
       payload.keterangan = 'Lolos Uji Administrasi via Amdalnet';
-      payload.penandatangan_hua = { ...ekstra, is_amdalnet: true, file_amdalnet_url: amdalnetUrl };
+      payload.penandatangan_hua = { 
+        ...ekstra, 
+        is_amdalnet: true, 
+        tanggal_amdalnet: inputTanggal, 
+        file_amdalnet_url: amdalnetUrl 
+      };
+      if (amdalnetUrl) {
+        payload.file_uji_admin_url = amdalnetUrl;
+        payload.arsip_fisik = updatedArsipFisik;
+      }
     } else {
       const keberadaan = checklistItems.map((_, i) => formData.get(`keberadaan[${i}]`) || '');
       const kesesuaian = checklistItems.map((_, i) => formData.get(`kesesuaian[${i}]`) || '');
@@ -234,6 +327,7 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
 
       const updatedEkstra = {
         ...ekstra,
+        is_amdalnet: false,
         kewenangan: formData.get('kewenangan'),
         kbli: formData.get('kbli'),
         hasil_verifikasi_uji: formData.get('hasil_verifikasi_uji'),
@@ -260,7 +354,13 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
       
       if(res.ok) {
         setDoc(resData.data);
-        setMessage('Data & Nomor BA Uji Administrasi berhasil disimpan! Silakan klik tombol Unduh Berkas BA HUA.');
+        setIsReplacingAmdalnet(false);
+        setNewAmdalnetFile(null);
+        if (localPreviewUrl) {
+          URL.revokeObjectURL(localPreviewUrl);
+          setLocalPreviewUrl(null);
+        }
+        setMessage(isAmdalnet ? 'Data BA Uji Administrasi AMDALNET berhasil disimpan!' : 'Data & Nomor BA Uji Administrasi berhasil disimpan! Silakan klik tombol Unduh Berkas BA HUA.');
         setTimeout(() => setMessage(''), 5000);
       } else {
         alert(`Gagal menyimpan: ${resData.error || 'Server error'}`);
@@ -359,15 +459,176 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
 
         <form onSubmit={handleSubmit}>
           {/* Opsi Amdalnet */}
-          <div className="mb-6 p-4 rounded-xl border border-outline-variant bg-secondary-container text-on-secondary-container shadow-sm hover:shadow-md transition-shadow">
-             <label className="flex items-center gap-3 cursor-pointer">
-               <input type="checkbox" checked={isAmdalnet} onChange={(e) => setIsAmdalnet(e.target.checked)} className="w-6 h-6 border border-outline-variant rounded bg-surface text-secondary shadow-sm hover:shadow-md transition-shadow focus:ring-emerald-500" />
-               <span className="font-bold text-on-surface uppercase">Sudah melalui AMDALNET (Lewati Uji Administrasi Manual)</span>
+          <div className="mb-6 p-5 rounded-2xl border-2 border-emerald-300 bg-emerald-50/80 text-emerald-950 shadow-sm transition-shadow">
+             <label className="flex items-center gap-3 cursor-pointer select-none">
+               <input 
+                 type="checkbox" 
+                 checked={isAmdalnet} 
+                 onChange={(e) => setIsAmdalnet(e.target.checked)} 
+                 className="w-5 h-5 text-emerald-600 rounded border-emerald-400 focus:ring-emerald-500 cursor-pointer" 
+               />
+               <span className="font-black text-sm uppercase tracking-wide text-emerald-900">
+                 Sudah melalui AMDALNET (Lewati Uji Administrasi Manual)
+               </span>
              </label>
+
              {isAmdalnet && (
-               <div className="mt-4 pt-4 border-t border-outline-variant">
-                 <label className="block text-sm font-bold text-on-surface mb-2 uppercase">Upload Dokumen Hasil Uji Administrasi (PDF)</label>
-                 <input type="file" name="file_amdalnet" accept=".pdf" className="w-full text-xs text-on-surface font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-outline-variant file:text-xs file:font-bold file:bg-surface file:text-on-surface hover:file:bg-surface-container-low file:shadow-sm hover:shadow-md transition-shadow file:transition-all cursor-pointer bg-emerald-200 border border-outline-variant rounded-xl p-2 shadow-sm hover:shadow-md transition-shadow" />
+               <div className="mt-5 pt-5 border-t border-emerald-200 space-y-5">
+                 {/* 1. Input Tanggal AMDALNET */}
+                 <div>
+                   <label className="block text-xs font-black text-emerald-950 mb-1.5 uppercase flex items-center gap-1.5">
+                     <Calendar size={14} className="text-emerald-700" />
+                     <span>Tanggal BA Uji Administrasi (AMDALNET) <span className="text-rose-600">*</span></span>
+                   </label>
+                   <input 
+                     type="date" 
+                     name="tanggal_amdalnet" 
+                     required={isAmdalnet}
+                     value={tanggalAmdalnet}
+                     onChange={(e) => setTanggalAmdalnet(e.target.value)}
+                     className="w-full md:w-1/2 bg-white border border-emerald-300 text-slate-800 font-bold text-sm rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none cursor-pointer shadow-sm"
+                   />
+                   <p className="text-[11px] text-emerald-800 mt-1 font-semibold">
+                     * Tentukan tanggal pelaksanaan atau penerbitan dokumen BA HUA dari AMDALNET.
+                   </p>
+                 </div>
+
+                 {/* 2. Berkas Dokumen AMDALNET: Preview & Ganti */}
+                 <div>
+                   <label className="block text-xs font-black text-emerald-950 mb-2 uppercase flex items-center gap-1.5">
+                     <FileText size={14} className="text-emerald-700" />
+                     <span>Dokumen Hasil Uji Administrasi (PDF)</span>
+                   </label>
+
+                   {/* Jika dokumen sudah terunggah dan sedang TIDAK dalam mode ganti */}
+                   {currentUploadedAmdalnetUrl && !isReplacingAmdalnet ? (
+                     <div className="bg-white border-2 border-emerald-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                       <div className="flex items-center gap-3">
+                         <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
+                           <FileText size={20} />
+                         </div>
+                         <div>
+                           <div className="flex items-center gap-2">
+                             <span className="text-xs font-black text-emerald-900 uppercase">Dokumen BA HUA (AMDALNET)</span>
+                             <span className="inline-flex items-center gap-1 text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full border border-emerald-200">
+                               <CheckCircle size={10} className="text-emerald-600" /> Tersimpan
+                             </span>
+                           </div>
+                           <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                             Dokumen PDF hasil uji administrasi dari sistem AMDALNET telah terunggah.
+                           </p>
+                         </div>
+                       </div>
+
+                       <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                         <button
+                           type="button"
+                           onClick={() => {
+                             setPreviewModalUrl(currentUploadedAmdalnetUrl);
+                             setPreviewModalTitle('Dokumen Hasil Uji Administrasi AMDALNET');
+                           }}
+                           className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase rounded-xl shadow-sm transition-colors"
+                           title="Preview Dokumen"
+                         >
+                           <Eye size={13} />
+                           <span>Preview</span>
+                         </button>
+
+                         <a
+                           href={currentUploadedAmdalnetUrl}
+                           target="_blank"
+                           rel="noreferrer"
+                           className="inline-flex items-center justify-center p-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-black text-xs uppercase rounded-xl shadow-sm transition-colors"
+                           title="Buka Dokumen di Tab Baru"
+                         >
+                           <ExternalLink size={14} />
+                         </a>
+
+                         <button
+                           type="button"
+                           onClick={() => setIsReplacingAmdalnet(true)}
+                           className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-black text-xs uppercase rounded-xl shadow-sm transition-colors"
+                           title="Ganti Dokumen dengan File Baru"
+                         >
+                           <RefreshCw size={13} />
+                           <span>Ganti File</span>
+                         </button>
+                       </div>
+                     </div>
+                   ) : (
+                     /* Mode Upload File (Belum ada file ATAU sedang mengganti) */
+                     <div className="space-y-3">
+                       {isReplacingAmdalnet && currentUploadedAmdalnetUrl && (
+                         <div className="flex items-center justify-between p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs font-bold">
+                           <div className="flex items-center gap-2">
+                             <AlertCircle size={15} className="text-amber-600 shrink-0" />
+                             <span>Mode Ganti Berkas: Pilih file PDF baru di bawah untuk mengganti dokumen.</span>
+                           </div>
+                           <button
+                             type="button"
+                             onClick={() => {
+                               setIsReplacingAmdalnet(false);
+                               setNewAmdalnetFile(null);
+                               if (localPreviewUrl) {
+                                 URL.revokeObjectURL(localPreviewUrl);
+                                 setLocalPreviewUrl(null);
+                               }
+                             }}
+                             className="text-amber-800 hover:text-amber-950 underline text-xs font-black shrink-0 px-2 py-0.5"
+                           >
+                             Batal Ganti
+                           </button>
+                         </div>
+                       )}
+
+                       <div className="flex flex-col sm:flex-row gap-2">
+                         <input 
+                           type="file" 
+                           name="file_amdalnet" 
+                           accept=".pdf" 
+                           onChange={handleNewFileChange}
+                           className="w-full text-xs text-slate-800 font-bold file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-black file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 file:shadow-sm cursor-pointer bg-white border border-emerald-300 rounded-xl p-2 shadow-sm" 
+                         />
+                       </div>
+
+                       {newAmdalnetFile && (
+                         <div className="flex items-center justify-between p-2.5 bg-emerald-100/80 border border-emerald-300 rounded-xl text-emerald-900 text-xs font-bold">
+                           <div className="flex items-center gap-2 truncate">
+                             <FileText size={14} className="text-emerald-700 shrink-0" />
+                             <span className="truncate">File dipilih: <span className="font-mono">{newAmdalnetFile.name}</span> ({(newAmdalnetFile.size / 1024).toFixed(1)} KB)</span>
+                           </div>
+                           <div className="flex items-center gap-2 shrink-0">
+                             {localPreviewUrl && (
+                               <button
+                                 type="button"
+                                 onClick={() => {
+                                   setPreviewModalUrl(localPreviewUrl);
+                                   setPreviewModalTitle(`Preview: ${newAmdalnetFile.name}`);
+                                 }}
+                                 className="inline-flex items-center gap-1 text-[11px] font-black bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 py-1 rounded-lg transition-colors uppercase"
+                               >
+                                 <Eye size={12} /> Preview
+                               </button>
+                             )}
+                             <button
+                               type="button"
+                               onClick={() => {
+                                 setNewAmdalnetFile(null);
+                                 if (localPreviewUrl) {
+                                   URL.revokeObjectURL(localPreviewUrl);
+                                   setLocalPreviewUrl(null);
+                                 }
+                               }}
+                               className="text-rose-600 hover:text-rose-800 text-[11px] font-black uppercase px-2 py-1"
+                             >
+                               Hapus
+                             </button>
+                           </div>
+                         </div>
+                       )}
+                     </div>
+                   )}
+                 </div>
                </div>
              )}
           </div>
@@ -641,12 +902,59 @@ export default function UjiAdministrasiPage({ params }: { params: Promise<{ id: 
               )}
               <button type="submit" disabled={submitting} className="w-full sm:w-auto px-10 py-4 bg-teal-400 hover:bg-teal-300 text-on-surface font-bold rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 tracking-widest uppercase text-sm disabled:opacity-70 disabled:hover:translate-y-0">
                 {submitting ? <LottieLoader size={24} /> : <Send size={18} />}
-                Simpan Data BA HUA
+                {isAmdalnet ? 'Simpan Data BA HUA (AMDALNET)' : 'Simpan Data BA HUA'}
               </button>
             </div>
           </div>
         </form>
       </div>
+
+      {/* Modal Preview PDF */}
+      {previewModalUrl && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
+          onClick={() => setPreviewModalUrl(null)}
+        >
+          <div 
+            className="bg-white rounded-2xl w-full max-w-5xl h-[88vh] flex flex-col overflow-hidden shadow-2xl border border-slate-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between gap-3 border-b border-slate-800">
+              <div className="flex items-center gap-2 truncate">
+                <FileText size={18} className="text-emerald-400 shrink-0" />
+                <span className="font-bold text-sm truncate uppercase tracking-wider">
+                  {previewModalTitle || 'Preview Dokumen'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={previewModalUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 transition-colors uppercase"
+                >
+                  <ExternalLink size={13} /> Tab Baru
+                </a>
+                <button
+                  type="button"
+                  onClick={() => setPreviewModalUrl(null)}
+                  className="p-1.5 hover:bg-slate-800 text-slate-300 hover:text-white rounded-lg transition-colors"
+                  title="Tutup Preview"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 w-full bg-slate-100 overflow-hidden relative">
+              <iframe
+                src={previewModalUrl}
+                className="w-full h-full border-0"
+                title="PDF Preview"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
