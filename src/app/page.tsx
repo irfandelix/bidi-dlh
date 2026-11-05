@@ -307,6 +307,164 @@ export default function Home() {
         </div>
       </div>
 
+      {/* KALENDER INTERAKTIF DENGAN PENANDA AGENDA PENGAWASAN */}
+      <div className="bg-white border border-slate-200 rounded-[2rem] shadow-lg overflow-hidden">
+        
+        {/* Calendar Header with Month Navigation */}
+        <div className="p-6 border-b border-slate-200 bg-slate-50/70 flex flex-wrap justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 border border-slate-200 flex items-center justify-center shadow-xs">
+              <CalendarIcon size={20} />
+            </div>
+            <div>
+              <h3 className="font-black text-slate-900 uppercase tracking-wide text-sm md:text-base">
+                Jadwal & Kalender Pengawasan
+              </h3>
+              <p className="text-xs font-bold text-slate-500">
+                Memantau tanggal kegiatan inspeksi dan kunjungan lapangan DLH
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={prevMonth}
+              className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-100 rounded-xl shadow-xs transition-colors"
+              title="Bulan Sebelumnya"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <span className="px-4 py-1.5 bg-white border border-slate-200 rounded-xl font-black text-xs uppercase tracking-wider text-slate-800 shadow-xs min-w-[140px] text-center">
+              {currentMonthLabel}
+            </span>
+            <button
+              type="button"
+              onClick={nextMonth}
+              className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-100 rounded-xl shadow-xs transition-colors"
+              title="Bulan Berikutnya"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Kolom Kiri: Grid Kalender Bulan */}
+          <div className="lg:col-span-2">
+            {/* Header Hari */}
+            <div className="grid grid-cols-7 gap-2 text-center mb-3">
+              {['MIN', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB'].map((day, i) => (
+                <div key={i} className={`font-black text-xs uppercase tracking-wider ${i === 0 ? 'text-rose-600' : 'text-slate-600'}`}>
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Grid Tanggal */}
+            <div className="grid grid-cols-7 gap-2">
+              {blankDays.map((_, i) => (
+                <div key={`blank-${i}`} className="h-14 md:h-16"></div>
+              ))}
+
+              {daysArray.map((day) => {
+                const dateKey = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = dateKey === todayStr;
+                const isSelected = dateKey === selectedCalendarDate;
+                const agendasOnDay = agendasByDate[dateKey] || [];
+                const hasAgenda = agendasOnDay.length > 0;
+
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => setSelectedCalendarDate(dateKey)}
+                    className={`h-14 md:h-16 flex flex-col items-center justify-between p-1.5 rounded-2xl font-black text-sm border-2 transition-all relative group ${
+                      isSelected
+                        ? 'bg-slate-900 border-slate-900 text-white shadow-md'
+                        : isToday
+                        ? 'bg-amber-50 border-amber-400 text-amber-900 shadow-xs'
+                        : 'bg-slate-50/80 border-slate-200/80 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span className="text-xs leading-none mt-0.5">{day}</span>
+
+                    {/* Penanda Agenda */}
+                    {hasAgenda && (
+                      <div className="flex items-center gap-1 mb-0.5">
+                        <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-md ${
+                          isSelected ? 'bg-rose-500 text-white' : 'bg-rose-100 text-rose-700 border border-rose-200'
+                        }`}>
+                          {agendasOnDay.length} Lap.
+                        </span>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Kolom Kanan: Detail Kegiatan pada Tanggal Terpilih */}
+          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col h-full">
+            <div className="border-b border-slate-200 pb-3 mb-3">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block">
+                Agenda Pengawasan Tanggal:
+              </span>
+              <h4 className="font-black text-slate-900 text-sm uppercase mt-0.5">
+                {selectedCalendarDate ? new Date(selectedCalendarDate).toLocaleDateString('id-ID', { dateStyle: 'full' }) : 'Pilih Tanggal'}
+              </h4>
+            </div>
+
+            <div className="flex-1 overflow-y-auto space-y-2.5 max-h-[320px] custom-scrollbar pr-1">
+              {selectedDateAgendas.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-48 text-center text-slate-400 space-y-2">
+                  <CalendarIcon size={32} strokeWidth={1.5} className="text-slate-300" />
+                  <p className="text-xs font-bold uppercase tracking-wider">
+                    Tidak ada agenda kunjungan lapangan pada tanggal ini.
+                  </p>
+                </div>
+              ) : (
+                selectedDateAgendas.map((item, idx) => (
+                  <div key={idx} className="p-3 bg-white border border-slate-200 rounded-xl shadow-xs space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">
+                        {item.kategori || 'Umum'}
+                      </span>
+                      <span className="text-[10px] font-mono font-bold text-slate-500">
+                        {item.token || '—'}
+                      </span>
+                    </div>
+
+                    <h5 className="font-black text-xs text-slate-900 uppercase line-clamp-2">
+                      {item.nama_kegiatan}
+                    </h5>
+
+                    {item.alamat_lokasi && (
+                      <p className="text-[10px] text-slate-500 line-clamp-1 flex items-start gap-1">
+                        <MapPin size={11} className="text-rose-500 shrink-0 mt-0.5" />
+                        {item.alamat_lokasi}
+                      </p>
+                    )}
+
+                    <div className="pt-1.5 border-t border-slate-100 flex justify-end">
+                      <Link 
+                        href="/pengawasan/agenda"
+                        className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 flex items-center gap-1 uppercase tracking-wider"
+                      >
+                        Buka di Agenda <ChevronRight size={11} />
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       {/* STATISTIC CARDS: PERIZINAN */}
       <div>
         <div className="flex items-center justify-between mb-4 px-2">
@@ -623,164 +781,6 @@ export default function Home() {
                       </span>
                     </div>
                   </Link>
-                ))
-              )}
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* KALENDER INTERAKTIF DENGAN PENANDA AGENDA PENGAWASAN */}
-      <div className="bg-white border border-slate-200 rounded-[2rem] shadow-lg overflow-hidden">
-        
-        {/* Calendar Header with Month Navigation */}
-        <div className="p-6 border-b border-slate-200 bg-slate-50/70 flex flex-wrap justify-between items-center gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 border border-slate-200 flex items-center justify-center shadow-xs">
-              <CalendarIcon size={20} />
-            </div>
-            <div>
-              <h3 className="font-black text-slate-900 uppercase tracking-wide text-sm md:text-base">
-                Jadwal & Kalender Pengawasan
-              </h3>
-              <p className="text-xs font-bold text-slate-500">
-                Memantau tanggal kegiatan inspeksi dan kunjungan lapangan DLH
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={prevMonth}
-              className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-100 rounded-xl shadow-xs transition-colors"
-              title="Bulan Sebelumnya"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <span className="px-4 py-1.5 bg-white border border-slate-200 rounded-xl font-black text-xs uppercase tracking-wider text-slate-800 shadow-xs min-w-[140px] text-center">
-              {currentMonthLabel}
-            </span>
-            <button
-              type="button"
-              onClick={nextMonth}
-              className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-100 rounded-xl shadow-xs transition-colors"
-              title="Bulan Berikutnya"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-        </div>
-
-        <div className="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Kolom Kiri: Grid Kalender Bulan */}
-          <div className="lg:col-span-2">
-            {/* Header Hari */}
-            <div className="grid grid-cols-7 gap-2 text-center mb-3">
-              {['MIN', 'SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB'].map((day, i) => (
-                <div key={i} className={`font-black text-xs uppercase tracking-wider ${i === 0 ? 'text-rose-600' : 'text-slate-600'}`}>
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Grid Tanggal */}
-            <div className="grid grid-cols-7 gap-2">
-              {blankDays.map((_, i) => (
-                <div key={`blank-${i}`} className="h-14 md:h-16"></div>
-              ))}
-
-              {daysArray.map((day) => {
-                const dateKey = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const isToday = dateKey === todayStr;
-                const isSelected = dateKey === selectedCalendarDate;
-                const agendasOnDay = agendasByDate[dateKey] || [];
-                const hasAgenda = agendasOnDay.length > 0;
-
-                return (
-                  <button
-                    key={day}
-                    type="button"
-                    onClick={() => setSelectedCalendarDate(dateKey)}
-                    className={`h-14 md:h-16 flex flex-col items-center justify-between p-1.5 rounded-2xl font-black text-sm border-2 transition-all relative group ${
-                      isSelected
-                        ? 'bg-slate-900 border-slate-900 text-white shadow-md'
-                        : isToday
-                        ? 'bg-amber-50 border-amber-400 text-amber-900 shadow-xs'
-                        : 'bg-slate-50/80 border-slate-200/80 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
-                    }`}
-                  >
-                    <span className="text-xs leading-none mt-0.5">{day}</span>
-
-                    {/* Penanda Agenda */}
-                    {hasAgenda && (
-                      <div className="flex items-center gap-1 mb-0.5">
-                        <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-md ${
-                          isSelected ? 'bg-rose-500 text-white' : 'bg-rose-100 text-rose-700 border border-rose-200'
-                        }`}>
-                          {agendasOnDay.length} Lap.
-                        </span>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Kolom Kanan: Detail Kegiatan pada Tanggal Terpilih */}
-          <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col h-full">
-            <div className="border-b border-slate-200 pb-3 mb-3">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block">
-                Agenda Pengawasan Tanggal:
-              </span>
-              <h4 className="font-black text-slate-900 text-sm uppercase mt-0.5">
-                {selectedCalendarDate ? new Date(selectedCalendarDate).toLocaleDateString('id-ID', { dateStyle: 'full' }) : 'Pilih Tanggal'}
-              </h4>
-            </div>
-
-            <div className="flex-1 overflow-y-auto space-y-2.5 max-h-[320px] custom-scrollbar pr-1">
-              {selectedDateAgendas.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-48 text-center text-slate-400 space-y-2">
-                  <CalendarIcon size={32} strokeWidth={1.5} className="text-slate-300" />
-                  <p className="text-xs font-bold uppercase tracking-wider">
-                    Tidak ada agenda kunjungan lapangan pada tanggal ini.
-                  </p>
-                </div>
-              ) : (
-                selectedDateAgendas.map((item, idx) => (
-                  <div key={idx} className="p-3 bg-white border border-slate-200 rounded-xl shadow-xs space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">
-                        {item.kategori || 'Umum'}
-                      </span>
-                      <span className="text-[10px] font-mono font-bold text-slate-500">
-                        {item.token || '—'}
-                      </span>
-                    </div>
-
-                    <h5 className="font-black text-xs text-slate-900 uppercase line-clamp-2">
-                      {item.nama_kegiatan}
-                    </h5>
-
-                    {item.alamat_lokasi && (
-                      <p className="text-[10px] text-slate-500 line-clamp-1 flex items-start gap-1">
-                        <MapPin size={11} className="text-rose-500 shrink-0 mt-0.5" />
-                        {item.alamat_lokasi}
-                      </p>
-                    )}
-
-                    <div className="pt-1.5 border-t border-slate-100 flex justify-end">
-                      <Link 
-                        href="/pengawasan/agenda"
-                        className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 flex items-center gap-1 uppercase tracking-wider"
-                      >
-                        Buka di Agenda <ChevronRight size={11} />
-                      </Link>
-                    </div>
-                  </div>
                 ))
               )}
             </div>
