@@ -180,9 +180,9 @@ export async function POST(request: Request) {
       "Perizinan yang Sudah Dimiliki atau Izin yang Lama (Jika Ada)",
       "Perjanjian Pengangkutan Sampah (MOU)",
       "Perjanjian Pengangkutan Limbah B3 (MOU)",
-      "Pemenuhan Persetujuan Teknis Air Limbah", 
+      "Pemenuhan Standar Teknis Pemenuhan Baku Mutu Air Limbah", 
       "Pemenuhan Rincian Teknis Limbah B3 Sementara", 
-      "Pemenuhan Persetujuan Teknis Emisi", 
+      "Pemenuhan Standar Teknis Pemenuhan Baku Mutu Emisi", 
       "Pemenuhan Persetujuan Teknis Andalalin", 
       "Hasil Penapisan Kewajiban Pemenuhan Persetujuan Teknis", 
       "Bukti Upload Permohonan pada AMDALNET dan/atau SIDARLING"
