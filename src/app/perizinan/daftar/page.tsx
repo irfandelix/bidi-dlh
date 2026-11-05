@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Loader2
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Loader2, Eye
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -825,6 +825,26 @@ export default function DaftarPerizinanPage() {
                   const isMPP = stage.title.includes('(MPP)');
                   const cleanTitle = stage.title.replace(' (MPP)', '').replace(' (DLH)', '');
 
+                  let fisik: any = {};
+                  try { 
+                    if (selectedDoc.arsip_fisik) {
+                      fisik = typeof selectedDoc.arsip_fisik === 'string' ? JSON.parse(selectedDoc.arsip_fisik) : selectedDoc.arsip_fisik;
+                    }
+                  } catch (e) {}
+
+                  let huaEkstra: any = {};
+                  try {
+                    if (selectedDoc.penandatangan_hua) {
+                      huaEkstra = typeof selectedDoc.penandatangan_hua === 'string' ? JSON.parse(selectedDoc.penandatangan_hua) : selectedDoc.penandatangan_hua;
+                    }
+                  } catch (e) {}
+
+                  const isUjiAdmin = stage.id === 2;
+                  const ujiAdminFileUrl = isUjiAdmin 
+                    ? (fisik?.urlUjiAdmin || selectedDoc.file_uji_admin_url || huaEkstra?.file_amdalnet_url || null)
+                    : null;
+                  const isUjiAdminUploaded = isUjiAdmin && !!ujiAdminFileUrl;
+
                   const iconBg = isCurrent ? 'bg-emerald-100 text-emerald-600 border-emerald-200' : 
                                isDisabled ? 'bg-slate-50 text-slate-300 border-slate-200' : 
                                'bg-slate-100 text-slate-500 border-slate-200 group-hover:bg-indigo-100 group-hover:text-indigo-600 group-hover:border-indigo-200 shadow-sm';
@@ -883,6 +903,45 @@ export default function DaftarPerizinanPage() {
                                   {isDownloadingThis ? <Loader2 size={11} className="animate-spin" /> : <Download size={11} />}
                                   <span>{isDownloadingThis ? 'Unduh...' : 'Unduh (.docx)'}</span>
                                 </button>
+                              )}
+                            </div>
+                            {isUjiAdminUploaded && (
+                              <div className="pt-1.5 border-t border-slate-200/60 flex items-center justify-between gap-1">
+                                <span className="text-[10px] font-black text-emerald-700 flex items-center gap-1">
+                                  <CheckCircle size={11} className="text-emerald-600 shrink-0" />
+                                  <span>Sudah upload hasil uji admin</span>
+                                </span>
+                                {ujiAdminFileUrl && (
+                                  <a
+                                    href={ujiAdminFileUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-[9px] font-black text-indigo-600 hover:text-indigo-800 underline uppercase shrink-0"
+                                  >
+                                    Lihat
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ) : isUjiAdminUploaded ? (
+                          <div className="space-y-1.5 bg-emerald-50/90 px-2.5 py-1.5 rounded-lg border border-emerald-200">
+                            <div className="flex items-center justify-between gap-1.5">
+                              <span className="text-[10px] font-black text-emerald-800 flex items-center gap-1 leading-snug">
+                                <CheckCircle size={12} className="text-emerald-600 shrink-0" />
+                                <span>Sudah upload hasil uji admin</span>
+                              </span>
+                              {ujiAdminFileUrl && (
+                                <a
+                                  href={ujiAdminFileUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="inline-flex items-center gap-1 text-[9px] font-black bg-emerald-200/80 hover:bg-emerald-300 text-emerald-900 px-2 py-0.5 rounded border border-emerald-300 transition-colors uppercase shrink-0"
+                                >
+                                  <Eye size={10} /> Lihat
+                                </a>
                               )}
                             </div>
                           </div>
