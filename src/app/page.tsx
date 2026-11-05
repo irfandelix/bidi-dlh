@@ -132,12 +132,25 @@ export default function Home() {
     fetchDashboardData();
   }, []);
 
-  // Map agenda pengawasan berdasarkan tanggal kunjungan (YYYY-MM-DD)
-  const agendasByDate = useMemo(() => {
+  // Map Sidang Dokumen Lingkungan berdasarkan tanggal pemeriksaan
+  const sidangsByDate = useMemo(() => {
+    const map: Record<string, any[]> = {};
+    allPerizinan.forEach(item => {
+      const rawDate = item.tanggal_pemeriksaan || item.tanggal_ba_pemeriksaan;
+      if (!rawDate) return;
+      const tgl = String(rawDate).split('T')[0];
+      if (!map[tgl]) map[tgl] = [];
+      map[tgl].push(item);
+    });
+    return map;
+  }, [allPerizinan]);
+
+  // Map Agenda Pengawasan berdasarkan tanggal kunjungan
+  const pengawasanByDate = useMemo(() => {
     const map: Record<string, any[]> = {};
     allPengawasan.forEach(item => {
       if (!item.tanggal_kunjungan) return;
-      const tgl = item.tanggal_kunjungan.split('T')[0];
+      const tgl = String(item.tanggal_kunjungan).split('T')[0];
       if (!map[tgl]) map[tgl] = [];
       map[tgl].push(item);
     });
@@ -160,11 +173,16 @@ export default function Home() {
     setCurrentCalendarDate(new Date(calendarYear, calendarMonth + 1, 1));
   };
 
-  // Selected date agenda items
-  const selectedDateAgendas = useMemo(() => {
+  // Selected date events
+  const selectedDateSidangs = useMemo(() => {
     if (!selectedCalendarDate) return [];
-    return agendasByDate[selectedCalendarDate] || [];
-  }, [selectedCalendarDate, agendasByDate]);
+    return sidangsByDate[selectedCalendarDate] || [];
+  }, [selectedCalendarDate, sidangsByDate]);
+
+  const selectedDatePengawasan = useMemo(() => {
+    if (!selectedCalendarDate) return [];
+    return pengawasanByDate[selectedCalendarDate] || [];
+  }, [selectedCalendarDate, pengawasanByDate]);
 
   // Filtered items inside modal
   const filteredModalData = useMemo(() => {
@@ -307,10 +325,10 @@ export default function Home() {
         </div>
       </div>
 
-      {/* KALENDER INTERAKTIF DENGAN PENANDA AGENDA PENGAWASAN */}
+      {/* KALENDER INTERAKTIF DENGAN PENANDA AGENDA SIDANG LINGKUNGAN & PENGAWASAN */}
       <div className="bg-white border border-slate-200 rounded-[2rem] shadow-lg overflow-hidden">
         
-        {/* Calendar Header with Month Navigation */}
+        {/* Calendar Header with Month Navigation & Legend */}
         <div className="p-6 border-b border-slate-200 bg-slate-50/70 flex flex-wrap justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 border border-slate-200 flex items-center justify-center shadow-xs">
@@ -318,34 +336,47 @@ export default function Home() {
             </div>
             <div>
               <h3 className="font-black text-slate-900 uppercase tracking-wide text-sm md:text-base">
-                Jadwal & Kalender Pengawasan
+                Jadwal & Kalender Kegiatan DLH
               </h3>
               <p className="text-xs font-bold text-slate-500">
-                Memantau tanggal kegiatan inspeksi dan kunjungan lapangan DLH
+                Memantau agenda sidang pembahasan dokumen lingkungan & inspeksi pengawasan lapangan
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={prevMonth}
-              className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-100 rounded-xl shadow-xs transition-colors"
-              title="Bulan Sebelumnya"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <span className="px-4 py-1.5 bg-white border border-slate-200 rounded-xl font-black text-xs uppercase tracking-wider text-slate-800 shadow-xs min-w-[140px] text-center">
-              {currentMonthLabel}
-            </span>
-            <button
-              type="button"
-              onClick={nextMonth}
-              className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-100 rounded-xl shadow-xs transition-colors"
-              title="Bulan Berikutnya"
-            >
-              <ChevronRight size={16} />
-            </button>
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Legend Pills */}
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 text-[10px] md:text-xs font-black text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-xl shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-indigo-600"></span> Sidang Lingkungan
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-[10px] md:text-xs font-black text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-xl shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-rose-600"></span> Pengawasan Lapangan
+              </span>
+            </div>
+
+            {/* Month Navigation */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={prevMonth}
+                className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-100 rounded-xl shadow-xs transition-colors"
+                title="Bulan Sebelumnya"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="px-3.5 py-1.5 bg-white border border-slate-200 rounded-xl font-black text-xs uppercase tracking-wider text-slate-800 shadow-xs min-w-[130px] text-center">
+                {currentMonthLabel}
+              </span>
+              <button
+                type="button"
+                onClick={nextMonth}
+                className="w-9 h-9 flex items-center justify-center bg-white border border-slate-200 hover:bg-slate-100 rounded-xl shadow-xs transition-colors"
+                title="Bulan Berikutnya"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -365,22 +396,23 @@ export default function Home() {
             {/* Grid Tanggal */}
             <div className="grid grid-cols-7 gap-2">
               {blankDays.map((_, i) => (
-                <div key={`blank-${i}`} className="h-14 md:h-16"></div>
+                <div key={`blank-${i}`} className="min-h-[64px] md:min-h-[72px]"></div>
               ))}
 
               {daysArray.map((day) => {
                 const dateKey = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const isToday = dateKey === todayStr;
                 const isSelected = dateKey === selectedCalendarDate;
-                const agendasOnDay = agendasByDate[dateKey] || [];
-                const hasAgenda = agendasOnDay.length > 0;
+                const sidangsOnDay = sidangsByDate[dateKey] || [];
+                const pengawasanOnDay = pengawasanByDate[dateKey] || [];
+                const hasEvents = sidangsOnDay.length > 0 || pengawasanOnDay.length > 0;
 
                 return (
                   <button
                     key={day}
                     type="button"
                     onClick={() => setSelectedCalendarDate(dateKey)}
-                    className={`h-14 md:h-16 flex flex-col items-center justify-between p-1.5 rounded-2xl font-black text-sm border-2 transition-all relative group ${
+                    className={`min-h-[64px] md:min-h-[72px] flex flex-col items-center justify-between p-1.5 rounded-2xl font-black text-sm border-2 transition-all relative group ${
                       isSelected
                         ? 'bg-slate-900 border-slate-900 text-white shadow-md'
                         : isToday
@@ -390,14 +422,27 @@ export default function Home() {
                   >
                     <span className="text-xs leading-none mt-0.5">{day}</span>
 
-                    {/* Penanda Agenda */}
-                    {hasAgenda && (
-                      <div className="flex items-center gap-1 mb-0.5">
-                        <span className={`text-[9px] font-black px-1.5 py-0.2 rounded-md ${
-                          isSelected ? 'bg-rose-500 text-white' : 'bg-rose-100 text-rose-700 border border-rose-200'
-                        }`}>
-                          {agendasOnDay.length} Lap.
-                        </span>
+                    {/* Penanda Event: Sidang Lingkungan & Pengawasan */}
+                    {hasEvents && (
+                      <div className="flex flex-col gap-0.5 w-full mt-1">
+                        {sidangsOnDay.length > 0 && (
+                          <span className={`text-[8px] font-black px-1 py-0.5 rounded leading-tight text-center truncate ${
+                            isSelected 
+                              ? 'bg-indigo-400 text-slate-950' 
+                              : 'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                          }`}>
+                            {sidangsOnDay.length} Sidang
+                          </span>
+                        )}
+                        {pengawasanOnDay.length > 0 && (
+                          <span className={`text-[8px] font-black px-1 py-0.5 rounded leading-tight text-center truncate ${
+                            isSelected 
+                              ? 'bg-rose-400 text-slate-950' 
+                              : 'bg-rose-100 text-rose-800 border border-rose-200'
+                          }`}>
+                            {pengawasanOnDay.length} PW
+                          </span>
+                        )}
                       </div>
                     )}
                   </button>
@@ -410,54 +455,118 @@ export default function Home() {
           <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 flex flex-col h-full">
             <div className="border-b border-slate-200 pb-3 mb-3">
               <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 block">
-                Agenda Pengawasan Tanggal:
+                Agenda Terjadwal Tanggal:
               </span>
               <h4 className="font-black text-slate-900 text-sm uppercase mt-0.5">
                 {selectedCalendarDate ? new Date(selectedCalendarDate).toLocaleDateString('id-ID', { dateStyle: 'full' }) : 'Pilih Tanggal'}
               </h4>
+              {selectedCalendarDate && (
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+                    {selectedDateSidangs.length} Sidang
+                  </span>
+                  <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+                    {selectedDatePengawasan.length} Pengawasan
+                  </span>
+                </div>
+              )}
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2.5 max-h-[320px] custom-scrollbar pr-1">
-              {selectedDateAgendas.length === 0 ? (
+            <div className="flex-1 overflow-y-auto space-y-3 max-h-[360px] custom-scrollbar pr-1">
+              {selectedDateSidangs.length === 0 && selectedDatePengawasan.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 text-center text-slate-400 space-y-2">
                   <CalendarIcon size={32} strokeWidth={1.5} className="text-slate-300" />
                   <p className="text-xs font-bold uppercase tracking-wider">
-                    Tidak ada agenda kunjungan lapangan pada tanggal ini.
+                    Tidak ada jadwal sidang lingkungan maupun pengawasan pada tanggal ini.
                   </p>
                 </div>
               ) : (
-                selectedDateAgendas.map((item, idx) => (
-                  <div key={idx} className="p-3 bg-white border border-slate-200 rounded-xl shadow-xs space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">
-                        {item.kategori || 'Umum'}
+                <>
+                  {/* SEKSI 1: SIDANG LINGKUNGAN HIDUP */}
+                  {selectedDateSidangs.length > 0 && (
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-indigo-700 flex items-center gap-1">
+                        🏛️ Sidang Dokumen Lingkungan ({selectedDateSidangs.length})
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-slate-500">
-                        {item.token || '—'}
+                      {selectedDateSidangs.map((item, idx) => (
+                        <div key={`sidang-${idx}`} className="p-3 bg-white border border-slate-200 rounded-xl shadow-xs space-y-1.5 hover:border-indigo-300 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-indigo-50 text-indigo-800 border border-indigo-200">
+                              {item.jenis_dokumen || 'UKL-UPL'}
+                            </span>
+                            <span className="text-[10px] font-mono font-bold text-slate-500">
+                              #{item.no_urut || item.id}
+                            </span>
+                          </div>
+
+                          <h5 className="font-black text-xs text-slate-900 uppercase line-clamp-2">
+                            {item.nama_kegiatan}
+                          </h5>
+
+                          <p className="text-[10px] font-bold text-slate-500 uppercase">
+                            Pemrakarsa: {item.nama_pemrakarsa || '—'}
+                          </p>
+
+                          {item.nomor_ba_pemeriksaan && (
+                            <p className="text-[9px] font-mono text-slate-400 truncate">
+                              BA: {item.nomor_ba_pemeriksaan}
+                            </p>
+                          )}
+
+                          <div className="pt-1.5 border-t border-slate-100 flex justify-end">
+                            <Link 
+                              href={`/perizinan/pemeriksaan-substansi/${item.id}`}
+                              className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 flex items-center gap-1 uppercase tracking-wider"
+                            >
+                              Buka Berkas Sidang <ChevronRight size={11} />
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* SEKSI 2: PENGAWASAN LAPANGAN */}
+                  {selectedDatePengawasan.length > 0 && (
+                    <div className="space-y-2 pt-2">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-rose-700 flex items-center gap-1">
+                        🛡️ Pengawasan Lapangan ({selectedDatePengawasan.length})
                       </span>
+                      {selectedDatePengawasan.map((item, idx) => (
+                        <div key={`pw-${idx}`} className="p-3 bg-white border border-slate-200 rounded-xl shadow-xs space-y-1.5 hover:border-rose-300 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">
+                              {item.kategori || 'Umum'}
+                            </span>
+                            <span className="text-[10px] font-mono font-bold text-slate-500">
+                              {item.token || '—'}
+                            </span>
+                          </div>
+
+                          <h5 className="font-black text-xs text-slate-900 uppercase line-clamp-2">
+                            {item.nama_kegiatan}
+                          </h5>
+
+                          {item.alamat_lokasi && (
+                            <p className="text-[10px] text-slate-500 line-clamp-1 flex items-start gap-1">
+                              <MapPin size={11} className="text-rose-500 shrink-0 mt-0.5" />
+                              {item.alamat_lokasi}
+                            </p>
+                          )}
+
+                          <div className="pt-1.5 border-t border-slate-100 flex justify-end">
+                            <Link 
+                              href="/pengawasan/agenda"
+                              className="text-[10px] font-black text-rose-600 hover:text-rose-800 flex items-center gap-1 uppercase tracking-wider"
+                            >
+                              Buka di Agenda <ChevronRight size={11} />
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-
-                    <h5 className="font-black text-xs text-slate-900 uppercase line-clamp-2">
-                      {item.nama_kegiatan}
-                    </h5>
-
-                    {item.alamat_lokasi && (
-                      <p className="text-[10px] text-slate-500 line-clamp-1 flex items-start gap-1">
-                        <MapPin size={11} className="text-rose-500 shrink-0 mt-0.5" />
-                        {item.alamat_lokasi}
-                      </p>
-                    )}
-
-                    <div className="pt-1.5 border-t border-slate-100 flex justify-end">
-                      <Link 
-                        href="/pengawasan/agenda"
-                        className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 flex items-center gap-1 uppercase tracking-wider"
-                      >
-                        Buka di Agenda <ChevronRight size={11} />
-                      </Link>
-                    </div>
-                  </div>
-                ))
+                  )}
+                </>
               )}
             </div>
           </div>
