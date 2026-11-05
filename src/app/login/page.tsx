@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { User, Lock, Eye, EyeOff, LogIn, ShieldCheck, AlertCircle, Sparkles } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, LogIn, ShieldCheck, AlertCircle } from 'lucide-react';
 import { handleLogin } from './actions';
 
 export default function LoginPage() {
@@ -35,56 +35,38 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-emerald-50/40 to-teal-100/30 px-4 py-12 relative overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-200/30 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-teal-200/30 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-b from-slate-50 via-white to-slate-100/60 px-4 py-12 relative">
+      {/* Soft Ambient Background Glow */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[350px] bg-emerald-100/40 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Main Login Card (NeoBrutalism Style) */}
-      <div className="relative w-full max-w-md bg-white border-2 border-slate-900 rounded-[2rem] shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] p-7 sm:p-10 transition-all">
-        {/* Header & Logo */}
+      {/* Modern Card (Clean, Soft & Elegant) */}
+      <div className="relative w-full max-w-md bg-white border border-slate-200/80 rounded-3xl shadow-xl shadow-slate-200/60 p-8 sm:p-10 transition-all">
+        {/* Header & Single BIDI Logo */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-14 h-14 p-2 bg-slate-50 border-2 border-slate-900 rounded-2xl shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] flex items-center justify-center">
-              <Image
-                src="/logo-sragen.png"
-                alt="Logo Sragen"
-                width={38}
-                height={38}
-                className="object-contain"
-                priority
-              />
-            </div>
-            <div className="w-14 h-14 p-2 bg-emerald-500 border-2 border-slate-900 rounded-2xl shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] flex items-center justify-center">
-              <Image
-                src="/BIDIDLH.png"
-                alt="Logo BIDI DLH"
-                width={40}
-                height={40}
-                className="object-contain"
-                priority
-              />
-            </div>
+          <div className="w-16 h-16 mx-auto mb-4 p-2.5 bg-emerald-50 border border-emerald-100/80 rounded-2xl flex items-center justify-center shadow-sm">
+            <Image
+              src="/BIDIDLH.png"
+              alt="Logo BIDI DLH"
+              width={50}
+              height={50}
+              className="object-contain"
+              priority
+            />
           </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 border border-emerald-300 text-emerald-950 text-[10px] font-black uppercase tracking-widest rounded-lg mb-2">
-            <Sparkles size={11} className="text-emerald-700" />
-            <span>Kabupaten Sragen</span>
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             BIDI <span className="text-emerald-600">DLH</span>
           </h1>
-          <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mt-1">
+          <p className="text-slate-500 text-xs font-medium mt-1">
             Sistem Informasi Lingkungan Hidup Terpadu
           </p>
         </div>
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 p-3.5 bg-rose-50 border-2 border-rose-300 rounded-2xl flex items-start gap-3 text-rose-800 animate-in fade-in duration-200">
-            <AlertCircle size={18} className="text-rose-600 shrink-0 mt-0.5" />
-            <div className="text-xs font-bold leading-snug">
+          <div className="mb-6 p-3.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3 text-rose-800 animate-in fade-in duration-200">
+            <AlertCircle size={17} className="text-rose-600 shrink-0 mt-0.5" />
+            <div className="text-xs font-semibold leading-relaxed">
               {error}
             </div>
           </div>
@@ -96,9 +78,9 @@ export default function LoginPage() {
           <div>
             <label 
               htmlFor="name" 
-              className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2"
+              className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2"
             >
-              Nama Pengguna (Username)
+              Nama Pengguna
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -112,7 +94,7 @@ export default function LoginPage() {
                 autoComplete="username"
                 maxLength={60}
                 placeholder="Masukkan username atau nama"
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 transition-all"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50/70 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
               />
             </div>
           </div>
@@ -121,7 +103,7 @@ export default function LoginPage() {
           <div>
             <label 
               htmlFor="password" 
-              className="block text-xs font-black text-slate-700 uppercase tracking-wider mb-2"
+              className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2"
             >
               Kata Sandi
             </label>
@@ -137,12 +119,12 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 maxLength={100}
                 placeholder="••••••••"
-                className="w-full pl-11 pr-11 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-slate-900 transition-all"
+                className="w-full pl-11 pr-11 py-3 bg-slate-50/70 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-700 transition-colors"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition-colors"
                 title={showPassword ? 'Sembunyikan Kata Sandi' : 'Tampilkan Kata Sandi'}
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -151,11 +133,11 @@ export default function LoginPage() {
           </div>
 
           {/* Submit Button */}
-          <div className="pt-3">
+          <div className="pt-2">
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:translate-x-1 active:translate-y-1 text-white border-2 border-slate-900 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] hover:shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] transition-all flex items-center justify-center gap-2 ${
+              className={`w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white rounded-xl font-bold text-sm tracking-wide shadow-lg shadow-emerald-600/20 hover:shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 ${
                 loading ? 'opacity-80 cursor-wait' : ''
               }`}
             >
@@ -177,11 +159,11 @@ export default function LoginPage() {
           </div>
         </form>
 
-        {/* Security Badge Footer */}
+        {/* Subtle Security Badge Footer */}
         <div className="mt-8 pt-5 border-t border-slate-100 flex items-center justify-center gap-2 text-slate-400">
           <ShieldCheck size={14} className="text-emerald-600" />
-          <span className="text-[10px] font-bold uppercase tracking-wider">
-            Autentikasi Terenkripsi & Anti-Injection Terproteksi
+          <span className="text-xs font-medium">
+            Sistem Autentikasi Aman & Terenkripsi
           </span>
         </div>
       </div>
