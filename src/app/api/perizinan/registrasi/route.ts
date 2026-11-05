@@ -29,6 +29,8 @@ export async function POST(request: Request) {
       'RINTEK LB3': 'RT.LB3', 'PERTEK AIR LIMBAH': 'ST.AL', 'PERTEK EMISI': 'ST.EM',
       'STANDAR TEKNIS AIR LIMBAH': 'ST.AL', 'STANDAR TEKNIS EMISI': 'ST.EM',
       'Standar Teknis Air Limbah': 'ST.AL', 'Standar Teknis Emisi': 'ST.EM',
+      'Standar Teknis Pemenuhan Baku Mutu Air Limbah': 'ST.AL', 'Standar Teknis Pemenuhan Baku Mutu Emisi': 'ST.EM',
+      'STANDAR TEKNIS PEMENUHAN BAKU MUTU AIR LIMBAH': 'ST.AL', 'STANDAR TEKNIS PEMENUHAN BAKU MUTU EMISI': 'ST.EM',
       'Persetujuan Teknis Air Limbah': 'ST.AL', 'Persetujuan Teknis Emisi': 'ST.EM',
       'KAJIAN TEKNIS AIR LIMBAH': 'KT.AL', 'KAJIAN TEKNIS EMISI': 'KT.EM',
       'KT AL': 'KT.AL', 'KT EM': 'KT.EM', 'SLO': 'SLO', 'DPLH': 'DPLH', 
