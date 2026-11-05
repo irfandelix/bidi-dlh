@@ -23,6 +23,19 @@ import {
 import LottieLoader from '@/components/LottieLoader';
 import klasifikasiData from '@/data/klasifikasi.json';
 
+const LEVEL_1_CATEGORIES = [
+  { code: '600', name: 'PEKERJAAN UMUM & LINGKUNGAN HIDUP' },
+  { code: '000', name: 'UMUM & TATA USAHA' },
+  { code: '800', name: 'KEPEGAWAIAN' },
+  { code: '900', name: 'KEUANGAN DAERAH' },
+  { code: '100', name: 'PEMERINTAHAN' },
+  { code: '200', name: 'POLITIK' },
+  { code: '300', name: 'KEAMANAN & KETERTIBAN' },
+  { code: '400', name: 'KESEJAHTERAAN RAKYAT' },
+  { code: '500', name: 'PEREKONOMIAN' },
+  { code: '700', name: 'PENGAWASAN' }
+];
+
 export default function TambahNotaDinasPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -44,10 +57,12 @@ export default function TambahNotaDinasPage() {
   const [keterangan, setKeterangan] = useState('');
   const [file, setFile] = useState<File | null>(null);
 
-  // Klasifikasi (khusus Umum)
-  const [klasifikasiSearch, setKlasifikasiSearch] = useState('');
-  const [selectedKlasifikasi, setSelectedKlasifikasi] = useState('600.4 - Pengelolaan Lingkungan Hidup');
-  const [categoryFilter, setCategoryFilter] = useState('600');
+  // Klasifikasi Bertingkat & Pencarian Cepat (khusus Umum)
+  const [selectedKlasifikasi, setSelectedKlasifikasi] = useState('600.4 - LINGKUNGAN HIDUP');
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [selectedL1, setSelectedL1] = useState('600');
+  const [selectedL2, setSelectedL2] = useState('600.4');
+  const [selectedL3, setSelectedL3] = useState('');
 
   // Anggota list
   const [anggota, setAnggota] = useState<any[]>([]);
@@ -58,33 +73,89 @@ export default function TambahNotaDinasPage() {
   const [savedNomor, setSavedNomor] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
-  const filteredKlasifikasi = useMemo(() => {
-    let list = klasifikasiData as any[];
-    if (categoryFilter !== 'SEMUA') {
-      list = list.filter(k => k.code.startsWith(categoryFilter));
-    }
-    if (!klasifikasiSearch.trim()) {
-      return list.slice(0, 100);
-    }
-    const q = klasifikasiSearch.toLowerCase().trim();
-    return list.filter((k: any) => 
-      k.name.toLowerCase().includes(q) || 
-      k.code.toLowerCase().includes(q)
-    ).slice(0, 100);
-  }, [klasifikasiSearch, categoryFilter]);
+  // Opsi Level 2 (Sub-Urusan)
+  const level2Options = useMemo(() => {
+    if (!selectedL1) return [];
+    return (klasifikasiData as any[]).filter((k: any) => {
+      const parts = k.code.split('.');
+      return parts.length === 2 && parts[0] === selectedL1;
+    });
+  }, [selectedL1]);
 
-  const totalMatchesCount = useMemo(() => {
-    let list = klasifikasiData as any[];
-    if (categoryFilter !== 'SEMUA') {
-      list = list.filter(k => k.code.startsWith(categoryFilter));
+  // Opsi Level 3 (Rincian)
+  const level3Options = useMemo(() => {
+    if (!selectedL2) return [];
+    return (klasifikasiData as any[]).filter((k: any) => {
+      const parts = k.code.split('.');
+      return parts.length >= 3 && k.code.startsWith(selectedL2 + '.');
+    });
+  }, [selectedL2]);
+
+  // Hasil Pencarian Cepat Kata Kunci
+  const searchResults = useMemo(() => {
+    if (!searchKeyword.trim()) return [];
+    const q = searchKeyword.toLowerCase().trim();
+    return (klasifikasiData as any[]).filter((k: any) => 
+      k.code.toLowerCase().includes(q) || k.name.toLowerCase().includes(q)
+    ).slice(0, 15);
+  }, [searchKeyword]);
+
+  const handleL1Change = (val: string) => {
+    setSelectedL1(val);
+    const l2List = (klasifikasiData as any[]).filter((k: any) => {
+      const parts = k.code.split('.');
+      return parts.length === 2 && parts[0] === val;
+    });
+    if (l2List.length > 0) {
+      const firstL2 = l2List[0];
+      setSelectedL2(firstL2.code);
+      setSelectedL3('');
+      setSelectedKlasifikasi(`${firstL2.code} - ${firstL2.name}`);
+    } else {
+      setSelectedL2('');
+      setSelectedL3('');
+      const l1Item = LEVEL_1_CATEGORIES.find(c => c.code === val);
+      setSelectedKlasifikasi(`${val} - ${l1Item?.name || ''}`);
     }
-    if (!klasifikasiSearch.trim()) return list.length;
-    const q = klasifikasiSearch.toLowerCase().trim();
-    return list.filter((k: any) => 
-      k.name.toLowerCase().includes(q) || 
-      k.code.toLowerCase().includes(q)
-    ).length;
-  }, [klasifikasiSearch, categoryFilter]);
+  };
+
+  const handleL2Change = (val: string) => {
+    setSelectedL2(val);
+    setSelectedL3('');
+    const item = (klasifikasiData as any[]).find((k: any) => k.code === val);
+    setSelectedKlasifikasi(item ? `${item.code} - ${item.name}` : val);
+  };
+
+  const handleL3Change = (val: string) => {
+    setSelectedL3(val);
+    if (!val) {
+      const item = (klasifikasiData as any[]).find((k: any) => k.code === selectedL2);
+      setSelectedKlasifikasi(item ? `${item.code} - ${item.name}` : selectedL2);
+    } else {
+      const item = (klasifikasiData as any[]).find((k: any) => k.code === val);
+      setSelectedKlasifikasi(item ? `${item.code} - ${item.name}` : val);
+    }
+  };
+
+  const handleSelectSearchResult = (k: any) => {
+    setSelectedKlasifikasi(`${k.code} - ${k.name}`);
+    setSearchKeyword('');
+    // Sinkronisasi dropdown bertingkat
+    const parts = k.code.split('.');
+    if (parts.length >= 1) setSelectedL1(parts[0]);
+    if (parts.length >= 2) setSelectedL2(`${parts[0]}.${parts[1]}`);
+    if (parts.length >= 3) setSelectedL3(k.code);
+    else setSelectedL3('');
+  };
+
+  const handleResetToDefault = () => {
+    setSelectedL1('600');
+    setSelectedL2('600.4');
+    setSelectedL3('');
+    setSelectedKlasifikasi('600.4 - LINGKUNGAN HIDUP');
+    setSearchKeyword('');
+  };
+
 
   const addPetugas = () => setPetugasList([...petugasList, '']);
   const removePetugas = (idx: number) => {
@@ -114,7 +185,7 @@ export default function TambahNotaDinasPage() {
         action: 'next-number',
         tanggal: tanggalNota,
         bagian: dariBagian,
-        kode_klasifikasi: selectedKlasifikasi || klasifikasiSearch,
+        kode_klasifikasi: selectedKlasifikasi,
         is_sisipan: isSisipan ? 'true' : 'false',
         nomor_sisipan: nomorSisipan
       });
@@ -128,7 +199,7 @@ export default function TambahNotaDinasPage() {
     } catch (err) {
       console.error('Failed to fetch preview nomor:', err);
     }
-  }, [tanggalNota, dariBagian, selectedKlasifikasi, klasifikasiSearch, isSisipan, nomorSisipan, savedNotaId]);
+  }, [tanggalNota, dariBagian, selectedKlasifikasi, isSisipan, nomorSisipan, savedNotaId]);
 
   useEffect(() => {
     fetchPreviewNomor();
@@ -167,8 +238,8 @@ export default function TambahNotaDinasPage() {
       alert('Tanggal Nota wajib diisi!');
       return;
     }
-    if (dariBagian === 'Umum' && !selectedKlasifikasi && !klasifikasiSearch) {
-      alert('Pilih atau ketik Kode Klasifikasi untuk Bagian Umum!');
+    if (dariBagian === 'Umum' && !selectedKlasifikasi) {
+      alert('Pilih Kode Klasifikasi untuk Bagian Umum!');
       return;
     }
 
@@ -181,7 +252,7 @@ export default function TambahNotaDinasPage() {
         nama_nota: namaNota,
         tanggal_nota: tanggalNota,
         dari_bagian: dariBagian,
-        kode_klasifikasi: selectedKlasifikasi || klasifikasiSearch,
+        kode_klasifikasi: selectedKlasifikasi,
         yth,
         sifat,
         lampiran,
@@ -280,7 +351,7 @@ export default function TambahNotaDinasPage() {
         nama_nota: namaNota,
         tanggal_nota: tanggalNota,
         dari_bagian: dariBagian,
-        kode_klasifikasi: selectedKlasifikasi || klasifikasiSearch,
+        kode_klasifikasi: selectedKlasifikasi,
         yth,
         sifat,
         lampiran,
@@ -571,7 +642,7 @@ export default function TambahNotaDinasPage() {
             )}
           </div>
 
-          {/* PENGATURAN KODE KLASIFIKASI (BAGIAN UMUM) - PANEL INLINE TERBUKA TANPA DROPDOWN */}
+          {/* KLASIFIKASI KODE SURAT BERTINGKAT & CARI CEPAT */}
           {dariBagian === 'Umum' && (
             <div className="bg-fuchsia-50/50 border border-fuchsia-200 p-5 rounded-2xl space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-fuchsia-200/70 pb-3">
@@ -580,132 +651,157 @@ export default function TambahNotaDinasPage() {
                     Kode Klasifikasi Surat (Bagian Umum) <span className="text-red-500">*</span>
                   </label>
                   <p className="text-[11px] text-slate-500 mt-0.5">
-                    Daftar master klasifikasi kearsipan terbuka langsung di bawah ini. Anda dapat mencari, memfilter per kategori, atau klik baris untuk memilih.
+                    Pilih bertingkat (000, 100, 600 ➔ Sub-Bidang) atau cari cepat langsung melalui kata kunci.
                   </p>
                 </div>
 
-                {/* Badge Kode Terpilih */}
+                {/* Badge Kode Aktif */}
                 {selectedKlasifikasi && (
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-fuchsia-100 border border-fuchsia-300 rounded-lg text-xs font-bold text-fuchsia-900 shrink-0">
                     <CheckCircle2 size={13} className="text-fuchsia-700" />
-                    <span>Terpilih: {selectedKlasifikasi.split(' - ')[0]}</span>
+                    <span>Aktif: {selectedKlasifikasi.split(' - ')[0]}</span>
                   </div>
                 )}
               </div>
 
-              {/* Kolom Pencarian Langsung */}
+              {/* PENCARIAN CEPAT KATA KUNCI */}
               <div className="relative">
-                <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />
-                <input 
-                  type="text" 
-                  placeholder="Cari kode atau nama klasifikasi (misal: 600, sampah, limbah, izin, 800, pegawai)..." 
-                  value={klasifikasiSearch}
-                  onChange={(e) => setKlasifikasiSearch(e.target.value)}
-                  disabled={Boolean(savedNotaId)}
-                  className="w-full bg-white border border-slate-300 text-slate-900 text-xs font-medium rounded-xl pl-9 pr-4 py-2.5 focus:border-fuchsia-500 outline-none shadow-sm"
-                />
-              </div>
-
-              {/* Tombol Kategori Cepat */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                <span className="text-[11px] font-bold text-slate-500 uppercase mr-1">Kelompok:</span>
-                {[
-                  { label: '600 LH & PU (277)', val: '600' },
-                  { label: 'Semua (2.578)', val: 'SEMUA' },
-                  { label: '800 Kepegawaian (188)', val: '800' },
-                  { label: '000 Umum & Perlengkapan', val: '000' },
-                  { label: '900 Keuangan Daerah', val: '900' }
-                ].map((cat) => (
-                  <button
-                    key={cat.val}
-                    type="button"
-                    onClick={() => setCategoryFilter(cat.val)}
+                <div className="relative">
+                  <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />
+                  <input 
+                    type="text" 
+                    placeholder="🔍 Cari cepat kata kunci (misal: sampah, limbah, izin, cuti, mutasi, atau ketik 600)..." 
+                    value={searchKeyword}
+                    onChange={(e) => setSearchKeyword(e.target.value)}
                     disabled={Boolean(savedNotaId)}
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${
-                      categoryFilter === cat.val
-                        ? 'bg-fuchsia-600 text-white border-fuchsia-600 shadow-sm'
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* DAFTAR MASTER KLASIFIKASI INLINE (TIDAK DROPDOWN MELAYANG) */}
-              <div className="bg-white border border-slate-300 rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-slate-50 px-4 py-2 border-b border-slate-200 flex justify-between items-center text-[11px] font-bold text-slate-600 uppercase">
-                  <span>Daftar Klasifikasi ({totalMatchesCount} data)</span>
-                  <span className="text-slate-400 font-normal">Klik baris untuk memilih</span>
-                </div>
-
-                <div className="h-64 overflow-y-auto divide-y divide-slate-100">
-                  {filteredKlasifikasi.map((k: any, i: number) => {
-                    const isSelected = selectedKlasifikasi.startsWith(k.code);
-                    return (
-                      <div 
-                        key={i} 
-                        onClick={() => {
-                          if (savedNotaId) return;
-                          setSelectedKlasifikasi(`${k.code} - ${k.name}`);
-                        }}
-                        className={`px-4 py-2.5 cursor-pointer flex flex-col transition-colors ${
-                          isSelected 
-                            ? 'bg-fuchsia-100/70 border-l-4 border-fuchsia-600' 
-                            : 'hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
-                            isSelected 
-                              ? 'bg-fuchsia-600 text-white' 
-                              : 'bg-slate-100 text-fuchsia-700 border border-slate-200'
-                          }`}>
-                            {k.code}
-                          </span>
-                          {isSelected && (
-                            <span className="text-[11px] font-bold text-fuchsia-700 flex items-center gap-1">
-                              <Check size={12} /> Terpilih
-                            </span>
-                          )}
-                        </div>
-                        <p className={`text-xs mt-1 leading-snug ${
-                          isSelected ? 'font-semibold text-slate-900' : 'text-slate-600'
-                        }`}>
-                          {k.name}
-                        </p>
-                      </div>
-                    );
-                  })}
-                  {filteredKlasifikasi.length === 0 && (
-                    <div className="p-8 text-center text-xs text-slate-400">
-                      Tidak ada kode klasifikasi yang cocok dengan kata kunci & kategori.
-                    </div>
+                    className="w-full bg-white border border-slate-300 text-slate-900 text-xs font-medium rounded-xl pl-9 pr-14 py-2.5 focus:border-fuchsia-500 outline-none shadow-sm"
+                  />
+                  {searchKeyword && (
+                    <button 
+                      type="button" 
+                      onClick={() => setSearchKeyword('')} 
+                      className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-600 font-bold"
+                    >
+                      Batal
+                    </button>
                   )}
                 </div>
+
+                {/* Hasil Pencarian Cepat (hanya muncul saat pengguna mengetik) */}
+                {searchResults.length > 0 && (
+                  <div className="mt-2 bg-white border border-fuchsia-300 rounded-xl shadow-lg max-h-60 overflow-y-auto divide-y divide-slate-100 z-20">
+                    <div className="bg-fuchsia-50/80 px-3 py-1.5 text-[10px] font-bold text-fuchsia-800 uppercase flex justify-between items-center">
+                      <span>Hasil Pencarian Cepat ({searchResults.length} ditemukan)</span>
+                      <span className="text-slate-400 font-normal">Klik untuk memilih</span>
+                    </div>
+                    {searchResults.map((k: any, i: number) => (
+                      <div 
+                        key={i} 
+                        onClick={() => handleSelectSearchResult(k)}
+                        className="px-4 py-2.5 hover:bg-fuchsia-50/70 cursor-pointer flex flex-col transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-fuchsia-700 bg-fuchsia-50 px-1.5 py-0.5 rounded border border-fuchsia-200">
+                            {k.code}
+                          </span>
+                        </div>
+                        <span className="text-xs text-slate-700 mt-0.5 font-medium leading-snug">
+                          {k.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Rincian Pilihan & Tombol Reset */}
-              <div className="bg-white p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <span className="font-bold text-slate-500 uppercase shrink-0">Kode Aktif:</span>
-                  <span className="font-bold text-slate-900 truncate">
-                    {selectedKlasifikasi || 'Belum Dipilih'}
-                  </span>
+              {/* PEMILIHAN BERTINGKAT (CASCADING LEVEL 1 ➔ 2 ➔ 3) */}
+              <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-3.5 shadow-sm">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
+                  Atau Pilih Klasifikasi Berjenjang:
+                </span>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {/* TINGKAT 1: RUMPUN UTAMA */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1.5 uppercase">
+                      1. Kelompok Utama (000 - 900)
+                    </label>
+                    <select 
+                      value={selectedL1}
+                      onChange={(e) => handleL1Change(e.target.value)}
+                      disabled={Boolean(savedNotaId)}
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-xs font-bold rounded-xl px-3 py-2.5 focus:bg-white focus:border-fuchsia-500 outline-none cursor-pointer"
+                    >
+                      {LEVEL_1_CATEGORIES.map(c => (
+                        <option key={c.code} value={c.code}>
+                          {c.code} - {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* TINGKAT 2: SUB-URUSAN */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1.5 uppercase">
+                      2. Sub-Bidang / Urusan
+                    </label>
+                    <select 
+                      value={selectedL2}
+                      onChange={(e) => handleL2Change(e.target.value)}
+                      disabled={Boolean(savedNotaId) || level2Options.length === 0}
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-xs font-bold rounded-xl px-3 py-2.5 focus:bg-white focus:border-fuchsia-500 outline-none cursor-pointer disabled:opacity-50"
+                    >
+                      {level2Options.map((c: any) => (
+                        <option key={c.code} value={c.code}>
+                          {c.code} - {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* TINGKAT 3: RINCIAN SPESIFIK */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 mb-1.5 uppercase">
+                      3. Rincian Khusus (Opsional)
+                    </label>
+                    <select 
+                      value={selectedL3}
+                      onChange={(e) => handleL3Change(e.target.value)}
+                      disabled={Boolean(savedNotaId) || level3Options.length === 0}
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-xs font-bold rounded-xl px-3 py-2.5 focus:bg-white focus:border-fuchsia-500 outline-none cursor-pointer disabled:opacity-50"
+                    >
+                      <option value="">-- Gunakan {selectedL2} Saja --</option>
+                      {level3Options.map((c: any) => (
+                        <option key={c.code} value={c.code}>
+                          {c.code} - {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                {selectedKlasifikasi && !savedNotaId && (
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      setSelectedKlasifikasi('600.4 - Pengelolaan Lingkungan Hidup');
-                      setKlasifikasiSearch('');
-                      setCategoryFilter('600');
-                    }}
-                    className="text-[11px] font-bold text-slate-500 hover:text-fuchsia-700 px-2.5 py-1 rounded-lg hover:bg-slate-100 transition-colors shrink-0 text-left sm:text-right"
-                  >
-                    Kembalikan ke Default (600.4)
-                  </button>
-                )}
+
+                {/* Ringkasan Pilihan Aktif */}
+                <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <span className="font-bold text-slate-500 uppercase shrink-0">Kode Aktif:</span>
+                    <span className="font-bold text-fuchsia-900 font-mono bg-fuchsia-50 border border-fuchsia-200 px-2 py-0.5 rounded shrink-0">
+                      {selectedKlasifikasi ? selectedKlasifikasi.split(' - ')[0] : '600.4'}
+                    </span>
+                    <span className="text-slate-700 truncate font-medium">
+                      {selectedKlasifikasi ? selectedKlasifikasi.split(' - ').slice(1).join(' - ') : 'Pengelolaan Lingkungan Hidup'}
+                    </span>
+                  </div>
+
+                  {!savedNotaId && (
+                    <button 
+                      type="button" 
+                      onClick={handleResetToDefault}
+                      className="text-[11px] font-bold text-fuchsia-700 hover:text-fuchsia-900 underline text-left sm:text-right shrink-0"
+                    >
+                      Reset ke 600.4 (Default DLH)
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}
