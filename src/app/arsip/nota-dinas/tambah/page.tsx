@@ -48,6 +48,7 @@ export default function TambahNotaDinasPage() {
   const [klasifikasiSearch, setKlasifikasiSearch] = useState('');
   const [selectedKlasifikasi, setSelectedKlasifikasi] = useState('');
   const [showKlasifikasiDropdown, setShowKlasifikasiDropdown] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState('SEMUA');
 
   // Anggota list
   const [anggota, setAnggota] = useState<any[]>([]);
@@ -59,12 +60,32 @@ export default function TambahNotaDinasPage() {
   const [copied, setCopied] = useState(false);
 
   const filteredKlasifikasi = useMemo(() => {
-    if (!klasifikasiSearch) return klasifikasiData.slice(0, 50);
-    return klasifikasiData.filter((k: any) => 
-      k.name.toLowerCase().includes(klasifikasiSearch.toLowerCase()) || 
-      k.code.toLowerCase().includes(klasifikasiSearch.toLowerCase())
-    ).slice(0, 50);
-  }, [klasifikasiSearch]);
+    let list = klasifikasiData as any[];
+    if (categoryFilter !== 'SEMUA') {
+      list = list.filter(k => k.code.startsWith(categoryFilter));
+    }
+    if (!klasifikasiSearch.trim()) {
+      return list.slice(0, 100);
+    }
+    const q = klasifikasiSearch.toLowerCase().trim();
+    return list.filter((k: any) => 
+      k.name.toLowerCase().includes(q) || 
+      k.code.toLowerCase().includes(q)
+    ).slice(0, 100);
+  }, [klasifikasiSearch, categoryFilter]);
+
+  const totalMatchesCount = useMemo(() => {
+    let list = klasifikasiData as any[];
+    if (categoryFilter !== 'SEMUA') {
+      list = list.filter(k => k.code.startsWith(categoryFilter));
+    }
+    if (!klasifikasiSearch.trim()) return list.length;
+    const q = klasifikasiSearch.toLowerCase().trim();
+    return list.filter((k: any) => 
+      k.name.toLowerCase().includes(q) || 
+      k.code.toLowerCase().includes(q)
+    ).length;
+  }, [klasifikasiSearch, categoryFilter]);
 
   const addPetugas = () => setPetugasList([...petugasList, '']);
   const removePetugas = (idx: number) => {
@@ -575,31 +596,77 @@ export default function TambahNotaDinasPage() {
               </div>
               
               {showKlasifikasiDropdown && !savedNotaId && (
-                <div className="absolute z-50 mt-1 w-[95%] max-h-56 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl">
-                  <div className="flex justify-between items-center bg-slate-50 p-2 border-b border-slate-200 sticky top-0 z-50">
-                    <span className="text-[11px] font-bold uppercase text-slate-500 px-2">Pilih Klasifikasi</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setShowKlasifikasiDropdown(false)} 
-                      className="text-[11px] font-bold text-red-600 px-2 py-0.5 bg-white border border-red-200 rounded"
-                    >
-                      TUTUP
-                    </button>
-                  </div>
-                  {filteredKlasifikasi.map((k: any, i: number) => (
-                    <div 
-                      key={i} 
-                      onClick={() => {
-                        setSelectedKlasifikasi(`${k.code} - ${k.name}`);
-                        setKlasifikasiSearch(`${k.code} - ${k.name}`);
-                        setShowKlasifikasiDropdown(false);
-                      }}
-                      className="px-4 py-2.5 border-b border-slate-100 hover:bg-fuchsia-50/50 cursor-pointer flex flex-col bg-white"
-                    >
-                      <span className="font-bold text-slate-900 text-xs">{k.code}</span>
-                      <span className="text-slate-500 text-[11px]">{k.name}</span>
+                <div className="absolute z-50 mt-1 w-[95%] max-h-80 overflow-y-auto bg-white border border-slate-300 rounded-2xl shadow-2xl">
+                  {/* Dropdown Header */}
+                  <div className="bg-slate-50 p-3 border-b border-slate-200 sticky top-0 z-50 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[11px] font-bold uppercase text-slate-700">
+                          {totalMatchesCount} Kode Ditemukan (dari 2.578 Master Data)
+                        </span>
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={() => setShowKlasifikasiDropdown(false)} 
+                        className="text-[11px] font-bold text-red-600 px-2.5 py-0.5 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors"
+                      >
+                        TUTUP
+                      </button>
                     </div>
-                  ))}
+
+                    {/* Quick Category Filter Pills */}
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {[
+                        { label: 'Semua (2.578)', val: 'SEMUA' },
+                        { label: '600 LH & PU (277)', val: '600' },
+                        { label: '800 Kepegawaian (188)', val: '800' },
+                        { label: '000 Umum', val: '000' },
+                        { label: '900 Keuangan', val: '900' }
+                      ].map((cat) => (
+                        <button
+                          key={cat.val}
+                          type="button"
+                          onClick={() => setCategoryFilter(cat.val)}
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md border transition-all ${
+                            categoryFilter === cat.val
+                              ? 'bg-fuchsia-600 text-white border-fuchsia-600 shadow-sm'
+                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Dropdown Items List */}
+                  <div className="divide-y divide-slate-100">
+                    {filteredKlasifikasi.map((k: any, i: number) => (
+                      <div 
+                        key={i} 
+                        onClick={() => {
+                          setSelectedKlasifikasi(`${k.code} - ${k.name}`);
+                          setKlasifikasiSearch(`${k.code} - ${k.name}`);
+                          setShowKlasifikasiDropdown(false);
+                        }}
+                        className="px-4 py-3 hover:bg-fuchsia-50/60 cursor-pointer flex flex-col bg-white transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-fuchsia-700 text-xs px-1.5 py-0.5 bg-fuchsia-50 rounded border border-fuchsia-200">
+                            {k.code}
+                          </span>
+                        </div>
+                        <span className="text-slate-700 text-xs mt-1 font-medium leading-relaxed">
+                          {k.name}
+                        </span>
+                      </div>
+                    ))}
+                    {filteredKlasifikasi.length === 0 && (
+                      <div className="p-6 text-center text-xs font-bold text-slate-400">
+                        Tidak ada kode klasifikasi yang cocok dengan kata kunci & kategori terpilih.
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
