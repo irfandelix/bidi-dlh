@@ -10,7 +10,6 @@ import {
   Key, 
   Copy, 
   Check, 
-  Share2, 
   ExternalLink, 
   PlusCircle, 
   FileCheck, 
@@ -20,7 +19,8 @@ import {
   Calendar,
   FileText,
   Sparkles,
-  MessageCircle
+  Smartphone,
+  Send
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -40,7 +40,7 @@ export default function BuatAgendaPengaduanPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successData, setSuccessData] = useState<any>(null);
 
-  // Mode: 'token_only' (cepat buat token) vs 'lengkap' (input langsung semua data)
+  // Mode: 'token_only' (cepat buat token untuk mobile BIDIDLH.apk) vs 'lengkap' (input langsung semua data di web)
   const [mode, setMode] = useState<'token_only' | 'lengkap'>('token_only');
 
   // Copy feedback states
@@ -135,7 +135,7 @@ export default function BuatAgendaPengaduanPage() {
     setTimeout(() => setCopiedToken(false), 2500);
   };
 
-  // Helper Kirim via WhatsApp
+  // Helper Kirim Penugasan ke WhatsApp Petugas
   const handleShareWhatsApp = () => {
     if (!successData?.token) return;
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -143,30 +143,16 @@ export default function BuatAgendaPengaduanPage() {
     
     const message = 
       `*DINAS LINGKUNGAN HIDUP*\n` +
-      `*TIKET PENGADUAN MASYARAKAT*\n\n` +
-      `Halo Bapak/Ibu,\n` +
-      `Tiket aduan lingkungan hidup Anda telah berhasil dibuat:\n\n` +
+      `*PENUGASAN ADUAN LAPANGAN (BIDIDLH.apk)*\n\n` +
+      `Halo Rekan Petugas DLH,\n` +
+      `Berikut rincian tiket aduan masyarakat untuk verifikasi lapangan:\n\n` +
       `📌 *Perihal:* ${successData.perihal || '-'}\n` +
-      `🔑 *Kode Token:* *${successData.token}*\n` +
+      `🔑 *Token BIDIDLH.apk:* *${successData.token}*\n` +
       `📅 *Tanggal:* ${successData.tanggal || '-'}\n\n` +
-      `Silakan lengkapi formulir aduan Anda melalui tautan berikut:\n` +
-      `👉 ${link}\n\n` +
-      `Terima kasih telah berpartisipasi menjaga kelestarian lingkungan hidup.`;
+      `Silakan buka aplikasi *BIDIDLH.apk* di perangkat Anda, lalu masukkan kode token di atas untuk input verifikasi & BAP lapangan.\n\n` +
+      `Akses Web Alternatif: ${link}`;
 
-    let waPhone = '';
-    if (successData.telp_pelapor) {
-      // Normalisasi nomor telepon ke format internasional (misal 0812 -> 62812)
-      let cleaned = successData.telp_pelapor.replace(/[^0-9]/g, '');
-      if (cleaned.startsWith('0')) {
-        cleaned = '62' + cleaned.substring(1);
-      }
-      waPhone = cleaned;
-    }
-
-    const waUrl = waPhone 
-      ? `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`
-      : `https://wa.me/?text=${encodeURIComponent(message)}`;
-
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(waUrl, '_blank');
   };
 
@@ -191,7 +177,7 @@ export default function BuatAgendaPengaduanPage() {
             Catat Pengaduan Baru
           </h2>
           <p className="text-sm font-bold text-slate-600 mt-1 uppercase">
-            Terbitkan Tiket Token Akses Pelapor atau Rekam Langsung Laporan Masyarakat
+            Terbitkan Tiket Terintegrasi BIDIDLH.apk atau Rekam Langsung Laporan Masyarakat
           </p>
         </div>
       </div>
@@ -212,14 +198,14 @@ export default function BuatAgendaPengaduanPage() {
           <div className="bg-purple-600 text-white p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center border border-white/30 shrink-0">
-                <Key size={30} className="text-white" />
+                <Smartphone size={30} className="text-white" />
               </div>
               <div>
                 <span className="inline-block bg-white/20 text-white font-mono font-bold text-[11px] px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1">
-                  Tiket Resmi Diterbitkan ✓
+                  Terintegrasi BIDIDLH.apk ✓
                 </span>
                 <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight">
-                  Tiket Berhasil Dibuat!
+                  Tiket Berhasil Diterbitkan!
                 </h3>
               </div>
             </div>
@@ -236,7 +222,7 @@ export default function BuatAgendaPengaduanPage() {
             {/* Ringkasan Perihal & Tanggal */}
             <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-2">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
-                <span className="text-xs font-black text-slate-500 uppercase tracking-wider">Perihal Aduan:</span>
+                <span className="text-xs font-black text-slate-500 uppercase tracking-wider">Perihal Kasus Aduan:</span>
                 <span className="text-sm sm:text-base font-black text-slate-900 text-left sm:text-right">
                   {successData.perihal}
                 </span>
@@ -247,11 +233,12 @@ export default function BuatAgendaPengaduanPage() {
               </div>
             </div>
 
-            {/* Kotak Token Besar */}
+            {/* Kotak Token Besar - Khusus BIDIDLH.apk */}
             <div className="text-center p-6 bg-purple-50/70 border-2 border-purple-200 rounded-2xl space-y-3">
-              <span className="text-xs font-black uppercase tracking-widest text-purple-700">
-                Kode Token Akses Pelapor
-              </span>
+              <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-purple-700">
+                <Key size={16} />
+                <span>Kode Token Integrasi BIDIDLH.apk</span>
+              </div>
               <div className="flex items-center justify-center gap-3">
                 <span className="text-3xl sm:text-4xl font-black font-mono text-purple-950 tracking-wider bg-white px-6 py-3 rounded-2xl border-2 border-purple-300 shadow-inner">
                   {successData.token}
@@ -265,15 +252,19 @@ export default function BuatAgendaPengaduanPage() {
                   {copiedToken ? <Check size={20} className="text-emerald-600" /> : <Copy size={20} />}
                 </button>
               </div>
-              <p className="text-xs font-bold text-slate-500">
-                {copiedToken ? <span className="text-emerald-600 font-black">Kode token berhasil disalin ke papan klip!</span> : 'Kode unik ini digunakan pelapor untuk memverifikasi dan mengisi form aduan.'}
+              <p className="text-xs font-bold text-slate-600 max-w-md mx-auto">
+                {copiedToken ? (
+                  <span className="text-emerald-600 font-black">Kode token berhasil disalin ke papan klip!</span>
+                ) : (
+                  'Buka aplikasi BIDIDLH.apk di ponsel petugas lapangan, lalu input kode token di atas untuk mengisi data verlap dan BAP.'
+                )}
               </p>
             </div>
 
-            {/* Kotak Tautan Publik Pelapor */}
+            {/* Kotak Tautan Alternatif Web */}
             <div className="space-y-2">
               <label className="block text-xs font-black text-slate-600 uppercase tracking-wider">
-                Tautan Formulir Langsung untuk Pelapor:
+                Tautan Form Web (Alternatif Tanpa Aplikasi Mobile):
               </label>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <div className="bg-slate-50 border-2 border-slate-200 p-3 rounded-xl break-all text-xs font-mono font-bold text-slate-700 flex-1">
@@ -292,33 +283,33 @@ export default function BuatAgendaPengaduanPage() {
                   ) : (
                     <>
                       <Copy size={16} />
-                      <span>Salin Tautan</span>
+                      <span>Salin Link</span>
                     </>
                   )}
                 </button>
               </div>
             </div>
 
-            {/* Tombol Aksi Distribusi Tiket */}
+            {/* Tombol Aksi Distribusi Tiket & Input */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              {/* Bagikan ke WhatsApp */}
+              {/* Kirim Tugas ke WhatsApp Petugas */}
               <button
                 type="button"
                 onClick={handleShareWhatsApp}
                 className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl border border-emerald-700 shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider"
               >
-                <MessageCircle size={18} />
-                <span>Kirim via WhatsApp</span>
+                <Send size={16} />
+                <span>Kirim Tugas ke WA Petugas</span>
               </button>
 
-              {/* Buka Form Isian Sekarang */}
+              {/* Buka Form Isian Sekarang di Web */}
               {successData.id && (
                 <Link
                   href={`/pengaduan/isi/${successData.id}`}
                   className="w-full py-3.5 px-4 bg-purple-600 hover:bg-purple-700 text-white font-black rounded-xl border border-purple-700 shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider text-center"
                 >
-                  <ExternalLink size={18} />
-                  <span>Buka & Isi Formulir</span>
+                  <ExternalLink size={16} />
+                  <span>Isi di Web Sekarang</span>
                 </Link>
               )}
             </div>
@@ -356,7 +347,7 @@ export default function BuatAgendaPengaduanPage() {
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               
-              {/* Tab 1: Token Cepat */}
+              {/* Tab 1: Token Cepat untuk BIDIDLH.apk */}
               <button
                 type="button"
                 onClick={() => setMode('token_only')}
@@ -370,20 +361,20 @@ export default function BuatAgendaPengaduanPage() {
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
                     mode === 'token_only' ? 'bg-purple-600 text-white' : 'bg-slate-200 text-slate-600'
                   }`}>
-                    <Key size={18} />
+                    <Smartphone size={18} />
                   </div>
                   <div>
                     <h4 className="font-black text-sm text-slate-900 uppercase">
-                      Buat Token Cepat
+                      Integrasi BIDIDLH.apk
                     </h4>
                     <p className="text-[11px] font-bold text-slate-500 mt-0.5">
-                      Cukup judul & tanggal, link dikirim ke pelapor
+                      Cukup perihal & tanggal, diisi oleh petugas lapangan via aplikasi
                     </p>
                   </div>
                 </div>
               </button>
 
-              {/* Tab 2: Input Lengkap */}
+              {/* Tab 2: Input Lengkap di Web */}
               <button
                 type="button"
                 onClick={() => setMode('lengkap')}
@@ -401,10 +392,10 @@ export default function BuatAgendaPengaduanPage() {
                   </div>
                   <div>
                     <h4 className="font-black text-sm text-slate-900 uppercase">
-                      Input Langsung di Tempat
+                      Input Lengkap di Web
                     </h4>
                     <p className="text-[11px] font-bold text-slate-500 mt-0.5">
-                      Rekam data pelapor & lokasi sekaligus
+                      Rekam langsung data pelapor, terlapor, dan lokasi di kantor
                     </p>
                   </div>
                 </div>
@@ -536,7 +527,7 @@ export default function BuatAgendaPengaduanPage() {
             <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs font-bold text-slate-500">
                 {mode === 'token_only' 
-                  ? 'Tiket akan otomatis menerbitkan kode unik ADN-XXXXXX untuk dibagikan ke pelapor.' 
+                  ? 'Tiket akan otomatis menerbitkan kode unik ADN-XXXXXX yang terintegrasi langsung dengan aplikasi mobile BIDIDLH.apk.' 
                   : 'Data laporan akan langsung tersimpan dengan status Form Terisi.'}
               </p>
 
@@ -546,7 +537,7 @@ export default function BuatAgendaPengaduanPage() {
                 className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white font-black rounded-2xl border border-slate-900 shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-xs sm:text-sm disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 {loading ? <LottieLoader size={24} /> : <Save size={18} />}
-                <span>{mode === 'token_only' ? 'Terbitkan Token Akses' : 'Simpan & Terbitkan Tiket'}</span>
+                <span>{mode === 'token_only' ? 'Terbitkan Token BIDIDLH.apk' : 'Simpan & Terbitkan Tiket'}</span>
               </button>
             </div>
 

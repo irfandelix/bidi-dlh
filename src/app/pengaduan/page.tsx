@@ -8,7 +8,6 @@ import {
   AlertTriangle, 
   ExternalLink, 
   Search, 
-  Download, 
   Copy, 
   Check, 
   Clock, 
@@ -16,13 +15,12 @@ import {
   FileCheck, 
   MapPin, 
   User, 
-  Phone, 
   X, 
   ChevronLeft, 
   ChevronRight, 
   FileSpreadsheet,
   Layers,
-  FileText
+  Smartphone
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -81,7 +79,7 @@ export default function PengaduanListPage() {
         const matchTerlapor = (item.nama_terlapor || '').toLowerCase().includes(q);
         const matchLokasi = (item.lokasi_aduan || '').toLowerCase().includes(q);
         const matchToken = (item.token || '').toLowerCase().includes(q);
-        const matchHp = (item.no_hp || item.telepon || '').toLowerCase().includes(q);
+        const matchHp = (item.no_hp || item.telepon || item.telp_pelapor || '').toLowerCase().includes(q);
         return matchPerihal || matchPelapor || matchTerlapor || matchLokasi || matchToken || matchHp;
       }
 
@@ -138,7 +136,7 @@ export default function PengaduanListPage() {
       `"${item.tanggal || '-'}"`,
       `"${(item.perihal || '').replace(/"/g, '""')}"`,
       `"${(item.nama_pelapor || '-').replace(/"/g, '""')}"`,
-      `"${(item.no_hp || item.telepon || '-').replace(/"/g, '""')}"`,
+      `"${(item.no_hp || item.telepon || item.telp_pelapor || '-').replace(/"/g, '""')}"`,
       `"${(item.nama_terlapor || '-').replace(/"/g, '""')}"`,
       `"${(item.lokasi_aduan || '-').replace(/"/g, '""')}"`,
       `"${item.status_tahapan || 'Menunggu Isian'}"`,
@@ -168,7 +166,7 @@ export default function PengaduanListPage() {
         <ArrowLeft size={16} /> Kembali ke Beranda
       </Link>
 
-      {/* Header Halaman (Konsisten dengan gaya NeoBrutalism DLH) */}
+      {/* Header Halaman */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-md flex-1 w-full">
           <div className="w-14 h-14 rounded-xl bg-purple-400 border border-slate-200 flex items-center justify-center shadow-sm shrink-0">
@@ -179,7 +177,7 @@ export default function PengaduanListPage() {
               Daftar Pengaduan
             </h2>
             <p className="text-sm font-bold text-slate-600 mt-1 uppercase">
-              Rekap Data, Registrasi Tiket & Dokumentasi Aduan Lingkungan Hidup
+              Rekap Data, Tiket Integrasi BIDIDLH.apk & Dokumentasi Aduan Lingkungan Hidup
             </p>
           </div>
         </div>
@@ -195,7 +193,7 @@ export default function PengaduanListPage() {
         </Link>
       </div>
 
-      {/* Kartu Ringkasan Metrik (Poin 3) */}
+      {/* Kartu Ringkasan Metrik */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Total Aduan */}
         <div 
@@ -214,7 +212,7 @@ export default function PengaduanListPage() {
           <p className="text-[11px] font-bold text-slate-500 mt-1">Semua laporan terdaftar</p>
         </div>
 
-        {/* Menunggu Pelapor */}
+        {/* Menunggu Isian */}
         <div 
           onClick={() => setStatusFilter('menunggu')}
           className={`bg-white p-5 rounded-2xl border-2 transition-all cursor-pointer shadow-sm hover:shadow-md ${
@@ -222,13 +220,13 @@ export default function PengaduanListPage() {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">Menunggu Pelapor</span>
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">Menunggu Isian</span>
             <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
-              <Clock size={16} />
+              <Smartphone size={16} />
             </div>
           </div>
           <p className="text-2xl sm:text-3xl font-black text-amber-600 mt-2 font-mono">{metrics.menunggu}</p>
-          <p className="text-[11px] font-bold text-slate-500 mt-1">Token terbit / belum isi</p>
+          <p className="text-[11px] font-bold text-slate-500 mt-1">Token terbit / BIDIDLH.apk</p>
         </div>
 
         {/* Form Terisi */}
@@ -266,7 +264,7 @@ export default function PengaduanListPage() {
         </div>
       </div>
 
-      {/* Filter Tabs & Search Bar & Export (Poin 2 & Poin 6) */}
+      {/* Filter Tabs & Search Bar & Export */}
       <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
         <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           
@@ -292,7 +290,7 @@ export default function PengaduanListPage() {
                   : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-white'
               }`}
             >
-              Menunggu Pelapor ({metrics.menunggu})
+              Menunggu Isian ({metrics.menunggu})
             </button>
             <button
               type="button"
@@ -352,7 +350,7 @@ export default function PengaduanListPage() {
         </div>
       </div>
 
-      {/* Tabel Data Pengaduan (Poin 1 Fix colSpan & Poin 4 Informasi Lengkap) */}
+      {/* Tabel Data Pengaduan */}
       <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-md">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -368,14 +366,12 @@ export default function PengaduanListPage() {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  {/* Fixed colSpan={5} (Poin 1) */}
                   <td colSpan={5} className="p-12 text-center text-slate-500 font-bold uppercase tracking-widest">
                     <LottieLoader size={120} text="MEMUAT DATA PENGADUAN..." />
                   </td>
                 </tr>
               ) : filteredData.length === 0 ? (
                 <tr>
-                  {/* Fixed colSpan={5} (Poin 1) */}
                   <td colSpan={5} className="p-12 text-center text-slate-500 font-bold uppercase tracking-widest">
                     <div className="max-w-md mx-auto space-y-3">
                       <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto text-slate-400">
@@ -413,7 +409,7 @@ export default function PengaduanListPage() {
                               type="button"
                               onClick={() => handleCopyLink(item.token)}
                               className="p-1 text-slate-400 hover:text-purple-600 rounded transition-colors"
-                              title="Salin tautan formulir pelapor"
+                              title="Salin token / tautan form"
                             >
                               {isCopied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
                             </button>
@@ -441,8 +437,8 @@ export default function PengaduanListPage() {
                             <span className="inline-flex items-center gap-1">
                               <User size={13} className="text-purple-600" />
                               <span className="font-bold text-slate-800">{item.nama_pelapor}</span>
-                              {(item.no_hp || item.telepon) && (
-                                <span className="text-slate-400 font-mono">({item.no_hp || item.telepon})</span>
+                              {(item.no_hp || item.telepon || item.telp_pelapor) && (
+                                <span className="text-slate-400 font-mono">({item.no_hp || item.telepon || item.telp_pelapor})</span>
                               )}
                             </span>
                           )}
@@ -472,7 +468,7 @@ export default function PengaduanListPage() {
                             </span>
                           ) : isMenunggu ? (
                             <span className="inline-block bg-amber-100 text-amber-800 font-black text-xs px-3 py-1 rounded-full border border-amber-300">
-                              Menunggu Pelapor
+                              Menunggu Isian
                             </span>
                           ) : (
                             <span className="inline-block bg-indigo-100 text-indigo-800 font-black text-xs px-3 py-1 rounded-full border border-indigo-300">
@@ -514,7 +510,7 @@ export default function PengaduanListPage() {
           </table>
         </div>
 
-        {/* Paginasi (Poin 5) */}
+        {/* Paginasi */}
         {!loading && filteredData.length > 0 && (
           <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-bold text-slate-600">
             <div>
