@@ -46,9 +46,8 @@ export default function TambahNotaDinasPage() {
 
   // Klasifikasi (khusus Umum)
   const [klasifikasiSearch, setKlasifikasiSearch] = useState('');
-  const [selectedKlasifikasi, setSelectedKlasifikasi] = useState('');
-  const [showKlasifikasiDropdown, setShowKlasifikasiDropdown] = useState(false);
-  const [categoryFilter, setCategoryFilter] = useState('SEMUA');
+  const [selectedKlasifikasi, setSelectedKlasifikasi] = useState('600.4 - Pengelolaan Lingkungan Hidup');
+  const [categoryFilter, setCategoryFilter] = useState('600');
 
   // Anggota list
   const [anggota, setAnggota] = useState<any[]>([]);
@@ -572,105 +571,145 @@ export default function TambahNotaDinasPage() {
             )}
           </div>
 
-          {/* Klasifikasi jika Umum */}
+          {/* PENGATURAN KODE KLASIFIKASI (BAGIAN UMUM) - PANEL INLINE TERBUKA TANPA DROPDOWN */}
           {dariBagian === 'Umum' && (
-            <div className="bg-fuchsia-50/60 border border-fuchsia-200 p-4 rounded-2xl relative space-y-2">
-              <label className="block text-xs font-bold text-fuchsia-900 uppercase tracking-wider">
-                Kode Klasifikasi Surat (Bagian Umum) <span className="text-red-500">*</span>
-              </label>
+            <div className="bg-fuchsia-50/50 border border-fuchsia-200 p-5 rounded-2xl space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-fuchsia-200/70 pb-3">
+                <div>
+                  <label className="block text-xs font-black text-fuchsia-950 uppercase tracking-wider">
+                    Kode Klasifikasi Surat (Bagian Umum) <span className="text-red-500">*</span>
+                  </label>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    Daftar master klasifikasi kearsipan terbuka langsung di bawah ini. Anda dapat mencari, memfilter per kategori, atau klik baris untuk memilih.
+                  </p>
+                </div>
+
+                {/* Badge Kode Terpilih */}
+                {selectedKlasifikasi && (
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-fuchsia-100 border border-fuchsia-300 rounded-lg text-xs font-bold text-fuchsia-900 shrink-0">
+                    <CheckCircle2 size={13} className="text-fuchsia-700" />
+                    <span>Terpilih: {selectedKlasifikasi.split(' - ')[0]}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Kolom Pencarian Langsung */}
               <div className="relative">
                 <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />
                 <input 
                   type="text" 
-                  placeholder="Ketik kode atau nama klasifikasi (misal: 600, 800, Pegawai)..." 
+                  placeholder="Cari kode atau nama klasifikasi (misal: 600, sampah, limbah, izin, 800, pegawai)..." 
                   value={klasifikasiSearch}
-                  onChange={(e) => {
-                    setKlasifikasiSearch(e.target.value);
-                    setShowKlasifikasiDropdown(true);
-                  }}
-                  onFocus={() => setShowKlasifikasiDropdown(true)}
+                  onChange={(e) => setKlasifikasiSearch(e.target.value)}
                   disabled={Boolean(savedNotaId)}
-                  className="w-full bg-white border border-slate-200 text-slate-800 text-xs font-medium rounded-xl pl-9 pr-4 py-2.5 focus:border-fuchsia-500 outline-none"
-                  required
+                  className="w-full bg-white border border-slate-300 text-slate-900 text-xs font-medium rounded-xl pl-9 pr-4 py-2.5 focus:border-fuchsia-500 outline-none shadow-sm"
                 />
               </div>
-              
-              {showKlasifikasiDropdown && !savedNotaId && (
-                <div className="absolute z-50 mt-1 w-[95%] max-h-80 overflow-y-auto bg-white border border-slate-300 rounded-2xl shadow-2xl">
-                  {/* Dropdown Header */}
-                  <div className="bg-slate-50 p-3 border-b border-slate-200 sticky top-0 z-50 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[11px] font-bold uppercase text-slate-700">
-                          {totalMatchesCount} Kode Ditemukan (dari 2.578 Master Data)
-                        </span>
-                      </div>
-                      <button 
-                        type="button" 
-                        onClick={() => setShowKlasifikasiDropdown(false)} 
-                        className="text-[11px] font-bold text-red-600 px-2.5 py-0.5 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors"
-                      >
-                        TUTUP
-                      </button>
-                    </div>
 
-                    {/* Quick Category Filter Pills */}
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {[
-                        { label: 'Semua (2.578)', val: 'SEMUA' },
-                        { label: '600 LH & PU (277)', val: '600' },
-                        { label: '800 Kepegawaian (188)', val: '800' },
-                        { label: '000 Umum', val: '000' },
-                        { label: '900 Keuangan', val: '900' }
-                      ].map((cat) => (
-                        <button
-                          key={cat.val}
-                          type="button"
-                          onClick={() => setCategoryFilter(cat.val)}
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md border transition-all ${
-                            categoryFilter === cat.val
-                              ? 'bg-fuchsia-600 text-white border-fuchsia-600 shadow-sm'
-                              : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
-                          }`}
-                        >
-                          {cat.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+              {/* Tombol Kategori Cepat */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                <span className="text-[11px] font-bold text-slate-500 uppercase mr-1">Kelompok:</span>
+                {[
+                  { label: '600 LH & PU (277)', val: '600' },
+                  { label: 'Semua (2.578)', val: 'SEMUA' },
+                  { label: '800 Kepegawaian (188)', val: '800' },
+                  { label: '000 Umum & Perlengkapan', val: '000' },
+                  { label: '900 Keuangan Daerah', val: '900' }
+                ].map((cat) => (
+                  <button
+                    key={cat.val}
+                    type="button"
+                    onClick={() => setCategoryFilter(cat.val)}
+                    disabled={Boolean(savedNotaId)}
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all ${
+                      categoryFilter === cat.val
+                        ? 'bg-fuchsia-600 text-white border-fuchsia-600 shadow-sm'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
 
-                  {/* Dropdown Items List */}
-                  <div className="divide-y divide-slate-100">
-                    {filteredKlasifikasi.map((k: any, i: number) => (
+              {/* DAFTAR MASTER KLASIFIKASI INLINE (TIDAK DROPDOWN MELAYANG) */}
+              <div className="bg-white border border-slate-300 rounded-xl overflow-hidden shadow-sm">
+                <div className="bg-slate-50 px-4 py-2 border-b border-slate-200 flex justify-between items-center text-[11px] font-bold text-slate-600 uppercase">
+                  <span>Daftar Klasifikasi ({totalMatchesCount} data)</span>
+                  <span className="text-slate-400 font-normal">Klik baris untuk memilih</span>
+                </div>
+
+                <div className="h-64 overflow-y-auto divide-y divide-slate-100">
+                  {filteredKlasifikasi.map((k: any, i: number) => {
+                    const isSelected = selectedKlasifikasi.startsWith(k.code);
+                    return (
                       <div 
                         key={i} 
                         onClick={() => {
+                          if (savedNotaId) return;
                           setSelectedKlasifikasi(`${k.code} - ${k.name}`);
-                          setKlasifikasiSearch(`${k.code} - ${k.name}`);
-                          setShowKlasifikasiDropdown(false);
                         }}
-                        className="px-4 py-3 hover:bg-fuchsia-50/60 cursor-pointer flex flex-col bg-white transition-colors"
+                        className={`px-4 py-2.5 cursor-pointer flex flex-col transition-colors ${
+                          isSelected 
+                            ? 'bg-fuchsia-100/70 border-l-4 border-fuchsia-600' 
+                            : 'hover:bg-slate-50'
+                        }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-bold text-fuchsia-700 text-xs px-1.5 py-0.5 bg-fuchsia-50 rounded border border-fuchsia-200">
+                        <div className="flex items-center justify-between">
+                          <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
+                            isSelected 
+                              ? 'bg-fuchsia-600 text-white' 
+                              : 'bg-slate-100 text-fuchsia-700 border border-slate-200'
+                          }`}>
                             {k.code}
                           </span>
+                          {isSelected && (
+                            <span className="text-[11px] font-bold text-fuchsia-700 flex items-center gap-1">
+                              <Check size={12} /> Terpilih
+                            </span>
+                          )}
                         </div>
-                        <span className="text-slate-700 text-xs mt-1 font-medium leading-relaxed">
+                        <p className={`text-xs mt-1 leading-snug ${
+                          isSelected ? 'font-semibold text-slate-900' : 'text-slate-600'
+                        }`}>
                           {k.name}
-                        </span>
+                        </p>
                       </div>
-                    ))}
-                    {filteredKlasifikasi.length === 0 && (
-                      <div className="p-6 text-center text-xs font-bold text-slate-400">
-                        Tidak ada kode klasifikasi yang cocok dengan kata kunci & kategori terpilih.
-                      </div>
-                    )}
-                  </div>
+                    );
+                  })}
+                  {filteredKlasifikasi.length === 0 && (
+                    <div className="p-8 text-center text-xs text-slate-400">
+                      Tidak ada kode klasifikasi yang cocok dengan kata kunci & kategori.
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Rincian Pilihan & Tombol Reset */}
+              <div className="bg-white p-3 rounded-xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="font-bold text-slate-500 uppercase shrink-0">Kode Aktif:</span>
+                  <span className="font-bold text-slate-900 truncate">
+                    {selectedKlasifikasi || 'Belum Dipilih'}
+                  </span>
+                </div>
+                {selectedKlasifikasi && !savedNotaId && (
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setSelectedKlasifikasi('600.4 - Pengelolaan Lingkungan Hidup');
+                      setKlasifikasiSearch('');
+                      setCategoryFilter('600');
+                    }}
+                    className="text-[11px] font-bold text-slate-500 hover:text-fuchsia-700 px-2.5 py-1 rounded-lg hover:bg-slate-100 transition-colors shrink-0 text-left sm:text-right"
+                  >
+                    Kembalikan ke Default (600.4)
+                  </button>
+                )}
+              </div>
             </div>
           )}
+
         </div>
 
         {/* CARD 2: KOLOM MENAMPILKAN NOMOR SEBELUM DI UPLOAD & TOMBOL SIMPAN NOMOR */}
