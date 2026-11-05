@@ -74,8 +74,11 @@ export async function GET(request: Request) {
       });
     }
 
-    // Default: return all
-    const { data, error } = await supabase.from('pengawasan_lapangans').select('*').order('tanggal_kunjungan', { ascending: false });
+    // Default: return all with BAP relationship
+    const { data, error } = await supabase
+      .from('pengawasan_lapangans')
+      .select('*, bap_pengawasans(*)')
+      .order('tanggal_kunjungan', { ascending: false });
     if (error) throw error;
     
     return NextResponse.json({ data });
