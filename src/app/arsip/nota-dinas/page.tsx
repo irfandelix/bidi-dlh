@@ -15,7 +15,11 @@ import {
   Building2,
   Filter,
   Sparkles,
-  X
+  X,
+  Eye,
+  Copy,
+  Check,
+  Info
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import LottieLoader from '@/components/LottieLoader';
@@ -58,6 +62,17 @@ export default function DaftarArsipNotaDinasPage() {
   const [uploadModalDoc, setUploadModalDoc] = useState<NotaDinas | null>(null);
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
+
+  // State untuk modal rincian detail nota dinas & salin perihal
+  const [selectedDetailDoc, setSelectedDetailDoc] = useState<NotaDinas | null>(null);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [copiedModalText, setCopiedModalText] = useState(false);
+
+  const handleCopyPerihal = (id: number, text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const fetchDocs = () => {
     fetch('/api/arsip-nota-dinas')
@@ -382,14 +397,14 @@ export default function DaftarArsipNotaDinasPage() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-700 text-xs font-bold uppercase tracking-wider">
-                <th className="px-5 py-4 w-14 text-center">No</th>
-                <th className="px-5 py-4 min-w-[140px]">Tanggal</th>
-                <th className="px-5 py-4 min-w-[200px]">Nomor Nota Dinas</th>
-                <th className="px-5 py-4 min-w-[130px]">Bagian</th>
-                <th className="px-5 py-4 min-w-[260px]">Perihal / Isi Ringkas</th>
+                <th className="px-5 py-4 w-12 text-center">No</th>
+                <th className="px-5 py-4 min-w-[130px]">Tanggal</th>
+                <th className="px-5 py-4 min-w-[190px]">Nomor Nota Dinas</th>
+                <th className="px-5 py-4 min-w-[120px]">Bagian</th>
+                <th className="px-5 py-4 min-w-[360px]">Perihal / Isi Lengkap Nota Dinas</th>
                 <th className="px-5 py-4 min-w-[180px]">Pemohon</th>
                 <th className="px-5 py-4 min-w-[120px] text-center">Berkas Lampiran</th>
-                <th className="px-5 py-4 min-w-[100px] text-center">Aksi</th>
+                <th className="px-5 py-4 min-w-[130px] text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
@@ -421,15 +436,39 @@ export default function DaftarArsipNotaDinasPage() {
                         </span>
                       </td>
 
-                      <td className="px-5 py-4">
-                        <p className="font-semibold text-slate-900 leading-snug line-clamp-2">
-                          {d.nama_nota || '-'}
-                        </p>
-                        {d.keterangan && (
-                          <p className="text-xs text-slate-500 mt-1 italic line-clamp-1">
-                            Ket: {d.keterangan}
-                          </p>
-                        )}
+                      <td className="px-5 py-4 min-w-[360px]">
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between gap-2 group">
+                            <p className="font-semibold text-slate-900 leading-relaxed text-xs md:text-sm whitespace-normal break-words">
+                              {d.nama_nota || '-'}
+                            </p>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleCopyPerihal(d.id, d.nama_nota)}
+                                title="Salin Teks Perihal"
+                                className="p-1 text-slate-400 hover:text-fuchsia-700 hover:bg-fuchsia-50 rounded-md transition-colors"
+                              >
+                                {copiedId === d.id ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedDetailDoc(d)}
+                                title="Buka Detail Rincian"
+                                className="p-1 text-slate-400 hover:text-fuchsia-700 hover:bg-fuchsia-50 rounded-md transition-colors"
+                              >
+                                <Eye size={13} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {d.keterangan && (
+                            <div className="bg-slate-50 border border-slate-200/90 rounded-lg p-2 text-xs text-slate-600 flex items-start gap-1.5 leading-relaxed">
+                              <span className="font-bold text-slate-400 shrink-0 uppercase tracking-wide text-[10px]">Ket:</span>
+                              <span className="whitespace-normal break-words">{d.keterangan}</span>
+                            </div>
+                          )}
+                        </div>
                       </td>
 
                       <td className="px-5 py-4">
@@ -469,15 +508,25 @@ export default function DaftarArsipNotaDinasPage() {
                       </td>
 
                       <td className="px-5 py-4 text-center">
-                        <button 
-                          onClick={() => handleDelete(d.id)}
-                          disabled={deletingId === d.id}
-                          className="px-2.5 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors inline-flex items-center gap-1 disabled:opacity-50"
-                          title="Hapus Nota Dinas"
-                        >
-                          <Trash2 size={13} />
-                          <span>Hapus</span>
-                        </button>
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button 
+                            onClick={() => setSelectedDetailDoc(d)}
+                            className="px-2.5 py-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-fuchsia-50 hover:text-fuchsia-700 border border-slate-200 rounded-lg transition-colors inline-flex items-center gap-1"
+                            title="Lihat Rincian Lengkap"
+                          >
+                            <Eye size={13} />
+                            <span>Detail</span>
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(d.id)}
+                            disabled={deletingId === d.id}
+                            className="px-2.5 py-1.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors inline-flex items-center gap-1 disabled:opacity-50"
+                            title="Hapus Nota Dinas"
+                          >
+                            <Trash2 size={13} />
+                            <span>Hapus</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -597,6 +646,144 @@ export default function DaftarArsipNotaDinasPage() {
         </div>
       )}
 
+      {/* Modal Detail Lengkap Nota Dinas */}
+      {selectedDetailDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 space-y-6">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center shrink-0">
+                  <FileText size={24} />
+                </div>
+                <div>
+                  <h3 className="text-base md:text-lg font-black text-slate-900 uppercase">
+                    Rincian Lengkap Nota Dinas
+                  </h3>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="font-mono text-xs font-bold text-fuchsia-800 bg-fuchsia-50 px-2 py-0.5 rounded border border-fuchsia-200">
+                      {selectedDetailDoc.nomor_otomatis}
+                    </span>
+                    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold border ${getBagianBadgeClass(selectedDetailDoc.dari_bagian)}`}>
+                      {selectedDetailDoc.dari_bagian || 'Umum'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedDetailDoc(null)} 
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                title="Tutup"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="space-y-4">
+              {/* Box Perihal Lengkap */}
+              <div className="bg-fuchsia-50/40 border border-fuchsia-200 p-5 rounded-2xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-fuchsia-950 uppercase tracking-wider flex items-center gap-1.5">
+                    <Info size={14} className="text-fuchsia-600" />
+                    Perihal / Isi Nota Dinas
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedDetailDoc.nama_nota);
+                      setCopiedModalText(true);
+                      setTimeout(() => setCopiedModalText(false), 2000);
+                    }}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-fuchsia-700 bg-white hover:bg-fuchsia-100 border border-fuchsia-200 px-2.5 py-1 rounded-lg transition-colors"
+                  >
+                    {copiedModalText ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                    <span>{copiedModalText ? 'Perihal Disalin' : 'Salin Perihal'}</span>
+                  </button>
+                </div>
+                <p className="text-sm md:text-base font-semibold text-slate-900 leading-relaxed whitespace-pre-wrap break-words">
+                  {selectedDetailDoc.nama_nota}
+                </p>
+              </div>
+
+              {/* Rincian Atribut */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Tanggal Nota:</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedDetailDoc.tanggal_nota || '-'}</span>
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Asal Bagian:</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedDetailDoc.dari_bagian || 'Umum'}</span>
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Pemohon:</span>
+                  <span className="font-bold text-slate-800 text-sm uppercase">
+                    {selectedDetailDoc.pemohon?.nama || 'Tanpa Pemohon'}
+                  </span>
+                  {selectedDetailDoc.pemohon?.jabatan && (
+                    <p className="text-[11px] text-slate-500">{selectedDetailDoc.pemohon.jabatan}</p>
+                  )}
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Berkas Dokumen:</span>
+                  {selectedDetailDoc.file_url ? (
+                    <a 
+                      href={resolveFileUrl(selectedDetailDoc.file_url)} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white rounded-lg text-xs font-bold transition-colors mt-0.5"
+                    >
+                      <ExternalLink size={13} />
+                      <span>Buka File Lampiran</span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const target = selectedDetailDoc;
+                        setSelectedDetailDoc(null);
+                        setUploadModalDoc(target);
+                      }}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-200 hover:bg-fuchsia-100 text-slate-700 hover:text-fuchsia-700 rounded-lg text-xs font-bold transition-colors mt-0.5"
+                    >
+                      <Upload size={13} />
+                      <span>Unggah File Sekarang</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Keterangan Tambahan jika ada */}
+              {selectedDetailDoc.keterangan && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Keterangan / Catatan:</span>
+                  <p className="text-xs text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">
+                    {selectedDetailDoc.keterangan}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
+              <button 
+                type="button"
+                onClick={() => setSelectedDetailDoc(null)}
+                className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
       {/* Import Modal */}
       {showImportModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
@@ -651,6 +838,144 @@ export default function DaftarArsipNotaDinasPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Detail Lengkap Nota Dinas */}
+      {selectedDetailDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 space-y-6">
+            
+            {/* Modal Header */}
+            <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-fuchsia-100 text-fuchsia-700 flex items-center justify-center shrink-0">
+                  <FileText size={24} />
+                </div>
+                <div>
+                  <h3 className="text-base md:text-lg font-black text-slate-900 uppercase">
+                    Rincian Lengkap Nota Dinas
+                  </h3>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="font-mono text-xs font-bold text-fuchsia-800 bg-fuchsia-50 px-2 py-0.5 rounded border border-fuchsia-200">
+                      {selectedDetailDoc.nomor_otomatis}
+                    </span>
+                    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold border ${getBagianBadgeClass(selectedDetailDoc.dari_bagian)}`}>
+                      {selectedDetailDoc.dari_bagian || 'Umum'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <button 
+                onClick={() => setSelectedDetailDoc(null)} 
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors"
+                title="Tutup"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="space-y-4">
+              {/* Box Perihal Lengkap */}
+              <div className="bg-fuchsia-50/40 border border-fuchsia-200 p-5 rounded-2xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-fuchsia-950 uppercase tracking-wider flex items-center gap-1.5">
+                    <Info size={14} className="text-fuchsia-600" />
+                    Perihal / Isi Nota Dinas
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedDetailDoc.nama_nota);
+                      setCopiedModalText(true);
+                      setTimeout(() => setCopiedModalText(false), 2000);
+                    }}
+                    className="inline-flex items-center gap-1 text-xs font-bold text-fuchsia-700 bg-white hover:bg-fuchsia-100 border border-fuchsia-200 px-2.5 py-1 rounded-lg transition-colors"
+                  >
+                    {copiedModalText ? <Check size={13} className="text-emerald-600" /> : <Copy size={13} />}
+                    <span>{copiedModalText ? 'Perihal Disalin' : 'Salin Perihal'}</span>
+                  </button>
+                </div>
+                <p className="text-sm md:text-base font-semibold text-slate-900 leading-relaxed whitespace-pre-wrap break-words">
+                  {selectedDetailDoc.nama_nota}
+                </p>
+              </div>
+
+              {/* Rincian Atribut */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Tanggal Nota:</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedDetailDoc.tanggal_nota || '-'}</span>
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Asal Bagian:</span>
+                  <span className="font-bold text-slate-800 text-sm">{selectedDetailDoc.dari_bagian || 'Umum'}</span>
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Pemohon:</span>
+                  <span className="font-bold text-slate-800 text-sm uppercase">
+                    {selectedDetailDoc.pemohon?.nama || 'Tanpa Pemohon'}
+                  </span>
+                  {selectedDetailDoc.pemohon?.jabatan && (
+                    <p className="text-[11px] text-slate-500">{selectedDetailDoc.pemohon.jabatan}</p>
+                  )}
+                </div>
+
+                <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Berkas Dokumen:</span>
+                  {selectedDetailDoc.file_url ? (
+                    <a 
+                      href={resolveFileUrl(selectedDetailDoc.file_url)} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-fuchsia-600 hover:bg-fuchsia-700 text-white rounded-lg text-xs font-bold transition-colors mt-0.5"
+                    >
+                      <ExternalLink size={13} />
+                      <span>Buka File Lampiran</span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const target = selectedDetailDoc;
+                        setSelectedDetailDoc(null);
+                        setUploadModalDoc(target);
+                      }}
+                      className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-200 hover:bg-fuchsia-100 text-slate-700 hover:text-fuchsia-700 rounded-lg text-xs font-bold transition-colors mt-0.5"
+                    >
+                      <Upload size={13} />
+                      <span>Unggah File Sekarang</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Keterangan Tambahan jika ada */}
+              {selectedDetailDoc.keterangan && (
+                <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1">
+                  <span className="text-slate-400 font-bold uppercase tracking-wider block text-[10px]">Keterangan / Catatan:</span>
+                  <p className="text-xs text-slate-700 font-medium leading-relaxed whitespace-pre-wrap">
+                    {selectedDetailDoc.keterangan}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-4 border-t border-slate-100 flex justify-end">
+              <button 
+                type="button"
+                onClick={() => setSelectedDetailDoc(null)}
+                className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
