@@ -341,14 +341,17 @@ export async function GET(
         }
       },
       getSize: function(img: any, tagValue: string, tagName: string) {
+        if (!tagValue || typeof tagValue !== 'string' || !tagValue.startsWith('data:image')) {
+          return [1, 1]; // Return 1x1 if not signed so it stays clean
+        }
         if (tagName.includes('foto_')) return [300, 225]; // 4:3 ratio for field photos
         
-        let maxWidth = 240;
-        let maxHeight = 80;
+        let maxWidth = 200;
+        let maxHeight = 70;
         
         if (tagName.includes('paraf_')) {
-          maxWidth = 120;
-          maxHeight = 60;
+          maxWidth = 100;
+          maxHeight = 50;
         }
 
         if (img instanceof Buffer) {

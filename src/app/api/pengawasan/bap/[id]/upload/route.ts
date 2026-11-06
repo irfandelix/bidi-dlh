@@ -299,6 +299,16 @@ export async function POST(
 
     const zip = new PizZip(content);
 
+    function getPngDimensions(buffer: Buffer) {
+      if (buffer.length > 24 && buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) {
+        return {
+          width: buffer.readUInt32BE(16),
+          height: buffer.readUInt32BE(20)
+        };
+      }
+      return null;
+    }
+
     const imageOptions = {
       getImage: function(tagValue: string, tagName: string) {
         const emptyImageBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
@@ -315,10 +325,28 @@ export async function POST(
         }
       },
       getSize: function(img: any, tagValue: string, tagName: string) {
+        if (!tagValue || typeof tagValue !== 'string' || !tagValue.startsWith('data:image')) {
+          return [1, 1]; // Return 1x1 if not signed so it stays clean
+        }
         if (tagName.includes('foto_')) return [300, 225]; // 4:3 ratio for field photos
-        if (tagName.includes('ttd_')) return [240, 80]; // 3:1 aspect ratio
-        if (tagName.includes('paraf_')) return [120, 60]; 
-        return [200, 150];
+        
+        let maxWidth = 200;
+        let maxHeight = 70;
+        
+        if (tagName.includes('paraf_')) {
+          maxWidth = 100;
+          maxHeight = 50;
+        }
+
+        if (img instanceof Buffer) {
+          const dims = getPngDimensions(img);
+          if (dims && dims.width > 0 && dims.height > 0) {
+            const ratio = Math.min(maxWidth / dims.width, maxHeight / dims.height);
+            return [Math.round(dims.width * ratio), Math.round(dims.height * ratio)];
+          }
+        }
+        
+        return [maxWidth, maxHeight];
       }
     };
 
