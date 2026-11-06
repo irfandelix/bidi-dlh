@@ -316,82 +316,80 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
   if (!agenda) return <div className="min-h-screen bg-white p-6 flex items-center justify-center font-bold text-xl text-rose-600 uppercase tracking-widest">Agenda Tidak Ditemukan</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50/60 font-sans pb-32">
-      {/* STICKY TOP HEADER DENGAN STEPPER INTERAKTIF (SEJAJAR PERSIS DENGAN KARTU FORM) */}
-      <div className="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-3.5">
-          {/* BARIS 1: TOMBOL KEMBALI, JUDUL, BADGE SEKTOR, DAN SKOR KETAATAN SEJAJAR SEGARIS */}
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <Link 
-                href="/pengawasan/agenda" 
-                className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 flex items-center justify-center transition-all shrink-0"
-                title="Kembali ke Agenda"
-              >
-                <ArrowLeft size={18} />
-              </Link>
-              <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
-                <h1 className="text-base sm:text-lg lg:text-xl font-black text-slate-900 tracking-tight truncate">
-                  {agenda.nama_pemrakarsa}
-                </h1>
-                <span className="px-2.5 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider bg-teal-100 text-teal-800 border border-teal-200 shrink-0">
-                  BAP {kategori || 'Sektor'}
-                </span>
-                <span className="text-xs text-slate-400 font-bold shrink-0 hidden sm:inline">• ID #{id}</span>
-              </div>
-            </div>
-
-            {/* Status Skor Preview Sejajar */}
-            <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-100 border border-slate-200 rounded-xl shrink-0">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Skor Ketaatan:</span>
-              <span className={`text-xs sm:text-sm font-black ${totalSkor() >= 70 ? 'text-emerald-600' : totalSkor() >= 50 ? 'text-amber-600' : 'text-slate-700'}`}>
-                {totalSkor()} • {finalStatus()}
+    <div className="w-full pb-32">
+      {/* HEADER CARD DENGAN STEPPER INTERAKTIF (LEBAR & BERJARAK NYAMAN DARI NAVBAR) */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 sm:p-5 w-full mb-6">
+        {/* BARIS 1: TOMBOL KEMBALI, JUDUL, BADGE SEKTOR, DAN SKOR KETAATAN SEJAJAR SEGARIS */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <Link 
+              href="/pengawasan/agenda" 
+              className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 flex items-center justify-center transition-all shrink-0"
+              title="Kembali ke Agenda"
+            >
+              <ArrowLeft size={18} />
+            </Link>
+            <div className="flex items-center gap-2.5 min-w-0 flex-wrap">
+              <h1 className="text-base sm:text-lg lg:text-xl font-black text-slate-900 tracking-tight truncate">
+                {agenda.nama_pemrakarsa}
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-black uppercase tracking-wider bg-teal-100 text-teal-800 border border-teal-200 shrink-0">
+                BAP {kategori || 'Sektor'}
               </span>
+              <span className="text-xs text-slate-400 font-bold shrink-0 hidden sm:inline">• ID #{id}</span>
             </div>
           </div>
 
-          {/* STEPPER TABS (SEJAJAR PERSIS DENGAN KARTU KONTEN DI BAWAHNYA) */}
-          <div className="mt-3 pt-3 border-t border-slate-100">
-            <div className="grid grid-cols-5 gap-1.5 sm:gap-2.5">
-              {stepList.map((s) => {
-                const isActive = step === s.num;
-                const isPast = step > s.num;
-                return (
-                  <button
-                    key={s.num}
-                    type="button"
-                    onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(s.num); }}
-                    className={`p-2 sm:px-3 sm:py-2.5 rounded-xl text-left transition-all border flex items-center gap-2 sm:gap-2.5 ${
-                      isActive 
-                        ? 'bg-teal-600 text-white border-teal-600 shadow-md shadow-teal-200'
-                        : isPast
-                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                        : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
-                    }`}
-                  >
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
-                      isActive ? 'bg-white text-teal-800' : isPast ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
-                    }`}>
-                      {isPast ? '✓' : s.num}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[11px] font-black uppercase tracking-wider truncate leading-tight">
-                        {s.title}
-                      </div>
-                      <div className={`text-[9px] font-medium truncate mt-0.5 hidden lg:block leading-tight ${isActive ? 'text-teal-100' : 'text-slate-400'}`}>
-                        {s.sub}
-                      </div>
+          {/* Status Skor Preview Sejajar */}
+          <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-100 border border-slate-200 rounded-xl shrink-0">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Skor Ketaatan:</span>
+            <span className={`text-xs sm:text-sm font-black ${totalSkor() >= 70 ? 'text-emerald-600' : totalSkor() >= 50 ? 'text-amber-600' : 'text-slate-700'}`}>
+              {totalSkor()} • {finalStatus()}
+            </span>
+          </div>
+        </div>
+
+        {/* STEPPER TABS (LEBAR, RESPONSIF & SEJAJAR PERSIS) */}
+        <div className="mt-4 pt-3.5 border-t border-slate-100">
+          <div className="grid grid-cols-5 gap-2 sm:gap-3">
+            {stepList.map((s) => {
+              const isActive = step === s.num;
+              const isPast = step > s.num;
+              return (
+                <button
+                  key={s.num}
+                  type="button"
+                  onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(s.num); }}
+                  className={`p-2.5 sm:px-4 sm:py-3 rounded-xl text-left transition-all border flex items-center gap-2.5 sm:gap-3 ${
+                    isActive 
+                      ? 'bg-teal-600 text-white border-teal-600 shadow-md shadow-teal-200'
+                      : isPast
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                      : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'
+                  }`}
+                >
+                  <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                    isActive ? 'bg-white text-teal-800' : isPast ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-700'
+                  }`}>
+                    {isPast ? '✓' : s.num}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-[11px] sm:text-xs font-black uppercase tracking-wider truncate leading-tight">
+                      {s.title}
                     </div>
-                  </button>
-                );
-              })}
-            </div>
+                    <div className={`text-[10px] font-medium truncate mt-0.5 hidden lg:block leading-tight ${isActive ? 'text-teal-100' : 'text-slate-400'}`}>
+                      {s.sub}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* MAIN FORM CONTAINER (SEJAJAR PERSIS DENGAN HEADER & STEPPER: max-w-6xl mx-auto px-4 sm:px-6 lg:px-8) */}
-      <form onSubmit={handleSubmit} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      {/* MAIN FORM CONTAINER (LEBAR LEGA & SEJAJAR DENGAN HEADER: w-full space-y-6) */}
+      <form onSubmit={handleSubmit} className="w-full space-y-6">
         
         {/* ========================================================================= */}
         {/* STEP 1: IDENTITAS & WAKTU                                                 */}
@@ -1491,7 +1489,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
 
       {/* FIXED BOTTOM NAVIGATION BAR (SEJAJAR PERSIS DENGAN KARTU KONTEN) */}
       <div className="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-200 z-50 shadow-lg">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-3">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-3">
           {step > 1 ? (
             <button 
               type="button" 

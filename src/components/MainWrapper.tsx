@@ -9,6 +9,7 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
   const isPeta = pathname === '/peta';
   const isMobileApp = pathname === '/pengawasan/mobile' || pathname === '/hotline/mobile';
   const isToken = pathname === '/pengawasan/token';
+  const isBapIsi = pathname.startsWith('/pengawasan/ba/isi');
 
   let mainClass = "flex-1 pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full";
   if (isLogin) {
@@ -19,6 +20,8 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
     mainClass = "flex flex-col w-full h-[100dvh] p-0 m-0 overflow-hidden";
   } else if (isToken) {
     mainClass = "flex flex-col items-center justify-center w-full h-[100dvh] pt-20 pb-4 px-4 max-w-7xl mx-auto overflow-hidden";
+  } else if (isBapIsi) {
+    mainClass = "flex-1 pt-28 sm:pt-32 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto w-full";
   }
 
   return (
