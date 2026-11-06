@@ -956,48 +956,52 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         {/* STEP 3: CHECKLIST HASIL PENGAWASAN                                       */}
         {/* ========================================================================= */}
         <div className={`${step === 3 ? 'block' : 'hidden'} animate-in fade-in duration-200 space-y-6`}>
-          {/* Dokumen Perizinan Multi-Item */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
+          {/* Dokumen Perizinan Multi-Item (Disamakan dengan gaya Bab Checklist) */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+              <h4 className="font-black text-xs sm:text-sm uppercase tracking-wider">
                 1. Daftar Dokumen Izin Yang Ditunjukkan
               </h4>
-              <span className="text-xs text-slate-400 font-bold">{listDokumen.length} Dokumen</span>
+              <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-md font-bold">
+                {listDokumen.length} Dokumen
+              </span>
             </div>
 
-            <div className="space-y-2.5">
-              {listDokumen.map((dok, i) => (
-                <div key={dok.id} className="flex gap-2 items-center">
-                  <span className="w-6 text-center font-bold text-slate-400 text-xs">{i + 1}.</span>
-                  <input 
-                    type="text" 
-                    value={dok.value} 
-                    onChange={(e) => {
-                      const l = [...listDokumen]; l[i].value = e.target.value; setListDokumen(l);
-                    }} 
-                    placeholder="Nama Dokumen / Izin Teknis..." 
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" 
-                  />
-                  {listDokumen.length > 1 && (
-                    <button 
-                      type="button" 
-                      onClick={() => setListDokumen(listDokumen.filter(x => x.id !== dok.id))} 
-                      className="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl border border-rose-200 transition-colors"
-                      title="Hapus Baris"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  )}
-                </div>
-              ))}
-              
-              <button 
-                type="button" 
-                onClick={() => setListDokumen([...listDokumen, { id: Date.now(), value: '' }])} 
-                className="w-full py-2.5 border-2 border-dashed border-slate-300 hover:border-amber-400 rounded-xl font-bold text-slate-600 hover:text-amber-700 hover:bg-amber-50/50 flex items-center justify-center gap-2 uppercase text-xs tracking-wider transition-colors mt-2"
-              >
-                <Plus size={15} /> Tambah Baris Izin
-              </button>
+            <div className="p-5 md:p-6 space-y-3">
+              <div className="space-y-2.5">
+                {listDokumen.map((dok, i) => (
+                  <div key={dok.id} className="flex gap-2 items-center">
+                    <span className="w-6 text-center font-bold text-slate-400 text-xs">{i + 1}.</span>
+                    <input 
+                      type="text" 
+                      value={dok.value} 
+                      onChange={(e) => {
+                        const l = [...listDokumen]; l[i].value = e.target.value; setListDokumen(l);
+                      }} 
+                      placeholder="Nama Dokumen / Izin Teknis..." 
+                      className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-400" 
+                    />
+                    {listDokumen.length > 1 && (
+                      <button 
+                        type="button" 
+                        onClick={() => setListDokumen(listDokumen.filter(x => x.id !== dok.id))} 
+                        className="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl border border-rose-200 transition-colors"
+                        title="Hapus Baris"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                
+                <button 
+                  type="button" 
+                  onClick={() => setListDokumen([...listDokumen, { id: Date.now(), value: '' }])} 
+                  className="w-full py-2.5 border-2 border-dashed border-slate-300 hover:border-amber-400 rounded-xl font-bold text-slate-600 hover:text-amber-700 hover:bg-amber-50/50 flex items-center justify-center gap-2 uppercase text-xs tracking-wider transition-colors mt-2"
+                >
+                  <Plus size={15} /> Tambah Baris Izin
+                </button>
+              </div>
             </div>
           </div>
 
