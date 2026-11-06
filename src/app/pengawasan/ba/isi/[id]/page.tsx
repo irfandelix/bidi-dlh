@@ -130,11 +130,13 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
   ) => {
     return currentKomponen.map(komp => {
       const kNama = (komp.nama || '').toLowerCase();
-      // Jangan timpa jika komponen ini bertanda N/A
-      if (komp.nilai === 'N/A' || komp.nilai === 'NA') return komp;
 
       // C.1 Dokumen Perizinan
       if (kNama.startsWith('1.') || kNama.includes('dokumen')) {
+        const pdTrim = (currentPoinDokumen || '').trim().toUpperCase();
+        if (pdTrim === 'N/A' || pdTrim === 'NA' || komp.nilai === 'N/A' || komp.nilai === 'NA') {
+          return { ...komp, nilai: 'N/A' };
+        }
         if (currentPoinDokumen !== '' && !isNaN(Number(currentPoinDokumen))) {
           const score100 = Math.round(Number(currentPoinDokumen) * 10);
           return { ...komp, nilai: score100.toString() };
@@ -153,7 +155,23 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                              (babTitle.includes('sampah') && kNama.includes('sampah'));
 
         if (matchNum || matchKeyword) {
-          const scored = (cat.items || []).filter((it: any) => it.poin !== '' && it.poin !== undefined && it.poin !== null && !isNaN(Number(it.poin)));
+          // Jangan timpa jika komponen ini bertanda N/A
+          if (komp.nilai === 'N/A' || komp.nilai === 'NA') return komp;
+
+          // Cek jika seluruh butir yang diisi bertanda N/A
+          const itemsWithInput = (cat.items || []).filter((it: any) => (it.poin ?? '').toString().trim() !== '');
+          const allInputIsNA = itemsWithInput.length > 0 && itemsWithInput.every((it: any) => {
+            const p = (it.poin || '').trim().toUpperCase();
+            return p === 'N/A' || p === 'NA';
+          });
+          if (allInputIsNA) {
+            return { ...komp, nilai: 'N/A' };
+          }
+
+          const scored = (cat.items || []).filter((it: any) => {
+            const p = (it.poin ?? '').toString().trim().toUpperCase();
+            return p !== '' && p !== 'N/A' && p !== 'NA' && !isNaN(Number(p));
+          });
           if (scored.length > 0) {
             const sum = scored.reduce((acc: number, curr: any) => acc + Number(curr.poin), 0);
             const score100 = Math.round((sum / scored.length) * 10);
@@ -165,12 +183,92 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     });
   };
 
+  const getKomponenForBab = (babString: string) => {
+    const bLower = (babString || '').toLowerCase();
+    const babNum = bLower.match(/^\d+/)?.[0];
+
+    return komponenPenilaian.find(komp => {
+      const kNama = (komp.nama || '').toLowerCase();
+      const matchNum = babNum && kNama.startsWith(`${babNum}.`);
+      const matchKeyword = (babNum === '1' && (kNama.includes('dokumen') || kNama.startsWith('1.'))) ||
+                           (bLower.includes('air') && kNama.includes('air')) ||
+                           (bLower.includes('udara') && kNama.includes('udara')) ||
+                           ((bLower.includes('b3') || bLower.includes('lb3')) && (kNama.includes('b3') || kNama.includes('lb3'))) ||
+                           (bLower.includes('sampah') && kNama.includes('sampah'));
+      return matchNum || matchKeyword;
+    });
+  };
+
+  const isBabNA = (babString: string) => {
+    const komp = getKomponenForBab(babString);
+    if (!komp) return false;
+    const val = (komp.nilai ?? '').toString().trim().toUpperCase();
+    return val === 'N/A' || val === 'NA';
+  };
+
+  const toggleBabNA = (babString: string) => {
+    const bLower = (babString || '').toLowerCase();
+    const babNum = bLower.match(/^\d+/)?.[0];
+    const currentlyNA = isBabNA(babString);
+
+    if (!currentlyNA) {
+      // Toggle ON N/A
+      if (babNum === '1') setPoinDokumen('N/A');
+      setKomponenPenilaian(prev => prev.map(komp => {
+        const kNama = (komp.nama || '').toLowerCase();
+        const matchNum = babNum && kNama.startsWith(`${babNum}.`);
+        const matchKeyword = (babNum === '1' && (kNama.includes('dokumen') || kNama.startsWith('1.'))) ||
+                             (bLower.includes('air') && kNama.includes('air')) ||
+                             (bLower.includes('udara') && kNama.includes('udara')) ||
+                             ((bLower.includes('b3') || bLower.includes('lb3')) && (kNama.includes('b3') || kNama.includes('lb3'))) ||
+                             (bLower.includes('sampah') && kNama.includes('sampah'));
+        if (matchNum || matchKeyword) {
+          return { ...komp, nilai: 'N/A' };
+        }
+        return komp;
+      }));
+    } else {
+      // Toggle OFF N/A
+      const nextPoinDok = (babNum === '1' && (poinDokumen === 'N/A' || poinDokumen === 'NA')) ? '' : poinDokumen;
+      if (babNum === '1') setPoinDokumen(nextPoinDok);
+
+      const resetList = komponenPenilaian.map(komp => {
+        const kNama = (komp.nama || '').toLowerCase();
+        const matchNum = babNum && kNama.startsWith(`${babNum}.`);
+        const matchKeyword = (babNum === '1' && (kNama.includes('dokumen') || kNama.startsWith('1.'))) ||
+                             (bLower.includes('air') && kNama.includes('air')) ||
+                             (bLower.includes('udara') && kNama.includes('udara')) ||
+                             ((bLower.includes('b3') || bLower.includes('lb3')) && (kNama.includes('b3') || kNama.includes('lb3'))) ||
+                             (bLower.includes('sampah') && kNama.includes('sampah'));
+        if (matchNum || matchKeyword) {
+          return { ...komp, nilai: '' };
+        }
+        return komp;
+      });
+
+      const recalced = recalculateAllScoresFromChecklist(checklist, nextPoinDok, resetList);
+      setKomponenPenilaian(recalced);
+    }
+  };
+
   const getComponentChecklistStat = (kompNama: string) => {
     const kNama = (kompNama || '').toLowerCase();
     if (kNama.startsWith('1.') || kNama.includes('dokumen')) {
+      const pdUpper = (poinDokumen || '').trim().toUpperCase();
+      if (pdUpper === 'N/A' || pdUpper === 'NA') {
+        return {
+          hasScore: false,
+          isNA: true,
+          avg: 0,
+          count: 0,
+          isDokumen: true,
+          totalItems: listDokumen.length
+        };
+      }
       if (poinDokumen !== '' && !isNaN(Number(poinDokumen))) {
         return {
           hasScore: true,
+          isNA: false,
           avg: Number(poinDokumen),
           count: listDokumen.filter(d => d.value.trim() !== '').length || 1,
           isDokumen: true,
@@ -179,6 +277,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       }
       return {
         hasScore: false,
+        isNA: false,
         avg: 0,
         count: 0,
         isDokumen: true,
@@ -196,22 +295,34 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                            (babTitle.includes('sampah') && kNama.includes('sampah'));
 
       if (matchNum || matchKeyword) {
-        const scored = (cat.items || []).filter((it: any) => it.poin !== '' && it.poin !== undefined && it.poin !== null && !isNaN(Number(it.poin)));
+        const scored = (cat.items || []).filter((it: any) => {
+          const p = (it.poin ?? '').toString().trim().toUpperCase();
+          return p !== '' && p !== 'N/A' && p !== 'NA' && !isNaN(Number(p));
+        });
+        const naCount = (cat.items || []).filter((it: any) => {
+          const p = (it.poin ?? '').toString().trim().toUpperCase();
+          return p === 'N/A' || p === 'NA';
+        }).length;
+
         if (scored.length > 0) {
           const sum = scored.reduce((acc: number, curr: any) => acc + Number(curr.poin), 0);
           const avg = Math.round((sum / scored.length) * 10) / 10;
           return {
             hasScore: true,
+            isNA: false,
             avg: avg,
             count: scored.length,
+            naCount: naCount,
             totalItems: (cat.items || []).length,
             isDokumen: false
           };
         }
         return {
           hasScore: false,
+          isNA: false,
           avg: 0,
           count: 0,
+          naCount: naCount,
           totalItems: (cat.items || []).length,
           isDokumen: false
         };
@@ -318,13 +429,47 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
   };
 
   const handlePoinDokumenChange = (val: string) => {
-    setPoinDokumen(val);
-    setKomponenPenilaian(prev => recalculateAllScoresFromChecklist(checklist, val, prev));
+    const trimmed = val.trim().toUpperCase();
+    if (trimmed === 'NA' || trimmed === 'N/A') {
+      setPoinDokumen('N/A');
+      setKomponenPenilaian(prev => prev.map(komp => {
+        const kNama = (komp.nama || '').toLowerCase();
+        if (kNama.startsWith('1.') || kNama.includes('dokumen')) {
+          return { ...komp, nilai: 'N/A' };
+        }
+        return komp;
+      }));
+      return;
+    }
+
+    if (val === '' || (!isNaN(Number(val)) && Number(val) >= 0 && Number(val) <= 10) || val.endsWith('.')) {
+      setPoinDokumen(val);
+      setKomponenPenilaian(prev => {
+        const updated = prev.map(komp => {
+          const kNama = (komp.nama || '').toLowerCase();
+          if ((kNama.startsWith('1.') || kNama.includes('dokumen')) && (komp.nilai === 'N/A' || komp.nilai === 'NA')) {
+            return { ...komp, nilai: '' };
+          }
+          return komp;
+        });
+        return recalculateAllScoresFromChecklist(checklist, val, updated);
+      });
+    }
   };
 
   const handlePoinChange = (catIdx: number, itemIdx: number, val: string) => {
+    const trimmed = val.trim().toUpperCase();
+    let finalVal = val;
+    if (trimmed === 'NA' || trimmed === 'N/A') {
+      finalVal = 'N/A';
+    } else if (val !== '' && (isNaN(Number(val)) || Number(val) < 0 || Number(val) > 10)) {
+      if (val !== '.' && !val.endsWith('.')) {
+        return;
+      }
+    }
+
     const newChecklist = [...checklist];
-    newChecklist[catIdx].items[itemIdx].poin = val;
+    newChecklist[catIdx].items[itemIdx].poin = finalVal;
     setChecklist(newChecklist);
 
     // Otomatis update skor komponen penilaian dari rata-rata poin checklist
@@ -1103,40 +1248,90 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         {/* ========================================================================= */}
         <div className={`${step === 3 ? 'block' : 'hidden'} animate-in fade-in duration-200 space-y-6`}>
           {/* Dokumen Perizinan Multi-Item (Disamakan dengan gaya Bab Checklist) */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="bg-slate-900 text-white px-5 py-3.5 flex flex-wrap items-center justify-between gap-2">
-              <h4 className="font-black text-xs sm:text-sm uppercase tracking-wider">
-                1. Daftar Dokumen Izin Yang Ditunjukkan
-              </h4>
+          <div className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${
+            isBabNA('1. Dokumen Perizinan Lingkungan') ? 'border-amber-300/80 ring-1 ring-amber-300/40' : 'border-slate-200'
+          }`}>
+            <div className={`px-5 py-3.5 flex flex-wrap items-center justify-between gap-2 ${
+              isBabNA('1. Dokumen Perizinan Lingkungan') ? 'bg-amber-950 text-amber-50' : 'bg-slate-900 text-white'
+            }`}>
+              <div className="flex items-center gap-2.5">
+                <h4 className="font-black text-xs sm:text-sm uppercase tracking-wider">
+                  1. Daftar Dokumen Izin Yang Ditunjukkan
+                </h4>
+                {isBabNA('1. Dokumen Perizinan Lingkungan') && (
+                  <span className="text-[10px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md font-black shadow-xs">
+                    STATUS N/A
+                  </span>
+                )}
+              </div>
+
               <div className="flex items-center gap-2">
-                {/* Poin Evaluasi Dokumen Perizinan (1 - 10) */}
-                <div className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-xl focus-within:ring-2 focus-within:ring-teal-400">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
+                {/* Tombol Set N/A langsung di Checklist */}
+                <button
+                  type="button"
+                  onClick={() => toggleBabNA('1. Dokumen Perizinan Lingkungan')}
+                  className={`px-3 py-1 rounded-lg text-xs font-black transition-all border flex items-center gap-1.5 ${
+                    isBabNA('1. Dokumen Perizinan Lingkungan') 
+                      ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-sm hover:bg-amber-300' 
+                      : 'bg-white/10 hover:bg-white/20 text-slate-300 border-white/20'
+                  }`}
+                  title={isBabNA('1. Dokumen Perizinan Lingkungan') ? 'Klik untuk mengaktifkan kembali bab ini' : 'Tandai bab ini sebagai N/A (Tidak ada objek pengawasan)'}
+                >
+                  {isBabNA('1. Dokumen Perizinan Lingkungan') ? '✓ N/A' : 'Set N/A'}
+                </button>
+
+                {/* Poin Evaluasi Dokumen Perizinan (1 - 10 / NA) */}
+                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition-all ${
+                  isBabNA('1. Dokumen Perizinan Lingkungan')
+                    ? 'bg-amber-100/80 border-amber-300 text-amber-950'
+                    : 'bg-slate-800 border-slate-700 focus-within:ring-2 focus-within:ring-teal-400'
+                }`}>
+                  <span className={`text-[10px] font-black uppercase tracking-wider ${
+                    isBabNA('1. Dokumen Perizinan Lingkungan') ? 'text-amber-900' : 'text-slate-300'
+                  }`}>
                     Poin (1 - 10):
                   </span>
                   <input 
-                    type="number" 
-                    min="1" 
-                    max="10" 
+                    type="text" 
                     value={poinDokumen} 
                     onChange={(e) => {
-                      const val = e.target.value;
-                      if (val === '' || (Number(val) >= 0 && Number(val) <= 10)) {
-                        handlePoinDokumenChange(val);
-                      }
+                      handlePoinDokumenChange(e.target.value);
                     }} 
-                    placeholder="1-10" 
-                    className="w-12 text-center font-mono font-black text-xs text-teal-300 bg-transparent focus:outline-none placeholder:text-slate-500"
+                    placeholder="1-10 / NA" 
+                    className={`w-16 text-center font-mono font-black text-xs bg-transparent focus:outline-none ${
+                      isBabNA('1. Dokumen Perizinan Lingkungan')
+                        ? 'text-amber-950 font-black'
+                        : 'text-teal-300 placeholder:text-slate-500'
+                    }`}
                   />
-                  <span className="text-[10px] font-black text-slate-400">/ 10</span>
+                  <span className={`text-[10px] font-black ${
+                    isBabNA('1. Dokumen Perizinan Lingkungan') ? 'text-amber-800' : 'text-slate-400'
+                  }`}>/ 10</span>
                 </div>
+
                 <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-md font-bold">
                   {listDokumen.length} Dokumen
                 </span>
               </div>
             </div>
 
-            <div className="p-5 md:p-6 space-y-3">
+            {isBabNA('1. Dokumen Perizinan Lingkungan') && (
+              <div className="bg-amber-50 border-b border-amber-200/80 px-5 py-2.5 flex items-center justify-between gap-3 text-amber-900">
+                <div className="flex items-center gap-2 text-xs font-bold">
+                  <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                  <span>Dokumen Perizinan berstatus <b>N/A (Tidak Ada Objek / Tidak Berlaku)</b> • Tidak dihitung dalam rata-rata skor ketaatan.</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => toggleBabNA('1. Dokumen Perizinan Lingkungan')}
+                  className="text-[11px] font-black text-amber-800 underline hover:text-amber-950 shrink-0"
+                >
+                  Aktifkan Kembali
+                </button>
+              </div>
+            )}
+
+            <div className={`p-5 md:p-6 space-y-3 ${isBabNA('1. Dokumen Perizinan Lingkungan') ? 'opacity-60 bg-slate-50/50' : ''}`}>
               <div className="space-y-2.5">
                 {listDokumen.map((dok, i) => (
                   <div key={dok.id} className="flex gap-2 items-center">
@@ -1178,19 +1373,58 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
           <div className="space-y-6">
             {checklist.map((cat, catIdx) => {
               const babNum = cat.bab?.match(/^\d+/)?.[0] || (catIdx + 2);
-              const scoredItems = (cat.items || []).filter((it: any) => it.poin !== '' && it.poin !== undefined && it.poin !== null && !isNaN(Number(it.poin)));
+              const scoredItems = (cat.items || []).filter((it: any) => {
+                const p = (it.poin ?? '').toString().trim().toUpperCase();
+                return p !== '' && p !== 'N/A' && p !== 'NA' && !isNaN(Number(p));
+              });
+              const naItems = (cat.items || []).filter((it: any) => {
+                const p = (it.poin ?? '').toString().trim().toUpperCase();
+                return p === 'N/A' || p === 'NA';
+              });
               const hasScores = scoredItems.length > 0;
               const avgPoin = hasScores ? Math.round((scoredItems.reduce((acc: number, curr: any) => acc + Number(curr.poin), 0) / scoredItems.length) * 10) / 10 : null;
               const skorBab = avgPoin !== null ? Math.round(avgPoin * 10) : null;
+              const babIsNA = isBabNA(cat.bab);
 
               return (
-                <div key={catIdx} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="bg-slate-900 text-white px-5 py-3.5 flex flex-wrap items-center justify-between gap-2">
-                    <h4 className="font-black text-xs sm:text-sm uppercase tracking-wider">{cat.bab}</h4>
+                <div key={catIdx} className={`bg-white rounded-2xl border shadow-sm overflow-hidden transition-all ${
+                  babIsNA ? 'border-amber-300/80 ring-1 ring-amber-300/40' : 'border-slate-200'
+                }`}>
+                  <div className={`px-5 py-3.5 flex flex-wrap items-center justify-between gap-2 ${
+                    babIsNA ? 'bg-amber-950 text-amber-50' : 'bg-slate-900 text-white'
+                  }`}>
+                    <div className="flex items-center gap-2.5">
+                      <h4 className="font-black text-xs sm:text-sm uppercase tracking-wider">{cat.bab}</h4>
+                      {babIsNA && (
+                        <span className="text-[10px] bg-amber-500 text-slate-950 px-2 py-0.5 rounded-md font-black shadow-xs">
+                          STATUS N/A
+                        </span>
+                      )}
+                    </div>
+
                     <div className="flex items-center gap-2">
-                      {hasScores && (
+                      {/* Tombol Set N/A langsung di Checklist */}
+                      <button
+                        type="button"
+                        onClick={() => toggleBabNA(cat.bab)}
+                        className={`px-3 py-1 rounded-lg text-xs font-black transition-all border flex items-center gap-1.5 ${
+                          babIsNA 
+                            ? 'bg-amber-400 text-slate-950 border-amber-300 font-black shadow-sm hover:bg-amber-300' 
+                            : 'bg-white/10 hover:bg-white/20 text-slate-300 border-white/20'
+                        }`}
+                        title={babIsNA ? 'Klik untuk mengaktifkan kembali bab ini' : 'Tandai bab ini sebagai N/A (Tidak ada objek pengawasan)'}
+                      >
+                        {babIsNA ? '✓ N/A' : 'Set N/A'}
+                      </button>
+
+                      {!babIsNA && hasScores && (
                         <span className="text-[10px] bg-teal-500/30 text-teal-200 border border-teal-400/30 px-2.5 py-0.5 rounded-md font-bold">
-                          Rata-rata: {avgPoin}/10 (Skor Bab: {skorBab})
+                          Rata-rata: {avgPoin}/10 (Skor: {skorBab})
+                        </span>
+                      )}
+                      {!babIsNA && naItems.length > 0 && !hasScores && (
+                        <span className="text-[10px] bg-amber-500/30 text-amber-200 border border-amber-400/30 px-2 py-0.5 rounded-md font-bold">
+                          {naItems.length} Butir N/A
                         </span>
                       )}
                       <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-md font-bold">
@@ -1199,76 +1433,114 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                     </div>
                   </div>
 
-                  <div className="p-5 md:p-6 divide-y divide-slate-100">
-                    {cat.items.map((item: any, itemIdx: number) => (
-                      <div key={itemIdx} className="py-4 first:pt-0 last:pb-0 space-y-3">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                          <div className="flex items-start gap-2.5 flex-1 min-w-0">
-                            <span className="px-2.5 py-0.5 min-w-[34px] h-6 rounded-lg bg-amber-100 text-amber-900 text-xs font-black flex items-center justify-center shrink-0 mt-0.5 font-mono shadow-xs">
-                              {babNum}.{item.no}
-                            </span>
-                            <p className="font-bold text-slate-900 text-sm leading-relaxed">
-                              {item.point}
-                            </p>
+                  {babIsNA && (
+                    <div className="bg-amber-50 border-b border-amber-200/80 px-5 py-2.5 flex items-center justify-between gap-3 text-amber-900">
+                      <div className="flex items-center gap-2 text-xs font-bold">
+                        <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                        <span>Objek pengawasan ini berstatus <b>N/A (Tidak Ada Objek / Tidak Berlaku)</b> • Tidak dihitung dalam rata-rata skor ketaatan.</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => toggleBabNA(cat.bab)}
+                        className="text-[11px] font-black text-amber-800 underline hover:text-amber-950 shrink-0"
+                      >
+                        Aktifkan Kembali
+                      </button>
+                    </div>
+                  )}
+
+                  <div className={`p-5 md:p-6 divide-y divide-slate-100 ${babIsNA ? 'opacity-60 bg-slate-50/50' : ''}`}>
+                    {cat.items.map((item: any, itemIdx: number) => {
+                      const itemIsNA = (item.poin ?? '').toString().toUpperCase() === 'N/A' || (item.poin ?? '').toString().toUpperCase() === 'NA';
+                      return (
+                        <div key={itemIdx} className="py-4 first:pt-0 last:pb-0 space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                              <span className={`px-2.5 py-0.5 min-w-[34px] h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 mt-0.5 font-mono shadow-xs ${
+                                itemIsNA || babIsNA ? 'bg-amber-100 text-amber-950' : 'bg-amber-100 text-amber-900'
+                              }`}>
+                                {babNum}.{item.no}
+                              </span>
+                              <p className="font-bold text-slate-900 text-sm leading-relaxed">
+                                {item.point}
+                              </p>
+                            </div>
+
+                            {/* Poin Evaluasi (1 - 10 / N/A) */}
+                            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto pl-10 sm:pl-0">
+                              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+                                Poin:
+                              </span>
+                              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition-all ${
+                                itemIsNA 
+                                  ? 'bg-amber-100/80 border-amber-300 text-amber-950' 
+                                  : 'bg-slate-50 border-slate-200 focus-within:ring-2 focus-within:ring-teal-400 focus-within:bg-white'
+                              }`}>
+                                <input 
+                                  type="text" 
+                                  value={item.poin ?? ''} 
+                                  onChange={(e) => {
+                                    handlePoinChange(catIdx, itemIdx, e.target.value);
+                                  }} 
+                                  placeholder="1-10" 
+                                  className={`w-14 text-center font-mono font-black text-sm bg-transparent focus:outline-none ${
+                                    itemIsNA ? 'text-amber-950 font-black' : 'text-teal-800'
+                                  }`}
+                                />
+                                <span className={`text-xs font-black ${itemIsNA ? 'text-amber-800' : 'text-slate-400'}`}>/ 10</span>
+                              </div>
+
+                              {/* Tombol Cepat N/A per butir */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handlePoinChange(catIdx, itemIdx, itemIsNA ? '' : 'N/A');
+                                }}
+                                className={`px-2 py-1 rounded-lg text-[10px] font-black border transition-all ${
+                                  itemIsNA 
+                                    ? 'bg-amber-500 text-slate-950 border-amber-600 shadow-xs' 
+                                    : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
+                                }`}
+                                title="Tandai butir ini N/A atau klik lagi untuk batal"
+                              >
+                                {itemIsNA ? '✓ N/A' : 'N/A'}
+                              </button>
+                            </div>
                           </div>
 
-                          {/* Poin Evaluasi (1 - 10) */}
-                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto pl-10 sm:pl-0">
-                            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
-                              Poin (1 - 10):
-                            </span>
-                            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl focus-within:ring-2 focus-within:ring-teal-400 focus-within:bg-white transition-all">
-                              <input 
-                                type="number" 
-                                min="1" 
-                                max="10" 
-                                value={item.poin ?? ''} 
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-0 sm:pl-11">
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                Kondisi Eksisting Lapangan
+                              </label>
+                              <textarea 
+                                value={item.kondisi} 
                                 onChange={(e) => {
-                                  const val = e.target.value;
-                                  if (val === '' || (Number(val) >= 0 && Number(val) <= 10)) {
-                                    handlePoinChange(catIdx, itemIdx, val);
-                                  }
+                                  const c = [...checklist]; c[catIdx].items[itemIdx].kondisi = e.target.value; setChecklist(c);
                                 }} 
-                                placeholder="1-10" 
-                                className="w-14 text-center font-mono font-black text-sm text-teal-800 bg-transparent focus:outline-none"
+                                rows={2} 
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400" 
+                                placeholder="Hasil pengamatan riil di lapangan..."
                               />
-                              <span className="text-xs font-black text-slate-400">/ 10</span>
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                Keterangan / Catatan Teknis
+                              </label>
+                              <textarea 
+                                value={item.keterangan} 
+                                onChange={(e) => {
+                                  const c = [...checklist]; c[catIdx].items[itemIdx].keterangan = e.target.value; setChecklist(c);
+                                }} 
+                                rows={2} 
+                                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400" 
+                                placeholder="Catatan tambahan / rekomendasi..."
+                              />
                             </div>
                           </div>
                         </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-0 sm:pl-11">
-                          <div>
-                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                              Kondisi Eksisting Lapangan
-                            </label>
-                            <textarea 
-                              value={item.kondisi} 
-                              onChange={(e) => {
-                                const c = [...checklist]; c[catIdx].items[itemIdx].kondisi = e.target.value; setChecklist(c);
-                              }} 
-                              rows={2} 
-                              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400" 
-                              placeholder="Hasil pengamatan riil di lapangan..."
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                              Keterangan / Catatan Teknis
-                            </label>
-                            <textarea 
-                              value={item.keterangan} 
-                              onChange={(e) => {
-                                const c = [...checklist]; c[catIdx].items[itemIdx].keterangan = e.target.value; setChecklist(c);
-                              }} 
-                              rows={2} 
-                              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400" 
-                              placeholder="Catatan tambahan / rekomendasi..."
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -1471,20 +1743,10 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                       {/* Tombol Toggle N/A */}
                       <button
                         type="button"
-                        onClick={() => {
-                          const k = [...komponenPenilaian];
-                          if (isNA) {
-                            k[idx].nilai = '';
-                            const recalced = recalculateAllScoresFromChecklist(checklist, poinDokumen, k);
-                            setKomponenPenilaian(recalced);
-                          } else {
-                            k[idx].nilai = 'N/A';
-                            setKomponenPenilaian(k);
-                          }
-                        }}
+                        onClick={() => toggleBabNA(komp.nama)}
                         className={`px-3 py-2 rounded-lg text-xs font-black transition-all border shrink-0 ${
                           isNA 
-                            ? 'bg-amber-500 text-white border-amber-600 shadow-sm hover:bg-amber-600' 
+                            ? 'bg-amber-500 text-slate-950 border-amber-600 shadow-sm hover:bg-amber-400 font-black' 
                             : 'bg-white hover:bg-slate-100 text-slate-500 border-slate-200'
                         }`}
                         title={isNA ? 'Kembalikan ke nilai checklist' : 'Tandai sebagai N/A (Tidak Ada Objek Pengawasan)'}
