@@ -92,7 +92,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
   const [listDokumen, setListDokumen] = useState([{ id: Date.now(), value: '' }]);
   const [listFoto, setListFoto] = useState([{ id: Date.now(), file: null as any, base64: '', keterangan: '' }]);
   const [listSaran, setListSaran] = useState([{ id: Date.now(), value: '' }]);
-  const [komponenPenilaian, setKomponenPenilaian] = useState([{ id: Date.now(), nama: '', nilai: '' }]);
+  const [komponenPenilaian, setKomponenPenilaian] = useState<{ id: any, nama: string, nilai: string }[]>([]);
   
   const [checklist, setChecklist] = useState<any[]>([]);
 
@@ -104,7 +104,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     try {
       const { data, error } = await supabase
         .from('pengawasan_lapangans')
-        .select('*')
+        .select('*, bap_pengawasans(*)')
         .eq('id', id)
         .single();
       
@@ -119,6 +119,23 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         bab: cat.bab,
         items: cat.items.map(item => ({ key: item.key || item.point, point: item.point, no: item.no, kondisi: '', keterangan: '' }))
       })));
+
+      // Komponen Penilaian otomatis diambil dari Bab Checklist Ketaatan
+      const defaultScores = [
+        { id: 'score_dokumen', nama: '1. Dokumen Perizinan Lingkungan', nilai: '' },
+        ...template.map((cat: any, idx: number) => ({
+          id: `score_${idx + 2}`,
+          nama: cat.bab,
+          nilai: ''
+        }))
+      ];
+
+      const existingBap = agendaData.bap_pengawasans && agendaData.bap_pengawasans.length > 0 ? agendaData.bap_pengawasans[0] : null;
+      if (existingBap?.rincian_skoring && Array.isArray(existingBap.rincian_skoring) && existingBap.rincian_skoring.length > 0 && existingBap.rincian_skoring.some((r: any) => r.nama && r.nama.trim() !== '')) {
+        setKomponenPenilaian(existingBap.rincian_skoring);
+      } else {
+        setKomponenPenilaian(defaultScores);
+      }
       
       if (agendaData.tim_tugas) {
         let parsedTim: string[] = [];
@@ -163,6 +180,22 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else { alert('GPS Tidak didukung.'); }
+  };
+
+  const syncScoresFromChecklist = () => {
+    const template = getTemplate(kategori || agenda?.kategori || '');
+    const newScores = [
+      { id: `score_dokumen_${Date.now()}`, nama: '1. Dokumen Perizinan Lingkungan', nilai: '' },
+      ...template.map((cat: any, idx: number) => {
+        const existing = komponenPenilaian.find(k => k.nama === cat.bab);
+        return {
+          id: `score_${idx + 2}_${Date.now()}`,
+          nama: cat.bab,
+          nilai: existing ? existing.nilai : ''
+        };
+      })
+    ];
+    setKomponenPenilaian(newScores);
   };
 
   const handleFileChange = (index: number, file: File) => {
@@ -1106,14 +1139,30 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
 
           {/* Penilaian Skoring & Hasil Status */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-            <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
-              Komponen Penilaian & Skor Ketaatan
-            </h4>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                  Komponen Penilaian & Skor Ketaatan
+                </h4>
+                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                  Daftar komponen otomatis diambil dari Checklist Ketaatan. Cukup isi nilai skor (0 - 100) di kolom sebelah kanan.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={syncScoresFromChecklist}
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 self-start sm:self-auto border border-slate-200 shadow-sm"
+                title="Sinkronkan ulang daftar komponen dari Checklist Ketaatan"
+              >
+                <RefreshCcw size={13} className="text-teal-600" />
+                <span>Muat Ulang dari Checklist</span>
+              </button>
+            </div>
 
             <div className="space-y-3">
               {komponenPenilaian.map((komp, idx) => (
-                <div key={komp.id} className="flex flex-col sm:flex-row gap-3 p-3.5 bg-slate-50 border border-slate-200 rounded-xl items-center">
-                  <span className="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-xs font-black">
+                <div key={komp.id || idx} className="flex flex-col sm:flex-row gap-3 p-3.5 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl items-center transition-colors">
+                  <span className="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-xs font-black shrink-0">
                     C.{idx + 1}
                   </span>
                   <input 
@@ -1122,10 +1171,11 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                     onChange={(e) => {
                       const k = [...komponenPenilaian]; k[idx].nama = e.target.value; setKomponenPenilaian(k);
                     }} 
-                    placeholder="Rincian penilaian (misal: Pengelolaan Limbah Cair / TPS B3)..." 
-                    className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-400 w-full"
+                    placeholder="Nama Komponen Penilaian..." 
+                    className="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-400 w-full"
                   />
-                  <div className="flex items-center gap-2 w-full sm:w-36 shrink-0">
+                  <div className="flex items-center gap-2 w-full sm:w-40 shrink-0">
+                    <span className="text-xs font-bold text-slate-400 sm:hidden">Nilai:</span>
                     <input 
                       type="number" 
                       min="0" 
@@ -1140,8 +1190,9 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                     {komponenPenilaian.length > 1 && (
                       <button 
                         type="button" 
-                        onClick={() => setKomponenPenilaian(komponenPenilaian.filter(x => x.id !== komp.id))} 
+                        onClick={() => setKomponenPenilaian(komponenPenilaian.filter((_, i) => i !== idx))} 
                         className="p-2 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors"
+                        title="Hapus Komponen"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -1155,7 +1206,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                 onClick={() => setKomponenPenilaian([...komponenPenilaian, { id: Date.now(), nama: '', nilai: '' }])} 
                 className="w-full py-2.5 border-2 border-dashed border-slate-300 hover:border-teal-400 rounded-xl font-bold text-slate-600 hover:text-teal-700 hover:bg-teal-50/50 flex items-center justify-center gap-2 uppercase tracking-wider text-xs transition-colors"
               >
-                <Plus size={15} /> Tambah Komponen Penilaian
+                <Plus size={15} /> Tambah Komponen Penilaian Lainnya
               </button>
             </div>
 
