@@ -133,17 +133,24 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       setAgenda(agendaData);
       setKategori(agendaData.kategori || '');
       
-      // Initialize checklist based on kategori
+      // Initialize checklist based on kategori (atau muat dari checklist tersimpan jika ada)
       const template = getTemplate(agendaData.kategori);
-      setChecklist(template.map(cat => ({
-        bab: cat.bab,
-        items: cat.items.map(item => ({ key: item.key || item.point, point: item.point, no: item.no, kondisi: '', keterangan: '' }))
-      })));
+      const existingBap = agendaData.bap_pengawasans && agendaData.bap_pengawasans.length > 0 ? agendaData.bap_pengawasans[0] : null;
+      const existingMatriks = existingBap?.data_matriks_c;
+      const savedChecklist = existingMatriks?.checklist;
+
+      if (savedChecklist && Array.isArray(savedChecklist) && savedChecklist.length > 0) {
+        setChecklist(savedChecklist);
+      } else {
+        setChecklist(template.map(cat => ({
+          bab: cat.bab,
+          items: cat.items.map(item => ({ key: item.key || item.point, point: item.point, no: item.no, kondisi: '', keterangan: '', poin: '' }))
+        })));
+      }
 
       // Komponen Penilaian otomatis diambil dari standar BAP (Pencemaran udara otomatis N/A untuk non-industri)
       const defaultScores = generateDefaultScores(agendaData.kategori);
 
-      const existingBap = agendaData.bap_pengawasans && agendaData.bap_pengawasans.length > 0 ? agendaData.bap_pengawasans[0] : null;
       if (existingBap?.rincian_skoring && Array.isArray(existingBap.rincian_skoring) && existingBap.rincian_skoring.length > 0 && existingBap.rincian_skoring.some((r: any) => r.nama && r.nama.trim() !== '')) {
         setKomponenPenilaian(existingBap.rincian_skoring);
       } else {
@@ -193,6 +200,40 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else { alert('GPS Tidak didukung.'); }
+  };
+
+  const handlePoinChange = (catIdx: number, itemIdx: number, val: string) => {
+    const newChecklist = [...checklist];
+    newChecklist[catIdx].items[itemIdx].poin = val;
+    setChecklist(newChecklist);
+
+    // Hitung rata-rata poin untuk bab ini dan otomatis update nilai skor bab di komponenPenilaian
+    const catItems = newChecklist[catIdx].items;
+    const scoredItems = catItems.filter((it: any) => it.poin !== '' && it.poin !== undefined && it.poin !== null && !isNaN(Number(it.poin)));
+    
+    if (scoredItems.length > 0) {
+      const sum = scoredItems.reduce((acc: number, curr: any) => acc + Number(curr.poin), 0);
+      const avg100 = Math.round((sum / scoredItems.length) * 10); // konversi poin 1-10 menjadi skor 10-100
+      
+      const babTitle = (newChecklist[catIdx].bab || '').toLowerCase();
+      const babNum = newChecklist[catIdx].bab.match(/^\d+/)?.[0];
+      
+      setKomponenPenilaian(prev => prev.map(komp => {
+        const kNama = (komp.nama || '').toLowerCase();
+        const matchNum = babNum && kNama.startsWith(`${babNum}.`);
+        const matchKeyword = (babTitle.includes('air') && kNama.includes('air')) ||
+                             (babTitle.includes('udara') && kNama.includes('udara')) ||
+                             ((babTitle.includes('b3') || babTitle.includes('lb3')) && (kNama.includes('b3') || kNama.includes('lb3'))) ||
+                             (babTitle.includes('sampah') && kNama.includes('sampah'));
+        
+        if (matchNum || matchKeyword) {
+          // Jangan timpa jika komponen ini bertanda N/A
+          if (komp.nilai === 'N/A' || komp.nilai === 'NA') return komp;
+          return { ...komp, nilai: avg100.toString() };
+        }
+        return komp;
+      }));
+    }
   };
 
   const syncScoresFromChecklist = () => {
@@ -1007,61 +1048,103 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
 
           {/* Checklist Ketaatan Lapangan */}
           <div className="space-y-6">
-            {checklist.map((cat, catIdx) => (
-              <div key={catIdx} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
-                  <h4 className="font-black text-xs sm:text-sm uppercase tracking-wider">{cat.bab}</h4>
-                  <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-md font-bold">
-                    {cat.items.length} Poin Evaluasi
-                  </span>
-                </div>
-                <div className="p-5 md:p-6 divide-y divide-slate-100">
-                  {cat.items.map((item: any, itemIdx: number) => (
-                    <div key={itemIdx} className="py-4 first:pt-0 last:pb-0 space-y-2">
-                      <div className="flex items-start gap-3">
-                        <span className="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 text-xs font-black flex items-center justify-center shrink-0 mt-0.5">
-                          {item.no}
-                        </span>
-                        <p className="font-bold text-slate-900 text-sm leading-relaxed flex-1">
-                          {item.point}
-                        </p>
-                      </div>
+            {checklist.map((cat, catIdx) => {
+              const babNum = cat.bab?.match(/^\d+/)?.[0] || (catIdx + 2);
+              const scoredItems = (cat.items || []).filter((it: any) => it.poin !== '' && it.poin !== undefined && it.poin !== null && !isNaN(Number(it.poin)));
+              const hasScores = scoredItems.length > 0;
+              const avgPoin = hasScores ? Math.round((scoredItems.reduce((acc: number, curr: any) => acc + Number(curr.poin), 0) / scoredItems.length) * 10) / 10 : null;
+              const skorBab = avgPoin !== null ? Math.round(avgPoin * 10) : null;
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-9">
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                            Kondisi Eksisting Lapangan
-                          </label>
-                          <textarea 
-                            value={item.kondisi} 
-                            onChange={(e) => {
-                              const c = [...checklist]; c[catIdx].items[itemIdx].kondisi = e.target.value; setChecklist(c);
-                            }} 
-                            rows={2} 
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400" 
-                            placeholder="Hasil pengamatan riil di lapangan..."
-                          />
+              return (
+                <div key={catIdx} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="bg-slate-900 text-white px-5 py-3.5 flex flex-wrap items-center justify-between gap-2">
+                    <h4 className="font-black text-xs sm:text-sm uppercase tracking-wider">{cat.bab}</h4>
+                    <div className="flex items-center gap-2">
+                      {hasScores && (
+                        <span className="text-[10px] bg-teal-500/30 text-teal-200 border border-teal-400/30 px-2.5 py-0.5 rounded-md font-bold">
+                          Rata-rata: {avgPoin}/10 (Skor Bab: {skorBab})
+                        </span>
+                      )}
+                      <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-md font-bold">
+                        {cat.items.length} Poin Evaluasi
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-5 md:p-6 divide-y divide-slate-100">
+                    {cat.items.map((item: any, itemIdx: number) => (
+                      <div key={itemIdx} className="py-4 first:pt-0 last:pb-0 space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                          <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                            <span className="px-2.5 py-0.5 min-w-[34px] h-6 rounded-lg bg-amber-100 text-amber-900 text-xs font-black flex items-center justify-center shrink-0 mt-0.5 font-mono shadow-xs">
+                              {babNum}.{item.no}
+                            </span>
+                            <p className="font-bold text-slate-900 text-sm leading-relaxed">
+                              {item.point}
+                            </p>
+                          </div>
+
+                          {/* Poin Evaluasi (1 - 10) */}
+                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto pl-10 sm:pl-0">
+                            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+                              Poin (1 - 10):
+                            </span>
+                            <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl focus-within:ring-2 focus-within:ring-teal-400 focus-within:bg-white transition-all">
+                              <input 
+                                type="number" 
+                                min="1" 
+                                max="10" 
+                                value={item.poin ?? ''} 
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val === '' || (Number(val) >= 0 && Number(val) <= 10)) {
+                                    handlePoinChange(catIdx, itemIdx, val);
+                                  }
+                                }} 
+                                placeholder="1-10" 
+                                className="w-14 text-center font-mono font-black text-sm text-teal-800 bg-transparent focus:outline-none"
+                              />
+                              <span className="text-xs font-black text-slate-400">/ 10</span>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                            Keterangan / Catatan Teknis
-                          </label>
-                          <textarea 
-                            value={item.keterangan} 
-                            onChange={(e) => {
-                              const c = [...checklist]; c[catIdx].items[itemIdx].keterangan = e.target.value; setChecklist(c);
-                            }} 
-                            rows={2} 
-                            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400" 
-                            placeholder="Catatan tambahan / rekomendasi..."
-                          />
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-0 sm:pl-11">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                              Kondisi Eksisting Lapangan
+                            </label>
+                            <textarea 
+                              value={item.kondisi} 
+                              onChange={(e) => {
+                                const c = [...checklist]; c[catIdx].items[itemIdx].kondisi = e.target.value; setChecklist(c);
+                              }} 
+                              rows={2} 
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400" 
+                              placeholder="Hasil pengamatan riil di lapangan..."
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                              Keterangan / Catatan Teknis
+                            </label>
+                            <textarea 
+                              value={item.keterangan} 
+                              onChange={(e) => {
+                                const c = [...checklist]; c[catIdx].items[itemIdx].keterangan = e.target.value; setChecklist(c);
+                              }} 
+                              rows={2} 
+                              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm font-semibold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400" 
+                              placeholder="Catatan tambahan / rekomendasi..."
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
