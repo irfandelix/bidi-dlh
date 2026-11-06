@@ -24,7 +24,11 @@ import {
   ShieldCheck,
   ChevronRight,
   ChevronLeft,
-  Lock
+  Lock,
+  Download,
+  Printer,
+  Eye,
+  FileCheck
 } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
 import { getTemplate } from './templates';
@@ -55,6 +59,12 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
   const sigTimRefs = useRef<any[]>([]);
   const parafTimRefs = useRef<any[]>([]);
   const sigSaksiRefs = useRef<any[]>([]);
+
+  // Step 6 Preview States
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [docxBlob, setDocxBlob] = useState<Blob | null>(null);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -583,14 +593,6 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     setKomponenPenilaian(calculated);
   };
 
-  const goToStep = (targetStep: number) => {
-    if (targetStep === 4) {
-      setKomponenPenilaian(prev => recalculateAllScoresFromChecklist(checklist, poinDokumen, prev));
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    setStep(targetStep);
-  };
-
   // Helper untuk menyesuaikan dimensi pixel internal canvas dengan ukuran tampilan fisik layar (DPI aware & responsive)
   const resizeCanvasPad = (padRef: any, fallbackImageUrl?: string | null) => {
     if (!padRef) return;
@@ -773,72 +775,245 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     return 'Tidak Taat';
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const cacheCurrentSignatures = () => {
+    const updatedPerw = listPerwakilan.map(p => {
+      const padTtd = sigPerwakilanRefs.current[p.id];
+      const padParaf = parafPerwakilanRefs.current[p.id];
+      return {
+        ...p,
+        savedTtd: padTtd && !padTtd.isEmpty() ? padTtd.getTrimmedCanvas().toDataURL('image/png') : (p.savedTtd || null),
+        savedParaf: padParaf && !padParaf.isEmpty() ? padParaf.getTrimmedCanvas().toDataURL('image/png') : (p.savedParaf || null)
+      };
+    });
+    setListPerwakilan(updatedPerw);
+
+    const prfPemrakarsa = parafPemrakarsaRef.current && !parafPemrakarsaRef.current.isEmpty()
+      ? parafPemrakarsaRef.current.getTrimmedCanvas().toDataURL('image/png')
+      : (savedSignaturesRef.current?.paraf_pemrakarsa || null);
+
+    const ttdTim = timTugas.map((_, idx) => {
+      const pad = sigTimRefs.current[idx];
+      return pad && !pad.isEmpty() ? pad.getTrimmedCanvas().toDataURL('image/png') : (savedSignaturesRef.current?.ttd_tim?.[idx] || null);
+    });
+
+    const prfTim = timTugas.map((_, idx) => {
+      const pad = parafTimRefs.current[idx];
+      return pad && !pad.isEmpty() ? pad.getTrimmedCanvas().toDataURL('image/png') : (savedSignaturesRef.current?.paraf_tim?.[idx] || null);
+    });
+
+    const ttdSaksi = saksiTugas.map((_, idx) => {
+      const pad = sigSaksiRefs.current[idx];
+      return pad && !pad.isEmpty() ? pad.getTrimmedCanvas().toDataURL('image/png') : (savedSignaturesRef.current?.ttd_saksi?.[idx] || null);
+    });
+
+    savedSignaturesRef.current = {
+      ...savedSignaturesRef.current,
+      paraf_pemrakarsa: prfPemrakarsa,
+      ttd_tim: ttdTim,
+      paraf_tim: prfTim,
+      ttd_saksi: ttdSaksi
+    };
+
+    return { updatedPerw, prfPemrakarsa, ttdTim, prfTim, ttdSaksi };
+  };
+
+  const buildPayload = () => {
+    let currentPerw = listPerwakilan;
+    let ttdTim = savedSignaturesRef.current?.ttd_tim || [];
+    let prfTim = savedSignaturesRef.current?.paraf_tim || [];
+    let ttdSaksi = savedSignaturesRef.current?.ttd_saksi || [];
+    let prfPemrakarsa = savedSignaturesRef.current?.paraf_pemrakarsa || null;
+
+    if (step === 5) {
+      const cached = cacheCurrentSignatures();
+      currentPerw = cached.updatedPerw;
+      ttdTim = cached.ttdTim;
+      prfTim = cached.prfTim;
+      ttdSaksi = cached.ttdSaksi;
+      prfPemrakarsa = cached.prfPemrakarsa;
+    }
+
+    const primaryPerwTtd = currentPerw[0]?.savedTtd || null;
+    const primaryPerwParaf = currentPerw[0]?.savedParaf || null;
+
+    const ttdPemrakarsa = sigPemrakarsaRef.current && !sigPemrakarsaRef.current.isEmpty() 
+      ? sigPemrakarsaRef.current.getTrimmedCanvas().toDataURL('image/png') 
+      : (savedSignaturesRef.current?.ttd_pemrakarsa || primaryPerwTtd);
+
+    const finalPrfPemrakarsa = prfPemrakarsa || primaryPerwParaf;
+
+    return {
+      bap: {
+        identitas: formData,
+        dokumen_izin: listDokumen.map(d => d.value).filter(v => v !== ''),
+        poin_dokumen: poinDokumen,
+        checklist: checklist,
+        dokumentasi: listFoto.map(f => ({ keterangan: f.keterangan, file: f.base64 })),
+        saran: listSaran.map(s => s.value).filter(v => v !== ''),
+        rincian_skoring: komponenPenilaian,
+        perwakilan: currentPerw.map(p => ({
+          nama: p.nama,
+          jabatan: p.jabatan,
+          telepon: p.telepon,
+          ttd: p.savedTtd || null,
+          paraf: p.savedParaf || null
+        })),
+        ttd_pemrakarsa: ttdPemrakarsa,
+        paraf_pemrakarsa: finalPrfPemrakarsa,
+        ttd_tim: ttdTim,
+        paraf_tim: prfTim,
+        saksi_details: saksiDetails,
+        ttd_saksi: ttdSaksi
+      },
+      status_ketaatan: finalStatus(),
+      total_skor: totalSkor()
+    };
+  };
+
+  const generateAndRenderPreview = async () => {
+    setPreviewLoading(true);
+    setPreviewError(null);
+    try {
+      const payload = buildPayload();
+
+      // Background draft save to database so nothing is lost
+      fetch(`/api/pengawasan/bap/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.warn('Auto-save notice:', err));
+
+      const res = await fetch(`/api/pengawasan/bap/${id}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        let errMsg = 'Gagal membuat file BAP';
+        try {
+          const errJson = await res.json();
+          errMsg = errJson.error || errMsg;
+        } catch {
+          errMsg += ` (Status: ${res.status})`;
+        }
+        throw new Error(errMsg);
+      }
+
+      const blob = await res.blob();
+      setDocxBlob(blob);
+
+      if (previewContainerRef.current) {
+        previewContainerRef.current.innerHTML = '';
+        const { renderAsync } = await import('docx-preview');
+        await renderAsync(blob, previewContainerRef.current, undefined, {
+          className: 'bap-docx-viewer',
+          inWrapper: true,
+          ignoreWidth: false,
+          ignoreHeight: false,
+          breakPages: true,
+          useBase64URL: true,
+        });
+      }
+    } catch (err: any) {
+      console.error('Preview error:', err);
+      setPreviewError(err.message || 'Gagal merender pratinjau dokumen.');
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleDownloadDocx = () => {
+    if (!docxBlob) {
+      alert('Dokumen belum selesai dimuat.');
+      return;
+    }
+    const url = URL.createObjectURL(docxBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = (agenda?.nama_pemrakarsa || 'Usaha').replace(/[^a-zA-Z0-9]/g, '_');
+    a.download = `BAP_${safeName}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePrintDocx = () => {
+    if (!previewContainerRef.current || !previewContainerRef.current.innerHTML) {
+      alert('Pratinjau dokumen belum siap dicetak.');
+      return;
+    }
+    const printContent = previewContainerRef.current.innerHTML;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+
+    const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map(el => el.outerHTML)
+      .join('\n');
+
+    printWindow.document.open();
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>BAP - ${agenda?.nama_pemrakarsa || 'Dokumen'}</title>
+          ${styles}
+          <style>
+            body { margin: 0; padding: 24px; background: white; font-family: sans-serif; }
+            .bap-docx-viewer { width: 100% !important; margin: 0 auto !important; }
+            .bap-docx-viewer .docx-wrapper { padding: 0 !important; background: white !important; }
+            .bap-docx-viewer section.docx { margin-bottom: 24px !important; box-shadow: none !important; }
+            @media print {
+              body { padding: 0 !important; }
+              @page { margin: 1cm; size: A4 portrait; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="bap-docx-viewer">
+            ${printContent}
+          </div>
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 350);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
+
+  const goToStep = (targetStep: number) => {
+    if (step === 5) {
+      cacheCurrentSignatures();
+    }
+    if (targetStep === 4) {
+      setKomponenPenilaian(prev => recalculateAllScoresFromChecklist(checklist, poinDokumen, prev));
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setStep(targetStep);
+
+    if (targetStep === 6) {
+      setTimeout(() => {
+        generateAndRenderPreview();
+      }, 80);
+    }
+  };
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
     setSaving(true);
     setSavingText('Menyimpan ke Database...');
     try {
-      const primaryPerwTtd = listPerwakilan[0] && sigPerwakilanRefs.current[listPerwakilan[0].id] && !sigPerwakilanRefs.current[listPerwakilan[0].id].isEmpty() 
-        ? sigPerwakilanRefs.current[listPerwakilan[0].id].getTrimmedCanvas().toDataURL('image/png') 
-        : (listPerwakilan[0]?.savedTtd || null);
-
-      const primaryPerwParaf = listPerwakilan[0] && parafPerwakilanRefs.current[listPerwakilan[0].id] && !parafPerwakilanRefs.current[listPerwakilan[0].id].isEmpty() 
-        ? parafPerwakilanRefs.current[listPerwakilan[0].id].getTrimmedCanvas().toDataURL('image/png') 
-        : (listPerwakilan[0]?.savedParaf || null);
-
-      const ttdPemrakarsa = sigPemrakarsaRef.current && !sigPemrakarsaRef.current.isEmpty() 
-        ? sigPemrakarsaRef.current.getTrimmedCanvas().toDataURL('image/png') 
-        : (savedSignaturesRef.current?.ttd_pemrakarsa || primaryPerwTtd);
-
-      const prfPemrakarsa = parafPemrakarsaRef.current && !parafPemrakarsaRef.current.isEmpty() 
-        ? parafPemrakarsaRef.current.getTrimmedCanvas().toDataURL('image/png') 
-        : (savedSignaturesRef.current?.paraf_pemrakarsa || primaryPerwParaf);
-
-      const ttdTim = timTugas.map((_, idx) => {
-        const pad = sigTimRefs.current[idx];
-        return pad && !pad.isEmpty() ? pad.getTrimmedCanvas().toDataURL('image/png') : (savedSignaturesRef.current?.ttd_tim?.[idx] || null);
-      });
-
-      const prfTim = timTugas.map((_, idx) => {
-        const pad = parafTimRefs.current[idx];
-        return pad && !pad.isEmpty() ? pad.getTrimmedCanvas().toDataURL('image/png') : (savedSignaturesRef.current?.paraf_tim?.[idx] || null);
-      });
-
-      const ttdSaksi = saksiTugas.map((_, idx) => {
-        const pad = sigSaksiRefs.current[idx];
-        return pad && !pad.isEmpty() ? pad.getTrimmedCanvas().toDataURL('image/png') : (savedSignaturesRef.current?.ttd_saksi?.[idx] || null);
-      });
-
-      const payload = {
-        bap: {
-          identitas: formData,
-          dokumen_izin: listDokumen.map(d => d.value).filter(v => v !== ''),
-          poin_dokumen: poinDokumen,
-          checklist: checklist,
-          dokumentasi: listFoto.map(f => ({ keterangan: f.keterangan, file: f.base64 })),
-          saran: listSaran.map(s => s.value).filter(v => v !== ''),
-          rincian_skoring: komponenPenilaian,
-          perwakilan: listPerwakilan.map(p => {
-            const padTtd = sigPerwakilanRefs.current[p.id];
-            const padParaf = parafPerwakilanRefs.current[p.id];
-            return {
-              nama: p.nama,
-              jabatan: p.jabatan,
-              telepon: p.telepon,
-              ttd: padTtd && !padTtd.isEmpty() ? padTtd.getTrimmedCanvas().toDataURL('image/png') : (p.savedTtd || null),
-              paraf: padParaf && !padParaf.isEmpty() ? padParaf.getTrimmedCanvas().toDataURL('image/png') : (p.savedParaf || null)
-            };
-          }),
-          ttd_pemrakarsa: ttdPemrakarsa,
-          paraf_pemrakarsa: prfPemrakarsa,
-          ttd_tim: ttdTim,
-          paraf_tim: prfTim,
-          saksi_details: saksiDetails,
-          ttd_saksi: ttdSaksi
-        },
-        status_ketaatan: finalStatus(),
-        total_skor: totalSkor()
-      };
+      const payload = buildPayload();
 
       const res = await fetch(`/api/pengawasan/bap/${id}`, {
         method: 'PUT',
@@ -890,7 +1065,8 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     { num: 2, title: 'Operasional', sub: 'Kapasitas & Utilitas' },
     { num: 3, title: 'Checklist Ketaatan', sub: 'Evaluasi Lapangan' },
     { num: 4, title: 'Dokumentasi & Saran', sub: 'Foto & Penilaian' },
-    { num: 5, title: 'Pengesahan BAP', sub: 'Tanda Tangan & Paraf' }
+    { num: 5, title: 'Pengesahan BAP', sub: 'Tanda Tangan & Paraf' },
+    { num: 6, title: 'Preview Dokumen', sub: 'Pratinjau Hasil BAP' }
   ];
 
   if (loading) return <div className="py-24 flex items-center justify-center"><LottieLoader size={150} text="MEMUAT FORM BAP..." /></div>;
@@ -932,7 +1108,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
 
         {/* STEPPER TABS (LEBAR, RESPONSIF & SEJAJAR PERSIS) */}
         <div className="mt-4 pt-3.5 border-t border-slate-100">
-          <div className="grid grid-cols-5 gap-2 sm:gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
             {stepList.map((s) => {
               const isActive = step === s.num;
               const isPast = step > s.num;
@@ -2445,6 +2621,106 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
           )}
         </div>
 
+        {/* ========================================================================= */}
+        {/* STEP 6: PREVIEW HASIL BAP & PRATINJAU DOKUMEN                             */}
+        {/* ========================================================================= */}
+        <div className={`${step === 6 ? 'block' : 'hidden'} animate-in fade-in duration-200 space-y-6`}>
+          {/* Header & Control Bar Card */}
+          <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                <span className="text-[10px] font-black uppercase tracking-wider text-teal-700 bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-lg">
+                  Tahap 6 • Pratinjau Dokumen BAP
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-lg">
+                  Hasil Otomatis Docx Sesuai Format Resmi
+                </span>
+              </div>
+              <h3 className="font-black text-slate-900 text-base md:text-lg tracking-tight">
+                Pratinjau Dokumen Berita Acara Pengawasan (BAP)
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Dokumen telah terisi otomatis dengan identitas, data operasional, checklist evaluasi, dokumentasi foto, dan tanda tangan digital.
+              </p>
+            </div>
+
+            {/* Toolbar Buttons */}
+            <div className="flex items-center flex-wrap gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={generateAndRenderPreview}
+                disabled={previewLoading}
+                className="px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-slate-50 hover:bg-slate-100 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                title="Muat ulang pratinjau dokumen"
+              >
+                <RefreshCcw size={14} className={previewLoading ? 'animate-spin text-teal-600' : ''} />
+                <span>Segarkan</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDownloadDocx}
+                disabled={previewLoading || !docxBlob}
+                className="px-4 py-2.5 rounded-xl border border-teal-200 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+              >
+                <Download size={14} />
+                <span>Unduh Word (.docx)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handlePrintDocx}
+                disabled={previewLoading}
+                className="px-4 py-2.5 rounded-xl border border-indigo-200 text-xs font-bold text-indigo-800 bg-indigo-50 hover:bg-indigo-100 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+              >
+                <Printer size={14} />
+                <span>Cetak / Simpan PDF</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Alert Panduan */}
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
+            <AlertCircle size={18} className="text-amber-600 shrink-0 mt-0.5" />
+            <div className="text-xs text-amber-900 leading-relaxed">
+              <span className="font-bold">Periksa Kembali Sebelum Simpan:</span> Pastikan seluruh data, foto, dan tanda tangan pada halaman pratinjau di bawah ini sudah lengkap dan sesuai. Jika ingin mengubah atau menambah data, silakan klik tombol <strong>Kembali</strong> atau pilih nomor tahap di atas. Setelah yakin, klik tombol hijau <strong>Simpan & Upload Drive</strong> di pojok kanan bawah.
+            </div>
+          </div>
+
+          {/* Document Preview Viewport */}
+          <div className="bg-slate-100 p-4 sm:p-8 rounded-2xl border border-slate-300 min-h-[600px] flex flex-col items-center justify-start overflow-x-auto shadow-inner relative">
+            {previewLoading && (
+              <div className="py-24 flex flex-col items-center justify-center">
+                <LottieLoader size={120} text="MEMBUAT PRATINJAU DOKUMEN BAP..." />
+                <p className="text-xs text-slate-500 font-medium mt-2">Menyusun format tabel, foto dokumentasi, dan tanda tangan digital...</p>
+              </div>
+            )}
+
+            {previewError && !previewLoading && (
+              <div className="py-16 text-center max-w-md mx-auto">
+                <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                  <AlertCircle size={24} />
+                </div>
+                <h4 className="font-black text-slate-800 text-base mb-1">Gagal Menampilkan Pratinjau</h4>
+                <p className="text-xs text-slate-500 mb-4">{previewError}</p>
+                <button
+                  type="button"
+                  onClick={generateAndRenderPreview}
+                  className="px-4 py-2 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700 transition-all inline-flex items-center gap-1.5 shadow-sm"
+                >
+                  <RefreshCcw size={14} />
+                  <span>Coba Muat Ulang</span>
+                </button>
+              </div>
+            )}
+
+            <div 
+              ref={previewContainerRef} 
+              className={`w-full max-w-[850px] transition-all ${previewLoading || previewError ? 'hidden' : 'block'}`}
+            />
+          </div>
+        </div>
+
       </form>
 
       {/* FIXED BOTTOM NAVIGATION BAR (SEJAJAR PERSIS DENGAN KARTU KONTEN) */}
@@ -2465,17 +2741,17 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
 
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-400 hidden sm:inline">
-              Tahap {step} dari 5
+              Tahap {step} dari 6
             </span>
 
-            {step < 5 ? (
+            {step < 6 ? (
               <button 
                 type="button" 
                 onClick={() => goToStep(step + 1)} 
                 className="px-6 py-3 rounded-xl font-black text-xs sm:text-sm text-white bg-slate-900 hover:bg-slate-800 uppercase tracking-wider transition-all flex items-center gap-2 shadow-md hover:-translate-y-0.5"
               >
-                <span>Lanjut ke Step {step + 1}</span>
-                <ChevronRight size={16} />
+                <span>{step === 5 ? 'Lanjut ke Preview BAP' : `Lanjut ke Step ${step + 1}`}</span>
+                {step === 5 ? <Eye size={16} /> : <ChevronRight size={16} />}
               </button>
             ) : (
               <button 
