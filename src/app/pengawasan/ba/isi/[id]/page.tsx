@@ -90,6 +90,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
   const parafPerwakilanRefs = useRef<any>({});
 
   const [listDokumen, setListDokumen] = useState([{ id: Date.now(), value: '' }]);
+  const [poinDokumen, setPoinDokumen] = useState<string>('');
   const [listFoto, setListFoto] = useState([{ id: Date.now(), file: null as any, base64: '', keterangan: '' }]);
   const [listSaran, setListSaran] = useState([{ id: Date.now(), value: '' }]);
   const [komponenPenilaian, setKomponenPenilaian] = useState<{ id: any, nama: string, nilai: string }[]>([]);
@@ -120,6 +121,104 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     ];
   };
 
+  // Fungsi terpusat untuk kalkulasi otomatis nilai C.1 s/d C.5 dari checklist ketaatan & poin dokumen
+  const recalculateAllScoresFromChecklist = (
+    currentChecklist: any[],
+    currentPoinDokumen: string,
+    currentKomponen: { id: any, nama: string, nilai: string }[]
+  ) => {
+    return currentKomponen.map(komp => {
+      const kNama = (komp.nama || '').toLowerCase();
+      // Jangan timpa jika komponen ini bertanda N/A
+      if (komp.nilai === 'N/A' || komp.nilai === 'NA') return komp;
+
+      // C.1 Dokumen Perizinan
+      if (kNama.startsWith('1.') || kNama.includes('dokumen')) {
+        if (currentPoinDokumen !== '' && !isNaN(Number(currentPoinDokumen))) {
+          const score100 = Math.round(Number(currentPoinDokumen) * 10);
+          return { ...komp, nilai: score100.toString() };
+        }
+        return komp;
+      }
+
+      // C.2 s/d C.5: Cocokkan dengan kategori checklist
+      for (const cat of currentChecklist) {
+        const babNum = (cat.bab || '').match(/^\d+/)?.[0];
+        const babTitle = (cat.bab || '').toLowerCase();
+        const matchNum = babNum && kNama.startsWith(`${babNum}.`);
+        const matchKeyword = (babTitle.includes('air') && kNama.includes('air')) ||
+                             (babTitle.includes('udara') && kNama.includes('udara')) ||
+                             ((babTitle.includes('b3') || babTitle.includes('lb3')) && (kNama.includes('b3') || kNama.includes('lb3'))) ||
+                             (babTitle.includes('sampah') && kNama.includes('sampah'));
+
+        if (matchNum || matchKeyword) {
+          const scored = (cat.items || []).filter((it: any) => it.poin !== '' && it.poin !== undefined && it.poin !== null && !isNaN(Number(it.poin)));
+          if (scored.length > 0) {
+            const sum = scored.reduce((acc: number, curr: any) => acc + Number(curr.poin), 0);
+            const score100 = Math.round((sum / scored.length) * 10);
+            return { ...komp, nilai: score100.toString() };
+          }
+        }
+      }
+      return komp;
+    });
+  };
+
+  const getComponentChecklistStat = (kompNama: string) => {
+    const kNama = (kompNama || '').toLowerCase();
+    if (kNama.startsWith('1.') || kNama.includes('dokumen')) {
+      if (poinDokumen !== '' && !isNaN(Number(poinDokumen))) {
+        return {
+          hasScore: true,
+          avg: Number(poinDokumen),
+          count: listDokumen.filter(d => d.value.trim() !== '').length || 1,
+          isDokumen: true,
+          totalItems: listDokumen.length
+        };
+      }
+      return {
+        hasScore: false,
+        avg: 0,
+        count: 0,
+        isDokumen: true,
+        totalItems: listDokumen.length
+      };
+    }
+
+    for (const cat of checklist) {
+      const babNum = (cat.bab || '').match(/^\d+/)?.[0];
+      const babTitle = (cat.bab || '').toLowerCase();
+      const matchNum = babNum && kNama.startsWith(`${babNum}.`);
+      const matchKeyword = (babTitle.includes('air') && kNama.includes('air')) ||
+                           (babTitle.includes('udara') && kNama.includes('udara')) ||
+                           ((babTitle.includes('b3') || babTitle.includes('lb3')) && (kNama.includes('b3') || kNama.includes('lb3'))) ||
+                           (babTitle.includes('sampah') && kNama.includes('sampah'));
+
+      if (matchNum || matchKeyword) {
+        const scored = (cat.items || []).filter((it: any) => it.poin !== '' && it.poin !== undefined && it.poin !== null && !isNaN(Number(it.poin)));
+        if (scored.length > 0) {
+          const sum = scored.reduce((acc: number, curr: any) => acc + Number(curr.poin), 0);
+          const avg = Math.round((sum / scored.length) * 10) / 10;
+          return {
+            hasScore: true,
+            avg: avg,
+            count: scored.length,
+            totalItems: (cat.items || []).length,
+            isDokumen: false
+          };
+        }
+        return {
+          hasScore: false,
+          avg: 0,
+          count: 0,
+          totalItems: (cat.items || []).length,
+          isDokumen: false
+        };
+      }
+    }
+    return null;
+  };
+
   const fetchAgenda = async () => {
     try {
       const { data, error } = await supabase
@@ -137,25 +236,40 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       const template = getTemplate(agendaData.kategori);
       const existingBap = agendaData.bap_pengawasans && agendaData.bap_pengawasans.length > 0 ? agendaData.bap_pengawasans[0] : null;
       const existingMatriks = existingBap?.data_matriks_c;
-      const savedChecklist = existingMatriks?.checklist;
+      const savedChecklist = existingMatriks?.checklist || existingBap?.checklist;
+      const savedPoinDokumen = existingMatriks?.poin_dokumen || existingBap?.poin_dokumen || '';
 
+      let loadedChecklist: any[] = [];
       if (savedChecklist && Array.isArray(savedChecklist) && savedChecklist.length > 0) {
-        setChecklist(savedChecklist);
+        loadedChecklist = savedChecklist;
       } else {
-        setChecklist(template.map(cat => ({
+        loadedChecklist = template.map(cat => ({
           bab: cat.bab,
           items: cat.items.map(item => ({ key: item.key || item.point, point: item.point, no: item.no, kondisi: '', keterangan: '', poin: '' }))
-        })));
+        }));
       }
+      setChecklist(loadedChecklist);
 
       // Komponen Penilaian otomatis diambil dari standar BAP (Pencemaran udara otomatis N/A untuk non-industri)
       const defaultScores = generateDefaultScores(agendaData.kategori);
 
+      let loadedKomponen = defaultScores;
       if (existingBap?.rincian_skoring && Array.isArray(existingBap.rincian_skoring) && existingBap.rincian_skoring.length > 0 && existingBap.rincian_skoring.some((r: any) => r.nama && r.nama.trim() !== '')) {
-        setKomponenPenilaian(existingBap.rincian_skoring);
-      } else {
-        setKomponenPenilaian(defaultScores);
+        loadedKomponen = existingBap.rincian_skoring;
       }
+
+      let currentPoinDok = savedPoinDokumen ? savedPoinDokumen.toString() : '';
+      if (!currentPoinDok) {
+        const c1 = loadedKomponen.find((k: any) => (k.nama || '').toLowerCase().startsWith('1.') || (k.nama || '').toLowerCase().includes('dokumen'));
+        if (c1 && c1.nilai && !isNaN(Number(c1.nilai)) && Number(c1.nilai) > 0) {
+          currentPoinDok = Math.round(Number(c1.nilai) / 10).toString();
+        }
+      }
+      setPoinDokumen(currentPoinDok);
+
+      // Hitung otomatis skor komponen dari checklist
+      const calculatedScores = recalculateAllScoresFromChecklist(loadedChecklist, currentPoinDok, loadedKomponen);
+      setKomponenPenilaian(calculatedScores);
       
       if (agendaData.tim_tugas) {
         let parsedTim: string[] = [];
@@ -202,44 +316,24 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     } else { alert('GPS Tidak didukung.'); }
   };
 
+  const handlePoinDokumenChange = (val: string) => {
+    setPoinDokumen(val);
+    setKomponenPenilaian(prev => recalculateAllScoresFromChecklist(checklist, val, prev));
+  };
+
   const handlePoinChange = (catIdx: number, itemIdx: number, val: string) => {
     const newChecklist = [...checklist];
     newChecklist[catIdx].items[itemIdx].poin = val;
     setChecklist(newChecklist);
 
-    // Hitung rata-rata poin untuk bab ini dan otomatis update nilai skor bab di komponenPenilaian
-    const catItems = newChecklist[catIdx].items;
-    const scoredItems = catItems.filter((it: any) => it.poin !== '' && it.poin !== undefined && it.poin !== null && !isNaN(Number(it.poin)));
-    
-    if (scoredItems.length > 0) {
-      const sum = scoredItems.reduce((acc: number, curr: any) => acc + Number(curr.poin), 0);
-      const avg100 = Math.round((sum / scoredItems.length) * 10); // konversi poin 1-10 menjadi skor 10-100
-      
-      const babTitle = (newChecklist[catIdx].bab || '').toLowerCase();
-      const babNum = newChecklist[catIdx].bab.match(/^\d+/)?.[0];
-      
-      setKomponenPenilaian(prev => prev.map(komp => {
-        const kNama = (komp.nama || '').toLowerCase();
-        const matchNum = babNum && kNama.startsWith(`${babNum}.`);
-        const matchKeyword = (babTitle.includes('air') && kNama.includes('air')) ||
-                             (babTitle.includes('udara') && kNama.includes('udara')) ||
-                             ((babTitle.includes('b3') || babTitle.includes('lb3')) && (kNama.includes('b3') || kNama.includes('lb3'))) ||
-                             (babTitle.includes('sampah') && kNama.includes('sampah'));
-        
-        if (matchNum || matchKeyword) {
-          // Jangan timpa jika komponen ini bertanda N/A
-          if (komp.nilai === 'N/A' || komp.nilai === 'NA') return komp;
-          return { ...komp, nilai: avg100.toString() };
-        }
-        return komp;
-      }));
-    }
+    // Otomatis update skor komponen penilaian dari rata-rata poin checklist
+    setKomponenPenilaian(prev => recalculateAllScoresFromChecklist(newChecklist, poinDokumen, prev));
   };
 
   const syncScoresFromChecklist = () => {
     const defaultScores = generateDefaultScores(kategori || agenda?.kategori || '');
     const mergedScores = defaultScores.map(def => {
-      // Cari apakah sudah ada nilai sebelumnya untuk komponen ini
+      // Pertahankan tanda N/A jika sebelumnya diset N/A
       const existing = komponenPenilaian.find(k => {
         const kNama = (k.nama || '').toLowerCase();
         const defKey = (def.nama || '').split('.')[1]?.trim().toLowerCase() || def.nama.toLowerCase();
@@ -248,10 +342,19 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       return {
         ...def,
         id: `score_${def.id}_${Date.now()}`,
-        nilai: (existing && existing.nilai !== '') ? existing.nilai : def.nilai
+        nilai: (existing && (existing.nilai === 'N/A' || existing.nilai === 'NA')) ? 'N/A' : def.nilai
       };
     });
-    setKomponenPenilaian(mergedScores);
+    const calculated = recalculateAllScoresFromChecklist(checklist, poinDokumen, mergedScores);
+    setKomponenPenilaian(calculated);
+  };
+
+  const goToStep = (targetStep: number) => {
+    if (targetStep === 4) {
+      setKomponenPenilaian(prev => recalculateAllScoresFromChecklist(checklist, poinDokumen, prev));
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setStep(targetStep);
   };
 
   const handleFileChange = (index: number, file: File) => {
@@ -345,6 +448,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         bap: {
           identitas: formData,
           dokumen_izin: listDokumen.map(d => d.value).filter(v => v !== ''),
+          poin_dokumen: poinDokumen,
           checklist: checklist,
           dokumentasi: listFoto.map(f => ({ keterangan: f.keterangan, file: f.base64 })),
           saran: listSaran.map(s => s.value).filter(v => v !== ''),
@@ -467,7 +571,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                 <button
                   key={s.num}
                   type="button"
-                  onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(s.num); }}
+                  onClick={() => goToStep(s.num)}
                   className={`p-2.5 sm:px-4 sm:py-3 rounded-xl text-left transition-all border flex items-center gap-2.5 sm:gap-3 ${
                     isActive 
                       ? 'bg-teal-600 text-white border-teal-600 shadow-md shadow-teal-200'
@@ -999,13 +1103,36 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         <div className={`${step === 3 ? 'block' : 'hidden'} animate-in fade-in duration-200 space-y-6`}>
           {/* Dokumen Perizinan Multi-Item (Disamakan dengan gaya Bab Checklist) */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between">
+            <div className="bg-slate-900 text-white px-5 py-3.5 flex flex-wrap items-center justify-between gap-2">
               <h4 className="font-black text-xs sm:text-sm uppercase tracking-wider">
                 1. Daftar Dokumen Izin Yang Ditunjukkan
               </h4>
-              <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-md font-bold">
-                {listDokumen.length} Dokumen
-              </span>
+              <div className="flex items-center gap-2">
+                {/* Poin Evaluasi Dokumen Perizinan (1 - 10) */}
+                <div className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-xl focus-within:ring-2 focus-within:ring-teal-400">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-300">
+                    Poin (1 - 10):
+                  </span>
+                  <input 
+                    type="number" 
+                    min="1" 
+                    max="10" 
+                    value={poinDokumen} 
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || (Number(val) >= 0 && Number(val) <= 10)) {
+                        handlePoinDokumenChange(val);
+                      }
+                    }} 
+                    placeholder="1-10" 
+                    className="w-12 text-center font-mono font-black text-xs text-teal-300 bg-transparent focus:outline-none placeholder:text-slate-500"
+                  />
+                  <span className="text-[10px] font-black text-slate-400">/ 10</span>
+                </div>
+                <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-md font-bold">
+                  {listDokumen.length} Dokumen
+                </span>
+              </div>
             </div>
 
             <div className="p-5 md:p-6 space-y-3">
@@ -1283,34 +1410,60 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
             <div className="space-y-3">
               {komponenPenilaian.map((komp, idx) => {
                 const isNA = (komp.nilai ?? '').toString().trim().toUpperCase() === 'N/A' || (komp.nilai ?? '').toString().trim().toUpperCase() === 'NA';
+                const stat = getComponentChecklistStat(komp.nama);
+
                 return (
                   <div 
                     key={komp.id || idx} 
-                    className={`flex flex-col sm:flex-row gap-3 p-3.5 rounded-xl border items-center transition-colors ${
+                    className={`flex flex-col sm:flex-row gap-3 p-3.5 rounded-xl border items-start sm:items-center transition-colors ${
                       isNA 
                         ? 'bg-amber-50/70 border-amber-200/80' 
                         : 'bg-slate-50 hover:bg-slate-100/70 border-slate-200'
                     }`}
                   >
-                    <span className={`px-2.5 py-1 rounded-lg text-xs font-black shrink-0 ${
-                      isNA ? 'bg-amber-600 text-white' : 'bg-slate-900 text-white'
-                    }`}>
-                      C.{idx + 1}
-                    </span>
-                    <input 
-                      type="text" 
-                      value={komp.nama} 
-                      onChange={(e) => {
-                        const k = [...komponenPenilaian]; k[idx].nama = e.target.value; setKomponenPenilaian(k);
-                      }} 
-                      placeholder="Nama Komponen Penilaian..." 
-                      className={`flex-1 px-3.5 py-2.5 border rounded-lg text-sm font-bold focus:outline-none focus:ring-2 w-full ${
-                        isNA 
-                          ? 'bg-amber-50/50 border-amber-200 text-amber-900 focus:ring-amber-400' 
-                          : 'bg-white border-slate-200 text-slate-800 focus:ring-teal-400'
-                      }`}
-                    />
-                    <div className="flex items-center gap-2 w-full sm:w-56 shrink-0 justify-end">
+                    <div className="flex-1 w-full space-y-1">
+                      <div className="flex items-center gap-2.5">
+                        <span className={`px-2.5 py-1 rounded-lg text-xs font-black shrink-0 ${
+                          isNA ? 'bg-amber-600 text-white' : 'bg-slate-900 text-white'
+                        }`}>
+                          C.{idx + 1}
+                        </span>
+                        <input 
+                          type="text" 
+                          value={komp.nama} 
+                          onChange={(e) => {
+                            const k = [...komponenPenilaian]; k[idx].nama = e.target.value; setKomponenPenilaian(k);
+                          }} 
+                          placeholder="Nama Komponen Penilaian..." 
+                          className={`flex-1 px-3.5 py-2.5 border rounded-lg text-sm font-bold focus:outline-none focus:ring-2 w-full ${
+                            isNA 
+                              ? 'bg-amber-50/50 border-amber-200 text-amber-900 focus:ring-amber-400' 
+                              : 'bg-white border-slate-200 text-slate-800 focus:ring-teal-400'
+                          }`}
+                        />
+                      </div>
+
+                      {/* Info Nilai Otomatis dari Checklist */}
+                      {!isNA && stat && stat.hasScore && (
+                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-teal-700 bg-teal-50 border border-teal-200/80 px-2.5 py-1 rounded-lg ml-0 sm:ml-10 w-fit">
+                          <span className="w-1.5 h-1.5 rounded-full bg-teal-500"></span>
+                          <span>
+                            {stat.isDokumen ? (
+                              <>✓ Otomatis dari Dokumen: Nilai <b>{stat.avg}/10</b> &rarr; Skor <b>{Math.round(stat.avg * 10)}</b></>
+                            ) : (
+                              <>✓ Otomatis dari Checklist: Rata-rata <b>{stat.avg}/10</b> ({stat.count} butir dinilai) &rarr; Skor <b>{Math.round(stat.avg * 10)}</b></>
+                            )}
+                          </span>
+                        </div>
+                      )}
+                      {!isNA && stat && !stat.hasScore && (
+                        <div className="text-[11px] font-medium text-slate-400 ml-0 sm:ml-10">
+                          * Belum ada poin di checklist ({stat.totalItems} butir belum dinilai di Tahap 3)
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end self-end sm:self-center">
                       {/* Tombol Toggle N/A */}
                       <button
                         type="button"
@@ -1717,7 +1870,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
           {step > 1 ? (
             <button 
               type="button" 
-              onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(step - 1); }} 
+              onClick={() => goToStep(step - 1)} 
               className="px-5 py-3 rounded-xl border border-slate-200 font-black text-xs sm:text-sm text-slate-700 bg-white hover:bg-slate-100 uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm"
             >
               <ChevronLeft size={16} />
@@ -1735,7 +1888,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
             {step < 5 ? (
               <button 
                 type="button" 
-                onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); setStep(step + 1); }} 
+                onClick={() => goToStep(step + 1)} 
                 className="px-6 py-3 rounded-xl font-black text-xs sm:text-sm text-white bg-slate-900 hover:bg-slate-800 uppercase tracking-wider transition-all flex items-center gap-2 shadow-md hover:-translate-y-0.5"
               >
                 <span>Lanjut ke Step {step + 1}</span>
