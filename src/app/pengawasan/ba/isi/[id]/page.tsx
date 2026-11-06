@@ -23,7 +23,8 @@ import {
   Building2, 
   ShieldCheck,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  Lock
 } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
 import { getTemplate } from './templates';
@@ -1389,11 +1390,16 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
-                  Komponen Penilaian & Skor Ketaatan
-                </h4>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs font-black text-slate-700 uppercase tracking-wider">
+                    Komponen Penilaian & Skor Ketaatan
+                  </h4>
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-teal-100 text-teal-800 border border-teal-200 flex items-center gap-1">
+                    <Lock size={10} /> Terkunci Otomatis
+                  </span>
+                </div>
                 <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                  Daftar komponen otomatis diambil dari Checklist Ketaatan. Cukup isi nilai skor (0 - 100) di kolom sebelah kanan.
+                  Daftar komponen dan nilai skor terisi otomatis dari Checklist Ketaatan di Tahap 3 (tidak dapat diedit manual).
                 </p>
               </div>
               <button
@@ -1403,7 +1409,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                 title="Sinkronkan ulang daftar komponen dari Checklist Ketaatan"
               >
                 <RefreshCcw size={13} className="text-teal-600" />
-                <span>Muat Ulang dari Checklist</span>
+                <span>Hitung Ulang dari Checklist</span>
               </button>
             </div>
 
@@ -1431,14 +1437,12 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                         <input 
                           type="text" 
                           value={komp.nama} 
-                          onChange={(e) => {
-                            const k = [...komponenPenilaian]; k[idx].nama = e.target.value; setKomponenPenilaian(k);
-                          }} 
-                          placeholder="Nama Komponen Penilaian..." 
-                          className={`flex-1 px-3.5 py-2.5 border rounded-lg text-sm font-bold focus:outline-none focus:ring-2 w-full ${
+                          readOnly 
+                          title="Komponen standar pengawasan BAP"
+                          className={`flex-1 px-3.5 py-2.5 border rounded-lg text-sm font-bold w-full cursor-default focus:outline-none ${
                             isNA 
-                              ? 'bg-amber-50/50 border-amber-200 text-amber-900 focus:ring-amber-400' 
-                              : 'bg-white border-slate-200 text-slate-800 focus:ring-teal-400'
+                              ? 'bg-amber-50/50 border-amber-200 text-amber-900' 
+                              : 'bg-white border-slate-200 text-slate-800'
                           }`}
                         />
                       </div>
@@ -1469,59 +1473,41 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                         type="button"
                         onClick={() => {
                           const k = [...komponenPenilaian];
-                          k[idx].nilai = isNA ? '' : 'N/A';
-                          setKomponenPenilaian(k);
+                          if (isNA) {
+                            k[idx].nilai = '';
+                            const recalced = recalculateAllScoresFromChecklist(checklist, poinDokumen, k);
+                            setKomponenPenilaian(recalced);
+                          } else {
+                            k[idx].nilai = 'N/A';
+                            setKomponenPenilaian(k);
+                          }
                         }}
                         className={`px-3 py-2 rounded-lg text-xs font-black transition-all border shrink-0 ${
                           isNA 
                             ? 'bg-amber-500 text-white border-amber-600 shadow-sm hover:bg-amber-600' 
                             : 'bg-white hover:bg-slate-100 text-slate-500 border-slate-200'
                         }`}
-                        title={isNA ? 'Klik untuk mengisi skor angka' : 'Tandai sebagai N/A (Tidak Ada Objek Pengawasan)'}
+                        title={isNA ? 'Kembalikan ke nilai checklist' : 'Tandai sebagai N/A (Tidak Ada Objek Pengawasan)'}
                       >
                         {isNA ? '✓ N/A' : 'Set N/A'}
                       </button>
 
                       {isNA ? (
-                        <div className="w-24 px-3 py-2 bg-amber-100 border border-amber-300 rounded-lg text-center font-mono font-black text-amber-900 text-sm">
+                        <div className="w-24 px-3 py-2 bg-amber-100 border border-amber-300 rounded-lg text-center font-mono font-black text-amber-900 text-sm select-none">
                           N/A
                         </div>
                       ) : (
-                        <input 
-                          type="number" 
-                          min="0" 
-                          max="100"
-                          value={komp.nilai} 
-                          onChange={(e) => {
-                            const k = [...komponenPenilaian]; k[idx].nilai = e.target.value; setKomponenPenilaian(k);
-                          }} 
-                          placeholder="0" 
-                          className="w-24 px-3 py-2 border border-slate-200 rounded-lg text-center font-mono font-bold text-lg text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-teal-400"
-                        />
-                      )}
-
-                      {komponenPenilaian.length > 1 && (
-                        <button 
-                          type="button" 
-                          onClick={() => setKomponenPenilaian(komponenPenilaian.filter((_, i) => i !== idx))} 
-                          className="p-2 text-rose-600 hover:bg-rose-100 rounded-lg transition-colors shrink-0"
-                          title="Hapus Komponen"
+                        <div 
+                          className="w-24 px-3 py-2 bg-slate-100 border border-slate-300/80 rounded-lg text-center font-mono font-black text-lg text-slate-900 select-none shadow-xs flex items-center justify-center gap-1 cursor-default"
+                          title="Terkunci: Nilai terisi otomatis dari poin Checklist Ketaatan di Tahap 3"
                         >
-                          <Trash2 size={16} />
-                        </button>
+                          <span>{komp.nilai !== '' ? komp.nilai : '0'}</span>
+                        </div>
                       )}
                     </div>
                   </div>
                 );
               })}
-
-              <button 
-                type="button" 
-                onClick={() => setKomponenPenilaian([...komponenPenilaian, { id: Date.now(), nama: '', nilai: '' }])} 
-                className="w-full py-2.5 border-2 border-dashed border-slate-300 hover:border-teal-400 rounded-xl font-bold text-slate-600 hover:text-teal-700 hover:bg-teal-50/50 flex items-center justify-center gap-2 uppercase tracking-wider text-xs transition-colors"
-              >
-                <Plus size={15} /> Tambah Komponen Penilaian Lainnya
-              </button>
             </div>
 
             {/* Banner Skor Rata-rata */}
