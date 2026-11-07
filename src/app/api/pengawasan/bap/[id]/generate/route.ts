@@ -212,15 +212,36 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
     paraf_perwakilan: val.paraf || ''
   }));
 
-  // Extract first perwakilan for root-level tags (used by fasyankes/industri) and fallback for pemrakarsa
-  const firstPerwakilan = perwakilan.length > 0 ? perwakilan[0] : null;
-  const nama_perwakilan = firstPerwakilan?.nama_perwakilan || identitas.pendamping_nama || '';
-  const jabatan_perwakilan = firstPerwakilan?.jabatan_perwakilan || identitas.pendamping_jabatan || '';
-  const telepon_perwakilan = firstPerwakilan?.telepon_perwakilan || identitas.telepon || '';
-  
-  // Use the first perwakilan's signature as ttd_pemrakarsa if the dedicated ttd_pemrakarsa is missing
-  const ttd_pemrakarsa_final = bapData.ttd_pemrakarsa || (firstPerwakilan?.ttd_perwakilan || '');
-  const ttd_perwakilan_final = firstPerwakilan?.ttd_perwakilan || '';
+  // Extract perwakilan for root-level tags and signature mapping
+  const firstPerw = perwakilan.length > 0 ? perwakilan[0] : null;
+  const secondPerw = perwakilan.length > 1 ? perwakilan[1] : null;
+
+  let nama_perwakilan = '';
+  let jabatan_perwakilan = '';
+  let telepon_perwakilan = '';
+  let ttd_pemrakarsa_final = bapData.ttd_pemrakarsa || '';
+  let ttd_perwakilan_final = '';
+
+  if (perwakilan.length >= 2) {
+    // 2 atau lebih perwakilan: perwakilan 1 ke pemrakarsa, perwakilan 2 ke perwakilan
+    nama_perwakilan = secondPerw?.nama_perwakilan || '';
+    jabatan_perwakilan = secondPerw?.jabatan_perwakilan || '';
+    telepon_perwakilan = secondPerw?.telepon_perwakilan || '';
+    ttd_pemrakarsa_final = ttd_pemrakarsa_final || firstPerw?.ttd_perwakilan || '';
+    ttd_perwakilan_final = secondPerw?.ttd_perwakilan || '';
+  } else if (perwakilan.length === 1 && firstPerw) {
+    // 1 perwakilan: isi data pendamping dan pasang tanda tangan agar muncul di kedua slot
+    nama_perwakilan = firstPerw.nama_perwakilan || identitas.pendamping_nama || '';
+    jabatan_perwakilan = firstPerw.jabatan_perwakilan || identitas.pendamping_jabatan || '';
+    telepon_perwakilan = firstPerw.telepon_perwakilan || identitas.telepon || '';
+    const sig = ttd_pemrakarsa_final || firstPerw.ttd_perwakilan || '';
+    ttd_pemrakarsa_final = sig;
+    ttd_perwakilan_final = sig;
+  } else {
+    nama_perwakilan = identitas.pendamping_nama || '';
+    jabatan_perwakilan = identitas.pendamping_jabatan || '';
+    telepon_perwakilan = identitas.telepon || '';
+  }
 
   // Formatting Rincian Skoring
   const skoring = (bapData.rincian_skoring || []).map((val: any, idx: number) => ({
