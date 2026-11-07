@@ -2321,9 +2321,9 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                           }
                         }} 
                         penColor="#0f172a" 
-                        minWidth={1.2}
-                        maxWidth={3.2}
-                        velocityFilterWeight={0.7}
+                        minWidth={1.6}
+                        maxWidth={2.4}
+                        velocityFilterWeight={0.4}
                         canvasProps={{ 
                           className: 'w-full h-full cursor-crosshair block relative z-10',
                           style: { width: '100%', height: '100%', touchAction: 'none' }
@@ -2363,9 +2363,9 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                           }
                         }} 
                         penColor="#0f172a" 
-                        minWidth={1.2}
-                        maxWidth={3.2}
-                        velocityFilterWeight={0.7}
+                        minWidth={1.6}
+                        maxWidth={2.4}
+                        velocityFilterWeight={0.4}
                         canvasProps={{ 
                           className: 'w-full h-full cursor-crosshair block relative z-10',
                           style: { width: '100%', height: '100%', touchAction: 'none' }
@@ -2416,9 +2416,9 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                       }
                     }} 
                     penColor="#0f172a" 
-                    minWidth={1.2}
-                    maxWidth={3.2}
-                    velocityFilterWeight={0.7}
+                    minWidth={1.6}
+                    maxWidth={2.4}
+                    velocityFilterWeight={0.4}
                     canvasProps={{ 
                       className: 'w-full h-full cursor-crosshair block relative z-10',
                       style: { width: '100%', height: '100%', touchAction: 'none' }
@@ -2475,9 +2475,9 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                             }
                           }} 
                           penColor="#0f172a" 
-                          minWidth={1.2}
-                          maxWidth={3.2}
-                          velocityFilterWeight={0.7}
+                          minWidth={1.6}
+                          maxWidth={2.4}
+                          velocityFilterWeight={0.4}
                           canvasProps={{ 
                             className: 'w-full h-full cursor-crosshair block relative z-10',
                             style: { width: '100%', height: '100%', touchAction: 'none' }
@@ -2513,9 +2513,9 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                             }
                           }} 
                           penColor="#0f172a" 
-                          minWidth={1.2}
-                          maxWidth={3.2}
-                          velocityFilterWeight={0.7}
+                          minWidth={1.6}
+                          maxWidth={2.4}
+                          velocityFilterWeight={0.4}
                           canvasProps={{ 
                             className: 'w-full h-full cursor-crosshair block relative z-10',
                             style: { width: '100%', height: '100%', touchAction: 'none' }
@@ -2606,9 +2606,9 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                             }
                           }} 
                           penColor="#0f172a" 
-                          minWidth={1.2}
-                          maxWidth={3.2}
-                          velocityFilterWeight={0.7}
+                          minWidth={1.6}
+                          maxWidth={2.4}
+                          velocityFilterWeight={0.4}
                           canvasProps={{ 
                             className: 'w-full h-full cursor-crosshair block relative z-10',
                             style: { width: '100%', height: '100%', touchAction: 'none' }

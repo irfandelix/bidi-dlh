@@ -220,7 +220,9 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
   let jabatan_perwakilan = '';
   let telepon_perwakilan = '';
   let ttd_pemrakarsa_final = bapData.ttd_pemrakarsa || '';
+  let paraf_pemrakarsa_final = bapData.paraf_pemrakarsa || '';
   let ttd_perwakilan_final = '';
+  let paraf_perwakilan_final = '';
 
   if (perwakilan.length >= 2) {
     // 2 atau lebih perwakilan: perwakilan 1 ke pemrakarsa, perwakilan 2 ke perwakilan
@@ -228,7 +230,9 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
     jabatan_perwakilan = secondPerw?.jabatan_perwakilan || '';
     telepon_perwakilan = secondPerw?.telepon_perwakilan || '';
     ttd_pemrakarsa_final = ttd_pemrakarsa_final || firstPerw?.ttd_perwakilan || '';
+    paraf_pemrakarsa_final = paraf_pemrakarsa_final || firstPerw?.paraf_perwakilan || '';
     ttd_perwakilan_final = secondPerw?.ttd_perwakilan || '';
+    paraf_perwakilan_final = secondPerw?.paraf_perwakilan || '';
   } else if (perwakilan.length === 1 && firstPerw) {
     // 1 perwakilan: isi data pendamping dan pasang tanda tangan agar muncul di kedua slot
     nama_perwakilan = firstPerw.nama_perwakilan || identitas.pendamping_nama || '';
@@ -237,6 +241,9 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
     const sig = ttd_pemrakarsa_final || firstPerw.ttd_perwakilan || '';
     ttd_pemrakarsa_final = sig;
     ttd_perwakilan_final = sig;
+    const prf = paraf_pemrakarsa_final || firstPerw.paraf_perwakilan || '';
+    paraf_pemrakarsa_final = prf;
+    paraf_perwakilan_final = prf;
   } else {
     nama_perwakilan = identitas.pendamping_nama || '';
     jabatan_perwakilan = identitas.pendamping_jabatan || '';
@@ -283,17 +290,15 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
     waktu_pengawasan: formatted_waktu,
     
     ttd_pemrakarsa: ttd_pemrakarsa_final,
-    paraf_pemrakarsa: bapData.paraf_pemrakarsa || '',
-    paraf_pengawas: (bapData.paraf_tim && bapData.paraf_tim[0]) ? bapData.paraf_tim[0] : '',
-    // Footer text tags (converted from image tags to avoid VML textbox parsing issues)
-    paraf_pengawas_text: '',
-    paraf_pemrakarsa_text: '',
+    paraf_pemrakarsa: paraf_pemrakarsa_final,
+    paraf_pengawas: (bapData.paraf_tim && bapData.paraf_tim[0]) ? bapData.paraf_tim[0] : (tim_pengawas[0]?.paraf_pengawas || ''),
     
     // Root-level perwakilan tags
     nama_perwakilan,
     jabatan_perwakilan,
     telepon_perwakilan,
     ttd_perwakilan: ttd_perwakilan_final,
+    paraf_perwakilan: paraf_perwakilan_final,
     
     tim_penilai_lengkap,
     tim_pengawas,
@@ -362,12 +367,12 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
       }
       if (tagName.includes('foto_')) return [300, 225]; // 4:3 ratio for field photos
       
-      let maxWidth = 200;
-      let maxHeight = 70;
+      let maxWidth = 160;
+      let maxHeight = 60;
       
       if (tagName.includes('paraf_')) {
-        maxWidth = 100;
-        maxHeight = 50;
+        maxWidth = 75;
+        maxHeight = 30;
       }
 
       if (img instanceof Buffer) {
