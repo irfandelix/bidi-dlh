@@ -2288,9 +2288,9 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                   </div>
                 </div>
 
-                {/* Kanvas TTD & Paraf (2 Kolom Lebar di Laptop) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  <div>
+                {/* Kanvas TTD & Paraf: Kolom TTD Luas & Kolom Paraf Ringkas */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-2 items-start">
+                  <div className="flex-1 min-w-0 w-full">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">
                         Tanda Tangan
@@ -2332,7 +2332,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                     </div>
                   </div>
 
-                  <div>
+                  <div className="w-full sm:w-48 md:w-56 shrink-0">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">
                         Paraf Singkat
@@ -2387,42 +2387,44 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
 
             {/* Paraf Pemrakarsa Footer */}
             <div className="pt-4 border-t border-slate-100">
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-[10px] font-black uppercase tracking-wider text-slate-700">
-                  Paraf {isSPPG ? 'Fasilitas' : 'Perusahaan'} (Untuk Footer Halaman)
-                </label>
-                <button 
-                  type="button" 
-                  onClick={() => {
-                    parafPemrakarsaRef.current?.clear();
-                    if (savedSignaturesRef.current) savedSignaturesRef.current.paraf_pemrakarsa = null;
-                  }} 
-                  className="text-[10px] font-bold text-rose-600 hover:text-rose-800"
-                >
-                  Hapus / Ulangi
-                </button>
-              </div>
-              <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-slate-50 h-24 shadow-inner max-w-sm select-none" style={{ touchAction: 'none' }}>
-                <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2 opacity-25 select-none">
-                  <div className="w-full border-b border-dashed border-slate-400"></div>
-                  <span className="text-[9px] text-slate-500 mt-0.5 uppercase font-bold tracking-wider">Paraf Footer Dokumen</span>
+              <div className="w-full sm:w-56">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[10px] font-black uppercase tracking-wider text-slate-700">
+                    Paraf {isSPPG ? 'Fasilitas' : 'Perusahaan'} (Footer Dokumen)
+                  </label>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      parafPemrakarsaRef.current?.clear();
+                      if (savedSignaturesRef.current) savedSignaturesRef.current.paraf_pemrakarsa = null;
+                    }} 
+                    className="text-[10px] font-bold text-rose-600 hover:text-rose-800"
+                  >
+                    Hapus / Ulangi
+                  </button>
                 </div>
-                <SignatureCanvas 
-                  ref={(ref) => {
-                    parafPemrakarsaRef.current = ref;
-                    if (ref && step === 5) {
-                      setTimeout(() => resizeCanvasPad(ref, savedSignaturesRef.current?.paraf_pemrakarsa), 20);
-                    }
-                  }} 
-                  penColor="#0f172a" 
-                  minWidth={1.2}
-                  maxWidth={3.2}
-                  velocityFilterWeight={0.7}
-                  canvasProps={{ 
-                    className: 'w-full h-full cursor-crosshair block relative z-10',
-                    style: { width: '100%', height: '100%', touchAction: 'none' }
-                  }} 
-                />
+                <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-slate-50 h-24 shadow-inner w-full select-none" style={{ touchAction: 'none' }}>
+                  <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2 opacity-25 select-none">
+                    <div className="w-full border-b border-dashed border-slate-400"></div>
+                    <span className="text-[9px] text-slate-500 mt-0.5 uppercase font-bold tracking-wider">Paraf Footer Dokumen</span>
+                  </div>
+                  <SignatureCanvas 
+                    ref={(ref) => {
+                      parafPemrakarsaRef.current = ref;
+                      if (ref && step === 5) {
+                        setTimeout(() => resizeCanvasPad(ref, savedSignaturesRef.current?.paraf_pemrakarsa), 20);
+                      }
+                    }} 
+                    penColor="#0f172a" 
+                    minWidth={1.2}
+                    maxWidth={3.2}
+                    velocityFilterWeight={0.7}
+                    canvasProps={{ 
+                      className: 'w-full h-full cursor-crosshair block relative z-10',
+                      style: { width: '100%', height: '100%', touchAction: 'none' }
+                    }} 
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -2445,8 +2447,8 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                     {idx + 1}. {nama}
                   </span>
                   
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
+                  <div className="flex gap-3 items-start">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[9px] font-black uppercase text-slate-500">TTD</span>
                         <button 
@@ -2484,7 +2486,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                       </div>
                     </div>
 
-                    <div>
+                    <div className="w-28 sm:w-32 shrink-0">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[9px] font-black uppercase text-slate-500">Paraf</span>
                         <button 
