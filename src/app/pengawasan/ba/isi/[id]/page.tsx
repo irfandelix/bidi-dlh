@@ -913,6 +913,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
           ignoreHeight: false,
           breakPages: true,
           useBase64URL: true,
+          ignoreLastRenderedPageBreak: false,
         });
       }
     } catch (err: any) {
