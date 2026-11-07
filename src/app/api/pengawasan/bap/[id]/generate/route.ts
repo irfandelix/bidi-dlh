@@ -129,7 +129,7 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
       nama_pengawas: nama,
       nip_pengawas: p.nip || '-',
       pangkat_pengawas: p.pangkat_golongan || '-',
-      jabatan_pengawas: p.jabatan_dinas || 'Pengawas Lingkungan Hidup',
+      jabatan_pengawas: p.jabatan_dinas || p.jabatan || 'Pengawas Lingkungan Hidup',
       instansi_pengawas: 'Dinas Lingkungan Hidup Kabupaten Sragen',
       ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
       paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
