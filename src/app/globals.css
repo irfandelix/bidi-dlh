@@ -38,36 +38,60 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Styling for BAP DOCX Preview */
+/* Styling for BAP DOCX Preview - Menyerupai Lembar Kertas Word (A4 Print Layout) */
 .bap-docx-viewer {
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
+
 .bap-docx-viewer .docx-wrapper {
-  background: transparent !important;
-  padding: 0 !important;
+  background: #475569 !important; /* Slate canvas seperti workspace Word */
+  padding: 32px 16px !important;
+  border-radius: 16px;
+  width: 100% !important;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
 }
+
 .bap-docx-viewer section.docx {
   background: #ffffff !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-  margin: 0 auto 24px auto !important;
-  padding: 40px !important;
-  border-radius: 8px !important;
-  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.35), 0 4px 6px -2px rgba(0, 0, 0, 0.15) !important;
+  margin: 0 auto !important;
+  border-radius: 2px !important;
+  box-sizing: border-box !important;
   color: #000000 !important;
+  max-width: 100% !important;
+  overflow: hidden;
 }
+
+/* Isolasi gaya tabel dan sel dari Tailwind CSS reset */
 .bap-docx-viewer section.docx table {
   border-collapse: collapse !important;
-  width: 100% !important;
 }
-.bap-docx-viewer section.docx table td,
-.bap-docx-viewer section.docx table th {
-  border-color: #334155 !important;
+
+.bap-docx-viewer section.docx td,
+.bap-docx-viewer section.docx th {
+  box-sizing: border-box;
+  vertical-align: top;
 }
+
+.bap-docx-viewer section.docx img {
+  display: inline-block !important;
+  max-width: none !important;
+}
+
 @media print {
+  .bap-docx-viewer .docx-wrapper {
+    background: transparent !important;
+    padding: 0 !important;
+  }
   .bap-docx-viewer section.docx {
     box-shadow: none !important;
     border: none !important;
-    padding: 0 !important;
     margin: 0 !important;
   }
 }

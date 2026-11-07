@@ -907,7 +907,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         previewContainerRef.current.innerHTML = '';
         const { renderAsync } = await import('docx-preview');
         await renderAsync(blob, previewContainerRef.current, undefined, {
-          className: 'bap-docx-viewer',
+          className: 'docx',
           inWrapper: true,
           ignoreWidth: false,
           ignoreHeight: false,
@@ -2718,7 +2718,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
 
             <div 
               ref={previewContainerRef} 
-              className={`w-full max-w-[850px] transition-all ${previewLoading || previewError ? 'hidden' : 'block'}`}
+              className={`bap-docx-viewer w-full flex justify-center transition-all ${previewLoading || previewError ? 'hidden' : 'block'}`}
             />
           </div>
         </div>
