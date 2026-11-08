@@ -183,7 +183,7 @@ body {
 .bap-docx-viewer section.docx > footer img {
   display: inline-block !important;
   max-height: 30px !important;
-  max-width: 190px !important;
+  max-width: 220px !important;
   object-fit: contain !important;
   vertical-align: middle !important;
 }

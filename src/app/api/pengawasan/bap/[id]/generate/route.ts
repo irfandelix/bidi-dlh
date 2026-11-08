@@ -307,7 +307,7 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
   const jumlah_pekerja_penghuni = identitas.jumlah_pekerja_penghuni || (identitas.jumlah_pekerja || identitas.jumlah_penghuni ? `Pekerja: ${identitas.jumlah_pekerja || '-'}, Penghuni: ${identitas.jumlah_penghuni || '-'}` : '');
   const jumlah_pasien_pekerja = `Pasien: ${identitas.jumlah_pasien || '-'}, Pekerja: ${identitas.jumlah_karyawan || identitas.jumlah_pekerja || '-'}`;
 
-    // Gabungkan paraf seluruh tim pengawas secara horizontal agar seluruh anggota tim tampil di footer
+    // Gabungkan paraf seluruh tim pengawas dan saksi secara horizontal agar seluruhnya tampil di footer
     let rawParafTim = bapData.paraf_tim;
     if (typeof rawParafTim === 'string') {
       try { rawParafTim = JSON.parse(rawParafTim); } catch (e) {}
@@ -315,7 +315,21 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
     if (!Array.isArray(rawParafTim) || rawParafTim.length === 0) {
       rawParafTim = tim_pengawas.map((t: any) => t.paraf_pengawas).filter(Boolean);
     }
-    const paraf_pengawas_final = await combineParafImages(rawParafTim, 45, 14);
+
+    let rawParafSaksi = bapData.paraf_saksi;
+    if (typeof rawParafSaksi === 'string') {
+      try { rawParafSaksi = JSON.parse(rawParafSaksi); } catch (e) {}
+    }
+    if (!Array.isArray(rawParafSaksi) || rawParafSaksi.length === 0) {
+      rawParafSaksi = saksi.map((s: any) => s.paraf_saksi).filter(Boolean);
+    }
+
+    const allParafPengawasDanSaksi = [
+      ...(Array.isArray(rawParafTim) ? rawParafTim : []),
+      ...(Array.isArray(rawParafSaksi) ? rawParafSaksi : [])
+    ];
+    const paraf_pengawas_final = await combineParafImages(allParafPengawasDanSaksi, 45, 14);
+    const paraf_saksi_combined = await combineParafImages(rawParafSaksi, 45, 14);
 
     // Gabungkan paraf pihak pemrakarsa jika ada lebih dari 1 perwakilan
     let rawParafPemrakarsa = perwakilan.map((p: any) => p.paraf_perwakilan).filter(Boolean);
@@ -351,7 +365,7 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
       ttd_pemrakarsa: ttd_pemrakarsa_final,
       paraf_pemrakarsa: paraf_pemrakarsa_combined,
       paraf_pengawas: paraf_pengawas_final,
-      paraf_saksi: (Array.isArray(bapData.paraf_saksi) ? bapData.paraf_saksi.find((p: any) => !!p) : '') || '',
+      paraf_saksi: paraf_saksi_combined,
     
     // Root-level perwakilan tags
     nama_perwakilan,
@@ -434,10 +448,10 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
       let maxHeight = 60;
       
       if (tagName.includes('paraf_pengawas')) {
-        maxWidth = 180;
+        maxWidth = 210;
         maxHeight = 32;
       } else if (tagName.includes('paraf_')) {
-        maxWidth = 85;
+        maxWidth = 90;
         maxHeight = 32;
       }
 
