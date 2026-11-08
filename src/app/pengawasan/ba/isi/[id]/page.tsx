@@ -33,6 +33,7 @@ import {
 import SignatureCanvas from 'react-signature-canvas';
 import { getTemplate } from './templates';
 import LottieLoader from '@/components/LottieLoader';
+import { paginateDocxContainer } from '@/lib/docx-paginator';
 
 export default function BAPFormPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -915,6 +916,18 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
           useBase64URL: true,
           ignoreLastRenderedPageBreak: false,
         });
+
+        // Paginasikan bagian dokumen yang memanjang ke lembar fisik A4
+        requestAnimationFrame(() => {
+          if (previewContainerRef.current) {
+            paginateDocxContainer(previewContainerRef.current);
+          }
+        });
+        setTimeout(() => {
+          if (previewContainerRef.current) {
+            paginateDocxContainer(previewContainerRef.current);
+          }
+        }, 120);
       }
     } catch (err: any) {
       console.error('Preview error:', err);
