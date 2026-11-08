@@ -1,12 +1,12 @@
 /**
  * Utility to paginate docx-preview rendered sections into strict A4 pages.
  * Ensures:
- * 1. Every sheet is bounded to exact physical A4 paper dimensions (210mm x 297mm).
- * 2. Tables and paragraphs cleanly split across A4 sheets without overflowing.
- * 3. Footers are pinned to the bottom of EVERY sheet and guaranteed to be visible.
- * 4. Paraf footers (Pihak Usaha & Tim Pengawas) appear on pages up to Dokumentasi,
- *    and clean page-number footers appear on the final signature pages.
- * 5. Accurate page numbers ("Halaman X dari Y") are rendered in the footer.
+ * 1. Faithfully preserves and respects the user's Word template layout, sections, and footers.
+ * 2. Every sheet is bounded to exact physical A4 paper dimensions (210mm x 297mm).
+ * 3. Tables and paragraphs cleanly split across A4 sheets without overflowing or clipping.
+ * 4. Footers from the template (paraf tables for checklist/documentation, page number only for signatures)
+ *    are pinned to the bottom of EVERY sheet and guaranteed to be visible.
+ * 5. Leaf-level page number text ("Halaman X dari Y") is updated accurately without altering paraf images or tables.
  */
 
 export function paginateDocxContainer(container: HTMLElement): number {
@@ -15,32 +15,30 @@ export function paginateDocxContainer(container: HTMLElement): number {
   const sections = Array.from(container.querySelectorAll<HTMLElement>('section.docx'));
   if (sections.length === 0) return 0;
 
-  // Track footers discovered from the document
-  let parafFooterTemplate: HTMLElement | null = null;
-  let pageOnlyFooterTemplate: HTMLElement | null = null;
+  // Track discovered footers across sections as templates
+  let lastDiscoveredParafFooter: HTMLElement | null = null;
+  let lastDiscoveredPageOnlyFooter: HTMLElement | null = null;
 
-  // First pass: locate footer templates from existing sections
   for (const sec of sections) {
     const f = sec.querySelector<HTMLElement>('footer');
     if (f) {
-      const text = f.textContent || '';
-      if (/Paraf/i.test(text)) {
-        if (!parafFooterTemplate) parafFooterTemplate = f.cloneNode(true) as HTMLElement;
+      if (/Paraf/i.test(f.textContent || '')) {
+        if (!lastDiscoveredParafFooter) lastDiscoveredParafFooter = f.cloneNode(true) as HTMLElement;
       } else {
-        if (!pageOnlyFooterTemplate) pageOnlyFooterTemplate = f.cloneNode(true) as HTMLElement;
+        if (!lastDiscoveredPageOnlyFooter) lastDiscoveredPageOnlyFooter = f.cloneNode(true) as HTMLElement;
       }
     }
   }
 
-  // Fallback default footer templates if not yet discovered
-  if (!pageOnlyFooterTemplate) {
-    pageOnlyFooterTemplate = createDefaultPageNumberFooter();
+  if (!lastDiscoveredPageOnlyFooter) {
+    lastDiscoveredPageOnlyFooter = createDefaultPageNumberFooter();
   }
-  if (!parafFooterTemplate) {
-    parafFooterTemplate = pageOnlyFooterTemplate.cloneNode(true) as HTMLElement;
+  if (!lastDiscoveredParafFooter) {
+    lastDiscoveredParafFooter = lastDiscoveredPageOnlyFooter.cloneNode(true) as HTMLElement;
   }
 
   const allFinalPages: HTMLElement[] = [];
+  let currentRunningFooterTemplate: HTMLElement | null = lastDiscoveredParafFooter;
 
   for (const section of sections) {
     const article = section.querySelector<HTMLElement>('article');
@@ -49,34 +47,31 @@ export function paginateDocxContainer(container: HTMLElement): number {
       continue;
     }
 
-    // Measure rendered width of section
+    // Measure rendered width and calculate exact A4 aspect ratio height
     const sectionWidth = section.offsetWidth || 794;
-    // A4 aspect ratio: height = width * (297 / 210)
     const a4Height = Math.round(sectionWidth * (297 / 210));
 
-    // Measure paddings
+    // Measure top padding
     const comp = window.getComputedStyle(section);
     const padTop = parseFloat(comp.paddingTop) || 45;
 
-    // Determine footer for this section
+    // Determine footer for this section:
+    // Prefer the section's own rendered footer from docx-preview
     let activeFooter = section.querySelector<HTMLElement>('footer');
-    const isSignatureSection = isSignaturesSection(section);
+    const isSignatureSec = isSignaturesSection(section);
 
-    if (!activeFooter) {
-      const templateToUse = isSignatureSection ? pageOnlyFooterTemplate : parafFooterTemplate;
-      activeFooter = templateToUse.cloneNode(true) as HTMLElement;
-      section.appendChild(activeFooter);
+    if (activeFooter) {
+      currentRunningFooterTemplate = activeFooter.cloneNode(true) as HTMLElement;
     } else {
-      // If signature section had paraf footer, swap to page-only footer
-      if (isSignatureSection && /Paraf/i.test(activeFooter.textContent || '')) {
-        const cleanFooter = pageOnlyFooterTemplate.cloneNode(true) as HTMLElement;
-        activeFooter.replaceWith(cleanFooter);
-        activeFooter = cleanFooter;
-      }
+      // If docx-preview did not render a footer for this section (e.g. linked to previous),
+      // inherit the appropriate footer
+      const fallbackFooter = isSignatureSec ? lastDiscoveredPageOnlyFooter : currentRunningFooterTemplate || lastDiscoveredParafFooter;
+      activeFooter = fallbackFooter.cloneNode(true) as HTMLElement;
+      section.appendChild(activeFooter);
     }
 
-    // Reserved height for footer + bottom margin to prevent body overlap
-    const footerReservation = 125; // 125px ensures body content never overlaps the pinned footer
+    // Reserved height for bottom footer + margins so text never overlaps footer
+    const footerReservation = 130;
     const maxArticleHeight = a4Height - padTop - footerReservation;
 
     // Check if section already fits within 1 A4 page
@@ -86,7 +81,7 @@ export function paginateDocxContainer(container: HTMLElement): number {
       continue;
     }
 
-    // Section exceeds 1 A4 page! Split into multiple pages
+    // Section exceeds 1 A4 page: split children into multiple A4 sheets
     const originalChildren = Array.from(article.children) as HTMLElement[];
     article.innerHTML = '';
 
@@ -111,10 +106,9 @@ export function paginateDocxContainer(container: HTMLElement): number {
       newArt.className = article.className;
       newPage.appendChild(newArt);
 
-      // Clone footer for the new page
-      const footerToClone = isSignatureSection ? pageOnlyFooterTemplate : parafFooterTemplate;
-      if (footerToClone) {
-        newPage.appendChild(footerToClone.cloneNode(true));
+      // Clone this section's specific footer to the new page
+      if (activeFooter) {
+        newPage.appendChild(activeFooter.cloneNode(true));
       }
 
       currentPage.after(newPage);
@@ -150,15 +144,13 @@ export function paginateDocxContainer(container: HTMLElement): number {
           currentArticle.appendChild(child);
         }
       } else {
-        // Table element
+        // Table element: split rows cleanly across pages
         const srcTable = child as HTMLTableElement;
         currentArticle.appendChild(srcTable);
         if (currentArticle.scrollHeight <= maxArticleHeight) {
-          // Table completely fits on current page
           continue;
         }
 
-        // Table exceeds current page space
         currentArticle.removeChild(srcTable);
 
         const rows = Array.from(srcTable.querySelectorAll('tr'));
@@ -217,7 +209,7 @@ function updateAllPageNumbersAndFooters(pages: HTMLElement[]) {
   pages.forEach((page, index) => {
     const pageNum = index + 1;
 
-    // 1. Update/Add Page Number Badge at top-right
+    // 1. Top-Right Sheet Badge
     let badge = page.querySelector<HTMLElement>('.bap-page-badge');
     if (!badge) {
       badge = document.createElement('div');
@@ -244,22 +236,26 @@ function updateAllPageNumbersAndFooters(pages: HTMLElement[]) {
     }
     badge.textContent = `Halaman ${pageNum} dari ${total}`;
 
-    // 2. Update Footer page number text
+    // 2. Safe leaf-level Footer Page Number Update
+    // NEVER overwrite table / td / wrapper div containing paraf signatures!
     const footer = page.querySelector<HTMLElement>('footer');
     if (footer) {
-      const candidates = Array.from(footer.querySelectorAll<HTMLElement>('p, td, span, div'));
-      let found = false;
-      for (const el of candidates) {
-        if (el.textContent && /Halaman\s*.*dari/i.test(el.textContent)) {
-          el.textContent = `Halaman ${pageNum} dari ${total}`;
-          found = true;
+      const allParagraphs = Array.from(footer.querySelectorAll<HTMLElement>('p'));
+      let updated = false;
+
+      // Search for specific <p> that has "Halaman" and NOT "Paraf"
+      for (const p of allParagraphs) {
+        if (p.textContent && /Halaman/i.test(p.textContent) && !/Paraf/i.test(p.textContent)) {
+          p.textContent = `Halaman ${pageNum} dari ${total}`;
+          updated = true;
           break;
         }
       }
-      if (!found) {
-        // If no "Halaman ... dari ..." element found, check center td
-        const centerTd = footer.querySelector('table tr td:nth-child(2)');
-        if (centerTd) {
+
+      // If not updated, check table center cell (td) if it does not contain "Paraf"
+      if (!updated) {
+        const centerTd = footer.querySelector<HTMLElement>('table tr td:nth-child(2)');
+        if (centerTd && !/Paraf/i.test(centerTd.textContent || '')) {
           centerTd.textContent = `Halaman ${pageNum} dari ${total}`;
         }
       }

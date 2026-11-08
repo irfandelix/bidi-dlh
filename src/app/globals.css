@@ -125,6 +125,10 @@ body {
   color: #475569 !important;
 }
 
+.bap-docx-viewer section.docx > footer > p {
+  text-align: center !important;
+}
+
 .bap-docx-viewer section.docx > footer img {
   display: inline-block !important;
   max-height: 28px !important;

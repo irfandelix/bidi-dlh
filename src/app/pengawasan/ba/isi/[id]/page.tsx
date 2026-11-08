@@ -928,6 +928,11 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
             paginateDocxContainer(previewContainerRef.current);
           }
         }, 120);
+        setTimeout(() => {
+          if (previewContainerRef.current) {
+            paginateDocxContainer(previewContainerRef.current);
+          }
+        }, 350);
       }
     } catch (err: any) {
       console.error('Preview error:', err);
