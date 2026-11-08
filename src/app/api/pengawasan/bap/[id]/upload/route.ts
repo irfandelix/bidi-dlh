@@ -7,6 +7,7 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 // @ts-ignore
 import ImageModule from 'docxtemplater-image-module-free';
+import { combineParafImages } from '@/lib/image-stitcher';
 
 // Helper to translate number to words
 function terbilang(angka: number): string {
@@ -285,6 +286,23 @@ export async function POST(
     const jumlah_pekerja_penghuni = identitas.jumlah_pekerja_penghuni || identitas.jumlah_pekerja || '';
     const jumlah_pasien_pekerja = `Pasien: ${identitas.jumlah_pasien || '-'}, Pekerja: ${identitas.jumlah_karyawan || identitas.jumlah_pekerja || '-'}`;
 
+    // Gabungkan paraf seluruh tim pengawas secara horizontal agar seluruh anggota tim tampil di footer
+    let rawParafTim = bapData.paraf_tim;
+    if (typeof rawParafTim === 'string') {
+      try { rawParafTim = JSON.parse(rawParafTim); } catch (e) {}
+    }
+    if (!Array.isArray(rawParafTim) || rawParafTim.length === 0) {
+      rawParafTim = tim_pengawas.map((t: any) => t.paraf_pengawas).filter(Boolean);
+    }
+    const paraf_pengawas_final = await combineParafImages(rawParafTim, 45, 14);
+
+    // Gabungkan paraf pihak pemrakarsa jika ada lebih dari 1 perwakilan
+    let rawParafPemrakarsa = perwakilan.map((p: any) => p.paraf_perwakilan).filter(Boolean);
+    if (rawParafPemrakarsa.length === 0 && (bapData.paraf_pemrakarsa || firstPerwakilan?.paraf_perwakilan)) {
+      rawParafPemrakarsa = [bapData.paraf_pemrakarsa || firstPerwakilan?.paraf_perwakilan];
+    }
+    const paraf_pemrakarsa_combined = await combineParafImages(rawParafPemrakarsa, 45, 14);
+
     // Prepare data payload for docxtemplater
     const data = {
       ...identitas, // contains kbli, alamat, pj_nama, telepon dll.
@@ -310,8 +328,8 @@ export async function POST(
       waktu_pengawasan: formatted_waktu,
       
       ttd_pemrakarsa: ttd_pemrakarsa_final,
-      paraf_pemrakarsa: bapData.paraf_pemrakarsa || (firstPerwakilan?.paraf_perwakilan || ''),
-      paraf_pengawas: (Array.isArray(bapData.paraf_tim) ? bapData.paraf_tim.find((p: any) => !!p) : '') || (tim_pengawas.find((t: any) => !!t.paraf_pengawas)?.paraf_pengawas || ''),
+      paraf_pemrakarsa: paraf_pemrakarsa_combined,
+      paraf_pengawas: paraf_pengawas_final,
       paraf_saksi: (Array.isArray(bapData.paraf_saksi) ? bapData.paraf_saksi.find((p: any) => !!p) : '') || '',
       // Footer text tags (converted from image tags to avoid VML textbox parsing issues)
       paraf_pengawas_text: '',
@@ -396,9 +414,12 @@ export async function POST(
         let maxWidth = 200;
         let maxHeight = 70;
         
-        if (tagName.includes('paraf_')) {
-          maxWidth = 100;
-          maxHeight = 50;
+        if (tagName.includes('paraf_pengawas')) {
+          maxWidth = 180;
+          maxHeight = 32;
+        } else if (tagName.includes('paraf_')) {
+          maxWidth = 85;
+          maxHeight = 32;
         }
 
         if (img instanceof Buffer) {

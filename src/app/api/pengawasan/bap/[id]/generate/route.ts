@@ -7,6 +7,7 @@ import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
 // @ts-ignore
 import ImageModule from 'docxtemplater-image-module-free';
+import { combineParafImages } from '@/lib/image-stitcher';
 
 // Helper to translate number to words
 function terbilang(angka: number): string {
@@ -306,34 +307,51 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
   const jumlah_pekerja_penghuni = identitas.jumlah_pekerja_penghuni || (identitas.jumlah_pekerja || identitas.jumlah_penghuni ? `Pekerja: ${identitas.jumlah_pekerja || '-'}, Penghuni: ${identitas.jumlah_penghuni || '-'}` : '');
   const jumlah_pasien_pekerja = `Pasien: ${identitas.jumlah_pasien || '-'}, Pekerja: ${identitas.jumlah_karyawan || identitas.jumlah_pekerja || '-'}`;
 
-  // Prepare data payload for docxtemplater
-  const data = {
-    ...identitas, // contains kbli, alamat, pj_nama, telepon dll.
-    ...checklistFlat, // contains air_fisik, ket_air_fisik dll.
-    // Template specific fallbacks mapping
-    luas_lahan: identitas.luas_lahan || identitas.luas_total || '',
-    hari_kerja: identitas.hari_kerja || identitas.hari_kerja_minggu || '',
-    hari_kerja_minggu: identitas.hari_kerja_minggu || identitas.hari_kerja || '',
-    jumlah_pekerja_penghuni, // For perumahan
-    jumlah_karyawan_pengunjung: identitas.jumlah_karyawan_pengunjung || (identitas.jumlah_penghuni ? `Pengunjung: ${identitas.jumlah_penghuni}, Pekerja: ${identitas.jumlah_pekerja || '-'}` : jumlah_pasien_pekerja), // For fasyankes/sppg
-    kapasitas_kegiatan: identitas.kapasitas_kegiatan || (identitas.kapasitas_izin ? `Izin: ${identitas.kapasitas_izin}, Riil: ${identitas.kapasitas_riil || '-'}` : ''),
-    jam_operasional: identitas.jam_operasional || identitas.shift_kerja || identitas.jam_kerja_hari || identitas.jam_produksi || '',
-    shift_kerja_konstruksi: identitas.shift_kerja_konstruksi || '',
-    shift_kerja: identitas.shift_kerja || identitas.jam_kerja_hari || identitas.shift_kerja_konstruksi || '',
+    // Gabungkan paraf seluruh tim pengawas secara horizontal agar seluruh anggota tim tampil di footer
+    let rawParafTim = bapData.paraf_tim;
+    if (typeof rawParafTim === 'string') {
+      try { rawParafTim = JSON.parse(rawParafTim); } catch (e) {}
+    }
+    if (!Array.isArray(rawParafTim) || rawParafTim.length === 0) {
+      rawParafTim = tim_pengawas.map((t: any) => t.paraf_pengawas).filter(Boolean);
+    }
+    const paraf_pengawas_final = await combineParafImages(rawParafTim, 45, 14);
 
-    nama_badan_usaha_kegiatan: agenda.nama_pemrakarsa || identitas.nama_usaha || identitas.nama_kegiatan || '',
-    alamat_lokasi: agenda.alamat_lokasi || identitas.alamat || '',
-    hari_ini_nama,
-    hari_ini_tanggal_terbilang,
-    hari_ini_bulan,
-    hari_ini_tahun_terbilang: hari_ini_tahun_terbilang.replace('  ', ' ').trim(),
-    tahun_ini: hari_ini_tahun,
-    waktu_pengawasan: formatted_waktu,
-    
-    ttd_pemrakarsa: ttd_pemrakarsa_final,
-    paraf_pemrakarsa: paraf_pemrakarsa_final,
-    paraf_pengawas: (Array.isArray(bapData.paraf_tim) ? bapData.paraf_tim.find((p: any) => !!p) : '') || (tim_pengawas.find((t: any) => !!t.paraf_pengawas)?.paraf_pengawas || ''),
-    paraf_saksi: (Array.isArray(bapData.paraf_saksi) ? bapData.paraf_saksi.find((p: any) => !!p) : '') || '',
+    // Gabungkan paraf pihak pemrakarsa jika ada lebih dari 1 perwakilan
+    let rawParafPemrakarsa = perwakilan.map((p: any) => p.paraf_perwakilan).filter(Boolean);
+    if (rawParafPemrakarsa.length === 0 && paraf_pemrakarsa_final) {
+      rawParafPemrakarsa = [paraf_pemrakarsa_final];
+    }
+    const paraf_pemrakarsa_combined = await combineParafImages(rawParafPemrakarsa, 45, 14);
+
+    // Prepare data payload for docxtemplater
+    const data = {
+      ...identitas, // contains kbli, alamat, pj_nama, telepon dll.
+      ...checklistFlat, // contains air_fisik, ket_air_fisik dll.
+      // Template specific fallbacks mapping
+      luas_lahan: identitas.luas_lahan || identitas.luas_total || '',
+      hari_kerja: identitas.hari_kerja || identitas.hari_kerja_minggu || '',
+      hari_kerja_minggu: identitas.hari_kerja_minggu || identitas.hari_kerja || '',
+      jumlah_pekerja_penghuni, // For perumahan
+      jumlah_karyawan_pengunjung: identitas.jumlah_karyawan_pengunjung || (identitas.jumlah_penghuni ? `Pengunjung: ${identitas.jumlah_penghuni}, Pekerja: ${identitas.jumlah_pekerja || '-'}` : jumlah_pasien_pekerja), // For fasyankes/sppg
+      kapasitas_kegiatan: identitas.kapasitas_kegiatan || (identitas.kapasitas_izin ? `Izin: ${identitas.kapasitas_izin}, Riil: ${identitas.kapasitas_riil || '-'}` : ''),
+      jam_operasional: identitas.jam_operasional || identitas.shift_kerja || identitas.jam_kerja_hari || identitas.jam_produksi || '',
+      shift_kerja_konstruksi: identitas.shift_kerja_konstruksi || '',
+      shift_kerja: identitas.shift_kerja || identitas.jam_kerja_hari || identitas.shift_kerja_konstruksi || '',
+
+      nama_badan_usaha_kegiatan: agenda.nama_pemrakarsa || identitas.nama_usaha || identitas.nama_kegiatan || '',
+      alamat_lokasi: agenda.alamat_lokasi || identitas.alamat || '',
+      hari_ini_nama,
+      hari_ini_tanggal_terbilang,
+      hari_ini_bulan,
+      hari_ini_tahun_terbilang: hari_ini_tahun_terbilang.replace('  ', ' ').trim(),
+      tahun_ini: hari_ini_tahun,
+      waktu_pengawasan: formatted_waktu,
+      
+      ttd_pemrakarsa: ttd_pemrakarsa_final,
+      paraf_pemrakarsa: paraf_pemrakarsa_combined,
+      paraf_pengawas: paraf_pengawas_final,
+      paraf_saksi: (Array.isArray(bapData.paraf_saksi) ? bapData.paraf_saksi.find((p: any) => !!p) : '') || '',
     
     // Root-level perwakilan tags
     nama_perwakilan,
@@ -415,9 +433,12 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
       let maxWidth = 160;
       let maxHeight = 60;
       
-      if (tagName.includes('paraf_')) {
-        maxWidth = 75;
-        maxHeight = 30;
+      if (tagName.includes('paraf_pengawas')) {
+        maxWidth = 180;
+        maxHeight = 32;
+      } else if (tagName.includes('paraf_')) {
+        maxWidth = 85;
+        maxHeight = 32;
       }
 
       if (img instanceof Buffer) {
