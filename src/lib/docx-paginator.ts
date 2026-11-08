@@ -1,12 +1,12 @@
 /**
- * Utility to paginate docx-preview rendered sections into strict A4 pages.
+ * Utility to align docx-preview rendered sections with Microsoft Word page layout.
  * Ensures:
  * 1. Faithfully preserves and respects the user's Word template layout, sections, and footers.
- * 2. Every sheet is bounded to exact physical A4 paper dimensions (210mm x 297mm).
- * 3. Tables and paragraphs cleanly split across A4 sheets without overflowing or clipping.
- * 4. Footers from the template (paraf tables for checklist/documentation, page number only for signatures)
- *    are pinned to the bottom of EVERY sheet and guaranteed to be visible.
- * 5. Leaf-level page number text ("Halaman X dari Y") is updated accurately without altering paraf images or tables.
+ * 2. Kop Surat logo is aligned to the left margin instead of centered.
+ * 3. Exact font ('Arial Nova Cond') and font sizes are honored throughout body and footers.
+ * 4. Signature sections (Pihak Usaha & Tim Pengawas), Dokumentasi, and LB3 stay together on their respective pages (never split).
+ * 5. Long tables (Section 1) split cleanly with preserved column widths without jumping.
+ * 6. Footers (paraf tables for checklist, page numbers only for signatures) stay anchored at the bottom.
  */
 
 export function paginateDocxContainer(container: HTMLElement): number {
@@ -15,7 +15,10 @@ export function paginateDocxContainer(container: HTMLElement): number {
   const sections = Array.from(container.querySelectorAll<HTMLElement>('section.docx'));
   if (sections.length === 0) return 0;
 
-  // Track discovered footers across sections as templates
+  // 1. Align Kop Surat Logo to the left margin (as in Word's floating anchor)
+  alignKopSuratLogo(sections[0]);
+
+  // 2. Discover footers across sections
   let lastDiscoveredParafFooter: HTMLElement | null = null;
   let lastDiscoveredPageOnlyFooter: HTMLElement | null = null;
 
@@ -47,7 +50,7 @@ export function paginateDocxContainer(container: HTMLElement): number {
       continue;
     }
 
-    // Measure rendered width and calculate exact A4 aspect ratio height
+    // Measure rendered width and calculate exact A4 aspect ratio height (210mm x 297mm)
     const sectionWidth = section.offsetWidth || 794;
     const a4Height = Math.round(sectionWidth * (297 / 210));
 
@@ -55,33 +58,38 @@ export function paginateDocxContainer(container: HTMLElement): number {
     const comp = window.getComputedStyle(section);
     const padTop = parseFloat(comp.paddingTop) || 45;
 
-    // Determine footer for this section:
-    // Prefer the section's own rendered footer from docx-preview
+    // Determine footer for this section
     let activeFooter = section.querySelector<HTMLElement>('footer');
     const isSignatureSec = isSignaturesSection(section);
 
     if (activeFooter) {
       currentRunningFooterTemplate = activeFooter.cloneNode(true) as HTMLElement;
     } else {
-      // If docx-preview did not render a footer for this section (e.g. linked to previous),
-      // inherit the appropriate footer
+      // Inherit appropriate footer if section links to previous in Word
       const fallbackFooter = isSignatureSec ? lastDiscoveredPageOnlyFooter : currentRunningFooterTemplate || lastDiscoveredParafFooter;
       activeFooter = fallbackFooter.cloneNode(true) as HTMLElement;
       section.appendChild(activeFooter);
     }
 
-    // Reserved height for bottom footer + margins so text never overlaps footer
-    const footerReservation = 130;
-    const maxArticleHeight = a4Height - padTop - footerReservation;
-
-    // Check if section already fits within 1 A4 page
-    if (article.scrollHeight <= maxArticleHeight + 15) {
+    // Check if section should NEVER be split (Signature pages, Dokumentasi, LB3, etc.)
+    if (shouldNeverSplit(section)) {
       applyA4Styles(section, a4Height);
       allFinalPages.push(section);
       continue;
     }
 
-    // Section exceeds 1 A4 page: split children into multiple A4 sheets
+    // Reserved height for bottom footer + margins so text never overlaps footer
+    const footerReservation = 75;
+    const maxArticleHeight = a4Height - padTop - footerReservation;
+
+    // Check if section already fits within 1 A4 page
+    if (article.scrollHeight <= maxArticleHeight + 25) {
+      applyA4Styles(section, a4Height);
+      allFinalPages.push(section);
+      continue;
+    }
+
+    // Section 1 exceeds 1 A4 page: split children (Table B) into multiple A4 sheets
     const originalChildren = Array.from(article.children) as HTMLElement[];
     article.innerHTML = '';
 
@@ -122,12 +130,24 @@ export function paginateDocxContainer(container: HTMLElement): number {
       const table = srcTable.cloneNode(false) as HTMLTableElement;
       table.style.cssText = srcTable.style.cssText;
       table.className = srcTable.className;
+      table.style.width = '100%';
 
-      const colgroups = srcTable.querySelectorAll('colgroup');
-      colgroups.forEach(cg => table.appendChild(cg.cloneNode(true)));
-
-      const thead = srcTable.querySelector('thead');
-      if (thead) table.appendChild(thead.cloneNode(true));
+      // Preserve explicit column widths from the source table
+      const firstRow = srcTable.querySelector('tr');
+      if (firstRow) {
+        const cells = Array.from(firstRow.children) as HTMLElement[];
+        const colgroup = document.createElement('colgroup');
+        cells.forEach(cell => {
+          const col = document.createElement('col');
+          if (cell.offsetWidth > 0) {
+            col.style.width = `${cell.offsetWidth}px`;
+          } else if (cell.style.width) {
+            col.style.width = cell.style.width;
+          }
+          colgroup.appendChild(col);
+        });
+        table.appendChild(colgroup);
+      }
 
       const origTbody = srcTable.querySelector('tbody');
       const tbody = origTbody ? (origTbody.cloneNode(false) as HTMLElement) : document.createElement('tbody');
@@ -173,24 +193,55 @@ export function paginateDocxContainer(container: HTMLElement): number {
     }
   }
 
-  // Update Page Number Badges and Footer Page Texts across all final sheets
+  // 3. Update Footer Page Numbers ("Halaman X dari Y") safely
   updateAllPageNumbersAndFooters(allFinalPages);
 
   return allFinalPages.length;
 }
 
+function alignKopSuratLogo(firstSection?: HTMLElement) {
+  if (!firstSection) return;
+  const kopImg = firstSection.querySelector<HTMLImageElement>(
+    'article > p:first-of-type img, article > p:nth-of-type(1) img, article > p:nth-of-type(2) img'
+  );
+  if (kopImg) {
+    const drawingDiv = kopImg.closest<HTMLElement>('div');
+    if (drawingDiv) {
+      drawingDiv.style.position = 'absolute';
+      drawingDiv.style.left = '20mm';
+      drawingDiv.style.top = '14mm';
+      drawingDiv.style.zIndex = '10';
+      drawingDiv.style.display = 'block';
+    }
+    kopImg.style.maxWidth = '65px';
+    kopImg.style.height = 'auto';
+  }
+}
+
 function applyA4Styles(el: HTMLElement, a4Height: number) {
-  el.style.height = `${a4Height}px`;
   el.style.minHeight = `${a4Height}px`;
-  el.style.maxHeight = `${a4Height}px`;
-  el.style.overflow = 'hidden';
   el.style.position = 'relative';
   el.style.boxSizing = 'border-box';
 }
 
+function shouldNeverSplit(section: HTMLElement): boolean {
+  const text = section.textContent || '';
+  return (
+    /Demikian Berita Acara/i.test(text) ||
+    /Pelaksanaan dan temuan fakta/i.test(text) ||
+    /Tim Pejabat Pengawas Lingkungan Hidup/i.test(text) ||
+    /Dokumentasi/i.test(text) ||
+    /Limbah Bahan Berbahaya dan Beracun/i.test(text)
+  );
+}
+
 function isSignaturesSection(section: HTMLElement): boolean {
   const text = section.textContent || '';
-  return /Demikian Berita Acara/i.test(text) || /Tim Pejabat Pengawas Lingkungan Hidup/i.test(text);
+  return (
+    /Demikian Berita Acara/i.test(text) ||
+    /Pelaksanaan dan temuan fakta/i.test(text) ||
+    /Tim Pejabat Pengawas Lingkungan Hidup/i.test(text)
+  );
 }
 
 function createDefaultPageNumberFooter(): HTMLElement {
@@ -209,34 +260,7 @@ function updateAllPageNumbersAndFooters(pages: HTMLElement[]) {
   pages.forEach((page, index) => {
     const pageNum = index + 1;
 
-    // 1. Top-Right Sheet Badge
-    let badge = page.querySelector<HTMLElement>('.bap-page-badge');
-    if (!badge) {
-      badge = document.createElement('div');
-      badge.className = 'bap-page-badge';
-      badge.style.cssText = `
-        position: absolute;
-        top: 10px;
-        right: 14px;
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        color: #64748b;
-        background: #f1f5f9;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        padding: 3px 8px;
-        pointer-events: none;
-        user-select: none;
-        z-index: 40;
-        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-      `;
-      page.appendChild(badge);
-    }
-    badge.textContent = `Halaman ${pageNum} dari ${total}`;
-
-    // 2. Safe leaf-level Footer Page Number Update
+    // Safe leaf-level Footer Page Number Update
     // NEVER overwrite table / td / wrapper div containing paraf signatures!
     const footer = page.querySelector<HTMLElement>('footer');
     if (footer) {

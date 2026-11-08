@@ -56,7 +56,7 @@ body {
   width: 100%;
   display: flex;
   justify-content: center;
-  font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif;
+  font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif !important;
 }
 
 .bap-docx-viewer .docx-wrapper {
@@ -79,7 +79,28 @@ body {
   box-sizing: border-box !important;
   color: #000000 !important;
   max-width: 100% !important;
-  overflow: hidden;
+  position: relative !important;
+  font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif !important;
+}
+
+.bap-docx-viewer section.docx p,
+.bap-docx-viewer section.docx span,
+.bap-docx-viewer section.docx td,
+.bap-docx-viewer section.docx th {
+  font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif !important;
+  line-height: 1.25 !important;
+}
+
+/* Posisi Logo Kop Surat di sebelah kiri kertas agar tidak di tengah */
+.bap-docx-viewer section.docx:first-of-type article > p:first-of-type span > div,
+.bap-docx-viewer section.docx:first-of-type article > p:first-of-type div:has(> img),
+.bap-docx-viewer section.docx:first-of-type article > p:first-child img {
+  position: absolute !important;
+  left: 20mm !important;
+  top: 15mm !important;
+  max-width: 65px !important;
+  height: auto !important;
+  z-index: 10 !important;
 }
 
 /* Isolasi gaya tabel dan sel dari Tailwind CSS reset */
@@ -99,11 +120,6 @@ body {
 }
 
 /* Pastikan footer selalu tampak di bagian bawah setiap lembar kertas A4 */
-.bap-docx-viewer section.docx {
-  position: relative !important;
-  box-sizing: border-box !important;
-}
-
 .bap-docx-viewer section.docx > footer {
   display: block !important;
   position: absolute !important;
