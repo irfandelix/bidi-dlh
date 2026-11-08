@@ -91,16 +91,29 @@ body {
   line-height: 1.25 !important;
 }
 
-/* Posisi Logo Kop Surat di sebelah kiri kertas agar tidak di tengah */
+/* Posisi Logo Kop Surat di sebelah kiri kertas agar tidak di tengah dan tidak menabrak garis */
+.bap-docx-viewer section.docx:first-of-type article > p:first-of-type {
+  position: relative !important;
+}
+
 .bap-docx-viewer section.docx:first-of-type article > p:first-of-type span > div,
-.bap-docx-viewer section.docx:first-of-type article > p:first-of-type div:has(> img),
-.bap-docx-viewer section.docx:first-of-type article > p:first-child img {
+.bap-docx-viewer section.docx:first-of-type article > p:first-of-type div:has(> img) {
   position: absolute !important;
-  left: 20mm !important;
-  top: 15mm !important;
-  max-width: 65px !important;
-  height: auto !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 68px !important;
+  height: 76px !important;
   z-index: 10 !important;
+  display: block !important;
+}
+
+.bap-docx-viewer section.docx:first-of-type article > p:first-of-type img {
+  width: 68px !important;
+  height: 76px !important;
+  max-width: 68px !important;
+  max-height: 76px !important;
+  object-fit: contain !important;
+  display: block !important;
 }
 
 /* Isolasi gaya tabel dan sel dari Tailwind CSS reset */
@@ -181,4 +194,24 @@ body {
   .bap-page-badge {
     display: none !important;
   }
+}
+
+/* Custom scrollbar for preview */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

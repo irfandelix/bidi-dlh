@@ -2,9 +2,9 @@
  * Utility to align docx-preview rendered sections with Microsoft Word page layout.
  * Ensures:
  * 1. Faithfully preserves and respects the user's Word template layout, sections, and footers.
- * 2. Kop Surat logo is aligned to the left margin instead of centered.
+ * 2. Kop Surat logo is aligned to the left margin instead of centered and stops comfortably above the line.
  * 3. Exact font ('Arial Nova Cond') and font sizes are honored throughout body and footers.
- * 4. Signature sections (Pihak Usaha & Tim Pengawas), Dokumentasi, and LB3 stay together on their respective pages (never split).
+ * 4. Signature sections (Demikian Berita Acara, Pihak Usaha & Tim Pengawas), Dokumentasi, and LB3 stay together on their respective pages (never split).
  * 5. Long tables (Section 1) split cleanly with preserved column widths without jumping.
  * 6. Footers (paraf tables for checklist, page numbers only for signatures) stay anchored at the bottom.
  */
@@ -12,13 +12,19 @@
 export function paginateDocxContainer(container: HTMLElement): number {
   if (!container) return 0;
 
+  // 1. Align Kop Surat Logo to the left margin (as in Word's floating anchor)
+  const firstSection = container.querySelector<HTMLElement>('section.docx');
+  if (firstSection) {
+    alignKopSuratLogo(firstSection);
+  }
+
+  // 2. Separate "Demikian Berita Acara" into its own page/section if grouped with preceding content
+  separateDemikianSection(container);
+
   const sections = Array.from(container.querySelectorAll<HTMLElement>('section.docx'));
   if (sections.length === 0) return 0;
 
-  // 1. Align Kop Surat Logo to the left margin (as in Word's floating anchor)
-  alignKopSuratLogo(sections[0]);
-
-  // 2. Discover footers across sections
+  // 3. Discover footers across sections
   let lastDiscoveredParafFooter: HTMLElement | null = null;
   let lastDiscoveredPageOnlyFooter: HTMLElement | null = null;
 
@@ -63,6 +69,13 @@ export function paginateDocxContainer(container: HTMLElement): number {
     const isSignatureSec = isSignaturesSection(section);
 
     if (activeFooter) {
+      if (isSignatureSec) {
+        // On signature page, strip paraf table from footer if present
+        const tables = Array.from(activeFooter.querySelectorAll('table'));
+        tables.forEach(tbl => {
+          if (/Paraf/i.test(tbl.textContent || '')) tbl.remove();
+        });
+      }
       currentRunningFooterTemplate = activeFooter.cloneNode(true) as HTMLElement;
     } else {
       // Inherit appropriate footer if section links to previous in Word
@@ -193,10 +206,51 @@ export function paginateDocxContainer(container: HTMLElement): number {
     }
   }
 
-  // 3. Update Footer Page Numbers ("Halaman X dari Y") safely
+  // 4. Update Footer Page Numbers ("Halaman X dari Y") safely
   updateAllPageNumbersAndFooters(allFinalPages);
 
   return allFinalPages.length;
+}
+
+function separateDemikianSection(container: HTMLElement) {
+  const sections = Array.from(container.querySelectorAll<HTMLElement>('section.docx'));
+  for (const sec of sections) {
+    const article = sec.querySelector<HTMLElement>('article');
+    if (!article) continue;
+    const children = Array.from(article.children) as HTMLElement[];
+    const demikianIdx = children.findIndex(c => /Demikian Berita Acara/i.test(c.textContent || ''));
+    if (demikianIdx > 0) {
+      // Elements from demikianIdx onwards belong to the signature page
+      const elementsToMove = children.slice(demikianIdx);
+      const newSec = document.createElement('section');
+      newSec.className = sec.className;
+      newSec.style.cssText = sec.style.cssText;
+
+      const headerEl = sec.querySelector<HTMLElement>('header');
+      if (headerEl) {
+        newSec.appendChild(headerEl.cloneNode(true));
+      }
+
+      const newArt = document.createElement('article');
+      newArt.className = article.className;
+      newArt.style.cssText = article.style.cssText;
+      elementsToMove.forEach(el => newArt.appendChild(el));
+      newSec.appendChild(newArt);
+
+      // Signature page gets a clean page-only footer (no paraf table)
+      const footer = sec.querySelector<HTMLElement>('footer');
+      if (footer) {
+        const newFooter = footer.cloneNode(true) as HTMLElement;
+        const parafTable = newFooter.querySelector('table');
+        if (parafTable && /Paraf/i.test(parafTable.textContent || '')) {
+          parafTable.remove();
+        }
+        newSec.appendChild(newFooter);
+      }
+
+      sec.after(newSec);
+    }
+  }
 }
 
 function alignKopSuratLogo(firstSection?: HTMLElement) {
@@ -205,16 +259,25 @@ function alignKopSuratLogo(firstSection?: HTMLElement) {
     'article > p:first-of-type img, article > p:nth-of-type(1) img, article > p:nth-of-type(2) img'
   );
   if (kopImg) {
+    const parentP = kopImg.closest<HTMLElement>('p');
+    if (parentP) {
+      parentP.style.position = 'relative';
+    }
     const drawingDiv = kopImg.closest<HTMLElement>('div');
     if (drawingDiv) {
       drawingDiv.style.position = 'absolute';
-      drawingDiv.style.left = '20mm';
-      drawingDiv.style.top = '14mm';
+      drawingDiv.style.left = '0px';
+      drawingDiv.style.top = '0px';
+      drawingDiv.style.width = '68px';
+      drawingDiv.style.height = '76px';
       drawingDiv.style.zIndex = '10';
       drawingDiv.style.display = 'block';
     }
-    kopImg.style.maxWidth = '65px';
-    kopImg.style.height = 'auto';
+    kopImg.style.width = '68px';
+    kopImg.style.height = '76px';
+    kopImg.style.maxWidth = '68px';
+    kopImg.style.maxHeight = '76px';
+    kopImg.style.objectFit = 'contain';
   }
 }
 
@@ -239,7 +302,6 @@ function isSignaturesSection(section: HTMLElement): boolean {
   const text = section.textContent || '';
   return (
     /Demikian Berita Acara/i.test(text) ||
-    /Pelaksanaan dan temuan fakta/i.test(text) ||
     /Tim Pejabat Pengawas Lingkungan Hidup/i.test(text)
   );
 }

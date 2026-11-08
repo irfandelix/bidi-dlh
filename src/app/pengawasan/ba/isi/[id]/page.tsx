@@ -2709,7 +2709,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
           </div>
 
           {/* Document Preview Viewport */}
-          <div className="bg-slate-100 p-4 sm:p-8 rounded-2xl border border-slate-300 min-h-[600px] flex flex-col items-center justify-start overflow-x-auto shadow-inner relative">
+          <div className="bg-slate-100 p-4 sm:p-6 rounded-2xl border border-slate-300 h-[calc(100vh-270px)] min-h-[600px] max-h-[820px] flex flex-col items-center justify-start overflow-y-auto overflow-x-auto shadow-inner relative custom-scrollbar">
             {previewLoading && (
               <div className="py-24 flex flex-col items-center justify-center">
                 <LottieLoader size={120} text="MEMBUAT PRATINJAU DOKUMEN BAP..." />
