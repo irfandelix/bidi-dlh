@@ -86,10 +86,10 @@ body {
 .bap-docx-viewer section.docx p,
 .bap-docx-viewer section.docx td,
 .bap-docx-viewer section.docx th {
-  line-height: 1.25;
+  line-height: 1.18;
 }
 
-/* Posisi Logo Kop Surat di sebelah kiri kertas agar tidak di tengah dan tidak menabrak garis */
+/* Posisi Logo Kop Surat di sebelah kiri kertas sesuai anchor template Word */
 .bap-docx-viewer section.docx:first-of-type article > p:first-of-type {
   position: relative !important;
 }
@@ -98,27 +98,34 @@ body {
 .bap-docx-viewer section.docx:first-of-type article > p:first-of-type div:has(> img) {
   position: absolute !important;
   left: 0 !important;
-  top: 2px !important;
+  top: 0 !important;
   width: 64px !important;
-  height: 74px !important;
+  height: 72px !important;
   z-index: 10 !important;
   display: block !important;
 }
 
 .bap-docx-viewer section.docx:first-of-type article > p:first-of-type img {
   width: 64px !important;
-  height: 74px !important;
+  height: 72px !important;
   max-width: 64px !important;
-  max-height: 74px !important;
+  max-height: 72px !important;
   object-fit: contain !important;
   display: block !important;
 }
 
-/* Garis pemisah Kop Surat (Double line sesuai template Word) */
-.bap-docx-viewer section.docx:first-of-type article > p[style*="border-bottom"] {
-  border-bottom: 3.5px double #000000 !important;
-  margin-top: 6px !important;
-  margin-bottom: 14px !important;
+/* Garis pemisah Kop Surat (thinThickSmallGap sesuai template Word) */
+.bap-docx-viewer section.docx:first-of-type article > p[data-kop-divider="true"] {
+  border-top: 1px solid #000000 !important;
+  border-bottom: 2.5px solid #000000 !important;
+  height: 1.5px !important;
+  min-height: 0 !important;
+  line-height: 0 !important;
+  font-size: 0 !important;
+  padding: 0 !important;
+  margin: 5px 0 6px 0 !important;
+  box-sizing: content-box !important;
+  width: 100% !important;
 }
 
 /* Isolasi gaya tabel dan sel dari Tailwind CSS reset */

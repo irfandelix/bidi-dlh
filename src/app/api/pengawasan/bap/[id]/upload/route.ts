@@ -121,24 +121,64 @@ export async function POST(
       }
     });
 
+    // Fetch Tim Pengawas Details from the DB
+    const { data: listPengawas } = await supabase.from('tim_pengawas').select('*');
+    const pengawasMap = new Map();
+    if (listPengawas) {
+      listPengawas.forEach((p: any) => pengawasMap.set(p.nama, p));
+    }
+
     // Formatting Tim Pengawas (used by toko/sppg/industri/fasyankes templates)
-    const tim_pengawas = timPengawasArr.map((nama: string, idx: number) => ({
-      no: idx + 1,
-      nama_pengawas: nama,
-      ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
-      paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
-    }));
+    const tim_pengawas = timPengawasArr.map((nama: string, idx: number) => {
+      const p = pengawasMap.get(nama) || {};
+      return {
+        no: idx + 1,
+        nama_pengawas: nama,
+        nip_pengawas: p.nip || '-',
+        pangkat_pengawas: p.pangkat_golongan || '-',
+        jabatan_pengawas: p.jabatan_dinas || p.jabatan || 'Pengawas Lingkungan Hidup',
+        instansi_pengawas: 'Dinas Lingkungan Hidup Kabupaten Sragen',
+        ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
+        paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
+      };
+    });
+    if (tim_pengawas.length === 0) {
+      tim_pengawas.push({
+        no: 1,
+        nama_pengawas: '',
+        nip_pengawas: '',
+        pangkat_pengawas: '',
+        jabatan_pengawas: '',
+        instansi_pengawas: 'Dinas Lingkungan Hidup Kabupaten Sragen',
+        ttd_pengawas: '',
+        paraf_pengawas: ''
+      });
+    }
 
     // Formatting Tim Penilai Lengkap (used by perumahan template - same data, different field names)
-    const tim_penilai_lengkap = timPengawasArr.map((nama: string, idx: number) => ({
-      nomor_urut: idx + 1,
-      nama: nama,
-      nip: identitas.tim_nip?.[idx] || '-',
-      pangkat_golongan: identitas.tim_pangkat?.[idx] || '-',
-      jabatan: identitas.tim_jabatan?.[idx] || 'Pengawas Lingkungan Hidup',
-      ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
-      paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
-    }));
+    const tim_penilai_lengkap = timPengawasArr.map((nama: string, idx: number) => {
+      const p = pengawasMap.get(nama) || {};
+      return {
+        nomor_urut: idx + 1,
+        nama: nama,
+        nip: p.nip || identitas.tim_nip?.[idx] || '-',
+        pangkat_golongan: p.pangkat_golongan || identitas.tim_pangkat?.[idx] || '-',
+        jabatan: p.jabatan_dinas || identitas.tim_jabatan?.[idx] || 'Pengawas Lingkungan Hidup',
+        ttd_pengawas: bapData.ttd_tim && bapData.ttd_tim[idx] ? bapData.ttd_tim[idx] : '',
+        paraf_pengawas: bapData.paraf_tim && bapData.paraf_tim[idx] ? bapData.paraf_tim[idx] : ''
+      };
+    });
+    if (tim_penilai_lengkap.length === 0) {
+      tim_penilai_lengkap.push({
+        nomor_urut: 1,
+        nama: '',
+        nip: '',
+        pangkat_golongan: '',
+        jabatan: '',
+        ttd_pengawas: '',
+        paraf_pengawas: ''
+      });
+    }
 
     // Formatting Saksi
     const saksi = saksiArr.map((nama: string, idx: number) => ({
@@ -146,8 +186,19 @@ export async function POST(
       nama_saksi: nama,
       jabatan_saksi: bapData.saksi_details && bapData.saksi_details[idx]?.jabatan ? bapData.saksi_details[idx].jabatan : '-',
       telepon_saksi: bapData.saksi_details && bapData.saksi_details[idx]?.telepon ? bapData.saksi_details[idx].telepon : '-',
-      ttd_saksi: bapData.ttd_saksi && bapData.ttd_saksi[idx] ? bapData.ttd_saksi[idx] : ''
+      ttd_saksi: bapData.ttd_saksi && bapData.ttd_saksi[idx] ? bapData.ttd_saksi[idx] : '',
+      paraf_saksi: bapData.paraf_saksi && bapData.paraf_saksi[idx] ? bapData.paraf_saksi[idx] : ''
     }));
+    if (saksi.length === 0) {
+      saksi.push({
+        no: 1,
+        nama_saksi: '',
+        jabatan_saksi: '',
+        telepon_saksi: '',
+        ttd_saksi: '',
+        paraf_saksi: ''
+      });
+    }
 
     // Formatting Dokumen Izin (Templates use {#dokumen_izin}{.}{/dokumen_izin})
     const dokumen_izin = (dokumenIzin || []).map((val: any) => {
@@ -181,6 +232,14 @@ export async function POST(
         ket_1: dokumentasi[i]?.keterangan || '',
         foto_2: await resolveImage(dokumentasi[i + 1]),
         ket_2: dokumentasi[i + 1]?.keterangan || ''
+      });
+    }
+    if (foto_baris.length === 0) {
+      foto_baris.push({
+        foto_1: '__EMPTY_PHOTO__',
+        ket_1: '',
+        foto_2: '__EMPTY_PHOTO__',
+        ket_2: ''
       });
     }
 
@@ -241,8 +300,8 @@ export async function POST(
       shift_kerja_konstruksi: identitas.shift_kerja_konstruksi || '',
       shift_kerja: identitas.shift_kerja || identitas.jam_kerja_hari || identitas.shift_kerja_konstruksi || '',
 
-      nama_badan_usaha_kegiatan: agenda.nama_pemrakarsa,
-      alamat_lokasi: agenda.alamat_lokasi,
+      nama_badan_usaha_kegiatan: agenda.nama_pemrakarsa || identitas.nama_usaha || identitas.nama_kegiatan || '',
+      alamat_lokasi: agenda.alamat_lokasi || identitas.alamat || '',
       hari_ini_nama,
       hari_ini_tanggal_terbilang,
       hari_ini_bulan,
@@ -325,6 +384,9 @@ export async function POST(
         }
       },
       getSize: function(img: any, tagValue: string, tagName: string) {
+        if (tagValue === '__EMPTY_PHOTO__') {
+          return [1, 140]; // Preserve empty bordered photo table row in Dokumentasi
+        }
         if (!tagValue || typeof tagValue !== 'string' || !tagValue.startsWith('data:image')) {
           return [1, 1]; // Return 1x1 if not signed so it stays clean
         }
@@ -355,6 +417,7 @@ export async function POST(
     const doc = new Docxtemplater(zip, {
       paragraphLoop: true,
       linebreaks: true,
+      nullGetter: () => '',
       modules: [imageModule]
     });
 

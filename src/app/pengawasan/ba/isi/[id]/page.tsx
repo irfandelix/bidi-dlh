@@ -914,7 +914,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
           ignoreHeight: false,
           breakPages: true,
           useBase64URL: true,
-          ignoreLastRenderedPageBreak: false,
+          ignoreLastRenderedPageBreak: true,
         });
 
         // Paginasikan bagian dokumen yang memanjang ke lembar fisik A4

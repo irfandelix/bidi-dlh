@@ -33,15 +33,29 @@ export function paginateDocxContainer(container: HTMLElement): number {
   // 3. Separate "Demikian Berita Acara" into its own page/section if grouped with preceding content
   separateDemikianSection(container);
 
-  // 4. Remove any blank sections again after separation
-  for (const sec of Array.from(container.querySelectorAll<HTMLElement>('section.docx'))) {
+  // 4. Remove any blank sections again after separation, and trim leading empty spacer <p> on subsequent sections
+  const remainingSections = Array.from(container.querySelectorAll<HTMLElement>('section.docx'));
+  remainingSections.forEach((sec, secIdx) => {
     const art = sec.querySelector<HTMLElement>('article');
     const text = (art?.textContent || '').trim();
     const hasVisuals = !!sec.querySelector('table, img, canvas, svg');
     if (text.length === 0 && !hasVisuals) {
       sec.remove();
+      return;
     }
-  }
+    if (secIdx > 0 && art) {
+      while (art.firstElementChild && art.firstElementChild.tagName === 'P') {
+        const firstP = art.firstElementChild as HTMLElement;
+        const pText = (firstP.textContent || '').trim();
+        const pHasVisual = !!firstP.querySelector('img, table, canvas, svg');
+        if (pText.length === 0 && !pHasVisual) {
+          firstP.remove();
+        } else {
+          break;
+        }
+      }
+    }
+  });
 
   const sections = Array.from(container.querySelectorAll<HTMLElement>('section.docx'));
   if (sections.length === 0) return 0;
@@ -308,83 +322,113 @@ function alignKopSurat(firstSection?: HTMLElement) {
     if (drawingDiv) {
       drawingDiv.style.position = 'absolute';
       drawingDiv.style.left = '0px';
-      drawingDiv.style.top = '2px';
+      drawingDiv.style.top = '0px';
       drawingDiv.style.width = '64px';
-      drawingDiv.style.height = '74px';
+      drawingDiv.style.height = '72px';
       drawingDiv.style.zIndex = '10';
       drawingDiv.style.display = 'block';
     }
     kopImg.style.width = '64px';
-    kopImg.style.height = '74px';
+    kopImg.style.height = '72px';
     kopImg.style.maxWidth = '64px';
-    kopImg.style.maxHeight = '74px';
+    kopImg.style.maxHeight = '72px';
     kopImg.style.objectFit = 'contain';
     kopImg.style.display = 'block';
   }
 
-  // Format Kop text paragraphs strictly matching the Word docx template
+  // Format Kop text paragraphs strictly matching the Word docx template (single spacing w:line="240", w:after="0", exact w:ind left)
   const article = firstSection.querySelector<HTMLElement>('article');
   if (!article) return;
 
   const paragraphs = Array.from(article.querySelectorAll<HTMLElement>('p'));
-  for (const p of paragraphs) {
+  paragraphs.forEach((p, idx) => {
     const text = (p.textContent || '').trim();
     if (/PEMERINTAH KABUPATEN SRAGEN/i.test(text)) {
+      p.style.position = 'relative';
       p.style.fontFamily = 'Arial, sans-serif';
       p.style.fontSize = '14pt';
       p.style.fontWeight = 'normal';
       p.style.textAlign = 'center';
-      p.style.lineHeight = '1.3';
-      p.style.margin = '0 0 2px 0';
+      p.style.lineHeight = '1.08';
+      p.style.minHeight = '0px';
+      p.style.margin = '0';
+      p.style.padding = '0 0 0 63.8pt';
       p.querySelectorAll<HTMLElement>('span').forEach(s => {
         s.style.fontFamily = 'Arial, sans-serif';
         s.style.fontSize = '14pt';
         s.style.fontWeight = 'normal';
+        s.style.lineHeight = '1.08';
       });
-    } else if (/DINAS LINGKUNGAN HIDUP/i.test(text)) {
+    } else if (/DINAS LINGKUNGAN HIDUP/i.test(text) && idx <= 4) {
       p.style.fontFamily = 'Arial, sans-serif';
       p.style.fontSize = '14pt';
       p.style.fontWeight = 'bold';
       p.style.textAlign = 'center';
-      p.style.lineHeight = '1.3';
-      p.style.margin = '0 0 4px 0';
+      p.style.lineHeight = '1.08';
+      p.style.minHeight = '0px';
+      p.style.margin = '0';
+      p.style.padding = '0 0 0 63.8pt';
       p.querySelectorAll<HTMLElement>('span').forEach(s => {
         s.style.fontFamily = 'Arial, sans-serif';
         s.style.fontSize = '14pt';
         s.style.fontWeight = 'bold';
+        s.style.lineHeight = '1.08';
       });
-    } else if (/Ronggowarsito/i.test(text)) {
+    } else if (/Ronggowarsito/i.test(text) && idx <= 5) {
       p.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
       p.style.fontSize = '10pt';
       p.style.fontWeight = 'normal';
       p.style.textAlign = 'center';
-      p.style.lineHeight = '1.25';
-      p.style.margin = '0 0 2px 0';
+      p.style.lineHeight = '1.12';
+      p.style.minHeight = '0px';
+      p.style.margin = '0';
+      p.style.padding = '0 0 0 42.55pt';
       p.querySelectorAll<HTMLElement>('span').forEach(s => {
         s.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
         s.style.fontSize = '10pt';
         s.style.fontWeight = 'normal';
+        s.style.lineHeight = '1.12';
       });
-    } else if (/Telepon|Faksimile/i.test(text)) {
+    } else if (/Telepon|Faksimile/i.test(text) && idx <= 6) {
       p.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
       p.style.fontSize = '10pt';
       p.style.fontWeight = 'normal';
       p.style.textAlign = 'center';
-      p.style.lineHeight = '1.25';
-      p.style.margin = '0 0 6px 0';
+      p.style.lineHeight = '1.12';
+      p.style.minHeight = '0px';
+      p.style.margin = '0';
+      p.style.padding = '0 0 0 42.55pt';
       p.querySelectorAll<HTMLElement>('span').forEach(s => {
         s.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
         s.style.fontSize = '10pt';
         s.style.fontWeight = 'normal';
+        s.style.lineHeight = '1.12';
       });
-    } else if (p.style.borderBottom || p.style.borderBottomWidth) {
-      // Horizontal double dividing line matching Word's thinThickSmallGap
-      p.style.borderBottom = '3.5px double #000000';
-      p.style.marginTop = '6px';
-      p.style.marginBottom = '14px';
+    } else if (idx <= 8 && (p.dataset.kopDivider === 'true' || p.style.borderBottom || p.style.borderBottomWidth)) {
+      // Horizontal thinThickSmallGap dividing line matching Word's w:pBdr bottom w:val="thinThickSmallGap" w:sz="24"
+      p.dataset.kopDivider = 'true';
+      p.style.borderTop = '1px solid #000000';
+      p.style.borderBottom = '2.5px solid #000000';
+      p.style.height = '1.5px';
+      p.style.minHeight = '0px';
+      p.style.lineHeight = '0';
+      p.style.fontSize = '0';
+      p.style.padding = '0';
+      p.style.margin = '5px 0 6px 0';
+      p.style.boxSizing = 'content-box';
       p.style.width = '100%';
+
+      const nextP = paragraphs[idx + 1];
+      if (nextP && (nextP.textContent || '').trim() === '' && !nextP.querySelector('img, table')) {
+        nextP.style.minHeight = '6px';
+        nextP.style.height = '6px';
+        nextP.style.lineHeight = '6px';
+        nextP.style.fontSize = '6px';
+        nextP.style.margin = '0';
+        nextP.style.padding = '0';
+      }
     }
-  }
+  });
 }
 
 function applyA4Styles(el: HTMLElement, a4Height: number) {
@@ -398,9 +442,7 @@ function shouldNeverSplit(section: HTMLElement): boolean {
   return (
     /Demikian Berita Acara/i.test(text) ||
     /Pelaksanaan dan temuan fakta/i.test(text) ||
-    /Tim Pejabat Pengawas Lingkungan Hidup/i.test(text) ||
-    /Dokumentasi/i.test(text) ||
-    /Limbah Bahan Berbahaya dan Beracun/i.test(text)
+    /Tim Pejabat Pengawas Lingkungan Hidup/i.test(text)
   );
 }
 
@@ -408,6 +450,7 @@ function isSignaturesSection(section: HTMLElement): boolean {
   const text = section.textContent || '';
   return (
     /Demikian Berita Acara/i.test(text) ||
+    /Pelaksanaan dan temuan fakta/i.test(text) ||
     /Tim Pejabat Pengawas Lingkungan Hidup/i.test(text)
   );
 }
