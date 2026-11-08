@@ -196,8 +196,8 @@ function isSignaturesSection(section: HTMLElement): boolean {
 function createDefaultPageNumberFooter(): HTMLElement {
   const footer = document.createElement('footer');
   footer.innerHTML = `
-    <div style="width: 100%; text-align: center; font-size: 8.5pt; color: #64748b; font-family: Arial, sans-serif;">
-      <p style="margin: 0;">Halaman 1 dari 1</p>
+    <div style="width: 100%; text-align: center; font-size: 9pt; color: #475569; font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif;">
+      <p style="margin: 0;"><span style="font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif; font-size: 9pt; color: #475569;">Halaman 1 dari 1</span></p>
     </div>
   `;
   return footer;
@@ -246,7 +246,12 @@ function updateAllPageNumbersAndFooters(pages: HTMLElement[]) {
       // Search for specific <p> that has "Halaman" and NOT "Paraf"
       for (const p of allParagraphs) {
         if (p.textContent && /Halaman/i.test(p.textContent) && !/Paraf/i.test(p.textContent)) {
-          p.textContent = `Halaman ${pageNum} dari ${total}`;
+          const firstSpan = p.querySelector('span');
+          const fontFamily = firstSpan?.style.fontFamily || p.style.fontFamily || "'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif";
+          const fontSize = firstSpan?.style.fontSize || p.style.fontSize || "9pt";
+          const color = firstSpan?.style.color || p.style.color || "#475569";
+
+          p.innerHTML = `<span style="font-family: ${fontFamily}; font-size: ${fontSize}; color: ${color};">Halaman ${pageNum} dari ${total}</span>`;
           updated = true;
           break;
         }
@@ -256,7 +261,7 @@ function updateAllPageNumbersAndFooters(pages: HTMLElement[]) {
       if (!updated) {
         const centerTd = footer.querySelector<HTMLElement>('table tr td:nth-child(2)');
         if (centerTd && !/Paraf/i.test(centerTd.textContent || '')) {
-          centerTd.textContent = `Halaman ${pageNum} dari ${total}`;
+          centerTd.innerHTML = `<span style="font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif; font-size: 9pt; color: #475569;">Halaman ${pageNum} dari ${total}</span>`;
         }
       }
     }

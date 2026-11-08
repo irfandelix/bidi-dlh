@@ -38,11 +38,25 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Font Fallback Mapping untuk Template BAP Word */
+@font-face {
+  font-family: 'Arial Nova Cond';
+  src: local('Arial Nova Cond'), local('Arial Nova Condensed'), local('Arial Narrow'), local('Arial');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'BookmanOldStyle';
+  src: local('Bookman Old Style'), local('BookmanOldStyle'), local('Bookman'), serif;
+  font-display: swap;
+}
+
 /* Styling for BAP DOCX Preview - Menyerupai Lembar Kertas Word (A4 Print Layout) */
 .bap-docx-viewer {
   width: 100%;
   display: flex;
   justify-content: center;
+  font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif;
 }
 
 .bap-docx-viewer .docx-wrapper {
@@ -114,15 +128,11 @@ body {
   border: none !important;
   padding: 2px 4px !important;
   vertical-align: bottom !important;
-  font-size: 8.5pt !important;
-  color: #475569 !important;
 }
 
 .bap-docx-viewer section.docx > footer p {
   margin: 0 !important;
   line-height: 1.25 !important;
-  font-size: 8.5pt !important;
-  color: #475569 !important;
 }
 
 .bap-docx-viewer section.docx > footer > p {
