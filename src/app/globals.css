@@ -80,15 +80,13 @@ body {
   color: #000000 !important;
   max-width: 100% !important;
   position: relative !important;
-  font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif !important;
+  font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif;
 }
 
 .bap-docx-viewer section.docx p,
-.bap-docx-viewer section.docx span,
 .bap-docx-viewer section.docx td,
 .bap-docx-viewer section.docx th {
-  font-family: 'Arial Nova Cond', 'Arial Narrow', Arial, sans-serif !important;
-  line-height: 1.25 !important;
+  line-height: 1.25;
 }
 
 /* Posisi Logo Kop Surat di sebelah kiri kertas agar tidak di tengah dan tidak menabrak garis */
@@ -100,20 +98,27 @@ body {
 .bap-docx-viewer section.docx:first-of-type article > p:first-of-type div:has(> img) {
   position: absolute !important;
   left: 0 !important;
-  top: 0 !important;
-  width: 68px !important;
-  height: 76px !important;
+  top: 2px !important;
+  width: 64px !important;
+  height: 74px !important;
   z-index: 10 !important;
   display: block !important;
 }
 
 .bap-docx-viewer section.docx:first-of-type article > p:first-of-type img {
-  width: 68px !important;
-  height: 76px !important;
-  max-width: 68px !important;
-  max-height: 76px !important;
+  width: 64px !important;
+  height: 74px !important;
+  max-width: 64px !important;
+  max-height: 74px !important;
   object-fit: contain !important;
   display: block !important;
+}
+
+/* Garis pemisah Kop Surat (Double line sesuai template Word) */
+.bap-docx-viewer section.docx:first-of-type article > p[style*="border-bottom"] {
+  border-bottom: 3.5px double #000000 !important;
+  margin-top: 6px !important;
+  margin-bottom: 14px !important;
 }
 
 /* Isolasi gaya tabel dan sel dari Tailwind CSS reset */

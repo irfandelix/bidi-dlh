@@ -2,29 +2,51 @@
  * Utility to align docx-preview rendered sections with Microsoft Word page layout.
  * Ensures:
  * 1. Faithfully preserves and respects the user's Word template layout, sections, and footers.
- * 2. Kop Surat logo is aligned to the left margin instead of centered and stops comfortably above the line.
- * 3. Exact font ('Arial Nova Cond') and font sizes are honored throughout body and footers.
+ * 2. Kop Surat logo and typography strictly follow the Word docx template.
+ * 3. Exact font ('Arial', 'Arial Narrow', 'Arial Nova Cond') and font sizes are honored throughout body and footers.
  * 4. Signature sections (Demikian Berita Acara, Pihak Usaha & Tim Pengawas), Dokumentasi, and LB3 stay together on their respective pages (never split).
- * 5. Long tables (Section 1) split cleanly with preserved column widths without jumping.
+ * 5. Long tables split cleanly with preserved column widths without jumping.
  * 6. Footers (paraf tables for checklist, page numbers only for signatures) stay anchored at the bottom.
+ * 7. Completely empty/blank pages are automatically pruned.
  */
 
 export function paginateDocxContainer(container: HTMLElement): number {
   if (!container) return 0;
 
-  // 1. Align Kop Surat Logo to the left margin (as in Word's floating anchor)
-  const firstSection = container.querySelector<HTMLElement>('section.docx');
-  if (firstSection) {
-    alignKopSuratLogo(firstSection);
+  // 1. Remove any completely blank sections (empty article, no text, no tables/images)
+  const initialSections = Array.from(container.querySelectorAll<HTMLElement>('section.docx'));
+  for (const sec of initialSections) {
+    const art = sec.querySelector<HTMLElement>('article');
+    const text = (art?.textContent || '').trim();
+    const hasVisuals = !!sec.querySelector('table, img, canvas, svg');
+    if (text.length === 0 && !hasVisuals) {
+      sec.remove();
+    }
   }
 
-  // 2. Separate "Demikian Berita Acara" into its own page/section if grouped with preceding content
+  // 2. Align Kop Surat Logo and text styling exactly as in Word template
+  const firstSection = container.querySelector<HTMLElement>('section.docx');
+  if (firstSection) {
+    alignKopSurat(firstSection);
+  }
+
+  // 3. Separate "Demikian Berita Acara" into its own page/section if grouped with preceding content
   separateDemikianSection(container);
+
+  // 4. Remove any blank sections again after separation
+  for (const sec of Array.from(container.querySelectorAll<HTMLElement>('section.docx'))) {
+    const art = sec.querySelector<HTMLElement>('article');
+    const text = (art?.textContent || '').trim();
+    const hasVisuals = !!sec.querySelector('table, img, canvas, svg');
+    if (text.length === 0 && !hasVisuals) {
+      sec.remove();
+    }
+  }
 
   const sections = Array.from(container.querySelectorAll<HTMLElement>('section.docx'));
   if (sections.length === 0) return 0;
 
-  // 3. Discover footers across sections
+  // 5. Discover footers across sections
   let lastDiscoveredParafFooter: HTMLElement | null = null;
   let lastDiscoveredPageOnlyFooter: HTMLElement | null = null;
 
@@ -52,7 +74,13 @@ export function paginateDocxContainer(container: HTMLElement): number {
   for (const section of sections) {
     const article = section.querySelector<HTMLElement>('article');
     if (!article) {
-      allFinalPages.push(section);
+      continue;
+    }
+
+    const textContent = (article.textContent || '').trim();
+    const hasVisuals = !!section.querySelector('table, img, canvas, svg');
+    if (textContent.length === 0 && !hasVisuals) {
+      section.remove();
       continue;
     }
 
@@ -102,7 +130,7 @@ export function paginateDocxContainer(container: HTMLElement): number {
       continue;
     }
 
-    // Section 1 exceeds 1 A4 page: split children (Table B) into multiple A4 sheets
+    // Section exceeds 1 A4 page: split children (Table B) into multiple A4 sheets
     const originalChildren = Array.from(article.children) as HTMLElement[];
     article.innerHTML = '';
 
@@ -206,7 +234,7 @@ export function paginateDocxContainer(container: HTMLElement): number {
     }
   }
 
-  // 4. Update Footer Page Numbers ("Halaman X dari Y") safely
+  // 6. Update Footer Page Numbers ("Halaman X dari Y") safely
   updateAllPageNumbersAndFooters(allFinalPages);
 
   return allFinalPages.length;
@@ -220,6 +248,17 @@ function separateDemikianSection(container: HTMLElement) {
     const children = Array.from(article.children) as HTMLElement[];
     const demikianIdx = children.findIndex(c => /Demikian Berita Acara/i.test(c.textContent || ''));
     if (demikianIdx > 0) {
+      // Check if elements BEFORE demikianIdx have any real content!
+      const elementsBefore = children.slice(0, demikianIdx);
+      const textBefore = elementsBefore.map(e => e.textContent || '').join('').trim();
+      const hasMediaBefore = elementsBefore.some(e => e.querySelector('table, img, canvas, svg'));
+
+      if (textBefore.length === 0 && !hasMediaBefore) {
+        // The elements before Demikian were just empty spacing!
+        elementsBefore.forEach(e => e.remove());
+        continue;
+      }
+
       // Elements from demikianIdx onwards belong to the signature page
       const elementsToMove = children.slice(demikianIdx);
       const newSec = document.createElement('section');
@@ -253,11 +292,13 @@ function separateDemikianSection(container: HTMLElement) {
   }
 }
 
-function alignKopSuratLogo(firstSection?: HTMLElement) {
+function alignKopSurat(firstSection?: HTMLElement) {
   if (!firstSection) return;
+
   const kopImg = firstSection.querySelector<HTMLImageElement>(
     'article > p:first-of-type img, article > p:nth-of-type(1) img, article > p:nth-of-type(2) img'
   );
+
   if (kopImg) {
     const parentP = kopImg.closest<HTMLElement>('p');
     if (parentP) {
@@ -267,17 +308,82 @@ function alignKopSuratLogo(firstSection?: HTMLElement) {
     if (drawingDiv) {
       drawingDiv.style.position = 'absolute';
       drawingDiv.style.left = '0px';
-      drawingDiv.style.top = '0px';
-      drawingDiv.style.width = '68px';
-      drawingDiv.style.height = '76px';
+      drawingDiv.style.top = '2px';
+      drawingDiv.style.width = '64px';
+      drawingDiv.style.height = '74px';
       drawingDiv.style.zIndex = '10';
       drawingDiv.style.display = 'block';
     }
-    kopImg.style.width = '68px';
-    kopImg.style.height = '76px';
-    kopImg.style.maxWidth = '68px';
-    kopImg.style.maxHeight = '76px';
+    kopImg.style.width = '64px';
+    kopImg.style.height = '74px';
+    kopImg.style.maxWidth = '64px';
+    kopImg.style.maxHeight = '74px';
     kopImg.style.objectFit = 'contain';
+    kopImg.style.display = 'block';
+  }
+
+  // Format Kop text paragraphs strictly matching the Word docx template
+  const article = firstSection.querySelector<HTMLElement>('article');
+  if (!article) return;
+
+  const paragraphs = Array.from(article.querySelectorAll<HTMLElement>('p'));
+  for (const p of paragraphs) {
+    const text = (p.textContent || '').trim();
+    if (/PEMERINTAH KABUPATEN SRAGEN/i.test(text)) {
+      p.style.fontFamily = 'Arial, sans-serif';
+      p.style.fontSize = '14pt';
+      p.style.fontWeight = 'normal';
+      p.style.textAlign = 'center';
+      p.style.lineHeight = '1.3';
+      p.style.margin = '0 0 2px 0';
+      p.querySelectorAll<HTMLElement>('span').forEach(s => {
+        s.style.fontFamily = 'Arial, sans-serif';
+        s.style.fontSize = '14pt';
+        s.style.fontWeight = 'normal';
+      });
+    } else if (/DINAS LINGKUNGAN HIDUP/i.test(text)) {
+      p.style.fontFamily = 'Arial, sans-serif';
+      p.style.fontSize = '14pt';
+      p.style.fontWeight = 'bold';
+      p.style.textAlign = 'center';
+      p.style.lineHeight = '1.3';
+      p.style.margin = '0 0 4px 0';
+      p.querySelectorAll<HTMLElement>('span').forEach(s => {
+        s.style.fontFamily = 'Arial, sans-serif';
+        s.style.fontSize = '14pt';
+        s.style.fontWeight = 'bold';
+      });
+    } else if (/Ronggowarsito/i.test(text)) {
+      p.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
+      p.style.fontSize = '10pt';
+      p.style.fontWeight = 'normal';
+      p.style.textAlign = 'center';
+      p.style.lineHeight = '1.25';
+      p.style.margin = '0 0 2px 0';
+      p.querySelectorAll<HTMLElement>('span').forEach(s => {
+        s.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
+        s.style.fontSize = '10pt';
+        s.style.fontWeight = 'normal';
+      });
+    } else if (/Telepon|Faksimile/i.test(text)) {
+      p.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
+      p.style.fontSize = '10pt';
+      p.style.fontWeight = 'normal';
+      p.style.textAlign = 'center';
+      p.style.lineHeight = '1.25';
+      p.style.margin = '0 0 6px 0';
+      p.querySelectorAll<HTMLElement>('span').forEach(s => {
+        s.style.fontFamily = "'Arial Narrow', Arial, sans-serif";
+        s.style.fontSize = '10pt';
+        s.style.fontWeight = 'normal';
+      });
+    } else if (p.style.borderBottom || p.style.borderBottomWidth) {
+      // Horizontal double dividing line matching Word's thinThickSmallGap
+      p.style.borderBottom = '3.5px double #000000';
+      p.style.marginTop = '6px';
+      p.style.marginBottom = '14px';
+      p.style.width = '100%';
+    }
   }
 }
 
@@ -323,7 +429,6 @@ function updateAllPageNumbersAndFooters(pages: HTMLElement[]) {
     const pageNum = index + 1;
 
     // Safe leaf-level Footer Page Number Update
-    // NEVER overwrite table / td / wrapper div containing paraf signatures!
     const footer = page.querySelector<HTMLElement>('footer');
     if (footer) {
       const allParagraphs = Array.from(footer.querySelectorAll<HTMLElement>('p'));
