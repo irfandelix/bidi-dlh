@@ -6,7 +6,7 @@ import {
   ArrowLeft, Search, CalendarPlus, Edit3, Copy, MapPin, 
   Database, Check, ChevronLeft, ChevronRight, Calendar, 
   Zap, Clock, AlertCircle, Trash2, ExternalLink, User, 
-  Shield, CheckCircle2, X, Eye, Compass, Layers
+  Shield, CheckCircle2, X, Eye, Compass, Layers, FileText, Archive
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -402,6 +402,11 @@ export default function DaftarAgenda() {
                               <span className="text-xs font-bold text-slate-600 uppercase">
                                 {agenda.nama_pemrakarsa || '—'}
                               </span>
+                              {agenda.nomor_nota_dinas && (
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono tracking-tight" title="Nomor Nota Dinas Terintegrasi Arsip">
+                                  Nota: {agenda.nomor_nota_dinas}
+                                </span>
+                              )}
                             </div>
                             {agenda.alamat_lokasi && (
                               <p className="text-[11px] text-slate-500 line-clamp-1 flex items-center gap-1">
@@ -589,6 +594,35 @@ export default function DaftarAgenda() {
                   {copiedToken === selectedAgenda.token ? <Check size={12} /> : <Copy size={12} />}
                   <span>{copiedToken === selectedAgenda.token ? 'Disalin' : 'Salin Tautan'}</span>
                 </button>
+              </div>
+
+              {/* Integrasi Nota Dinas (Arsip) & Nomor BAP */}
+              <div className="p-4 bg-gradient-to-r from-indigo-50/70 to-teal-50/70 border border-indigo-200 rounded-xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-900 flex items-center gap-1.5">
+                    <FileText size={13} className="text-indigo-600" />
+                    Integrasi Modul Arsip
+                  </span>
+                  <Link
+                    href="/arsip/nota-dinas"
+                    className="text-[10px] font-bold text-indigo-700 hover:text-indigo-900 underline flex items-center gap-1"
+                  >
+                    <span>Buka Arsip</span>
+                    <ExternalLink size={10} />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                  <div>
+                    <span className="text-slate-500 font-bold block text-[10px] uppercase">Nomor Nota Dinas</span>
+                    <span className="font-mono font-black text-slate-900">{selectedAgenda.nomor_nota_dinas || 'Otomatis di-generate sistem'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-bold block text-[10px] uppercase">Nomor Berita Acara (BAP)</span>
+                    <span className="font-mono font-black text-teal-800">
+                      {`600.4/${(selectedAgenda.nomor_nota_dinas || '').split('/')[1] || '001'}/BAP/17/${new Date(selectedAgenda.tanggal_kunjungan || new Date()).getFullYear()}`}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {/* Alamat & Titik Lokasi */}

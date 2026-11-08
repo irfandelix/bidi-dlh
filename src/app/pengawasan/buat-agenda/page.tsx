@@ -8,7 +8,8 @@ import Link from 'next/link';
 import { 
   ArrowLeft, Save, Calendar, MapPin, Building2, User, 
   Edit3, Database, CalendarPlus, CheckCircle2, Copy, Check, 
-  ExternalLink, Search, X, AlertCircle, Sparkles, Shield, UserCheck
+  ExternalLink, Search, X, AlertCircle, Sparkles, Shield, UserCheck,
+  FileText, Archive
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -44,13 +45,66 @@ export default function BuatAgenda() {
   // Validation error state
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Integrasi Nota Dinas (Arsip)
+  const [notaMode, setNotaMode] = useState<'auto' | 'pilih'>('auto');
+  const [previewNota, setPreviewNota] = useState<{
+    nomor_otomatis: string;
+    nomor_bap: string;
+    nextUrut: number;
+    tahun: string;
+    bulan: number;
+  } | null>(null);
+  const [loadingNota, setLoadingNota] = useState(false);
+  const [arsipNotaList, setArsipNotaList] = useState<any[]>([]);
+  const [selectedNota, setSelectedNota] = useState<any | null>(null);
+  const [searchNotaQuery, setSearchNotaQuery] = useState('');
+
   // Success modal state
   const [createdAgenda, setCreatedAgenda] = useState<{
     token: string;
     nama_kegiatan: string;
     tanggal_kunjungan: string;
+    nomor_nota_dinas?: string;
+    nomor_bap?: string;
   } | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
+
+  // Fetch nomor nota dinas preview real-time
+  const fetchNextNotaNumber = async (tgl: string) => {
+    try {
+      setLoadingNota(true);
+      const res = await fetch(`/api/arsip-nota-dinas?action=next-number&bagian=Pengawasan&tanggal=${tgl}`);
+      const data = await res.json();
+      if (data && data.nomor_otomatis) {
+        const parts = data.nomor_otomatis.split('/');
+        const urut = parts[1] || `${String(data.nextUrut).padStart(3, '0')}.${data.bulan}`;
+        setPreviewNota({
+          ...data,
+          nomor_bap: `600.4/${urut}/BAP/17/${data.tahun}`
+        });
+      }
+    } catch (e) {
+      console.error('Gagal mengambil preview nomor nota dinas:', e);
+    } finally {
+      setLoadingNota(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNextNotaNumber(formData.tanggal_kunjungan);
+  }, [formData.tanggal_kunjungan]);
+
+  useEffect(() => {
+    if (notaMode === 'pilih' && arsipNotaList.length === 0) {
+      fetch('/api/arsip-nota-dinas')
+        .then(res => res.json())
+        .then(res => {
+          const list = res.data || [];
+          setArsipNotaList(list.filter((n: any) => n.dari_bagian === 'Pengawasan' || n.dari_bagian === 'Umum'));
+        })
+        .catch(err => console.error(err));
+    }
+  }, [notaMode]);
 
   useEffect(() => {
     // Fetch documents for picker
@@ -220,6 +274,14 @@ export default function BuatAgenda() {
         return (pA?.urutan_hierarki || 99) - (pB?.urutan_hierarki || 99);
       });
 
+      const finalNomorNota = notaMode === 'pilih' && selectedNota 
+        ? selectedNota.nomor_otomatis 
+        : (previewNota?.nomor_otomatis || null);
+
+      const finalNotaId = notaMode === 'pilih' && selectedNota 
+        ? selectedNota.id 
+        : null;
+
       const payload: any = {
         tanggal_kunjungan: formData.tanggal_kunjungan,
         kategori: formData.kategori,
@@ -227,7 +289,9 @@ export default function BuatAgenda() {
         nama_pemrakarsa: formData.nama_pemrakarsa.trim(),
         alamat_lokasi: formData.alamat_lokasi.trim(),
         tim_tugas: sortedTim.join(' | '),
-        saksi: sortedSaksi.length > 0 ? sortedSaksi.join(' | ') : null
+        saksi: sortedSaksi.length > 0 ? sortedSaksi.join(' | ') : null,
+        nomor_nota_dinas: finalNomorNota,
+        nota_dinas_id: finalNotaId
       };
 
       if (formData.latitude) payload.latitude = formData.latitude;
@@ -249,7 +313,9 @@ export default function BuatAgenda() {
       setCreatedAgenda({
         token: tokenGenerated,
         nama_kegiatan: formData.nama_kegiatan,
-        tanggal_kunjungan: formData.tanggal_kunjungan
+        tanggal_kunjungan: formData.tanggal_kunjungan,
+        nomor_nota_dinas: created?.nomor_nota_dinas || finalNomorNota || undefined,
+        nomor_bap: previewNota?.nomor_bap || `600.4/${(created?.nomor_nota_dinas || finalNomorNota || '').split('/')[1] || '001'}/BAP/17/${new Date().getFullYear()}`
       });
 
     } catch (err: any) {
@@ -457,6 +523,156 @@ export default function BuatAgenda() {
                 </p>
               </div>
             )}
+
+            {/* INTEGRASI NOTA DINAS (BAGIAN ARSIP) */}
+            <div className="p-5 md:p-6 bg-gradient-to-br from-indigo-50/70 via-white to-teal-50/70 border-2 border-indigo-200/80 rounded-2xl space-y-4 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-100 pb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                    <FileText size={18} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                      <span>Integrasi Nota Dinas & Nomor BAP</span>
+                      <span className="text-[10px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full border border-indigo-200">
+                        Modul Arsip
+                      </span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
+                      Nomor nota dinas otomatis tersemat saat agenda dibuat dan terhubung ke Berita Acara (BAP).
+                    </p>
+                  </div>
+                </div>
+
+                {/* Mode Switcher */}
+                <div className="flex items-center bg-slate-100 p-1 rounded-xl self-start sm:self-auto border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => { setNotaMode('auto'); setSelectedNota(null); }}
+                    className={`px-3 py-1 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${
+                      notaMode === 'auto'
+                        ? 'bg-white text-indigo-700 shadow-sm font-black'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Otomatis Arsip
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNotaMode('pilih')}
+                    className={`px-3 py-1 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${
+                      notaMode === 'pilih'
+                        ? 'bg-white text-indigo-700 shadow-sm font-black'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Pilih Dari Arsip
+                  </button>
+                </div>
+              </div>
+
+              {notaMode === 'auto' ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                  <div className="bg-white p-3.5 rounded-xl border border-indigo-100 shadow-xs space-y-1">
+                    <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block">
+                      Nomor Nota Dinas Pengawasan (Arsip)
+                    </span>
+                    <div className="font-mono text-sm md:text-base font-black text-slate-900 tracking-wide flex items-center gap-2">
+                      {loadingNota ? (
+                        <span className="text-xs text-slate-400 font-sans font-semibold">Memuat nomor urut...</span>
+                      ) : (
+                        <span>{previewNota?.nomor_otomatis || '600.4.6/....../17/PW/2026'}</span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Tercatat langsung di Bagian Arsip • Seksi Pengawasan
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-3.5 rounded-xl border border-teal-100 shadow-xs space-y-1">
+                    <span className="text-[10px] font-bold text-teal-700 uppercase tracking-widest block">
+                      Nomor Berita Acara (BAP Terintegrasi)
+                    </span>
+                    <div className="font-mono text-sm md:text-base font-black text-slate-900 tracking-wide flex items-center gap-2">
+                      {loadingNota ? (
+                        <span className="text-xs text-slate-400 font-sans font-semibold">Memuat nomor BAP...</span>
+                      ) : (
+                        <span>{previewNota?.nomor_bap || '600.4/....../BAP/17/2026'}</span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-slate-400">
+                      Otomatis dicetak pada judul Berita Acara Lapangan
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3 pt-1">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase">
+                    Pilih Nota Dinas Yang Sudah Terdaftar di Arsip:
+                  </label>
+                  {selectedNota ? (
+                    <div className="p-3.5 bg-white border-2 border-indigo-200 rounded-xl flex items-center justify-between gap-3">
+                      <div>
+                        <span className="font-mono text-xs font-black text-indigo-900 block">
+                          {selectedNota.nomor_otomatis}
+                        </span>
+                        <p className="text-xs text-slate-700 font-bold mt-0.5">
+                          {selectedNota.nama_nota}
+                        </p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">
+                          Tanggal: {selectedNota.tanggal_nota} • Bagian: {selectedNota.dari_bagian}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedNota(null)}
+                        className="px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs font-black uppercase hover:bg-rose-100 transition-colors"
+                      >
+                        Ganti
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        placeholder="Ketik untuk mencari nomor atau perihal nota dinas di arsip..."
+                        value={searchNotaQuery}
+                        onChange={e => setSearchNotaQuery(e.target.value)}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                      />
+                      <div className="max-h-48 overflow-y-auto border border-slate-200 rounded-xl divide-y divide-slate-100 bg-white shadow-inner">
+                        {arsipNotaList
+                          .filter(n => {
+                            if (!searchNotaQuery.trim()) return true;
+                            const q = searchNotaQuery.toLowerCase();
+                            return (n.nomor_otomatis || '').toLowerCase().includes(q) || (n.nama_nota || '').toLowerCase().includes(q);
+                          })
+                          .slice(0, 10)
+                          .map(item => (
+                            <div
+                              key={item.id}
+                              onClick={() => setSelectedNota(item)}
+                              className="p-3 hover:bg-indigo-50/60 cursor-pointer transition-colors"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-mono text-xs font-black text-indigo-700">
+                                  {item.nomor_otomatis}
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-400">
+                                  {item.tanggal_nota}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-800 font-semibold mt-0.5 truncate">
+                                {item.nama_nota}
+                              </p>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* BARIS 1: TANGGAL KUNJUNGAN & KATEGORI USAHA */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -791,6 +1007,37 @@ export default function BuatAgenda() {
                 <span>{copiedLink ? 'Tautan Disalin!' : 'Salin Tautan Form Lapangan'}</span>
               </button>
             </div>
+
+            {/* Integrasi Arsip & BAP Card */}
+            {(createdAgenda.nomor_nota_dinas || createdAgenda.nomor_bap) && (
+              <div className="p-4 bg-indigo-50/70 border border-indigo-200 rounded-2xl text-left space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-indigo-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <Archive size={13} className="text-indigo-600" />
+                    Terintegrasi Arsip
+                  </span>
+                  <Link
+                    href="/arsip/nota-dinas"
+                    className="text-[10px] font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1 underline"
+                  >
+                    <span>Buka Arsip</span>
+                    <ExternalLink size={10} />
+                  </Link>
+                </div>
+                {createdAgenda.nomor_nota_dinas && (
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-500 uppercase block">Nomor Nota Dinas</span>
+                    <span className="font-mono text-xs font-black text-slate-900">{createdAgenda.nomor_nota_dinas}</span>
+                  </div>
+                )}
+                {createdAgenda.nomor_bap && (
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-500 uppercase block">Nomor Berita Acara (BAP)</span>
+                    <span className="font-mono text-xs font-black text-teal-900">{createdAgenda.nomor_bap}</span>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="space-y-2 pt-2">

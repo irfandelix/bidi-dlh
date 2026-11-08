@@ -330,8 +330,86 @@ export async function POST(
     }
     const paraf_pemrakarsa_combined = await combineParafImages(rawParafPemrakarsa, 45, 10);
 
+    // Integrasi Nota Dinas Arsip & Nomor Berita Acara (BAP)
+    let nomorNotaDinas = agenda.nomor_nota_dinas || identitas.nomor_nota_dinas || '';
+    let nomorUrutNota = '';
+
+    if (!nomorNotaDinas) {
+      const { data: matchedNota } = await supabase
+        .from('arsip_nota_dinas')
+        .select('*')
+        .or(`keterangan.ilike.%${agenda.token || agenda.nama_kegiatan}%,nama_nota.ilike.%${agenda.nama_kegiatan}%`)
+        .order('id', { ascending: false })
+        .limit(1);
+
+      if (matchedNota && matchedNota.length > 0) {
+        nomorNotaDinas = matchedNota[0].nomor_otomatis;
+        await supabase
+          .from('pengawasan_lapangans')
+          .update({ nomor_nota_dinas: nomorNotaDinas, nota_dinas_id: matchedNota[0].id })
+          .eq('id', id);
+      } else {
+        const visitDate = agenda.tanggal_kunjungan || today.toISOString().split('T')[0];
+        const vYear = new Date(visitDate).getFullYear().toString();
+        const vMonth = new Date(visitDate).getMonth() + 1;
+
+        const { data: lastDoc } = await supabase
+          .from('arsip_nota_dinas')
+          .select('no_urut')
+          .gte('tanggal_nota', `${vYear}-01-01`)
+          .lte('tanggal_nota', `${vYear}-12-31`)
+          .order('no_urut', { ascending: false })
+          .limit(1);
+
+        let nextUrut = 1;
+        if (lastDoc && lastDoc.length > 0) {
+          nextUrut = (lastDoc[0].no_urut || 0) + 1;
+        }
+
+        const urutStr = String(nextUrut).padStart(3, '0');
+        nomorNotaDinas = `600.4.6/${urutStr}.${vMonth}/17/PW/${vYear}`;
+
+        const { data: insertedNota } = await supabase
+          .from('arsip_nota_dinas')
+          .insert([{
+            no_urut: nextUrut,
+            nama_nota: `Nota Dinas Pengawasan Lingkungan Hidup - ${agenda.nama_kegiatan || 'Pengawasan Lapangan'} (${agenda.nama_pemrakarsa || '-'})`,
+            tanggal_nota: visitDate,
+            dari_bagian: 'Pengawasan',
+            nomor_otomatis: nomorNotaDinas,
+            keterangan: `Terintegrasi otomatis dari Pengawasan #${agenda.token || id}: ${agenda.nama_kegiatan}`
+          }])
+          .select()
+          .single();
+
+        if (insertedNota) {
+          await supabase
+            .from('pengawasan_lapangans')
+            .update({ nomor_nota_dinas: nomorNotaDinas, nota_dinas_id: insertedNota.id })
+            .eq('id', id);
+        }
+      }
+    }
+
+    if (nomorNotaDinas) {
+      const parts = nomorNotaDinas.split('/');
+      if (parts.length >= 2) {
+        nomorUrutNota = parts[1];
+      } else {
+        nomorUrutNota = nomorNotaDinas;
+      }
+    } else {
+      nomorUrutNota = `001.${today.getMonth() + 1}`;
+    }
+
+    const nomorBapFinal = identitas.nomor_bap || `600.4/${nomorUrutNota}/BAP/17/${hari_ini_tahun}`;
+
     // Prepare data payload for docxtemplater
     const data = {
+      nomor_bap_urut: nomorUrutNota,
+      nomor_bap: nomorBapFinal,
+      nomor_urut_bap: nomorUrutNota,
+      nomor_nota_dinas: nomorNotaDinas,
       ...identitas, // contains kbli, alamat, pj_nama, telepon dll.
       ...checklistFlat, // contains air_fisik, ket_air_fisik dll.
       // Template specific fallbacks mapping

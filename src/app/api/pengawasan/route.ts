@@ -112,6 +112,59 @@ export async function POST(request: Request) {
     const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
     body.token = `${prefix}-${randomStr}`;
 
+    // Integrasi dengan Nota Dinas pada Bagian Arsip
+    let notaDinasId = body.nota_dinas_id || null;
+    let nomorNotaDinas = body.nomor_nota_dinas || null;
+
+    if (!nomorNotaDinas) {
+      // Auto-generate nomor urut nota dinas baru di arsip_nota_dinas
+      const tanggalNota = body.tanggal_kunjungan || new Date().toISOString().split('T')[0];
+      const tahun = new Date(tanggalNota).getFullYear().toString();
+      const bulan = new Date(tanggalNota).getMonth() + 1;
+
+      const { data: lastDoc } = await supabaseAdmin
+        .from('arsip_nota_dinas')
+        .select('no_urut')
+        .gte('tanggal_nota', `${tahun}-01-01`)
+        .lte('tanggal_nota', `${tahun}-12-31`)
+        .order('no_urut', { ascending: false })
+        .limit(1);
+
+      let nextUrut = 1;
+      if (lastDoc && lastDoc.length > 0) {
+        nextUrut = (lastDoc[0].no_urut || 0) + 1;
+      }
+
+      const urutStr = String(nextUrut).padStart(3, '0');
+      nomorNotaDinas = `600.4.6/${urutStr}.${bulan}/17/PW/${tahun}`;
+
+      // Simpan langsung ke arsip_nota_dinas agar tercatat di modul arsip
+      const { data: insertedNota, error: notaErr } = await supabaseAdmin
+        .from('arsip_nota_dinas')
+        .insert([{
+          no_urut: nextUrut,
+          nama_nota: `Nota Dinas Pengawasan Lingkungan Hidup - ${body.nama_kegiatan || 'Pengawasan Lapangan'} (${body.nama_pemrakarsa || '-'})`,
+          tanggal_nota: tanggalNota,
+          dari_bagian: 'Pengawasan',
+          nomor_otomatis: nomorNotaDinas,
+          file_url: null,
+          pemohon_id: null,
+          keterangan: `Terintegrasi otomatis dari Jadwal Pengawasan #${body.token}: ${body.nama_kegiatan || '-'}`
+        }])
+        .select()
+        .single();
+
+      if (!notaErr && insertedNota) {
+        notaDinasId = insertedNota.id;
+        nomorNotaDinas = insertedNota.nomor_otomatis;
+      } else if (notaErr) {
+        console.error('Gagal mencatat arsip_nota_dinas otomatis:', notaErr);
+      }
+    }
+
+    body.nota_dinas_id = notaDinasId;
+    body.nomor_nota_dinas = nomorNotaDinas;
+
     const { data, error } = await supabaseAdmin
       .from('pengawasan_lapangans')
       // @ts-ignore

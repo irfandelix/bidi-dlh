@@ -28,7 +28,9 @@ import {
   Download,
   Printer,
   Eye,
-  FileCheck
+  FileCheck,
+  Archive,
+  ExternalLink
 } from 'lucide-react';
 import SignatureCanvas from 'react-signature-canvas';
 import { getTemplate } from './templates';
@@ -93,7 +95,8 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     kapasitas_kegiatan: '', jumlah_karyawan_pengunjung: '',
     // Shared
     dokumen_dimiliki: '', persetujuan_lingkungan: '',
-    riwayat_ketaatan: '', inspeksi_terakhir: ''
+    riwayat_ketaatan: '', inspeksi_terakhir: '',
+    nomor_nota_dinas: '', nomor_bap_urut: '', nomor_bap: ''
   });
 
   const [saksiDetails, setSaksiDetails] = useState<{jabatan: string, telepon: string}[]>([]);
@@ -447,16 +450,42 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         }
       }
       
+      // Sinkronisasi Nomor Nota Dinas & Nomor BAP
+      let nomorNotaDinas = agendaData.nomor_nota_dinas || existingMatriks?.identitas?.nomor_nota_dinas || '';
+      let nomorBapUrut = existingMatriks?.identitas?.nomor_bap_urut || '';
+
+      if (nomorNotaDinas) {
+        const parts = nomorNotaDinas.split('/');
+        if (!nomorBapUrut) {
+          nomorBapUrut = parts[1] || '001';
+        }
+      } else {
+        const visitDate = agendaData.tanggal_kunjungan || new Date().toISOString().split('T')[0];
+        const vYear = new Date(visitDate).getFullYear();
+        const vMonth = new Date(visitDate).getMonth() + 1;
+        nomorBapUrut = `001.${vMonth}`;
+        nomorNotaDinas = `600.4.6/${nomorBapUrut}/17/PW/${vYear}`;
+      }
+
+      const tahunBap = new Date(agendaData.tanggal_kunjungan || new Date()).getFullYear();
+      const nomorBapFinal = existingMatriks?.identitas?.nomor_bap || `600.4/${nomorBapUrut}/BAP/17/${tahunBap}`;
+
       // Muat identitas eksisting jika ada
       if (existingMatriks?.identitas && typeof existingMatriks.identitas === 'object') {
         setFormData(prev => ({
           ...prev,
           ...existingMatriks.identitas,
+          nomor_nota_dinas: existingMatriks.identitas.nomor_nota_dinas || nomorNotaDinas,
+          nomor_bap_urut: existingMatriks.identitas.nomor_bap_urut || nomorBapUrut,
+          nomor_bap: existingMatriks.identitas.nomor_bap || nomorBapFinal,
           koordinat: existingMatriks.identitas.koordinat || ((agendaData.latitude && agendaData.longitude) ? `${agendaData.latitude}, ${agendaData.longitude}` : '')
         }));
       } else {
         setFormData(prev => ({
           ...prev,
+          nomor_nota_dinas: nomorNotaDinas,
+          nomor_bap_urut: nomorBapUrut,
+          nomor_bap: nomorBapFinal,
           koordinat: (agendaData.latitude && agendaData.longitude) ? `${agendaData.latitude}, ${agendaData.longitude}` : ''
         }));
       }
@@ -1463,6 +1492,87 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                 onChange={handleChange} 
                 className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm font-bold bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-400" 
               />
+            </div>
+          </div>
+
+          {/* Integrasi Nota Dinas (Arsip) & Nomor Berita Acara (BAP) */}
+          <div className="bg-gradient-to-r from-indigo-50/80 via-white to-teal-50/80 border-2 border-indigo-200/90 p-5 rounded-2xl shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-indigo-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <FileText size={16} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                    <span>Nomor Dokumen Terintegrasi Arsip</span>
+                    <span className="text-[9px] font-black text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full border border-indigo-200">
+                      MODUL ARSIP DLH
+                    </span>
+                  </h4>
+                  <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
+                    Nomor BAP terbit otomatis mengikuti nomor urut Nota Dinas pada bagian Arsip.
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                href="/arsip/nota-dinas"
+                target="_blank"
+                className="text-xs font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1 bg-white border border-indigo-200 px-3 py-1.5 rounded-lg shadow-2xs self-start sm:self-auto hover:bg-indigo-50 transition-colors"
+              >
+                <span>Lihat Modul Arsip</span>
+                <ExternalLink size={12} />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white p-3.5 rounded-xl border border-indigo-100 shadow-xs">
+                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block mb-1">
+                  Nomor Nota Dinas Pengawasan (Arsip)
+                </span>
+                <input
+                  type="text"
+                  name="nomor_nota_dinas"
+                  value={formData.nomor_nota_dinas || ''}
+                  onChange={handleChange}
+                  className="w-full font-mono text-xs md:text-sm font-black text-slate-900 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  placeholder="Contoh: 600.4.6/033.11/17/PW/2026"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">Tercatat di data Nota Dinas Pengawasan</span>
+              </div>
+
+              <div className="bg-white p-3.5 rounded-xl border border-teal-100 shadow-xs">
+                <span className="text-[10px] font-bold text-teal-700 uppercase tracking-wider block mb-1">
+                  Nomor Berita Acara (BAP Tercetak)
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs md:text-sm font-black text-slate-700 shrink-0">
+                    Nomor: 600.4/
+                  </span>
+                  <input
+                    type="text"
+                    name="nomor_bap_urut"
+                    value={formData.nomor_bap_urut || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const tahunBap = new Date(agenda?.tanggal_kunjungan || new Date()).getFullYear();
+                      setFormData(prev => ({
+                        ...prev,
+                        nomor_bap_urut: val,
+                        nomor_bap: `600.4/${val}/BAP/17/${tahunBap}`
+                      }));
+                    }}
+                    className="w-24 font-mono text-xs md:text-sm font-black text-teal-900 px-2 py-1.5 rounded-lg border-2 border-teal-300 bg-teal-50/50 text-center focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500"
+                    placeholder="033.11"
+                  />
+                  <span className="font-mono text-xs md:text-sm font-black text-slate-700 shrink-0">
+                    /BAP/17/{new Date(agenda?.tanggal_kunjungan || new Date()).getFullYear()}
+                  </span>
+                </div>
+                <span className="text-[10px] text-teal-700/80 mt-1 block">
+                  Format resmi yang dicetak pada dokumen Berita Acara
+                </span>
+              </div>
             </div>
           </div>
 

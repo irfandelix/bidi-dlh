@@ -542,10 +542,15 @@ export default function PengawasanHubPage() {
 
                       {/* Usaha/Kegiatan & Lokasi */}
                       <td className="px-5 py-4">
-                        <div className="flex items-center gap-1.5 mb-1">
+                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
                           <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-black uppercase rounded-md border border-slate-200">
                             {item.kategori || 'Umum'}
                           </span>
+                          {item.nomor_nota_dinas && (
+                            <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-[10px] font-black font-mono rounded-md border border-indigo-200" title="Nomor Nota Dinas Terintegrasi Arsip">
+                              Nota: {item.nomor_nota_dinas}
+                            </span>
+                          )}
                         </div>
                         <p className="font-bold text-slate-900 text-sm leading-snug">
                           {item.nama_kegiatan || item.nama_usaha || '-'}
@@ -735,6 +740,35 @@ export default function PengawasanHubPage() {
                 <p className="font-bold text-slate-800">
                   {selectedDetail.lokasi_kegiatan || selectedDetail.lokasi || '-'}
                 </p>
+              </div>
+
+              {/* Integrasi Nota Dinas (Arsip) */}
+              <div className="p-4 bg-gradient-to-r from-indigo-50/70 to-teal-50/70 border border-indigo-200 rounded-xl space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-indigo-900 flex items-center gap-1.5">
+                    <Archive size={13} className="text-indigo-600" />
+                    Terintegrasi Modul Arsip
+                  </span>
+                  <Link
+                    href="/arsip/nota-dinas"
+                    className="text-[10px] font-bold text-indigo-700 hover:text-indigo-900 underline flex items-center gap-1"
+                  >
+                    <span>Buka Arsip</span>
+                    <ExternalLink size={10} />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                  <div>
+                    <span className="text-slate-500 font-bold block text-[10px] uppercase">Nomor Nota Dinas</span>
+                    <span className="font-mono font-black text-slate-900">{selectedDetail.nomor_nota_dinas || 'Otomatis di-generate sistem'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 font-bold block text-[10px] uppercase">Nomor Berita Acara (BAP)</span>
+                    <span className="font-mono font-black text-teal-800">
+                      {`600.4/${(selectedDetail.nomor_nota_dinas || '').split('/')[1] || '001'}/BAP/17/${new Date(selectedDetail.tanggal_kunjungan || new Date()).getFullYear()}`}
+                    </span>
+                  </div>
+                </div>
               </div>
 
               {selectedDetail.token && (
