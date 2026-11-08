@@ -119,6 +119,13 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     paraf_saksi?: (string | null)[];
   }>({});
 
+  // States & Refs untuk auto-save, draft lokal, dan pemulihan tanda tangan & paraf
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | null>(null);
+  const [manualSavingSignatures, setManualSavingSignatures] = useState(false);
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastClearedRef = useRef<Record<string, string>>({});
+  const [clearedHistory, setClearedHistory] = useState<Record<string, boolean>>({});
+
   const [listDokumen, setListDokumen] = useState([{ id: Date.now(), value: '' }]);
   const [poinDokumen, setPoinDokumen] = useState<string>('');
   const [listFoto, setListFoto] = useState([{ id: Date.now(), file: null as any, base64: '', keterangan: '' }]);
@@ -412,8 +419,8 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       const calculatedScores = recalculateAllScoresFromChecklist(loadedChecklist, currentPoinDok, loadedKomponen);
       setKomponenPenilaian(calculatedScores);
       
+      let parsedTim: string[] = [];
       if (agendaData.tim_tugas) {
-        let parsedTim: string[] = [];
         try { parsedTim = JSON.parse(agendaData.tim_tugas); } 
         catch { parsedTim = agendaData.tim_tugas.split('|').map((t: string) => t.trim()).filter((t: string) => t !== ''); }
         setTimTugas(parsedTim);
@@ -455,15 +462,16 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       }
 
       // Muat daftar perwakilan pihak usaha jika sudah pernah disimpan
+      let loadedPerwakilan: any[] = [];
       if (existingMatriks?.perwakilan && Array.isArray(existingMatriks.perwakilan) && existingMatriks.perwakilan.length > 0) {
-        setListPerwakilan(existingMatriks.perwakilan.map((p: any, idx: number) => ({
+        loadedPerwakilan = existingMatriks.perwakilan.map((p: any, idx: number) => ({
           id: p.id || (Date.now() + idx),
           nama: p.nama || '',
           jabatan: p.jabatan || '',
           telepon: p.telepon || '',
           savedTtd: p.ttd || null,
           savedParaf: p.paraf || null
-        })));
+        }));
       }
 
       // Muat daftar dokumen izin yang ditunjukkan
@@ -482,7 +490,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         })));
       }
 
-      // Muat tanda tangan & paraf tersimpan untuk tim, pemrakarsa, & saksi
+      // Muat tanda tangan & paraf tersimpan untuk tim, pemrakarsa, & saksi dari database
       let savedTtdTim: (string | null)[] = [];
       try {
         savedTtdTim = typeof existingBap?.ttd_tim === 'string' ? JSON.parse(existingBap.ttd_tim) : (existingBap?.ttd_tim || existingMatriks?.ttd_tim || []);
@@ -511,9 +519,70 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         savedParafSaksi = existingMatriks?.paraf_saksi || [];
       }
 
+      let savedParafPemrakarsa = existingBap?.paraf_pemrakarsa || existingMatriks?.paraf_pemrakarsa || null;
+      let savedTtdPemrakarsa = existingBap?.ttd_pemrakarsa || existingMatriks?.ttd_pemrakarsa || null;
+
+      // Cek cadangan draft tanda tangan & paraf dari localStorage (menjaga data tetap aman jika browser ter-refresh / tidak sengaja reset)
+      if (typeof window !== 'undefined') {
+        try {
+          const rawLocalDraft = localStorage.getItem(`@bap_signatures_${id}`);
+          if (rawLocalDraft) {
+            const localDraft = JSON.parse(rawLocalDraft);
+            if (localDraft) {
+              if (!savedParafPemrakarsa && localDraft.paraf_pemrakarsa) {
+                savedParafPemrakarsa = localDraft.paraf_pemrakarsa;
+              }
+              if (!savedTtdPemrakarsa && localDraft.ttd_pemrakarsa) {
+                savedTtdPemrakarsa = localDraft.ttd_pemrakarsa;
+              }
+              if (Array.isArray(localDraft.ttd_tim)) {
+                savedTtdTim = (parsedTim.length > 0 ? parsedTim : savedTtdTim).map((_, i) => savedTtdTim[i] || localDraft.ttd_tim[i] || null);
+              }
+              if (Array.isArray(localDraft.paraf_tim)) {
+                savedParafTim = (parsedTim.length > 0 ? parsedTim : savedParafTim).map((_, i) => savedParafTim[i] || localDraft.paraf_tim[i] || null);
+              }
+              if (Array.isArray(localDraft.ttd_saksi)) {
+                savedTtdSaksi = (parsedSaksi.length > 0 ? parsedSaksi : savedTtdSaksi).map((_, i) => savedTtdSaksi[i] || localDraft.ttd_saksi[i] || null);
+              }
+              if (Array.isArray(localDraft.paraf_saksi)) {
+                savedParafSaksi = (parsedSaksi.length > 0 ? parsedSaksi : savedParafSaksi).map((_, i) => savedParafSaksi[i] || localDraft.paraf_saksi[i] || null);
+              }
+              // Pulihkan perwakilan jika kosong di database
+              if (Array.isArray(localDraft.perwakilan) && localDraft.perwakilan.length > 0) {
+                if (loadedPerwakilan.length === 0) {
+                  loadedPerwakilan = localDraft.perwakilan.map((lp: any, idx: number) => ({
+                    id: lp.id || (Date.now() + idx),
+                    nama: lp.nama || '',
+                    jabatan: lp.jabatan || '',
+                    telepon: lp.telepon || '',
+                    savedTtd: lp.savedTtd || null,
+                    savedParaf: lp.savedParaf || null
+                  }));
+                } else {
+                  loadedPerwakilan = loadedPerwakilan.map((p, idx) => {
+                    const match = localDraft.perwakilan.find((lp: any) => lp.id === p.id) || localDraft.perwakilan[idx];
+                    return {
+                      ...p,
+                      savedTtd: p.savedTtd || match?.savedTtd || null,
+                      savedParaf: p.savedParaf || match?.savedParaf || null
+                    };
+                  });
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('Gagal memulihkan draft signature dari localStorage:', e);
+        }
+      }
+
+      if (loadedPerwakilan.length > 0) {
+        setListPerwakilan(loadedPerwakilan);
+      }
+
       savedSignaturesRef.current = {
-        ttd_pemrakarsa: existingBap?.ttd_pemrakarsa || existingMatriks?.ttd_pemrakarsa || null,
-        paraf_pemrakarsa: existingBap?.paraf_pemrakarsa || existingMatriks?.paraf_pemrakarsa || null,
+        ttd_pemrakarsa: savedTtdPemrakarsa,
+        paraf_pemrakarsa: savedParafPemrakarsa,
         ttd_tim: savedTtdTim,
         paraf_tim: savedParafTim,
         ttd_saksi: savedTtdSaksi,
@@ -792,6 +861,166 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     return 'Tidak Taat';
   };
 
+  const saveSignaturesToLocalStorage = (cached: any, perwList: any[]) => {
+    if (typeof window === 'undefined') return;
+    try {
+      const dataToSave = {
+        updatedAt: Date.now(),
+        ttd_pemrakarsa: savedSignaturesRef.current?.ttd_pemrakarsa || perwList[0]?.savedTtd || null,
+        paraf_pemrakarsa: cached?.prfPemrakarsa || savedSignaturesRef.current?.paraf_pemrakarsa || null,
+        ttd_tim: cached?.ttdTim || savedSignaturesRef.current?.ttd_tim || [],
+        paraf_tim: cached?.prfTim || savedSignaturesRef.current?.paraf_tim || [],
+        ttd_saksi: cached?.ttdSaksi || savedSignaturesRef.current?.ttd_saksi || [],
+        paraf_saksi: cached?.prfSaksi || savedSignaturesRef.current?.paraf_saksi || [],
+        saksi_names: saksiTugas,
+        saksi_details: saksiDetails,
+        perwakilan: perwList.map(p => ({
+          id: p.id,
+          nama: p.nama,
+          jabatan: p.jabatan,
+          telepon: p.telepon,
+          savedTtd: p.savedTtd || null,
+          savedParaf: p.savedParaf || null
+        }))
+      };
+      localStorage.setItem(`@bap_signatures_${id}`, JSON.stringify(dataToSave));
+    } catch (e) {
+      console.warn('Gagal menyimpan signature ke localStorage:', e);
+    }
+  };
+
+  const handleCanvasStroke = () => {
+    setSaveStatus('saving');
+    const cached = cacheCurrentSignatures();
+    saveSignaturesToLocalStorage(cached, cached.updatedPerw);
+
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(async () => {
+      try {
+        const payload = buildPayload();
+        await fetch(`/api/pengawasan/bap/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus(null), 3000);
+      } catch (err) {
+        console.warn('Auto-save background notice:', err);
+        setSaveStatus(null);
+      }
+    }, 1500);
+  };
+
+  const handleManualSaveSignatures = async () => {
+    setManualSavingSignatures(true);
+    try {
+      const cached = cacheCurrentSignatures();
+      saveSignaturesToLocalStorage(cached, cached.updatedPerw);
+      const payload = buildPayload();
+      const res = await fetch(`/api/pengawasan/bap/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Gagal menyimpan ke database');
+      setSaveStatus('saved');
+      alert('✓ Tanda tangan dan paraf berhasil disimpan ke database dan browser!\n\nData aman jika halaman tidak sengaja ter-refresh atau di-reset.');
+    } catch (err: any) {
+      alert('Tanda tangan & paraf tersimpan di browser (offline), namun gagal sinkron ke server: ' + (err.message || 'Koneksi terputus'));
+    } finally {
+      setManualSavingSignatures(false);
+    }
+  };
+
+  const handleRestoreAllSignatures = () => {
+    let localDraft: any = null;
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(`@bap_signatures_${id}`);
+        if (raw) localDraft = JSON.parse(raw);
+      } catch (e) {}
+    }
+
+    let restoredCount = 0;
+
+    // 1. Perwakilan
+    listPerwakilan.forEach((perw, idx) => {
+      const ttd = perw.savedTtd || localDraft?.perwakilan?.[idx]?.savedTtd;
+      const paraf = perw.savedParaf || localDraft?.perwakilan?.[idx]?.savedParaf;
+      if (ttd && sigPerwakilanRefs.current[perw.id]) {
+        resizeCanvasPad(sigPerwakilanRefs.current[perw.id], ttd);
+        restoredCount++;
+      }
+      if (paraf && parafPerwakilanRefs.current[perw.id]) {
+        resizeCanvasPad(parafPerwakilanRefs.current[perw.id], paraf);
+        restoredCount++;
+      }
+    });
+
+    // 2. Paraf Pemrakarsa
+    const prfPemrakarsa = savedSignaturesRef.current?.paraf_pemrakarsa || localDraft?.paraf_pemrakarsa;
+    if (prfPemrakarsa && parafPemrakarsaRef.current) {
+      resizeCanvasPad(parafPemrakarsaRef.current, prfPemrakarsa);
+      restoredCount++;
+    }
+
+    // 3. Tim Pengawas
+    timTugas.forEach((_, idx) => {
+      const ttd = savedSignaturesRef.current?.ttd_tim?.[idx] || localDraft?.ttd_tim?.[idx];
+      const paraf = savedSignaturesRef.current?.paraf_tim?.[idx] || localDraft?.paraf_tim?.[idx];
+      if (ttd && sigTimRefs.current[idx]) {
+        resizeCanvasPad(sigTimRefs.current[idx], ttd);
+        restoredCount++;
+      }
+      if (paraf && parafTimRefs.current[idx]) {
+        resizeCanvasPad(parafTimRefs.current[idx], paraf);
+        restoredCount++;
+      }
+    });
+
+    // 4. Saksi
+    saksiTugas.forEach((_, idx) => {
+      const ttd = savedSignaturesRef.current?.ttd_saksi?.[idx] || localDraft?.ttd_saksi?.[idx];
+      const paraf = savedSignaturesRef.current?.paraf_saksi?.[idx] || localDraft?.paraf_saksi?.[idx];
+      if (ttd && sigSaksiRefs.current[idx]) {
+        resizeCanvasPad(sigSaksiRefs.current[idx], ttd);
+        restoredCount++;
+      }
+      if (paraf && parafSaksiRefs.current[idx]) {
+        resizeCanvasPad(parafSaksiRefs.current[idx], paraf);
+        restoredCount++;
+      }
+    });
+
+    setTimeout(() => {
+      cacheCurrentSignatures();
+      alert(`✓ ${restoredCount > 0 ? `${restoredCount} tanda tangan / paraf berhasil dipulihkan ke kanvas` : 'Seluruh tanda tangan sudah terisi'}.`);
+    }, 120);
+  };
+
+  const handleClearPad = (key: string, padRef: any, onClearSaved: () => void) => {
+    if (padRef && !padRef.isEmpty()) {
+      try {
+        lastClearedRef.current[key] = padRef.getTrimmedCanvas().toDataURL('image/png');
+        setClearedHistory(prev => ({ ...prev, [key]: true }));
+      } catch (e) {}
+    }
+    padRef?.clear();
+    onClearSaved();
+    cacheCurrentSignatures();
+  };
+
+  const handleUndoClearPad = (key: string, padRef: any, onRestoreSaved: (val: string) => void) => {
+    const prevData = lastClearedRef.current[key];
+    if (prevData && padRef) {
+      resizeCanvasPad(padRef, prevData);
+      onRestoreSaved(prevData);
+      setClearedHistory(prev => ({ ...prev, [key]: false }));
+      handleCanvasStroke();
+    }
+  };
+
   const cacheCurrentSignatures = () => {
     const updatedPerw = listPerwakilan.map(p => {
       const padTtd = sigPerwakilanRefs.current[p.id];
@@ -837,7 +1066,9 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       paraf_saksi: prfSaksi
     };
 
-    return { updatedPerw, prfPemrakarsa, ttdTim, prfTim, ttdSaksi, prfSaksi };
+    const result = { updatedPerw, prfPemrakarsa, ttdTim, prfTim, ttdSaksi, prfSaksi };
+    saveSignaturesToLocalStorage(result, updatedPerw);
+    return result;
   };
 
   const buildPayload = () => {
@@ -1038,7 +1269,17 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
 
   const goToStep = (targetStep: number) => {
     if (step === 5) {
-      cacheCurrentSignatures();
+      const cached = cacheCurrentSignatures();
+      saveSignaturesToLocalStorage(cached, cached.updatedPerw);
+      // Auto-save draft ke database di background saat meninggalkan Step 5
+      try {
+        const payload = buildPayload();
+        fetch(`/api/pengawasan/bap/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).catch(err => console.warn('Auto-save step transition notice:', err));
+      } catch (e) {}
     }
     if (targetStep === 4) {
       setKomponenPenilaian(prev => recalculateAllScoresFromChecklist(checklist, poinDokumen, prev));
@@ -2263,6 +2504,54 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         {/* STEP 5: PENGESAHAN, TANDA TANGAN & PARAF                                  */}
         {/* ========================================================================= */}
         <div className={`${step === 5 ? 'block' : 'hidden'} animate-in fade-in duration-200 space-y-6`}>
+          {/* Banner Status Penyimpanan & Tombol Aksi Draf */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-slate-900 text-white p-4 sm:p-5 rounded-2xl shadow-sm gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center shrink-0">
+                <CheckCircle2 size={20} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-100">
+                    Penyimpanan Tanda Tangan & Paraf
+                  </h4>
+                  {saveStatus === 'saving' && (
+                    <span className="text-[10px] font-bold text-amber-400 bg-amber-400/20 px-2 py-0.5 rounded-full animate-pulse flex items-center gap-1">
+                      <Clock size={10} /> Menyimpan...
+                    </span>
+                  )}
+                  {saveStatus === 'saved' && (
+                    <span className="text-[10px] font-bold text-teal-400 bg-teal-400/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <CheckCircle2 size={10} /> Tersimpan Aman
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Setiap goresan tanda tangan & paraf tersimpan otomatis ke browser dan database agar aman jika halaman ter-refresh.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={handleRestoreAllSignatures}
+                className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors border border-slate-700 shadow-sm"
+                title="Pulihkan seluruh tanda tangan jika ada yang tidak sengaja terhapus"
+              >
+                <RefreshCcw size={13} /> Pulihkan TTD
+              </button>
+              <button
+                type="button"
+                onClick={handleManualSaveSignatures}
+                disabled={manualSavingSignatures}
+                className="px-3.5 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-xs font-black flex items-center gap-1.5 transition-colors shadow-sm disabled:opacity-50"
+              >
+                <Save size={13} /> {manualSavingSignatures ? 'Menyimpan...' : 'Simpan Draf TTD'}
+              </button>
+            </div>
+          </div>
+
           {/* Bagian Pihak Usaha / Pemrakarsa */}
           <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -2340,18 +2629,32 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                       <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">
                         Tanda Tangan
                       </span>
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          sigPerwakilanRefs.current[perw.id]?.clear();
-                          const l = [...listPerwakilan];
-                          if (l[idx]) l[idx].savedTtd = null;
-                          setListPerwakilan(l);
-                        }} 
-                        className="text-[10px] font-bold text-rose-600 hover:text-rose-800"
-                      >
-                        Hapus / Ulangi
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        {clearedHistory[`perw_ttd_${perw.id}`] && (
+                          <button
+                            type="button"
+                            onClick={() => handleUndoClearPad(`perw_ttd_${perw.id}`, sigPerwakilanRefs.current[perw.id], (val) => {
+                              const l = [...listPerwakilan];
+                              if (l[idx]) l[idx].savedTtd = val;
+                              setListPerwakilan(l);
+                            })}
+                            className="text-[10px] font-bold text-amber-600 hover:text-amber-800 underline"
+                          >
+                            Urungkan
+                          </button>
+                        )}
+                        <button 
+                          type="button" 
+                          onClick={() => handleClearPad(`perw_ttd_${perw.id}`, sigPerwakilanRefs.current[perw.id], () => {
+                            const l = [...listPerwakilan];
+                            if (l[idx]) l[idx].savedTtd = null;
+                            setListPerwakilan(l);
+                          })}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800"
+                        >
+                          Hapus / Ulangi
+                        </button>
+                      </div>
                     </div>
                     <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-white h-28 shadow-inner select-none" style={{ touchAction: 'none' }}>
                       <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2.5 opacity-25 select-none">
@@ -2365,6 +2668,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                             setTimeout(() => resizeCanvasPad(ref, perw.savedTtd), 20);
                           }
                         }} 
+                        onEnd={handleCanvasStroke}
                         penColor="#0f172a" 
                         minWidth={1.6}
                         maxWidth={2.4}
@@ -2382,18 +2686,32 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                       <span className="text-[10px] font-black uppercase tracking-wider text-slate-600">
                         Paraf Singkat
                       </span>
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          parafPerwakilanRefs.current[perw.id]?.clear();
-                          const l = [...listPerwakilan];
-                          if (l[idx]) l[idx].savedParaf = null;
-                          setListPerwakilan(l);
-                        }} 
-                        className="text-[10px] font-bold text-rose-600 hover:text-rose-800"
-                      >
-                        Hapus / Ulangi
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        {clearedHistory[`perw_paraf_${perw.id}`] && (
+                          <button
+                            type="button"
+                            onClick={() => handleUndoClearPad(`perw_paraf_${perw.id}`, parafPerwakilanRefs.current[perw.id], (val) => {
+                              const l = [...listPerwakilan];
+                              if (l[idx]) l[idx].savedParaf = val;
+                              setListPerwakilan(l);
+                            })}
+                            className="text-[10px] font-bold text-amber-600 hover:text-amber-800 underline"
+                          >
+                            Urungkan
+                          </button>
+                        )}
+                        <button 
+                          type="button" 
+                          onClick={() => handleClearPad(`perw_paraf_${perw.id}`, parafPerwakilanRefs.current[perw.id], () => {
+                            const l = [...listPerwakilan];
+                            if (l[idx]) l[idx].savedParaf = null;
+                            setListPerwakilan(l);
+                          })}
+                          className="text-[10px] font-bold text-rose-600 hover:text-rose-800"
+                        >
+                          Hapus / Ulangi
+                        </button>
+                      </div>
                     </div>
                     <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-white h-28 shadow-inner select-none" style={{ touchAction: 'none' }}>
                       <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2.5 opacity-25 select-none">
@@ -2407,6 +2725,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                             setTimeout(() => resizeCanvasPad(ref, perw.savedParaf), 20);
                           }
                         }} 
+                        onEnd={handleCanvasStroke}
                         penColor="#0f172a" 
                         minWidth={1.6}
                         maxWidth={2.4}
@@ -2437,16 +2756,28 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                   <label className="text-[10px] font-black uppercase tracking-wider text-slate-700">
                     Paraf {isSPPG ? 'Fasilitas' : 'Perusahaan'} (Footer Dokumen)
                   </label>
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      parafPemrakarsaRef.current?.clear();
-                      if (savedSignaturesRef.current) savedSignaturesRef.current.paraf_pemrakarsa = null;
-                    }} 
-                    className="text-[10px] font-bold text-rose-600 hover:text-rose-800"
-                  >
-                    Hapus / Ulangi
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    {clearedHistory['paraf_pemrakarsa'] && (
+                      <button
+                        type="button"
+                        onClick={() => handleUndoClearPad('paraf_pemrakarsa', parafPemrakarsaRef.current, (val) => {
+                          if (savedSignaturesRef.current) savedSignaturesRef.current.paraf_pemrakarsa = val;
+                        })}
+                        className="text-[10px] font-bold text-amber-600 hover:text-amber-800 underline"
+                      >
+                        Urungkan
+                      </button>
+                    )}
+                    <button 
+                      type="button" 
+                      onClick={() => handleClearPad('paraf_pemrakarsa', parafPemrakarsaRef.current, () => {
+                        if (savedSignaturesRef.current) savedSignaturesRef.current.paraf_pemrakarsa = null;
+                      })}
+                      className="text-[10px] font-bold text-rose-600 hover:text-rose-800"
+                    >
+                      Hapus / Ulangi
+                    </button>
+                  </div>
                 </div>
                 <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-slate-50 h-24 shadow-inner w-full select-none" style={{ touchAction: 'none' }}>
                   <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2 opacity-25 select-none">
@@ -2460,6 +2791,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                         setTimeout(() => resizeCanvasPad(ref, savedSignaturesRef.current?.paraf_pemrakarsa), 20);
                       }
                     }} 
+                    onEnd={handleCanvasStroke}
                     penColor="#0f172a" 
                     minWidth={1.6}
                     maxWidth={2.4}
@@ -2496,16 +2828,28 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[9px] font-black uppercase text-slate-500">TTD</span>
-                        <button 
-                          type="button" 
-                          onClick={() => {
-                            sigTimRefs.current[idx]?.clear();
-                            if (savedSignaturesRef.current?.ttd_tim) savedSignaturesRef.current.ttd_tim[idx] = null;
-                          }} 
-                          className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
-                        >
-                          Hapus
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          {clearedHistory[`tim_ttd_${idx}`] && (
+                            <button
+                              type="button"
+                              onClick={() => handleUndoClearPad(`tim_ttd_${idx}`, sigTimRefs.current[idx], (val) => {
+                                if (savedSignaturesRef.current?.ttd_tim) savedSignaturesRef.current.ttd_tim[idx] = val;
+                              })}
+                              className="text-[9px] font-bold text-amber-600 hover:text-amber-800 underline"
+                            >
+                              Urungkan
+                            </button>
+                          )}
+                          <button 
+                            type="button" 
+                            onClick={() => handleClearPad(`tim_ttd_${idx}`, sigTimRefs.current[idx], () => {
+                              if (savedSignaturesRef.current?.ttd_tim) savedSignaturesRef.current.ttd_tim[idx] = null;
+                            })}
+                            className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
+                          >
+                            Hapus
+                          </button>
+                        </div>
                       </div>
                       <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-white h-24 shadow-inner select-none" style={{ touchAction: 'none' }}>
                         <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2 opacity-25 select-none">
@@ -2519,6 +2863,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                               setTimeout(() => resizeCanvasPad(ref, savedSignaturesRef.current?.ttd_tim?.[idx]), 20);
                             }
                           }} 
+                          onEnd={handleCanvasStroke}
                           penColor="#0f172a" 
                           minWidth={1.6}
                           maxWidth={2.4}
@@ -2534,16 +2879,28 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                     <div className="w-28 sm:w-32 shrink-0">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[9px] font-black uppercase text-slate-500">Paraf</span>
-                        <button 
-                          type="button" 
-                          onClick={() => {
-                            parafTimRefs.current[idx]?.clear();
-                            if (savedSignaturesRef.current?.paraf_tim) savedSignaturesRef.current.paraf_tim[idx] = null;
-                          }} 
-                          className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
-                        >
-                          Hapus
-                        </button>
+                        <div className="flex items-center gap-1.5">
+                          {clearedHistory[`tim_paraf_${idx}`] && (
+                            <button
+                              type="button"
+                              onClick={() => handleUndoClearPad(`tim_paraf_${idx}`, parafTimRefs.current[idx], (val) => {
+                                if (savedSignaturesRef.current?.paraf_tim) savedSignaturesRef.current.paraf_tim[idx] = val;
+                              })}
+                              className="text-[9px] font-bold text-amber-600 hover:text-amber-800 underline"
+                            >
+                              Urungkan
+                            </button>
+                          )}
+                          <button 
+                            type="button" 
+                            onClick={() => handleClearPad(`tim_paraf_${idx}`, parafTimRefs.current[idx], () => {
+                              if (savedSignaturesRef.current?.paraf_tim) savedSignaturesRef.current.paraf_tim[idx] = null;
+                            })}
+                            className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
+                          >
+                            Hapus
+                          </button>
+                        </div>
                       </div>
                       <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-white h-24 shadow-inner select-none" style={{ touchAction: 'none' }}>
                         <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2 opacity-25 select-none">
@@ -2557,6 +2914,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                               setTimeout(() => resizeCanvasPad(ref, savedSignaturesRef.current?.paraf_tim?.[idx]), 20);
                             }
                           }} 
+                          onEnd={handleCanvasStroke}
                           penColor="#0f172a" 
                           minWidth={1.6}
                           maxWidth={2.4}
@@ -2692,16 +3050,28 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-[9px] font-black uppercase text-slate-500">TTD Saksi</span>
-                          <button 
-                            type="button" 
-                            onClick={() => {
-                              sigSaksiRefs.current[idx]?.clear();
-                              if (savedSignaturesRef.current?.ttd_saksi) savedSignaturesRef.current.ttd_saksi[idx] = null;
-                            }} 
-                            className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
-                          >
-                            Hapus
-                          </button>
+                          <div className="flex items-center gap-1.5">
+                            {clearedHistory[`saksi_ttd_${idx}`] && (
+                              <button
+                                type="button"
+                                onClick={() => handleUndoClearPad(`saksi_ttd_${idx}`, sigSaksiRefs.current[idx], (val) => {
+                                  if (savedSignaturesRef.current?.ttd_saksi) savedSignaturesRef.current.ttd_saksi[idx] = val;
+                                })}
+                                className="text-[9px] font-bold text-amber-600 hover:text-amber-800 underline"
+                              >
+                                Urungkan
+                              </button>
+                            )}
+                            <button 
+                              type="button" 
+                              onClick={() => handleClearPad(`saksi_ttd_${idx}`, sigSaksiRefs.current[idx], () => {
+                                if (savedSignaturesRef.current?.ttd_saksi) savedSignaturesRef.current.ttd_saksi[idx] = null;
+                              })}
+                              className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
+                            >
+                              Hapus
+                            </button>
+                          </div>
                         </div>
                         <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-white h-24 shadow-inner select-none" style={{ touchAction: 'none' }}>
                           <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2 opacity-25 select-none">
@@ -2715,6 +3085,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                                 setTimeout(() => resizeCanvasPad(ref, savedSignaturesRef.current?.ttd_saksi?.[idx]), 20);
                               }
                             }} 
+                            onEnd={handleCanvasStroke}
                             penColor="#0f172a" 
                             minWidth={1.6}
                             maxWidth={2.4}
@@ -2730,16 +3101,28 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                       <div className="w-28 sm:w-32 shrink-0">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-[9px] font-black uppercase text-slate-500">Paraf</span>
-                          <button 
-                            type="button" 
-                            onClick={() => {
-                              parafSaksiRefs.current[idx]?.clear();
-                              if (savedSignaturesRef.current?.paraf_saksi) savedSignaturesRef.current.paraf_saksi[idx] = null;
-                            }} 
-                            className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
-                          >
-                            Hapus
-                          </button>
+                          <div className="flex items-center gap-1.5">
+                            {clearedHistory[`saksi_paraf_${idx}`] && (
+                              <button
+                                type="button"
+                                onClick={() => handleUndoClearPad(`saksi_paraf_${idx}`, parafSaksiRefs.current[idx], (val) => {
+                                  if (savedSignaturesRef.current?.paraf_saksi) savedSignaturesRef.current.paraf_saksi[idx] = val;
+                                })}
+                                className="text-[9px] font-bold text-amber-600 hover:text-amber-800 underline"
+                              >
+                                Urungkan
+                              </button>
+                            )}
+                            <button 
+                              type="button" 
+                              onClick={() => handleClearPad(`saksi_paraf_${idx}`, parafSaksiRefs.current[idx], () => {
+                                if (savedSignaturesRef.current?.paraf_saksi) savedSignaturesRef.current.paraf_saksi[idx] = null;
+                              })}
+                              className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
+                            >
+                              Hapus
+                            </button>
+                          </div>
                         </div>
                         <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-white h-24 shadow-inner select-none" style={{ touchAction: 'none' }}>
                           <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2 opacity-25 select-none">
@@ -2753,6 +3136,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                                 setTimeout(() => resizeCanvasPad(ref, savedSignaturesRef.current?.paraf_saksi?.[idx]), 20);
                               }
                             }} 
+                            onEnd={handleCanvasStroke}
                             penColor="#0f172a" 
                             minWidth={1.6}
                             maxWidth={2.4}
@@ -2894,6 +3278,18 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
             <span className="text-xs font-bold text-slate-400 hidden sm:inline">
               Tahap {step} dari 6
             </span>
+
+            {step === 5 && (
+              <button 
+                type="button" 
+                onClick={handleManualSaveSignatures}
+                disabled={manualSavingSignatures}
+                className="px-4 py-3 rounded-xl border border-teal-200 font-bold text-xs sm:text-sm text-teal-800 bg-teal-50 hover:bg-teal-100 uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+              >
+                <Save size={15} />
+                <span>{manualSavingSignatures ? 'Menyimpan...' : 'Simpan Draf TTD'}</span>
+              </button>
+            )}
 
             {step < 6 ? (
               <button 
