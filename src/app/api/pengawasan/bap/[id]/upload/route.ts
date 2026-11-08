@@ -80,11 +80,24 @@ export async function POST(
       catch { timPengawasArr = agenda.tim_tugas.split('|').map((t: string) => t.trim()).filter((t: string) => t !== ''); }
     }
 
-    // Parse Saksi (Mobile might not have saksi, but web app might)
+    // Parse Saksi (Mendukung saksi_names dari payload web/mobile atau agenda.saksi)
     let saksiArr: string[] = [];
-    if (agenda.saksi) {
+    if (Array.isArray(bapData.saksi_names) && bapData.saksi_names.length > 0) {
+      saksiArr = bapData.saksi_names;
+    } else if (agenda.saksi) {
       try { saksiArr = JSON.parse(agenda.saksi); } 
       catch { saksiArr = agenda.saksi.split('|').map((t: string) => t.trim()).filter((t: string) => t !== ''); }
+    }
+
+    // Pastikan saksiArr mencakup seluruh data saksi jika bapData memiliki saksi lebih banyak
+    const maxSaksiLen = Math.max(
+      saksiArr.length,
+      Array.isArray(bapData.saksi_details) ? bapData.saksi_details.length : 0,
+      Array.isArray(bapData.paraf_saksi) ? bapData.paraf_saksi.length : 0,
+      Array.isArray(bapData.ttd_saksi) ? bapData.ttd_saksi.length : 0
+    );
+    while (saksiArr.length < maxSaksiLen) {
+      saksiArr.push(`Saksi ${saksiArr.length + 1}`);
     }
 
     // Date calculations
@@ -307,15 +320,15 @@ export async function POST(
       ...(Array.isArray(rawParafTim) ? rawParafTim : []),
       ...(Array.isArray(rawParafSaksi) ? rawParafSaksi : [])
     ];
-    const paraf_pengawas_final = await combineParafImages(allParafPengawasDanSaksi, 45, 14);
-    const paraf_saksi_combined = await combineParafImages(rawParafSaksi, 45, 14);
+    const paraf_pengawas_final = await combineParafImages(allParafPengawasDanSaksi, 45, 10);
+    const paraf_saksi_combined = await combineParafImages(rawParafSaksi, 45, 10);
 
     // Gabungkan paraf pihak pemrakarsa jika ada lebih dari 1 perwakilan
     let rawParafPemrakarsa = perwakilan.map((p: any) => p.paraf_perwakilan).filter(Boolean);
     if (rawParafPemrakarsa.length === 0 && (bapData.paraf_pemrakarsa || firstPerwakilan?.paraf_perwakilan)) {
       rawParafPemrakarsa = [bapData.paraf_pemrakarsa || firstPerwakilan?.paraf_perwakilan];
     }
-    const paraf_pemrakarsa_combined = await combineParafImages(rawParafPemrakarsa, 45, 14);
+    const paraf_pemrakarsa_combined = await combineParafImages(rawParafPemrakarsa, 45, 10);
 
     // Prepare data payload for docxtemplater
     const data = {
@@ -429,11 +442,11 @@ export async function POST(
         let maxHeight = 70;
         
         if (tagName.includes('paraf_pengawas')) {
-          maxWidth = 210;
-          maxHeight = 32;
+          maxWidth = 240;
+          maxHeight = 34;
         } else if (tagName.includes('paraf_')) {
-          maxWidth = 90;
-          maxHeight = 32;
+          maxWidth = 95;
+          maxHeight = 34;
         }
 
         if (img instanceof Buffer) {

@@ -2,13 +2,13 @@ import sharp from 'sharp';
 
 /**
  * Menggabungkan beberapa gambar tanda tangan / paraf base64 secara horizontal menjadi satu gambar.
- * Digunakan terutama untuk menampilkan paraf seluruh anggota Tim Pengawas (atau beberapa perwakilan)
+ * Digunakan terutama untuk menampilkan paraf seluruh anggota Tim Pengawas dan seluruh Saksi
  * secara berjajar rapi pada footer dokumen Word (.docx) & pratinjau web.
  */
 export async function combineParafImages(
   base64List: (string | null | undefined)[],
   targetHeight: number = 45,
-  gap: number = 14
+  gap: number = 10
 ): Promise<string> {
   if (!base64List || !Array.isArray(base64List)) return '';
 
@@ -21,6 +21,12 @@ export async function combineParafImages(
       const rawData = item.replace(base64Regex, '');
       const buf = Buffer.from(rawData, 'base64');
       if (buf.length > 0) {
+        // Cek apakah gambar memiliki piksel non-transparan
+        const stats = await sharp(buf).stats();
+        if (stats.channels[3] && stats.channels[3].max === 0) {
+          // Lewati jika seluruh piksel 100% transparan
+          continue;
+        }
         validBuffers.push(buf);
       }
     } catch {
@@ -41,14 +47,13 @@ export async function combineParafImages(
       const meta = await sharp(buf).metadata();
       if (!meta.width || !meta.height) continue;
 
-      let trimmed = sharp(buf);
+      let trimmedBuf = buf;
       try {
-        trimmed = trimmed.trim();
+        trimmedBuf = await sharp(buf).trim().toBuffer();
       } catch {
-        // Fallback jika gambar full transparent
+        trimmedBuf = buf;
       }
 
-      const trimmedBuf = await trimmed.toBuffer();
       const trimmedMeta = await sharp(trimmedBuf).metadata();
       const tWidth = trimmedMeta.width || meta.width;
       const tHeight = trimmedMeta.height || meta.height;

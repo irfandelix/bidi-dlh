@@ -421,10 +421,14 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         parafTimRefs.current = parsedTim.map(() => null);
       }
       
-      if (agendaData.saksi) {
-        let parsedSaksi: string[] = [];
+      let parsedSaksi: string[] = [];
+      if (existingMatriks?.saksi_names && Array.isArray(existingMatriks.saksi_names) && existingMatriks.saksi_names.length > 0) {
+        parsedSaksi = existingMatriks.saksi_names;
+      } else if (agendaData.saksi) {
         try { parsedSaksi = JSON.parse(agendaData.saksi); } 
         catch { parsedSaksi = agendaData.saksi.split('|').map((t: string) => t.trim()).filter((t: string) => t !== ''); }
+      }
+      if (parsedSaksi.length > 0) {
         setSaksiTugas(parsedSaksi);
         sigSaksiRefs.current = parsedSaksi.map(() => null);
         parafSaksiRefs.current = parsedSaksi.map(() => null);
@@ -883,6 +887,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         paraf_pemrakarsa: finalPrfPemrakarsa,
         ttd_tim: ttdTim,
         paraf_tim: prfTim,
+        saksi_names: saksiTugas,
         saksi_details: saksiDetails,
         ttd_saksi: ttdSaksi,
         paraf_saksi: prfSaksi
@@ -2569,10 +2574,10 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
             </div>
           </div>
 
-          {/* Bagian Saksi (Jika ada) */}
-          {saksiTugas.length > 0 && (
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
-              <div className="border-b border-slate-100 pb-3">
+          {/* Bagian Saksi */}
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-indigo-800 bg-indigo-100 px-2.5 py-1 rounded-md inline-block mb-1">
                   Pihak Saksi / Pendamping
                 </span>
@@ -2580,13 +2585,77 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                   Identitas, Tanda Tangan & Paraf Saksi
                 </h4>
               </div>
+              <button 
+                type="button" 
+                onClick={() => {
+                  const newName = `Saksi ${saksiTugas.length + 1}`;
+                  setSaksiTugas(prev => [...prev, newName]);
+                  setSaksiDetails(prev => [...prev, { jabatan: '', telepon: '' }]);
+                  sigSaksiRefs.current.push(null);
+                  parafSaksiRefs.current.push(null);
+                }} 
+                className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors border border-indigo-200 self-start sm:self-auto shadow-sm"
+              >
+                <PlusCircle size={14} /> Tambah Saksi
+              </button>
+            </div>
 
+            {saksiTugas.length === 0 ? (
+              <div className="text-center py-6 border-2 border-dashed border-slate-200 rounded-xl">
+                <p className="text-xs text-slate-500 font-bold mb-3">Belum ada saksi terdaftar untuk agenda ini.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSaksiTugas(['Saksi 1']);
+                    setSaksiDetails([{ jabatan: '', telepon: '' }]);
+                    sigSaksiRefs.current.push(null);
+                    parafSaksiRefs.current.push(null);
+                  }}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black inline-flex items-center gap-1.5 shadow-sm"
+                >
+                  <PlusCircle size={14} /> Tambah Saksi / Pendamping
+                </button>
+              </div>
+            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {saksiTugas.map((nama, idx) => (
                   <div key={`saksi-${idx}`} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
-                    <span className="font-black text-xs text-slate-900 block truncate border-b border-slate-200 pb-1.5">
-                      {idx + 1}. {nama}
-                    </span>
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-1.5 gap-2">
+                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                        <span className="font-black text-xs text-slate-500 shrink-0">{idx + 1}.</span>
+                        <input
+                          type="text"
+                          value={nama}
+                          onChange={(e) => {
+                            const updated = [...saksiTugas];
+                            updated[idx] = e.target.value;
+                            setSaksiTugas(updated);
+                          }}
+                          placeholder="Nama Saksi..."
+                          className="w-full text-xs font-black text-slate-900 bg-transparent border-0 border-b border-transparent hover:border-slate-300 focus:border-indigo-500 focus:ring-0 px-1 py-0.5"
+                        />
+                      </div>
+                      {saksiTugas.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newSaksi = saksiTugas.filter((_, i) => i !== idx);
+                            const newDetails = saksiDetails.filter((_, i) => i !== idx);
+                            setSaksiTugas(newSaksi);
+                            setSaksiDetails(newDetails);
+                            if (savedSignaturesRef.current?.ttd_saksi) {
+                              savedSignaturesRef.current.ttd_saksi.splice(idx, 1);
+                            }
+                            if (savedSignaturesRef.current?.paraf_saksi) {
+                              savedSignaturesRef.current.paraf_saksi.splice(idx, 1);
+                            }
+                          }}
+                          className="text-[10px] font-bold text-rose-500 hover:text-rose-700 shrink-0"
+                        >
+                          Hapus Saksi
+                        </button>
+                      )}
+                    </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div>
@@ -2596,7 +2665,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                           value={saksiDetails[idx]?.jabatan || ''} 
                           onChange={(e) => {
                             const newDetails = [...saksiDetails];
-                            newDetails[idx].jabatan = e.target.value;
+                            newDetails[idx] = { ...newDetails[idx], jabatan: e.target.value };
                             setSaksiDetails(newDetails);
                           }} 
                           placeholder="Jabatan..." 
@@ -2610,7 +2679,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                           value={saksiDetails[idx]?.telepon || ''} 
                           onChange={(e) => {
                             const newDetails = [...saksiDetails];
-                            newDetails[idx].telepon = e.target.value;
+                            newDetails[idx] = { ...newDetails[idx], telepon: e.target.value };
                             setSaksiDetails(newDetails);
                           }} 
                           placeholder="08..." 
@@ -2699,8 +2768,8 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* ========================================================================= */}
