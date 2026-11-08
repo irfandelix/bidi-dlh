@@ -60,6 +60,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
   const sigTimRefs = useRef<any[]>([]);
   const parafTimRefs = useRef<any[]>([]);
   const sigSaksiRefs = useRef<any[]>([]);
+  const parafSaksiRefs = useRef<any[]>([]);
 
   // Step 6 Preview States
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -115,6 +116,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     ttd_tim?: (string | null)[];
     paraf_tim?: (string | null)[];
     ttd_saksi?: (string | null)[];
+    paraf_saksi?: (string | null)[];
   }>({});
 
   const [listDokumen, setListDokumen] = useState([{ id: Date.now(), value: '' }]);
@@ -425,6 +427,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         catch { parsedSaksi = agendaData.saksi.split('|').map((t: string) => t.trim()).filter((t: string) => t !== ''); }
         setSaksiTugas(parsedSaksi);
         sigSaksiRefs.current = parsedSaksi.map(() => null);
+        parafSaksiRefs.current = parsedSaksi.map(() => null);
         
         if (existingMatriks?.saksi_details && Array.isArray(existingMatriks.saksi_details) && existingMatriks.saksi_details.length > 0) {
           setSaksiDetails(existingMatriks.saksi_details);
@@ -497,12 +500,20 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         savedTtdSaksi = existingMatriks?.ttd_saksi || [];
       }
 
+      let savedParafSaksi: (string | null)[] = [];
+      try {
+        savedParafSaksi = typeof existingBap?.paraf_saksi === 'string' ? JSON.parse(existingBap.paraf_saksi) : (existingBap?.paraf_saksi || existingMatriks?.paraf_saksi || []);
+      } catch {
+        savedParafSaksi = existingMatriks?.paraf_saksi || [];
+      }
+
       savedSignaturesRef.current = {
         ttd_pemrakarsa: existingBap?.ttd_pemrakarsa || existingMatriks?.ttd_pemrakarsa || null,
         paraf_pemrakarsa: existingBap?.paraf_pemrakarsa || existingMatriks?.paraf_pemrakarsa || null,
         ttd_tim: savedTtdTim,
         paraf_tim: savedParafTim,
-        ttd_saksi: savedTtdSaksi
+        ttd_saksi: savedTtdSaksi,
+        paraf_saksi: savedParafSaksi
       };
 
     } catch (error) {
@@ -682,6 +693,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         // 4. Saksi
         saksiTugas.forEach((_, idx) => {
           resizeCanvasPad(sigSaksiRefs.current[idx], savedSignaturesRef.current?.ttd_saksi?.[idx]);
+          resizeCanvasPad(parafSaksiRefs.current[idx], savedSignaturesRef.current?.paraf_saksi?.[idx]);
         });
       };
 
@@ -807,15 +819,21 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       return pad && !pad.isEmpty() ? pad.getTrimmedCanvas().toDataURL('image/png') : (savedSignaturesRef.current?.ttd_saksi?.[idx] || null);
     });
 
+    const prfSaksi = saksiTugas.map((_, idx) => {
+      const pad = parafSaksiRefs.current[idx];
+      return pad && !pad.isEmpty() ? pad.getTrimmedCanvas().toDataURL('image/png') : (savedSignaturesRef.current?.paraf_saksi?.[idx] || null);
+    });
+
     savedSignaturesRef.current = {
       ...savedSignaturesRef.current,
       paraf_pemrakarsa: prfPemrakarsa,
       ttd_tim: ttdTim,
       paraf_tim: prfTim,
-      ttd_saksi: ttdSaksi
+      ttd_saksi: ttdSaksi,
+      paraf_saksi: prfSaksi
     };
 
-    return { updatedPerw, prfPemrakarsa, ttdTim, prfTim, ttdSaksi };
+    return { updatedPerw, prfPemrakarsa, ttdTim, prfTim, ttdSaksi, prfSaksi };
   };
 
   const buildPayload = () => {
@@ -823,6 +841,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     let ttdTim = savedSignaturesRef.current?.ttd_tim || [];
     let prfTim = savedSignaturesRef.current?.paraf_tim || [];
     let ttdSaksi = savedSignaturesRef.current?.ttd_saksi || [];
+    let prfSaksi = savedSignaturesRef.current?.paraf_saksi || [];
     let prfPemrakarsa = savedSignaturesRef.current?.paraf_pemrakarsa || null;
 
     if (step === 5) {
@@ -831,6 +850,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       ttdTim = cached.ttdTim;
       prfTim = cached.prfTim;
       ttdSaksi = cached.ttdSaksi;
+      prfSaksi = cached.prfSaksi;
       prfPemrakarsa = cached.prfPemrakarsa;
     }
 
@@ -864,7 +884,8 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         ttd_tim: ttdTim,
         paraf_tim: prfTim,
         saksi_details: saksiDetails,
-        ttd_saksi: ttdSaksi
+        ttd_saksi: ttdSaksi,
+        paraf_saksi: prfSaksi
       },
       status_ketaatan: finalStatus(),
       total_skor: totalSkor()
@@ -2556,7 +2577,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                   Pihak Saksi / Pendamping
                 </span>
                 <h4 className="font-black text-sm text-slate-900 uppercase">
-                  Identitas & Tanda Tangan Saksi
+                  Identitas, Tanda Tangan & Paraf Saksi
                 </h4>
               </div>
 
@@ -2598,41 +2619,81 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                       </div>
                     </div>
 
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[9px] font-black uppercase text-slate-500">TTD Saksi</span>
-                        <button 
-                          type="button" 
-                          onClick={() => {
-                            sigSaksiRefs.current[idx]?.clear();
-                            if (savedSignaturesRef.current?.ttd_saksi) savedSignaturesRef.current.ttd_saksi[idx] = null;
-                          }} 
-                          className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
-                        >
-                          Hapus TTD
-                        </button>
-                      </div>
-                      <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-white h-24 shadow-inner select-none" style={{ touchAction: 'none' }}>
-                        <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2 opacity-25 select-none">
-                          <div className="w-full border-b border-dashed border-slate-400"></div>
-                          <span className="text-[9px] text-slate-500 mt-0.5 uppercase font-bold tracking-wider">TTD Saksi</span>
+                    <div className="flex gap-3 items-start">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[9px] font-black uppercase text-slate-500">TTD Saksi</span>
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              sigSaksiRefs.current[idx]?.clear();
+                              if (savedSignaturesRef.current?.ttd_saksi) savedSignaturesRef.current.ttd_saksi[idx] = null;
+                            }} 
+                            className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
+                          >
+                            Hapus
+                          </button>
                         </div>
-                        <SignatureCanvas 
-                          ref={(ref) => { 
-                            sigSaksiRefs.current[idx] = ref;
-                            if (ref && step === 5) {
-                              setTimeout(() => resizeCanvasPad(ref, savedSignaturesRef.current?.ttd_saksi?.[idx]), 20);
-                            }
-                          }} 
-                          penColor="#0f172a" 
-                          minWidth={1.6}
-                          maxWidth={2.4}
-                          velocityFilterWeight={0.4}
-                          canvasProps={{ 
-                            className: 'w-full h-full cursor-crosshair block relative z-10',
-                            style: { width: '100%', height: '100%', touchAction: 'none' }
-                          }} 
-                        />
+                        <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-white h-24 shadow-inner select-none" style={{ touchAction: 'none' }}>
+                          <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2 opacity-25 select-none">
+                            <div className="w-full border-b border-dashed border-slate-400"></div>
+                            <span className="text-[9px] text-slate-500 mt-0.5 uppercase font-bold tracking-wider">TTD Saksi</span>
+                          </div>
+                          <SignatureCanvas 
+                            ref={(ref) => { 
+                              sigSaksiRefs.current[idx] = ref;
+                              if (ref && step === 5) {
+                                setTimeout(() => resizeCanvasPad(ref, savedSignaturesRef.current?.ttd_saksi?.[idx]), 20);
+                              }
+                            }} 
+                            penColor="#0f172a" 
+                            minWidth={1.6}
+                            maxWidth={2.4}
+                            velocityFilterWeight={0.4}
+                            canvasProps={{ 
+                              className: 'w-full h-full cursor-crosshair block relative z-10',
+                              style: { width: '100%', height: '100%', touchAction: 'none' }
+                            }} 
+                          />
+                        </div>
+                      </div>
+
+                      <div className="w-28 sm:w-32 shrink-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[9px] font-black uppercase text-slate-500">Paraf</span>
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              parafSaksiRefs.current[idx]?.clear();
+                              if (savedSignaturesRef.current?.paraf_saksi) savedSignaturesRef.current.paraf_saksi[idx] = null;
+                            }} 
+                            className="text-[9px] font-bold text-rose-600 hover:text-rose-800"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                        <div className="relative border border-slate-300 rounded-xl overflow-hidden bg-white h-24 shadow-inner select-none" style={{ touchAction: 'none' }}>
+                          <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2 opacity-25 select-none">
+                            <div className="w-full border-b border-dashed border-slate-400"></div>
+                            <span className="text-[9px] text-slate-500 mt-0.5 uppercase font-bold tracking-wider">Paraf Saksi</span>
+                          </div>
+                          <SignatureCanvas 
+                            ref={(ref) => { 
+                              parafSaksiRefs.current[idx] = ref;
+                              if (ref && step === 5) {
+                                setTimeout(() => resizeCanvasPad(ref, savedSignaturesRef.current?.paraf_saksi?.[idx]), 20);
+                              }
+                            }} 
+                            penColor="#0f172a" 
+                            minWidth={1.6}
+                            maxWidth={2.4}
+                            velocityFilterWeight={0.4}
+                            canvasProps={{ 
+                              className: 'w-full h-full cursor-crosshair block relative z-10',
+                              style: { width: '100%', height: '100%', touchAction: 'none' }
+                            }} 
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

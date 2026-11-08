@@ -310,8 +310,9 @@ export async function POST(
       waktu_pengawasan: formatted_waktu,
       
       ttd_pemrakarsa: ttd_pemrakarsa_final,
-      paraf_pemrakarsa: bapData.paraf_pemrakarsa || '',
-      paraf_pengawas: (bapData.paraf_tim && bapData.paraf_tim[0]) ? bapData.paraf_tim[0] : '',
+      paraf_pemrakarsa: bapData.paraf_pemrakarsa || (firstPerwakilan?.paraf_perwakilan || ''),
+      paraf_pengawas: (Array.isArray(bapData.paraf_tim) ? bapData.paraf_tim.find((p: any) => !!p) : '') || (tim_pengawas.find((t: any) => !!t.paraf_pengawas)?.paraf_pengawas || ''),
+      paraf_saksi: (Array.isArray(bapData.paraf_saksi) ? bapData.paraf_saksi.find((p: any) => !!p) : '') || '',
       // Footer text tags (converted from image tags to avoid VML textbox parsing issues)
       paraf_pengawas_text: '',
       paraf_pemrakarsa_text: '',

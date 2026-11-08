@@ -332,7 +332,8 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
     
     ttd_pemrakarsa: ttd_pemrakarsa_final,
     paraf_pemrakarsa: paraf_pemrakarsa_final,
-    paraf_pengawas: (bapData.paraf_tim && bapData.paraf_tim[0]) ? bapData.paraf_tim[0] : (tim_pengawas[0]?.paraf_pengawas || ''),
+    paraf_pengawas: (Array.isArray(bapData.paraf_tim) ? bapData.paraf_tim.find((p: any) => !!p) : '') || (tim_pengawas.find((t: any) => !!t.paraf_pengawas)?.paraf_pengawas || ''),
+    paraf_saksi: (Array.isArray(bapData.paraf_saksi) ? bapData.paraf_saksi.find((p: any) => !!p) : '') || '',
     
     // Root-level perwakilan tags
     nama_perwakilan,
