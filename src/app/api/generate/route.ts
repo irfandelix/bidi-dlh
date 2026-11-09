@@ -343,6 +343,16 @@ export async function POST(request: Request) {
   'Permohonan Intergrasi RINTEK LB3': 'INT.LB3',
   'Permohonan Perubahan Lingkungan': 'PPL'
 } as Record<string, string>)[doc.jenis_dokumen as string] || doc.jenis_dokumen;
+        if (stage === 'pemeriksaan-revisi') {
+          const revNo = doc[`nomor_revisi_${targetRevisi || '1'}`] || doc.nomor_revisi_1;
+          if (revNo) return revNo;
+
+          const tglObj = new Date();
+          const seqUntukRevisi = doc.seq_pemeriksaan ?? ((doc.no_urut || doc.id) + 48);
+          const seqPadded = String(seqUntukRevisi).padStart(3, '0');
+          const kodeTahapan = doc.is_final_revisi ? 'BA.P.FINAL' : `BA.P.P${targetRevisi || '1'}`;
+          return `600.4.5/${seqPadded}.${tglObj.getMonth()+1}/17/${kodeTahapan}.${jenisAcronym}/${doc.tahun || tglObj.getFullYear()}`;
+        }
         const targetPhp = targetRevisi === '1' ? doc.nomor_php : doc[`nomor_php${parseInt(targetRevisi) - 1}`];
         if (targetPhp) return targetPhp;
         

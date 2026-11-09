@@ -167,14 +167,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       delete body.generate_nomor_revisi;
       if (body.revisi_ke || doc.revisi_ke) {
         let nomorRevisiStr = body.revisi_ke || doc.revisi_ke || '1';
-        for (let i = 1; i <= 5; i++) {
-          if (body[`tanggal_revisi_${i}`]) {
-            nomorRevisiStr = i.toString();
+        if (!body.revisi_ke) {
+          for (let i = 1; i <= 5; i++) {
+            if (body[`tanggal_revisi_${i}`]) {
+              nomorRevisiStr = i.toString();
+            }
           }
         }
         const nomorRevisi = parseInt(nomorRevisiStr, 10) || 1;
         
-        const kodeTahapan = "BA.P.P" + nomorRevisi;
+        // Deteksi apakah dokumen revisi ini sudah final (BA.P.FINAL)
+        const isFinal = body.is_final === true || body.is_final === 'true' || body.is_final_revisi === true;
+        const kodeTahapan = isFinal ? "BA.P.FINAL" : ("BA.P.P" + nomorRevisi);
+        
         const tgl = body[`tanggal_revisi_${nomorRevisi}`] || doc[`tanggal_revisi_${nomorRevisi}`];
         const tglObj = tgl ? new Date(tgl) : new Date();
         const bulan = tglObj.getMonth() + 1;
@@ -185,6 +190,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         const generatedNomorStr = `600.4.5/${seqPadded}.${bulan}/17/${kodeTahapan}.${jenisAcronym}/${tahun}`;
 
         body[`nomor_revisi_${nomorRevisi}`] = generatedNomorStr;
+        body.is_final_revisi = isFinal;
+        delete body.is_final;
       }
     }
 

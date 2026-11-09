@@ -21,6 +21,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
   
   const [revisiKe, setRevisiKe] = useState<string>('1');
   const [tanggalRevisi, setTanggalRevisi] = useState<string>('');
+  const [isFinal, setIsFinal] = useState<boolean>(false);
 
   const currentNomorRevisi = doc?.[`nomor_revisi_${revisiKe}`];
   const savedTanggalRevisi = doc?.[`tanggal_revisi_${revisiKe}`] || (revisiKe === '1' ? doc?.tanggal_revisi : '');
@@ -32,11 +33,14 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
     }
 
     setIsGeneratingNomor(true);
-    setMessage(`Menyimpan tanggal & men-generate Nomor BA Pemeriksaan Revisi ${revisiKe}...`);
+    const labelTahap = isFinal ? 'BA.P.FINAL' : `BA Pemeriksaan Revisi ${revisiKe}`;
+    setMessage(`Menyimpan tanggal & men-generate Nomor ${labelTahap}...`);
     try {
       const payload: any = {
         generate_nomor_revisi: true,
         revisi_ke: revisiKe,
+        is_final: isFinal,
+        is_final_revisi: isFinal,
         [`tanggal_revisi_${revisiKe}`]: tanggalRevisi,
       };
 
@@ -57,7 +61,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
             setTimeout(() => setCopiedNomor(false), 2000);
           } catch {}
         }
-        setMessage(`Tanggal berhasil disimpan & Nomor BA Pemeriksaan Revisi ${revisiKe} berhasil di-generate!`);
+        setMessage(`Tanggal berhasil disimpan & Nomor ${labelTahap} berhasil di-generate!`);
       } else {
         throw new Error('Gagal menyimpan tanggal & men-generate nomor');
       }
@@ -131,6 +135,15 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
     const dateKey = revisiKe === '1' ? 'tanggal_revisi_1' : `tanggal_revisi_${revisiKe}`;
     const initialDate = doc[dateKey] || doc.tanggal_revisi || new Date().toISOString().split('T')[0];
     setTanggalRevisi(initialDate);
+
+    const currentNo = doc[`nomor_revisi_${revisiKe}`];
+    if (currentNo && currentNo.includes('BA.P.FINAL')) {
+      setIsFinal(true);
+    } else if (currentNo && currentNo.includes('BA.P.P')) {
+      setIsFinal(false);
+    } else if (doc.is_final_revisi) {
+      setIsFinal(true);
+    }
   }, [revisiKe, doc]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -152,6 +165,8 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
     const payload: any = {
       generate_nomor_revisi: true,
       revisi_ke: nomor_revisi,
+      is_final: isFinal,
+      is_final_revisi: isFinal,
       penandatangan_revisi: JSON.stringify(penandatangan),
       nomor_registrasi_amdalnet: formData.get('nomor_registrasi_amdalnet'),
       status_tahapan, 
@@ -173,7 +188,8 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
       if(res.ok) {
         const resData = await res.json();
         setDoc(resData.data);
-        setMessage(`Data & Nomor Revisi ${nomor_revisi} berhasil disimpan (${actionType === 'acc' ? 'ACC / Selesai' : 'Revisi Lanjutan'}). Silakan klik tombol Unduh Berkas BA Revisi.`);
+        const labelRev = isFinal ? 'BA.P.FINAL' : `Nomor Revisi ${nomor_revisi}`;
+        setMessage(`Data & ${labelRev} berhasil disimpan (${actionType === 'acc' ? 'ACC / Selesai' : 'Revisi Lanjutan'}). Silakan klik tombol Unduh Berkas BA Revisi.`);
         setTimeout(() => setMessage(''), 5000);
       }
     } catch (err) {
@@ -217,9 +233,18 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
             <p className="font-bold text-on-surface mt-1 uppercase text-sm md:text-base">{doc.nama_kegiatan}</p>
           </div>
           <div>
-            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider">No. BA Pemeriksaan Revisi {revisiKe}</div>
+            <div className="font-bold text-on-surface-variant text-xs uppercase tracking-wider flex items-center gap-2">
+              <span>No. BA Pemeriksaan Revisi {revisiKe}</span>
+              {currentNomorRevisi?.includes('BA.P.FINAL') && (
+                <span className="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded font-mono font-bold">FINAL</span>
+              )}
+            </div>
             <div className="flex flex-wrap items-center gap-2 mt-1">
-              <p className="font-bold bg-blue-300 text-on-surface px-3 py-1 rounded border border-outline-variant inline-block text-sm font-mono shadow-sm">
+              <p className={`font-bold px-3 py-1 rounded border inline-block text-sm font-mono shadow-sm ${
+                currentNomorRevisi?.includes('BA.P.FINAL')
+                  ? 'bg-emerald-100 text-emerald-950 border-emerald-400'
+                  : 'bg-blue-300 text-on-surface border-outline-variant'
+              }`}>
                 {currentNomorRevisi || 'Belum di-generate'}
               </p>
               {currentNomorRevisi && (
@@ -258,11 +283,31 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                 {revisiHistory.map(([key, label]) => {
                   const nomorRev = doc[`nomor_revisi_${key}`];
                   const tanggal = doc[`tanggal_revisi_${key}`] || (key === '1' ? doc.tanggal_revisi : null);
+                  const isRevFinal = nomorRev && nomorRev.includes('BA.P.FINAL');
                   return (
-                    <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 flex flex-wrap justify-between items-center gap-3">
+                    <div key={key} className={`rounded-xl border p-4 flex flex-wrap justify-between items-center gap-3 ${
+                      isRevFinal ? 'bg-emerald-50/70 border-emerald-300' : 'bg-white border-slate-200'
+                    }`}>
                       <div>
-                        <span className="inline-block bg-blue-100 text-blue-800 text-xs font-black px-3 py-1 rounded-full border border-blue-200 mb-2">{label}</span>
-                        {nomorRev && <p className="text-xs font-bold text-blue-900 font-mono mb-1">{nomorRev}</p>}
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={`inline-block text-xs font-black px-3 py-1 rounded-full border ${
+                            isRevFinal
+                              ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                              : 'bg-blue-100 text-blue-800 border-blue-200'
+                          }`}>
+                            {label}
+                          </span>
+                          {isRevFinal && (
+                            <span className="bg-emerald-600 text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">
+                              BA.P.FINAL
+                            </span>
+                          )}
+                        </div>
+                        {nomorRev && (
+                          <p className={`text-xs font-bold font-mono mb-1 ${isRevFinal ? 'text-emerald-950' : 'text-blue-900'}`}>
+                            {nomorRev}
+                          </p>
+                        )}
                         {tanggal && <p className="text-sm text-slate-700 font-bold">Pemeriksaan: {new Date(tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>}
                       </div>
                       {nomorRev && (
@@ -270,10 +315,12 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                           type="button"
                           onClick={() => handleDownloadTemplate(key)}
                           disabled={downloadingRev === key}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 uppercase disabled:opacity-50"
+                          className={`px-4 py-2 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 uppercase disabled:opacity-50 ${
+                            isRevFinal ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-blue-600 hover:bg-blue-700'
+                          }`}
                         >
                           <Download size={14} />
-                          {downloadingRev === key ? 'Mengunduh...' : `Unduh BA ${label} (.docx)`}
+                          {downloadingRev === key ? 'Mengunduh...' : `Unduh BA ${isRevFinal ? 'FINAL' : label} (.docx)`}
                         </button>
                       )}
                     </div>
@@ -316,13 +363,64 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
               </div>
             </div>
 
+            {/* Checkbox Dokumen Final / Sesuai (BA.P.FINAL) */}
+            <div 
+              onClick={() => setIsFinal(!isFinal)}
+              className={`p-4 rounded-xl border-2 transition-all flex items-start gap-3.5 cursor-pointer select-none ${
+                isFinal 
+                  ? 'bg-emerald-50 border-emerald-500 shadow-sm ring-1 ring-emerald-400/40' 
+                  : 'bg-white border-slate-300 hover:border-slate-400'
+              }`}
+            >
+              <input
+                type="checkbox"
+                id="is_final_check"
+                checked={isFinal}
+                onChange={(e) => setIsFinal(e.target.checked)}
+                onClick={(e) => e.stopPropagation()}
+                className="w-5 h-5 mt-0.5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer accent-emerald-600"
+              />
+              <div className="flex-1">
+                <label htmlFor="is_final_check" className="cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-black text-slate-900 uppercase">
+                      Dokumen Telah Sesuai / Final (BA.P.FINAL)
+                    </span>
+                    {isFinal ? (
+                      <span className="bg-emerald-600 text-white text-[10px] px-2.5 py-0.5 rounded-full font-mono font-bold tracking-wider">
+                        BA.P.FINAL AKTIF
+                      </span>
+                    ) : (
+                      <span className="bg-slate-200 text-slate-700 text-[10px] px-2 py-0.5 rounded-full font-mono font-bold">
+                        BA.P.P{revisiKe}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs font-semibold text-slate-600 mt-1">
+                    Centang opsi ini jika perbaikan dokumen telah sesuai dan disetujui, sehingga nomor otomatis Berita Acara menggunakan format <strong>600.4.5/[Urutan].[Bulan]/17/BA.P.FINAL.[Jenis Dokumen]/[Tahun]</strong>.
+                  </p>
+                </label>
+              </div>
+            </div>
+
             <div className="pt-4 border-t border-blue-200/80">
-              <label className="block text-sm font-bold text-blue-950 mb-2 uppercase">
-                3. Nomor BA Pemeriksaan Revisi {revisiKe} (BA.P.P{revisiKe})
-              </label>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <label className="block text-sm font-bold text-blue-950 uppercase">
+                  3. Nomor BA Pemeriksaan Revisi {revisiKe} ({isFinal ? 'BA.P.FINAL' : `BA.P.P${revisiKe}`})
+                </label>
+                {currentNomorRevisi?.includes('BA.P.FINAL') && (
+                  <span className="text-[11px] font-mono font-black bg-emerald-600 text-white px-2.5 py-0.5 rounded-full shadow-sm">
+                    STATUS: BA.P.FINAL
+                  </span>
+                )}
+              </div>
               {currentNomorRevisi ? (
                 <div className="space-y-2.5">
-                  <div className="w-full bg-white border border-blue-300 text-blue-950 font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all">
+                  <div className={`w-full border font-bold text-sm rounded-xl px-4 py-3 shadow-sm font-mono break-all ${
+                    currentNomorRevisi.includes('BA.P.FINAL')
+                      ? 'bg-emerald-50 border-emerald-400 text-emerald-950'
+                      : 'bg-white border-blue-300 text-blue-950'
+                  }`}>
                     {currentNomorRevisi}
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -343,11 +441,11 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                       title="Simpan perubahan tanggal & perbarui nomor"
                     >
                       <RefreshCw size={15} className={isGeneratingNomor ? 'animate-spin' : ''} />
-                      <span>{isGeneratingNomor ? 'Proses...' : 'Update Tanggal'}</span>
+                      <span>{isGeneratingNomor ? 'Proses...' : (isFinal ? 'Update ke BA.P.FINAL' : 'Update Tanggal')}</span>
                     </button>
                   </div>
                   <p className="text-[11px] text-emerald-800 font-bold">
-                    ✅ {savedTanggalRevisi ? `Tanggal (${savedTanggalRevisi}) & Nomor Revisi ${revisiKe} sudah tersimpan.` : `Nomor Revisi ${revisiKe} sudah tersimpan.`}
+                    ✅ {savedTanggalRevisi ? `Tanggal (${savedTanggalRevisi}) & Nomor ${isFinal || currentNomorRevisi.includes('BA.P.FINAL') ? 'BA.P.FINAL' : `Revisi ${revisiKe}`} sudah tersimpan.` : `Nomor ${isFinal || currentNomorRevisi.includes('BA.P.FINAL') ? 'BA.P.FINAL' : `Revisi ${revisiKe}`} sudah tersimpan.`}
                   </p>
                   <button
                     type="button"
@@ -356,7 +454,7 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                     className="w-full sm:w-auto px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-sm transition-colors text-xs uppercase flex items-center justify-center gap-1.5 disabled:opacity-50"
                   >
                     <Download size={14} />
-                    <span>{downloadingRev === revisiKe ? 'Mengunduh...' : `Unduh Berkas BA Revisi ${revisiKe} (.docx)`}</span>
+                    <span>{downloadingRev === revisiKe ? 'Mengunduh...' : (currentNomorRevisi.includes('BA.P.FINAL') ? 'Unduh Berkas BA FINAL (.docx)' : `Unduh Berkas BA Revisi ${revisiKe} (.docx)`)}</span>
                   </button>
                 </div>
               ) : (
@@ -368,10 +466,10 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                     className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition-colors text-sm uppercase flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     <Zap size={16} />
-                    {isGeneratingNomor ? 'Menyimpan & Generate...' : `Simpan Tanggal & Generate Nomor Revisi ${revisiKe}`}
+                    {isGeneratingNomor ? 'Menyimpan & Generate...' : (isFinal ? 'Simpan Tanggal & Generate Nomor BA.P.FINAL' : `Simpan Tanggal & Generate Nomor Revisi ${revisiKe}`)}
                   </button>
                   <span className="text-xs font-bold text-blue-800/90">
-                    * Pilih tanggal revisi di atas, lalu klik untuk menyimpan tanggal & menerbitkan nomor BA Revisi {revisiKe}.
+                    * Pilih tanggal revisi di atas, lalu klik untuk menyimpan tanggal & menerbitkan nomor {isFinal ? 'BA.P.FINAL' : `BA Revisi ${revisiKe}`}.
                   </span>
                 </div>
               )}
@@ -441,13 +539,13 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                 className="w-full sm:w-auto px-6 py-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl border border-emerald-700 text-sm shadow-sm hover:-translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70"
               >
                 {downloadingRev === revisiKe ? <LottieLoader size={24} /> : <Download size={18} />}
-                Unduh Berkas BA Revisi {revisiKe} (.docx)
+                {currentNomorRevisi.includes('BA.P.FINAL') ? 'Unduh Berkas BA FINAL (.docx)' : `Unduh Berkas BA Revisi ${revisiKe} (.docx)`}
               </button>
             )}
             <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
               className="w-full sm:w-auto px-6 py-4 bg-error text-on-error hover:bg-error-container text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
               {submittingAction === 'revisi' ? <LottieLoader size={24} /> : <RotateCcw size={18} />}
-              Simpan & Terbitkan BA Revisi
+              {isFinal ? 'Simpan & Terbitkan BA FINAL' : 'Simpan & Terbitkan BA Revisi'}
             </button>
 
             <button type="submit" name="action" value="acc" disabled={submittingAction !== null}

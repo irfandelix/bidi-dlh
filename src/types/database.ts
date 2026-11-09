@@ -133,6 +133,7 @@ export interface Database {
           perihal_surat_permohonan: string | null
           revisi_ke: string | null
           status_verifikasi: string | null
+          is_final_revisi: boolean | null
         }
         Insert: { [key: string]: any }
         Update: { [key: string]: any }
