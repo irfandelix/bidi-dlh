@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getFileBufferFromDrive } from '@/lib/gdrive_pengawasan';
 import fs from 'fs';
 import path from 'path';
 import PizZip from 'pizzip';
@@ -65,8 +66,8 @@ export async function POST(request: Request) {
     // Update status pengaduan menjadi "Ditindaklanjuti" jika diperlukan
     if (id) {
       await supabase
-        .from('pengaduan')
-        .update({ status: 'ditindaklanjuti' })
+        .from('pengaduans')
+        .update({ status_tahapan: 'Ditindaklanjuti' })
         .eq('id', id);
     }
 
@@ -88,26 +89,75 @@ export async function POST(request: Request) {
     
     // Konfigurasi Image Module
     const imageOptions = {
-      centered: false,
+      centered: true,
       getImage: async function (tagValue: string, tagName: string) {
-        if (!tagValue) {
-          // Jika tidak ada gambar, berikan gambar transparan 1x1 pixel
-          const transparentPixel = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+        const transparentPixel = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+        if (!tagValue || typeof tagValue !== 'string') {
           return transparentPixel;
         }
-        try {
-          const res = await fetch(tagValue);
-          const arrayBuffer = await res.arrayBuffer();
-          return Buffer.from(arrayBuffer);
-        } catch (e) {
-          console.error("Gagal load gambar", tagValue, e);
-          const transparentPixel = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+
+        // 1. Tangani Base64 Image
+        if (tagValue.startsWith('data:image/')) {
+          try {
+            const base64Data = tagValue.split(',')[1] || tagValue;
+            return Buffer.from(base64Data, 'base64');
+          } catch (e) {
+            console.error('Error parsing base64 image:', e);
+            return transparentPixel;
+          }
+        }
+
+        // 2. Tangani Google Drive ID atau Google Drive URL
+        let driveFileId = '';
+        if (/^[a-zA-Z0-9_-]{25,55}$/.test(tagValue)) {
+          driveFileId = tagValue;
+        } else if (tagValue.includes('drive.google.com') || tagValue.includes('id=')) {
+          const match = tagValue.match(/\/d\/([a-zA-Z0-9_-]+)/) || tagValue.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+          if (match && match[1]) {
+            driveFileId = match[1];
+          }
+        }
+
+        if (driveFileId) {
+          try {
+            const buffer = await getFileBufferFromDrive(driveFileId);
+            if (buffer && buffer.length > 0) {
+              return buffer;
+            }
+          } catch (driveErr) {
+            console.warn('Gagal ambil media via Drive API, mencoba fallback ke thumbnail CDN:', driveFileId, driveErr);
+            try {
+              const thumbUrl = `https://drive.google.com/thumbnail?id=${driveFileId}&sz=w800`;
+              const resThumb = await fetch(thumbUrl);
+              if (resThumb.ok) {
+                const ab = await resThumb.arrayBuffer();
+                return Buffer.from(ab);
+              }
+            } catch (thumbErr) {
+              console.error('Fallback thumbnail Drive gagal:', thumbErr);
+            }
+          }
           return transparentPixel;
         }
+
+        // 3. Tangani standard HTTP/HTTPS URL
+        if (tagValue.startsWith('http://') || tagValue.startsWith('https://')) {
+          try {
+            const res = await fetch(tagValue);
+            if (res.ok) {
+              const arrayBuffer = await res.arrayBuffer();
+              return Buffer.from(arrayBuffer);
+            }
+          } catch (e) {
+            console.error('Gagal fetch URL gambar:', tagValue, e);
+          }
+        }
+
+        return transparentPixel;
       },
       getSize: function (img: any, tagValue: string, tagName: string) {
-        if (!tagValue) return [1, 1]; // pixel kecil
-        return [250, 200]; // ukuran default foto (lebar, tinggi) dalam pixel
+        if (!tagValue) return [1, 1]; // pixel kecil jika gambar kosong
+        return [320, 220]; // ukuran foto dokumentasi standar Word (lebar 320px, tinggi 220px)
       },
     };
 
@@ -156,11 +206,13 @@ export async function POST(request: Request) {
       compression: 'DEFLATE',
     });
 
+    const safeTerlapor = (nama_terlapor || 'Aduan').replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 40);
+
     // Return the generated file as response
     return new NextResponse(new Uint8Array(buf), {
       status: 200,
       headers: {
-        'Content-Disposition': `attachment; filename="Surat_Tindak_Lanjut_${nomor_otomatis.replace(/\//g, '_')}.docx"`,
+        'Content-Disposition': `attachment; filename="Surat_Tindak_Lanjut_${safeTerlapor}_${nomor_otomatis.replace(/\//g, '_')}.docx"`,
         'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       },
     });

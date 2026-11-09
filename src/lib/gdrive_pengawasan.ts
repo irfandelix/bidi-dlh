@@ -126,3 +126,18 @@ export async function uploadFileToDrive(
     throw error;
   }
 }
+
+export async function getFileBufferFromDrive(fileId: string): Promise<Buffer> {
+  const drive = getDrive();
+  try {
+    const res = await drive.files.get(
+      { fileId: fileId, alt: 'media' },
+      { responseType: 'arraybuffer' }
+    );
+    return Buffer.from(res.data as ArrayBuffer);
+  } catch (error) {
+    console.error('Error getting file buffer from Drive:', fileId, error);
+    throw error;
+  }
+}
+
