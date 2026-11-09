@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, ArrowRight, Loader2, FilePen, RotateCcw, CheckCircle2, ClipboardList, Zap, Copy, Check, RefreshCw, Download } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Loader2, FilePen, RotateCcw, CheckCircle2, ClipboardList, Zap, Copy, Check, RefreshCw, Download, Compass } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
 export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id: string }> }) {
@@ -565,27 +565,51 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
             </button>
           </div>
 
-          <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <Link
-              href={`/perizinan/pengembalian/${doc.id}`}
-              className={`w-full sm:w-auto px-5 py-3 border font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
-                isFinal 
-                  ? 'opacity-50 hover:opacity-100 bg-rose-50 text-rose-700 border-rose-200' 
-                  : 'bg-rose-100 hover:bg-rose-200 text-rose-900 border-rose-300'
-              }`}
-            >
-              Ke Tahap 8: Penyerahan BA Revisi <ArrowRight size={15} />
-            </Link>
-            <Link
-              href={`/perizinan/finalisasi/${doc.id}`}
-              className={`w-full sm:w-auto px-6 py-3 border font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
-                isFinal 
-                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-700 ring-2 ring-indigo-400 ring-offset-1 font-black shadow-md' 
-                  : 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-700'
-              }`}
-            >
-              Lanjut ke Tahap 10: Finalisasi (RPD & SK) <ArrowRight size={15} />
-            </Link>
+          {/* Bagian Navigasi Pintasan (Bukan Menyimpan Form) */}
+          <div className="pt-6 border-t-2 border-dashed border-slate-300 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+              <div className="flex items-center gap-2">
+                <span className="p-1 rounded-md bg-slate-200 text-slate-700">
+                  <Compass size={14} />
+                </span>
+                <span className="text-xs font-black uppercase tracking-wider text-slate-700">
+                  Navigasi Pintasan Antar-Tahap
+                </span>
+                <span className="bg-slate-200 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">
+                  Hanya Berpindah Halaman
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-500 font-semibold italic">
+                *Tombol di bawah ini hanya untuk navigasi, tidak menyimpan formulir
+              </span>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex flex-col sm:flex-row justify-between items-center gap-3">
+              <Link
+                href={`/perizinan/pengembalian/${doc.id}`}
+                className={`w-full sm:w-auto px-5 py-3 border font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
+                  isFinal 
+                    ? 'opacity-50 hover:opacity-100 bg-rose-50 text-rose-700 border-rose-200' 
+                    : 'bg-rose-100 hover:bg-rose-200 text-rose-900 border-rose-300'
+                }`}
+                title="Pindah ke halaman Penyerahan BA Revisi (Tahap 8)"
+              >
+                <span>Ke Tahap 8: Penyerahan BA Revisi</span>
+                <ArrowRight size={14} />
+              </Link>
+              <Link
+                href={`/perizinan/finalisasi/${doc.id}`}
+                className={`w-full sm:w-auto px-6 py-3 border font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
+                  isFinal 
+                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-700 ring-2 ring-indigo-400 ring-offset-1 font-black shadow-md' 
+                    : 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-700'
+                }`}
+                title="Pindah ke halaman Finalisasi RPD & SK (Tahap 10)"
+              >
+                <span>Lanjut ke Tahap 10: Finalisasi (RPD & SK)</span>
+                <ArrowRight size={14} />
+              </Link>
+            </div>
           </div>
         </form>
       </div>
