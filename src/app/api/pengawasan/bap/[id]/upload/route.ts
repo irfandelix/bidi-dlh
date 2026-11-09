@@ -558,13 +558,13 @@ export async function POST(
     // ----------------------------------------------------
     // GOOGLE DRIVE UPLOAD LOGIC
     // ----------------------------------------------------
-    const safeUsahaName = (agenda.nama_pemrakarsa || 'Usaha').replace(/[^a-zA-Z0-9 _-]/g, '_');
+    const safeKegiatanName = (agenda.nama_kegiatan || agenda.nama_pemrakarsa || 'Kegiatan').replace(/[^a-zA-Z0-9 _-]/g, '_');
     
-    // 1. Create/Get Main Folder for this enterprise
-    const enterpriseFolderId = await getOrCreateFolder(safeUsahaName);
+    // 1. Create/Get Main Folder for this enterprise/kegiatan
+    const enterpriseFolderId = await getOrCreateFolder(safeKegiatanName);
 
     // 2. Upload DOCX file to Main Folder
-    const docxName = `BAP_${safeUsahaName}_${hari_ini_tanggal_terbilang}_${hari_ini_bulan}_${hari_ini_tahun}.docx`;
+    const docxName = `BAP_${safeKegiatanName}_${hari_ini_tanggal_terbilang}_${hari_ini_bulan}_${hari_ini_tahun}.docx`;
     const docxFileId = await uploadFileToDrive(buf, docxName, enterpriseFolderId, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 
     // 3. Create/Get "Dokumentasi" subfolder

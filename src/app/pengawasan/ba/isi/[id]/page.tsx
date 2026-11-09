@@ -1236,7 +1236,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
     const url = URL.createObjectURL(docxBlob);
     const a = document.createElement('a');
     a.href = url;
-    const safeName = (agenda?.nama_pemrakarsa || 'Usaha').replace(/[^a-zA-Z0-9]/g, '_');
+    const safeName = (agenda?.nama_kegiatan || agenda?.nama_pemrakarsa || 'Kegiatan').replace(/[^a-zA-Z0-9]/g, '_');
     a.download = `BAP_${safeName}.docx`;
     document.body.appendChild(a);
     a.click();
@@ -1266,7 +1266,7 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>BAP - ${agenda?.nama_pemrakarsa || 'Dokumen'}</title>
+          <title>BAP - ${agenda?.nama_kegiatan || agenda?.nama_pemrakarsa || 'Dokumen'}</title>
           ${styles}
           <style>
             body { margin: 0; padding: 24px; background: white; font-family: sans-serif; }
@@ -1905,12 +1905,28 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
               ) : (isTokoModern || isSPPG) ? (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Kapasitas Kegiatan</label>
-                    <input type="text" name="kapasitas_kegiatan" value={formData.kapasitas_kegiatan} onChange={handleChange} placeholder="Kapasitas (Jumlah Kios/Los/Area Belanja)..." className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                      {isSPPG ? 'Kapasitas Kegiatan (Tangki LPG / Pengisian Tabung)' : 'Kapasitas Kegiatan'}
+                    </label>
+                    <input 
+                      type="text" 
+                      name="kapasitas_kegiatan" 
+                      value={formData.kapasitas_kegiatan} 
+                      onChange={handleChange} 
+                      placeholder={isSPPG ? "Kapasitas Tangki (Ton) / Pengisian Tabung (tabung/hari)..." : "Kapasitas (Jumlah Kios/Los/Area Belanja)..."} 
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400" 
+                    />
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Jumlah Karyawan & Pengunjung</label>
-                    <input type="text" name="jumlah_karyawan_pengunjung" value={formData.jumlah_karyawan_pengunjung} onChange={handleChange} placeholder="Pekerja & pengunjung per hari..." className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                    <input 
+                      type="text" 
+                      name="jumlah_karyawan_pengunjung" 
+                      value={formData.jumlah_karyawan_pengunjung} 
+                      onChange={handleChange} 
+                      placeholder={isSPPG ? "Pekerja, staf & sopir/pengunjung per hari..." : "Pekerja & pengunjung per hari..."} 
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400" 
+                    />
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
@@ -2032,6 +2048,30 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Persetujuan Lingkungan</label>
                   <textarea name="persetujuan_lingkungan" value={formData.persetujuan_lingkungan} onChange={handleChange} rows={2} placeholder="Persetujuan Lingkungan..." className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400"></textarea>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Riwayat Ketaatan</label>
+                    <input 
+                      type="text" 
+                      name="riwayat_ketaatan" 
+                      value={formData.riwayat_ketaatan} 
+                      onChange={handleChange} 
+                      placeholder="Cth: Taat / Belum Pernah Diawasi" 
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Inspeksi Terakhir</label>
+                    <input 
+                      type="text" 
+                      name="inspeksi_terakhir" 
+                      value={formData.inspeksi_terakhir} 
+                      onChange={handleChange} 
+                      placeholder="Cth: Tahun 2025 / Pengawasan Pertama" 
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400" 
+                    />
+                  </div>
                 </div>
               </div>
             </div>

@@ -579,7 +579,7 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
     compression: 'DEFLATE',
   });
 
-  const safeName = (agenda.nama_pemrakarsa || 'Usaha').replace(/[^a-zA-Z0-9]/g, '_');
+  const safeName = (agenda.nama_kegiatan || agenda.nama_pemrakarsa || 'Kegiatan').replace(/[^a-zA-Z0-9]/g, '_');
 
   return { buf, safeName };
 }
