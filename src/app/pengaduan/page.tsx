@@ -111,6 +111,14 @@ export default function PengaduanListPage() {
     setTimeout(() => setCopiedToken(null), 2500);
   };
 
+  // Export to Excel (.xlsx) Resmi ber-Kop DLH
+  const handleExportExcel = () => {
+    const params = new URLSearchParams();
+    if (statusFilter !== 'semua') params.set('status', statusFilter);
+    if (searchQuery.trim()) params.set('q', searchQuery.trim());
+    window.location.href = `/api/export/pengaduan?${params.toString()}`;
+  };
+
   // Export to CSV
   const handleExportCSV = () => {
     if (filteredData.length === 0) {
@@ -319,16 +327,26 @@ export default function PengaduanListPage() {
             </button>
           </div>
 
-          {/* Export to CSV Button */}
-          <button
-            type="button"
-            onClick={handleExportCSV}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-sm hover:-translate-y-0.5 active:translate-y-0"
-            title="Unduh data dalam format CSV/Excel"
-          >
-            <FileSpreadsheet size={16} />
-            <span>Ekspor CSV</span>
-          </button>
+          {/* Export Buttons */}
+          <div className="flex items-center gap-2 self-end lg:self-auto">
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm hover:shadow hover:-translate-y-0.5 active:translate-y-0"
+              title="Unduh Rekapitulasi Pengaduan Resmi (.xlsx) dengan Kop DLH"
+            >
+              <FileSpreadsheet size={15} />
+              <span>Export Excel</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold uppercase transition-all bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200"
+              title="Unduh format CSV sederhana"
+            >
+              <span>CSV</span>
+            </button>
+          </div>
         </div>
 
         {/* Real-time Search Bar */}
