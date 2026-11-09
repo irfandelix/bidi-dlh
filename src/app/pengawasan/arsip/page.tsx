@@ -6,7 +6,8 @@ import {
   Archive, ArrowLeft, Search, Calendar, MapPin, Building2, 
   CheckCircle2, AlertCircle, XCircle, Printer, ChevronLeft, 
   ChevronRight, Upload, FileCheck, LayoutGrid, List, Zap, 
-  ExternalLink, User, Shield, Check, Eye, Clock, FileText
+  ExternalLink, User, Shield, Check, Eye, Clock, FileText,
+  FileSpreadsheet
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -152,6 +153,15 @@ export default function ArsipPengawasan() {
     return null;
   };
 
+  const handleExportExcel = () => {
+    const params = new URLSearchParams();
+    if (activeCategory !== 'Semua') params.set('kategori', activeCategory);
+    if (statusFilter !== 'all') params.set('status', statusFilter);
+    else params.set('status', 'selesai');
+    if (searchTerm.trim()) params.set('q', searchTerm.trim());
+    window.location.href = `/api/export/pengawasan?${params.toString()}`;
+  };
+
   return (
     <div className="min-h-screen bg-white p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6 font-sans pb-24">
@@ -293,6 +303,17 @@ export default function ArsipPengawasan() {
 
             {/* View Mode Toggle & Pagination */}
             <div className="flex items-center gap-3 self-end md:self-auto">
+              {/* Export Excel Button */}
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-sm hover:shadow transition-all"
+                title="Unduh Rekapitulasi Arsip BAP ke format Excel (.xlsx)"
+              >
+                <FileSpreadsheet size={15} />
+                <span className="hidden sm:inline">Export Excel</span>
+              </button>
+
               {/* Grid / Table Toggle */}
               <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200">
                 <button

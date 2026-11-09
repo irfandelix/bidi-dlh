@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   Database, Inbox, ArrowLeft, Archive, Factory, Building2, 
   Home, ShoppingCart, ChevronLeft, ChevronRight, Layers, Search, 
-  ChevronDown, ChevronUp, Zap, Sparkles, Utensils
+  ChevronDown, ChevronUp, Zap, Sparkles, Utensils, FileSpreadsheet
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -320,6 +320,13 @@ export default function DatabaseGabungan() {
     }));
   };
 
+  const handleExportExcel = () => {
+    const params = new URLSearchParams();
+    if (activeTab !== 'Semua') params.set('kategori', activeTab);
+    if (searchQuery.trim()) params.set('q', searchQuery.trim());
+    window.location.href = `/api/export/pengawasan?${params.toString()}`;
+  };
+
   const tabs = [
     { id: 'Industri', icon: <Factory size={18} strokeWidth={2.5} /> },
     { id: 'Fasyankes', icon: <Building2 size={18} strokeWidth={2.5} /> },
@@ -377,6 +384,16 @@ export default function DatabaseGabungan() {
                 >
                   <Layers size={18} />
                   <span>{groupByFacility ? 'Gabung Fasilitas: Aktif' : 'Per Izin: Aktif'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportExcel}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm uppercase tracking-widest rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-md transition-all"
+                  title="Unduh rekapitulasi data pengawasan ke format Excel (.xlsx)"
+                >
+                  <FileSpreadsheet size={18} />
+                  <span>Export Excel</span>
                 </button>
               </div>
             </div>

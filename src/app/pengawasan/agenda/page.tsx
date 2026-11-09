@@ -6,7 +6,8 @@ import {
   ArrowLeft, Search, CalendarPlus, Edit3, Copy, MapPin, 
   Database, Check, ChevronLeft, ChevronRight, Calendar, 
   Zap, Clock, AlertCircle, Trash2, ExternalLink, User, 
-  Shield, CheckCircle2, X, Eye, Compass, Layers, FileText, Archive
+  Shield, CheckCircle2, X, Eye, Compass, Layers, FileText, Archive,
+  FileSpreadsheet
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -136,6 +137,13 @@ export default function DaftarAgenda() {
     }
   };
 
+  const handleExportExcel = () => {
+    const params = new URLSearchParams();
+    if (activeCategory !== 'Semua') params.set('kategori', activeCategory);
+    if (searchTerm.trim()) params.set('q', searchTerm.trim());
+    window.location.href = `/api/export/pengawasan?${params.toString()}`;
+  };
+
   const categories = ['Semua', 'Industri', 'Fasyankes', 'Perumahan', 'Toko Modern', 'SPPG', 'Lainnya'];
 
   return (
@@ -181,6 +189,15 @@ export default function DaftarAgenda() {
                   <CalendarPlus size={16} />
                   <span>+ Buat Agenda Baru</span>
                 </Link>
+                <button
+                  type="button"
+                  onClick={handleExportExcel}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all"
+                  title="Unduh rekapitulasi data pengawasan ke format Excel (.xlsx)"
+                >
+                  <FileSpreadsheet size={16} />
+                  <span>Export Excel</span>
+                </button>
                 <Link
                   href="/pengawasan/database"
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-xs uppercase tracking-widest rounded-xl border border-slate-200 transition-colors"

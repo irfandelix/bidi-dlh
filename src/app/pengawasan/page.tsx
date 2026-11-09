@@ -177,6 +177,16 @@ export default function PengawasanHubPage() {
     setTimeout(() => setCopiedToken(null), 2500);
   };
 
+  // Export to Excel (.xlsx) dengan Kop DLH Resmi
+  const handleExportExcel = () => {
+    const params = new URLSearchParams();
+    if (categoryFilter !== 'Semua') params.set('kategori', categoryFilter);
+    if (statusFilter === 'agenda') params.set('status', 'agenda');
+    else if (statusFilter === 'selesai') params.set('status', 'selesai');
+    if (searchQuery.trim()) params.set('q', searchQuery.trim());
+    window.location.href = `/api/export/pengawasan?${params.toString()}`;
+  };
+
   // Export to CSV
   const handleExportCSV = () => {
     if (filteredData.length === 0) {
@@ -427,15 +437,26 @@ export default function PengawasanHubPage() {
             </button>
           </div>
 
-          {/* Export CSV Button */}
-          <button
-            type="button"
-            onClick={handleExportCSV}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-black uppercase tracking-wider rounded-xl border border-slate-200 transition-colors"
-          >
-            <FileSpreadsheet size={15} className="text-emerald-700" />
-            <span>Ekspor CSV</span>
-          </button>
+          {/* Export Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black uppercase tracking-wider rounded-xl shadow-sm hover:shadow transition-all"
+              title="Unduh Rekapitulasi Pengawasan Resmi (.xlsx) dengan Kop DLH"
+            >
+              <FileSpreadsheet size={15} />
+              <span>Export Excel</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-black uppercase tracking-wider rounded-xl border border-slate-200 transition-colors"
+              title="Unduh format CSV sederhana"
+            >
+              <span>CSV</span>
+            </button>
+          </div>
         </div>
 
         {/* Kategori Filters */}
