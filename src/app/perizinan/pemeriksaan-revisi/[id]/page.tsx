@@ -594,8 +594,8 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                 }`}
                 title="Pindah ke halaman Penyerahan BA Revisi (Tahap 8)"
               >
+                <ArrowLeft size={14} />
                 <span>Ke Tahap 8: Penyerahan BA Revisi</span>
-                <ArrowRight size={14} />
               </Link>
               <Link
                 href={`/perizinan/finalisasi/${doc.id}`}
