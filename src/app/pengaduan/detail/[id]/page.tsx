@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FileText, CheckCircle2, Clock, User, MapPin, ExternalLink, Download, X, Copy, Share2, Camera } from 'lucide-react';
+import { ArrowLeft, Loader2, FileText, CheckCircle2, Clock, User, MapPin, ExternalLink, Download, X, Copy, Share2, Camera, Users, Check, Plus } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { use } from 'react';
 import LottieLoader from '@/components/LottieLoader';
@@ -27,6 +27,8 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
     lampiran: '-'
   });
   const [petugas, setPetugas] = useState<string[]>(['']);
+  const [masterPetugas, setMasterPetugas] = useState<any[]>([]);
+  const [loadingMasterPetugas, setLoadingMasterPetugas] = useState(false);
   const [foto1, setFoto1] = useState<File | null>(null);
   const [ketFoto1, setKetFoto1] = useState('');
   const [foto2, setFoto2] = useState<File | null>(null);
@@ -53,10 +55,43 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
   useEffect(() => {
     async function loadData() {
       await fetchData();
+      setLoadingMasterPetugas(true);
+      fetch('/api/pengaturan/tim-pengaduan')
+        .then(res => res.json())
+        .then(res => {
+          if (res.data) setMasterPetugas(res.data);
+        })
+        .catch(err => console.error('Gagal memuat master tim_pengaduan:', err))
+        .finally(() => setLoadingMasterPetugas(false));
       setLoading(false);
     }
     loadData();
   }, [id]);
+
+  const togglePetugasFromMaster = (namaPetugas: string) => {
+    if (petugas.includes(namaPetugas)) {
+      const filtered = petugas.filter(p => p !== namaPetugas);
+      setPetugas(filtered.length > 0 ? filtered : ['']);
+    } else {
+      const cleanList = petugas.filter(p => p.trim() !== '');
+      setPetugas([...cleanList, namaPetugas]);
+    }
+  };
+
+  const addPetugasManual = () => {
+    setPetugas([...petugas, '']);
+  };
+
+  const removePetugas = (index: number) => {
+    const next = petugas.filter((_, i) => i !== index);
+    setPetugas(next.length > 0 ? next : ['']);
+  };
+
+  const updatePetugasName = (index: number, val: string) => {
+    const next = [...petugas];
+    next[index] = val;
+    setPetugas(next);
+  };
 
   const handleGenerateSurat = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -515,34 +550,98 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
               </div>
 
               {/* TIM PETUGAS */}
-              <div className="pt-4 border-t-4 border-dashed border-outline-variant">
-                <label className="text-sm font-bold text-on-surface uppercase tracking-widest mb-3 block">Yang Melaksanakan Tugas</label>
-                <div className="space-y-3">
+              <div className="pt-4 border-t-4 border-dashed border-outline-variant space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-bold text-on-surface uppercase tracking-widest block">
+                    Yang Melaksanakan Tugas
+                  </label>
+                  <span className="text-[11px] font-black text-purple-800 bg-purple-100 border border-purple-200 px-2.5 py-0.5 rounded-full uppercase">
+                    {petugas.filter(p => p.trim() !== '').length} Petugas Dipilih
+                  </span>
+                </div>
+
+                {/* Chips Pilihan Cepat dari Master Data Tim Pengaduan */}
+                <div className="p-3.5 bg-purple-50/80 border border-purple-200 rounded-2xl space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-black text-purple-900 uppercase flex items-center gap-1.5">
+                      <Users size={14} className="text-purple-600" />
+                      Pilih Cepat dari Master Data Tim Pengaduan:
+                    </p>
+                    {loadingMasterPetugas && (
+                      <span className="text-[10px] text-purple-600 font-bold animate-pulse">Memuat...</span>
+                    )}
+                  </div>
+
+                  {masterPetugas.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {masterPetugas.map((mp) => {
+                        const isSelected = petugas.includes(mp.nama);
+                        return (
+                          <button
+                            key={mp.id || mp.nama}
+                            type="button"
+                            onClick={() => togglePetugasFromMaster(mp.nama)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-2xs cursor-pointer ${
+                              isSelected
+                                ? 'bg-purple-600 text-white border-purple-700 ring-2 ring-purple-300 font-black'
+                                : 'bg-white text-slate-700 border-slate-300 hover:border-purple-400 hover:bg-purple-100/50'
+                            }`}
+                            title={mp.jabatan_dinas ? `${mp.nama} (${mp.jabatan_dinas})` : mp.nama}
+                          >
+                            {isSelected ? <Check size={13} className="stroke-[3]" /> : <Plus size={13} />}
+                            <span>{mp.nama}</span>
+                            {mp.jabatan_dinas && (
+                              <span className={`text-[10px] font-normal ${isSelected ? 'text-purple-200' : 'text-slate-400'}`}>
+                                ({mp.jabatan_dinas})
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-500 italic">
+                      {loadingMasterPetugas ? 'Memuat data master tim...' : 'Belum ada data di master Tim Pengaduan (dapat diatur di Pengaturan > Tim Pengaduan).'}
+                    </p>
+                  )}
+                </div>
+
+                {/* Input List Nama yang Tercetak di Surat */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    Daftar Nama yang Tercetak di Surat:
+                  </p>
                   {petugas.map((p, index) => (
                     <div key={index} className="flex gap-2">
-                      <div className="w-10 h-10 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-center font-bold text-on-surface-variant shrink-0">
+                      <div className="w-10 h-10 bg-surface-container-low border border-outline-variant rounded-xl flex items-center justify-center font-black text-xs text-on-surface-variant shrink-0">
                         {index + 1}
                       </div>
                       <input 
                         type="text" 
                         value={p}
-                        onChange={(e) => {
-                          const newPetugas = [...petugas];
-                          newPetugas[index] = e.target.value;
-                          setPetugas(newPetugas);
-                        }}
+                        onChange={(e) => updatePetugasName(index, e.target.value)}
                         className="flex-1 bg-surface border border-outline-variant rounded-xl px-4 py-2 text-sm font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20"
-                        placeholder="Nama Petugas"
+                        placeholder="Klik nama petugas di atas atau ketik di sini..."
                       />
                       {petugas.length > 1 && (
-                        <button type="button" onClick={() => setPetugas(petugas.filter((_, i) => i !== index))} className="w-10 h-10 bg-error-container text-on-error-container text-error border border-outline-variant rounded-xl flex items-center justify-center hover:bg-rose-200 transition-colors">
+                        <button 
+                          type="button" 
+                          onClick={() => removePetugas(index)} 
+                          className="w-10 h-10 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl flex items-center justify-center hover:bg-rose-100 transition-colors shrink-0"
+                          title="Hapus baris ini"
+                        >
                           <X size={16} />
                         </button>
                       )}
                     </div>
                   ))}
-                  <button type="button" onClick={() => setPetugas([...petugas, ''])} className="w-full py-2 bg-surface-container-low border-2 border-dashed border-outline-variant rounded-xl text-xs font-bold text-on-surface-variant uppercase hover:bg-surface-container transition-colors">
-                    + Tambah Petugas
+                  <button 
+                    type="button" 
+                    onClick={addPetugasManual} 
+                    className="w-full py-2 bg-surface-container-low border-2 border-dashed border-outline-variant rounded-xl text-xs font-bold text-on-surface-variant uppercase hover:bg-surface-container transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <Plus size={14} />
+                    <span>+ Tambah Petugas Manual (Misal: Satpol PP / Koramil)</span>
                   </button>
                 </div>
               </div>
