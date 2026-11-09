@@ -172,13 +172,18 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
         <div className="bg-primary text-on-primary p-8 text-on-primary relative">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="flex items-center gap-3 mb-2">
+              <div className="flex flex-wrap items-center gap-3 mb-2">
                 <span className="bg-purple-500 text-on-primary font-bold text-xs px-3 py-1 rounded-full uppercase tracking-widest border border-purple-200">
                   TIKET PENGADUAN
                 </span>
                 <span className="bg-slate-800 text-slate-300 font-bold text-xs px-3 py-1 rounded-full uppercase tracking-widest border border-slate-200 flex items-center gap-1">
                   <Clock size={12} /> {new Date(data.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </span>
+                {data.nomor_nota_dinas && (
+                  <span className="bg-sky-600 text-white font-mono font-bold text-xs px-3 py-1 rounded-full uppercase tracking-wider border border-sky-400 flex items-center gap-1.5 shadow-sm">
+                    <FileText size={12} /> {data.nomor_nota_dinas}
+                  </span>
+                )}
               </div>
               <h1 className="text-3xl md:text-4xl font-bold uppercase leading-tight mb-1">{data.perihal}</h1>
               <p className="text-slate-400 font-bold uppercase tracking-widest text-sm flex items-center gap-2 mt-2">
@@ -335,7 +340,13 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
             <div className="flex items-center justify-between p-6 border-b-4 border-outline-variant bg-purple-100">
               <div>
                 <h3 className="text-2xl font-bold text-on-surface uppercase">Generate Surat Tindak Lanjut</h3>
-                <p className="text-xs font-bold text-on-surface-variant uppercase mt-1">Nomor otomatis akan ditarik dari Arsip Nota Dinas</p>
+                {data.nomor_nota_dinas ? (
+                  <p className="text-xs font-bold text-sky-800 bg-sky-100 border border-sky-300 px-2.5 py-1 rounded-lg uppercase mt-1.5 inline-flex items-center gap-1.5 font-mono shadow-xs">
+                    <FileText size={13} className="text-sky-600" /> No. Terintegrasi: {data.nomor_nota_dinas}
+                  </p>
+                ) : (
+                  <p className="text-xs font-bold text-on-surface-variant uppercase mt-1">Nomor otomatis akan ditarik dari Arsip Nota Dinas</p>
+                )}
               </div>
               <button 
                 onClick={() => setShowGenerateModal(false)}

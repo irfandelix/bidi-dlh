@@ -15,59 +15,94 @@ export async function POST(request: Request) {
     
     const { id, yth, dari, tembusan, hal, sifat, lampiran, petugas, fotos, kegiatan_aduan, nama_terlapor, lokasi_aduan, deskripsi_aduan, catatan_verlap, hasil_verlap } = body;
 
-    // 1. Dapatkan Nomor Nota Dinas terbaru untuk Pengaduan
+    // 1. Dapatkan Nomor Nota Dinas yang sudah terintegrasi atau booking baru jika belum ada
     const tanggal_nota = new Date().toISOString().split('T')[0];
     const tahun = new Date(tanggal_nota).getFullYear().toString();
     const bulan = new Date(tanggal_nota).getMonth() + 1;
 
-    const { data: lastDoc, error: lastErr } = await supabase
-      .from('arsip_nota_dinas')
-      .select('no_urut')
-      .gte('tanggal_nota', `${tahun}-01-01`)
-      .lte('tanggal_nota', `${tahun}-12-31`)
-      .order('no_urut', { ascending: false })
-      .limit(1);
+    let nomor_otomatis = '';
+    let notaDinasId: any = null;
 
-    if (lastErr) {
-      console.error('Supabase error saat cari urut:', lastErr);
-      return NextResponse.json({ error: lastErr.message }, { status: 400 });
-    }
-
-    let nextUrut = 1;
-    if (lastDoc && lastDoc.length > 0) {
-      nextUrut = (lastDoc[0].no_urut || 0) + 1;
-    }
-
-    let urutStr = String(nextUrut).padStart(3, '0');
-    // Format Pengaduan
-    const nomor_otomatis = `600.4.17.2/${urutStr}.${bulan}/17/PG/${tahun}`;
-
-    // 2. Simpan Nomor ke Database (Booking nomor)
-    const payload = {
-      no_urut: nextUrut,
-      nama_nota: hal || 'Surat Tindak Lanjut Pengaduan',
-      tanggal_nota,
-      dari_bagian: 'Pengaduan',
-      nomor_otomatis,
-      file_url: null,
-      pemohon_id: null,
-      keterangan: `Dibuat otomatis dari Modul Pengaduan (ID: ${id})`
-    };
-
-    const { error: insertErr } = await supabase
-      .from('arsip_nota_dinas')
-      .insert([payload]);
-
-    if (insertErr) {
-      console.error('Error insert nota dinas:', insertErr);
-      return NextResponse.json({ error: insertErr.message }, { status: 400 });
-    }
-
-    // Update status pengaduan menjadi "Ditindaklanjuti" jika diperlukan
     if (id) {
+      const { data: currentPengaduan } = await supabase
+        .from('pengaduans')
+        .select('id, nomor_nota_dinas, nota_dinas_id')
+        .eq('id', id)
+        .single();
+
+      if (currentPengaduan?.nomor_nota_dinas) {
+        nomor_otomatis = currentPengaduan.nomor_nota_dinas;
+        notaDinasId = currentPengaduan.nota_dinas_id;
+      }
+    }
+
+    // Jika belum ada nomor (misal data pengaduan lama), auto-booking nomor baru
+    if (!nomor_otomatis) {
+      const { data: lastDoc, error: lastErr } = await supabase
+        .from('arsip_nota_dinas')
+        .select('no_urut')
+        .gte('tanggal_nota', `${tahun}-01-01`)
+        .lte('tanggal_nota', `${tahun}-12-31`)
+        .order('no_urut', { ascending: false })
+        .limit(1);
+
+      if (lastErr) {
+        console.error('Supabase error saat cari urut:', lastErr);
+        return NextResponse.json({ error: lastErr.message }, { status: 400 });
+      }
+
+      let nextUrut = 1;
+      if (lastDoc && lastDoc.length > 0) {
+        nextUrut = (lastDoc[0].no_urut || 0) + 1;
+      }
+
+      let urutStr = String(nextUrut).padStart(3, '0');
+      // Format resmi Pengaduan
+      nomor_otomatis = `600.4.17.2/${urutStr}.${bulan}/17/PG/${tahun}`;
+
+      // Simpan Nomor ke Database (Booking nomor)
+      const payload = {
+        no_urut: nextUrut,
+        nama_nota: hal || 'Surat Tindak Lanjut Pengaduan',
+        tanggal_nota,
+        dari_bagian: 'Pengaduan',
+        nomor_otomatis,
+        file_url: null,
+        pemohon_id: null,
+        keterangan: `Dibuat otomatis dari Modul Pengaduan (ID: ${id})`
+      };
+
+      const { data: insertedNota, error: insertErr } = await supabase
+        .from('arsip_nota_dinas')
+        .insert([payload])
+        .select()
+        .single();
+
+      if (insertErr) {
+        console.error('Error insert nota dinas:', insertErr);
+        return NextResponse.json({ error: insertErr.message }, { status: 400 });
+      }
+
+      if (insertedNota) {
+        notaDinasId = insertedNota.id;
+      }
+    } else if (notaDinasId && hal) {
+      // Jika nomor sudah ada dan user mengubah hal/judul, perbarui nama_nota di arsip
+      await supabase
+        .from('arsip_nota_dinas')
+        .update({ nama_nota: hal })
+        .eq('id', notaDinasId);
+    }
+
+    // Update status pengaduan menjadi "Ditindaklanjuti" dan pastikan nomor_nota_dinas tersimpan
+    if (id) {
+      const updatePayload: any = { status_tahapan: 'Ditindaklanjuti' };
+      if (nomor_otomatis) updatePayload.nomor_nota_dinas = nomor_otomatis;
+      if (notaDinasId) updatePayload.nota_dinas_id = notaDinasId;
+
       await supabase
         .from('pengaduans')
-        .update({ status_tahapan: 'Ditindaklanjuti' })
+        .update(updatePayload)
         .eq('id', id);
     }
 

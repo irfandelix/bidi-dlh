@@ -108,7 +108,8 @@ export default function BuatAgendaPengaduanPage() {
         token: tokenStr,
         perihal,
         tanggal: payload.tanggal,
-        telp_pelapor: payload.telp_pelapor
+        telp_pelapor: payload.telp_pelapor,
+        nomor_nota_dinas: result.data?.nomor_nota_dinas || null
       });
     } catch (err: any) {
       setErrorMsg(err.message || 'Terjadi kesalahan sistem saat menyimpan tiket.');
@@ -148,6 +149,7 @@ export default function BuatAgendaPengaduanPage() {
       `Berikut rincian tiket aduan masyarakat untuk verifikasi lapangan:\n\n` +
       `📌 *Perihal:* ${successData.perihal || '-'}\n` +
       `🔑 *Token BIDIDLH.apk:* *${successData.token}*\n` +
+      (successData.nomor_nota_dinas ? `📑 *No. Nota Dinas:* ${successData.nomor_nota_dinas}\n` : '') +
       `📅 *Tanggal:* ${successData.tanggal || '-'}\n\n` +
       `Silakan buka aplikasi *BIDIDLH.apk* di perangkat Anda, lalu masukkan kode token di atas untuk input verifikasi & BAP lapangan.\n\n` +
       `Akses Web Alternatif: ${link}`;
@@ -232,6 +234,28 @@ export default function BuatAgendaPengaduanPage() {
                 <span className="font-mono text-slate-900">{successData.tanggal}</span>
               </div>
             </div>
+
+            {/* Box Nomor Nota Dinas Terintegrasi Otomatis */}
+            {successData.nomor_nota_dinas && (
+              <div className="bg-sky-50 border-2 border-sky-300 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-12 h-12 bg-sky-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-sm">
+                    <FileText size={24} />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-black uppercase tracking-wider text-sky-700 block">
+                      Nomor Nota Dinas Terintegrasi Otomatis (Arsip)
+                    </span>
+                    <span className="text-sm sm:text-lg font-black font-mono text-sky-950">
+                      {successData.nomor_nota_dinas}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-xs font-black text-sky-800 bg-white border border-sky-300 px-3 py-1.5 rounded-full uppercase tracking-wider shrink-0 shadow-xs">
+                  Tercatat di Arsip ✓
+                </span>
+              </div>
+            )}
 
             {/* Kotak Token Besar - Khusus BIDIDLH.apk */}
             <div className="text-center p-6 bg-purple-50/70 border-2 border-purple-200 rounded-2xl space-y-3">

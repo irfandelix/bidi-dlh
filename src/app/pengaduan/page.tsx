@@ -79,8 +79,9 @@ export default function PengaduanListPage() {
         const matchTerlapor = (item.nama_terlapor || '').toLowerCase().includes(q);
         const matchLokasi = (item.lokasi_aduan || '').toLowerCase().includes(q);
         const matchToken = (item.token || '').toLowerCase().includes(q);
+        const matchNota = (item.nomor_nota_dinas || '').toLowerCase().includes(q);
         const matchHp = (item.no_hp || item.telepon || item.telp_pelapor || '').toLowerCase().includes(q);
-        return matchPerihal || matchPelapor || matchTerlapor || matchLokasi || matchToken || matchHp;
+        return matchPerihal || matchPelapor || matchTerlapor || matchLokasi || matchToken || matchNota || matchHp;
       }
 
       return true;
@@ -120,6 +121,7 @@ export default function PengaduanListPage() {
     const headers = [
       'No',
       'Token Aduan',
+      'Nomor Nota Dinas',
       'Tanggal',
       'Perihal / Judul Aduan',
       'Nama Pelapor',
@@ -133,6 +135,7 @@ export default function PengaduanListPage() {
     const rows = filteredData.map((item, index) => [
       index + 1,
       `"${item.token || '-'}"`,
+      `"${item.nomor_nota_dinas || '-'}"`,
       `"${item.tanggal || '-'}"`,
       `"${(item.perihal || '').replace(/"/g, '""')}"`,
       `"${(item.nama_pelapor || '-').replace(/"/g, '""')}"`,
@@ -424,6 +427,13 @@ export default function PengaduanListPage() {
                             {item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                           </span>
                         </div>
+
+                        {item.nomor_nota_dinas && (
+                          <div className="flex items-center gap-1 font-mono text-[10px] font-bold text-sky-800 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded-md" title={`Nomor Nota Dinas: ${item.nomor_nota_dinas}`}>
+                            <FileText size={11} className="text-sky-600 shrink-0" />
+                            <span className="truncate max-w-[130px]">{item.nomor_nota_dinas}</span>
+                          </div>
+                        )}
                       </td>
 
                       {/* Perihal & Rincian */}
