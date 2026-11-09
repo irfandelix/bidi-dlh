@@ -542,10 +542,20 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
                 {currentNomorRevisi.includes('BA.P.FINAL') ? 'Unduh Berkas BA FINAL (.docx)' : `Unduh Berkas BA Revisi ${revisiKe} (.docx)`}
               </button>
             )}
-            <button type="submit" name="action" value="revisi" disabled={submittingAction !== null}
-              className="w-full sm:w-auto px-6 py-4 bg-error text-on-error hover:bg-error-container text-on-surface border border-outline-variant font-bold rounded-xl text-sm shadow-sm hover:shadow-md transition-shadow hover:-translate-y-1 hover:shadow-sm hover:shadow-md transition-shadow transition-all flex items-center justify-center gap-2 uppercase tracking-widest disabled:opacity-70 disabled:hover:translate-y-0">
+            <button 
+              type="submit" 
+              name="action" 
+              value="revisi" 
+              disabled={isFinal || submittingAction !== null}
+              title={isFinal ? "Dokumen telah berstatus Final (BA.P.FINAL). Tombol kembalikan dinonaktifkan, silakan gunakan tombol ACC & Lanjut Selesai." : undefined}
+              className={`w-full sm:w-auto px-6 py-4 font-bold rounded-xl text-sm border flex items-center justify-center gap-2 uppercase tracking-widest transition-all ${
+                isFinal 
+                  ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed shadow-none' 
+                  : 'bg-error text-on-error hover:bg-error-container text-on-surface border-outline-variant shadow-sm hover:shadow-md hover:-translate-y-1'
+              } disabled:cursor-not-allowed`}
+            >
               {submittingAction === 'revisi' ? <LottieLoader size={24} /> : <RotateCcw size={18} />}
-              {isFinal ? 'Simpan & Terbitkan BA FINAL' : 'Simpan & Terbitkan BA Revisi'}
+              {isFinal ? 'Kembalikan (Dinonaktifkan)' : 'Simpan & Terbitkan BA Revisi'}
             </button>
 
             <button type="submit" name="action" value="acc" disabled={submittingAction !== null}
@@ -558,13 +568,21 @@ export default function PemeriksaanRevisiPage({ params }: { params: Promise<{ id
           <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
             <Link
               href={`/perizinan/pengembalian/${doc.id}`}
-              className="w-full sm:w-auto px-5 py-3 bg-rose-100 hover:bg-rose-200 text-rose-900 border border-rose-300 font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+              className={`w-full sm:w-auto px-5 py-3 border font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
+                isFinal 
+                  ? 'opacity-50 hover:opacity-100 bg-rose-50 text-rose-700 border-rose-200' 
+                  : 'bg-rose-100 hover:bg-rose-200 text-rose-900 border-rose-300'
+              }`}
             >
               Ke Tahap 8: Penyerahan BA Revisi <ArrowRight size={15} />
             </Link>
             <Link
               href={`/perizinan/finalisasi/${doc.id}`}
-              className="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-700 font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider"
+              className={`w-full sm:w-auto px-6 py-3 border font-bold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2 uppercase tracking-wider ${
+                isFinal 
+                  ? 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-700 ring-2 ring-indigo-400 ring-offset-1 font-black shadow-md' 
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-700'
+              }`}
             >
               Lanjut ke Tahap 10: Finalisasi (RPD & SK) <ArrowRight size={15} />
             </Link>
