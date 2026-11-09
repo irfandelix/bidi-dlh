@@ -26,6 +26,7 @@ export default function NotaDinasPengawasanPage() {
 
   const [petugasList, setPetugasList] = useState<string[]>(['']);
   const [kegiatanList, setKegiatanList] = useState([{ nama_usaha: '', hasil_pengawasan: '' }]);
+  const [selectedAgendaId, setSelectedAgendaId] = useState<number | null>(null);
 
   // Data for Auto-Pickers
   const [agendas, setAgendas] = useState<any[]>([]);
@@ -138,6 +139,7 @@ export default function NotaDinasPengawasanPage() {
       setPetugasList(agenda.tim_tugas);
     }
 
+    setSelectedAgendaId(agenda.id || null);
     setShowPickerModal(false);
   };
 
@@ -151,6 +153,7 @@ export default function NotaDinasPengawasanPage() {
     });
     setPetugasList(['']);
     setKegiatanList([{ nama_usaha: '', hasil_pengawasan: '' }]);
+    setSelectedAgendaId(null);
     setGeneratedDoc(null);
     setErrorMsg('');
   };
@@ -161,6 +164,7 @@ export default function NotaDinasPengawasanPage() {
     setErrorMsg('');
 
     const payload = {
+      agenda_id: selectedAgendaId,
       hal: formData.hal,
       yth: formData.yth,
       dari: formData.dari,

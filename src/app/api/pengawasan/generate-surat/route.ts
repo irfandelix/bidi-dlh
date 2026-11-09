@@ -51,13 +51,26 @@ export async function POST(request: Request) {
       keterangan: `Dibuat otomatis dari Modul Pengawasan: ${kegiatan && kegiatan.length > 0 ? kegiatan[0].nama_usaha + (kegiatan.length > 1 ? ' dkk' : '') : '-'}`
     };
 
-    const { error: insertErr } = await supabase
+    const { data: insertedNota, error: insertErr } = await supabase
       .from('arsip_nota_dinas')
-      .insert([payload]);
+      .insert([payload])
+      .select()
+      .single();
 
     if (insertErr) {
       console.error('Error insert nota dinas:', insertErr);
       return NextResponse.json({ error: insertErr.message }, { status: 400 });
+    }
+
+    // Hubungkan nomor nota dinas kembali ke agenda pengawasan jika agenda_id disediakan
+    if (body.agenda_id) {
+      await supabase
+        .from('pengawasan_lapangans')
+        .update({
+          nomor_nota_dinas: nomor_otomatis,
+          nota_dinas_id: insertedNota ? insertedNota.id : null
+        })
+        .eq('id', body.agenda_id);
     }
 
     // 3. Generate DOCX

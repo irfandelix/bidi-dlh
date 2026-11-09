@@ -100,8 +100,8 @@ export async function POST(
       saksiArr.push(`Saksi ${saksiArr.length + 1}`);
     }
 
-    // Date calculations
-    const today = new Date();
+    // Date calculations (Prioritaskan tanggal kunjungan riil dari agenda)
+    const today = agenda.tanggal_kunjungan ? new Date(agenda.tanggal_kunjungan) : new Date();
     const hari_ini_nama = getHari(today);
     const hari_ini_tanggal_terbilang = terbilang(today.getDate()).trim();
     const hari_ini_bulan = getBulan(today);
@@ -597,6 +597,11 @@ export async function POST(
       await supabase.from('bap_pengawasans').update({
         data_matriks_c: bapData
       } as any).eq('id', bapRow.id);
+
+      // Sinkronkan file_bap ke pengawasan_lapangans
+      await supabase.from('pengawasan_lapangans').update({
+        file_bap: docxFileId
+      } as any).eq('id', id);
     }
 
     return NextResponse.json({ 

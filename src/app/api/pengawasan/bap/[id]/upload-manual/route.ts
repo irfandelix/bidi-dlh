@@ -63,6 +63,13 @@ export async function POST(
       throw updateError;
     }
 
+    // Update kolom file_bap di pengawasan_lapangans agar peta & daftar sinkron
+    await supabase
+      .from('pengawasan_lapangans')
+      // @ts-ignore
+      .update({ file_bap: publicUrl })
+      .eq('id', id);
+
     return NextResponse.json({
       success: true,
       url: publicUrl,

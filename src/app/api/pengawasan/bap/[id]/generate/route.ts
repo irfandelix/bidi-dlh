@@ -93,8 +93,8 @@ async function buildBapDocx(id: string, payloadOverride?: any) {
     saksiArr.push(`Saksi ${saksiArr.length + 1}`);
   }
 
-  // Date calculations
-  const today = new Date();
+  // Date calculations (Prioritaskan tanggal kunjungan riil dari agenda)
+  const today = agenda.tanggal_kunjungan ? new Date(agenda.tanggal_kunjungan) : new Date();
   const hari_ini_nama = getHari(today);
   const hari_ini_tanggal_terbilang = terbilang(today.getDate()).trim();
   const hari_ini_bulan = getBulan(today);

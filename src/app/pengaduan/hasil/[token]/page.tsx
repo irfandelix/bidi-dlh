@@ -62,7 +62,8 @@ export default function HasilVerlapPublikPage({ params }: { params: Promise<{ to
   }
 
   // Format Dates
-  const tglAduan = data.tanggal_aduan ? new Date(data.tanggal_aduan).toLocaleDateString('id-ID', {
+  const rawDate = data.tanggal || data.created_at || data.tanggal_aduan;
+  const tglAduan = rawDate ? new Date(rawDate).toLocaleDateString('id-ID', {
     day: 'numeric', month: 'long', year: 'numeric'
   }) : '-';
 

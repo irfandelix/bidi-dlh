@@ -29,20 +29,36 @@ function TokenForm() {
     setError('');
 
     try {
+      const cleanToken = token.trim().toUpperCase();
       const { data, error: sbError } = await supabase
         .from('pengaduans')
-        .select('id')
-        .eq('token', token.trim().toUpperCase())
+        .select('id, token, status_tahapan, nama_pelapor, catatan_verlap, hasil_verlap, ba_url')
+        .eq('token', cleanToken)
         .single();
 
       if (sbError || !data) {
         throw new Error('Token tidak ditemukan! Cek kembali link atau kode tokennya.');
       }
       
-      const agendaData = data as any;
+      const aduanData = data as any;
 
-      // Jika ketemu, arahkan ke form pengisian pelapor
-      router.push(`/pengaduan/isi/${agendaData.id}`);
+      // Smart routing:
+      // Jika aduan sudah diverifikasi lapangan, ditindaklanjuti, atau selesai, langsung arahkan ke halaman hasil / pelacakan publik
+      const isAlreadyProcessed = 
+        aduanData.status_tahapan === 'Sudah Diverifikasi Lapangan' || 
+        aduanData.status_tahapan === 'Ditindaklanjuti' || 
+        aduanData.status_tahapan === 'Selesai' ||
+        aduanData.status_tahapan === 'BA Selesai' ||
+        !!aduanData.catatan_verlap || 
+        !!aduanData.hasil_verlap || 
+        !!aduanData.ba_url;
+
+      if (isAlreadyProcessed) {
+        router.push(`/pengaduan/hasil/${aduanData.token || cleanToken}`);
+      } else {
+        // Jika form masih menunggu isian pelapor
+        router.push(`/pengaduan/isi/${aduanData.id}`);
+      }
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan saat verifikasi token.');
       setLoading(false);
@@ -58,7 +74,7 @@ function TokenForm() {
 
       <h2 className="text-3xl font-bold text-on-surface mb-2 uppercase tracking-tight">Verifikasi Token Pengaduan</h2>
       <p className="text-sm font-bold text-on-surface-variant mb-8 px-4 leading-relaxed">
-        Masukkan kode unik aduan (ADN-XXXXXX) untuk mengakses form isian.
+        Masukkan kode unik aduan (ADN-XXXXXX) untuk mengisi laporan atau memantau hasil verifikasi lapangan.
       </p>
 
       {error && (

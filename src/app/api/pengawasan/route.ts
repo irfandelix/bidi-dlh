@@ -18,13 +18,6 @@ export async function GET(request: Request) {
 
     // Agenda Hari Ini (atau semua agenda yang belum ada BAP)
     if (type === 'agenda') {
-      const { data, error } = await supabase
-        .from('pengawasan_lapangans')
-        .select('*')
-        .order('tanggal_kunjungan', { ascending: false });
-        
-      if (error) throw error;
-      
       const { data: agendaData, error: agendaError } = await supabase
         .from('pengawasan_lapangans')
         .select('*, bap_pengawasans(id)')
