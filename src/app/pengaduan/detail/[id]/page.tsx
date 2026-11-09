@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, FileText, CheckCircle2, Clock, User, MapPin, ExternalLink, Download, X, Copy, Share2 } from 'lucide-react';
+import { ArrowLeft, Loader2, FileText, CheckCircle2, Clock, User, MapPin, ExternalLink, Download, X, Copy, Share2, Camera } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { use } from 'react';
 import LottieLoader from '@/components/LottieLoader';
+import { getDriveWebLink, getDriveImageUrl } from '@/lib/driveImage';
 
 const supabase = createClient();
 
@@ -266,7 +267,7 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                       <p className="text-xs font-bold text-on-surface-variant">Diunggah saat mengisi form</p>
                     </div>
                     {data.dokumentasi_url ? (
-                      <a href={data.dokumentasi_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 hover:text-purple-900 font-bold text-xs uppercase tracking-widest rounded-lg transition-colors border border-purple-200">
+                      <a href={getDriveWebLink(data.dokumentasi_url)} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 bg-purple-100 text-purple-700 hover:bg-purple-200 hover:text-purple-900 font-bold text-xs uppercase tracking-widest rounded-lg transition-colors border border-purple-200">
                         Lihat <ExternalLink size={14} />
                       </a>
                     ) : (
@@ -329,6 +330,89 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
 
             </div>
           </div>
+
+          {/* HASIL VERIFIKASI LAPANGAN (VERLAP) */}
+          {(data.catatan_verlap || data.hasil_verlap || (data.foto_verlap_list && data.foto_verlap_list.length > 0)) && (
+            <div className="bg-emerald-50/70 border-2 border-emerald-300 rounded-3xl p-6 sm:p-8 space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-emerald-200 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-emerald-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-sm">
+                    <CheckCircle2 size={26} />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-black uppercase tracking-wider text-emerald-800 block">
+                      Hasil Pemeriksaan Lapangan
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 uppercase">
+                      Verifikasi Lapangan Petugas DLH
+                    </h3>
+                  </div>
+                </div>
+                <span className="bg-emerald-600 text-white font-mono font-bold text-xs px-3.5 py-1.5 rounded-full uppercase tracking-wider self-start sm:self-auto shadow-xs">
+                  {data.status_tahapan || 'Sudah Diverifikasi Lapangan'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Kronologi Verlap */}
+                <div className="bg-white p-5 rounded-2xl border border-emerald-200 space-y-2 shadow-xs">
+                  <p className="text-xs font-black uppercase tracking-wider text-emerald-800">
+                    Kronologi & Temuan Lapangan
+                  </p>
+                  <p className="text-sm font-bold text-slate-800 whitespace-pre-wrap leading-relaxed">
+                    {data.catatan_verlap || <span className="text-slate-400 italic font-normal">Tidak ada catatan kronologi</span>}
+                  </p>
+                </div>
+
+                {/* Arahan Teknis & Tindak Lanjut */}
+                <div className="bg-white p-5 rounded-2xl border border-teal-200 space-y-2 shadow-xs">
+                  <p className="text-xs font-black uppercase tracking-wider text-teal-800">
+                    Hasil Tindak Lanjut & Arahan Teknis
+                  </p>
+                  <p className="text-sm font-bold text-slate-800 whitespace-pre-wrap leading-relaxed">
+                    {data.hasil_verlap || <span className="text-slate-400 italic font-normal">Tidak ada hasil verifikasi</span>}
+                  </p>
+                </div>
+              </div>
+
+              {/* Foto Dokumentasi Verlap */}
+              {Array.isArray(data.foto_verlap_list) && data.foto_verlap_list.length > 0 && (
+                <div className="space-y-3 pt-2">
+                  <p className="text-xs font-black uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                    <Camera size={16} /> Foto Bukti Dokumentasi Verlap:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {data.foto_verlap_list.map((foto: any, fIdx: number) => {
+                      const directImg = getDriveImageUrl(foto.url);
+                      const webLink = getDriveWebLink(foto.url);
+                      return (
+                        <div key={fIdx} className="bg-white rounded-2xl border border-emerald-200 overflow-hidden shadow-xs hover:shadow-md transition-shadow">
+                          <img 
+                            src={directImg} 
+                            alt={foto.keterangan || `Foto ${fIdx + 1}`}
+                            className="w-full h-44 object-cover" 
+                          />
+                          <div className="p-3 bg-white space-y-2">
+                            <p className="text-xs font-bold text-slate-700 line-clamp-2">
+                              {foto.keterangan || `Dokumentasi Lapangan #${fIdx + 1}`}
+                            </p>
+                            <a 
+                              href={webLink} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-black uppercase text-emerald-700 hover:text-emerald-900"
+                            >
+                              Buka Foto Penuh <ExternalLink size={12} />
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           
         </div>
       </div>
