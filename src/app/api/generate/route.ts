@@ -494,7 +494,7 @@ export async function POST(request: Request) {
 
         // Pastikan footerReference rIdFooter1 ada di sectPr dan margin bawah cukup (1440 dxa)
         if (!docXml.includes('rIdFooter1')) {
-          docXml = docXml.replace('<w:sectPr', '<w:sectPr><w:footerReference w:type="default" r:id="rIdFooter1"/>');
+          docXml = docXml.replace(/(<w:sectPr[^>]*>)/, '$1<w:footerReference w:type="default" r:id="rIdFooter1"/>');
         }
         docXml = docXml.replace(/w:bottom="\d+"/, 'w:bottom="1440"');
         zip.file('word/document.xml', docXml);
@@ -517,7 +517,16 @@ export async function POST(request: Request) {
         let footerXml = zip.file('word/footer1.xml')?.asText();
         if (!footerXml || !footerXml.includes('{%qr_code}')) {
           footerXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml">
+<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" 
+       xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" 
+       xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" 
+       xmlns:v="urn:schemas-microsoft-com:vml" 
+       xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" 
+       xmlns:w10="urn:schemas-microsoft-com:office:word" 
+       xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" 
+       xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" 
+       xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" 
+       xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
   <w:tbl>
     <w:tblPr>
       <w:tblW w:w="9026" w:type="dxa"/>
