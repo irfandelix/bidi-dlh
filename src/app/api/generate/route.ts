@@ -4,6 +4,9 @@ import fs from 'fs';
 import path from 'path';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
+// @ts-ignore
+import ImageModule from 'docxtemplater-image-module-free';
+import QRCode from 'qrcode';
 import { uploadFileToDrive } from '@/lib/gdrive';
 
 export async function POST(request: Request) {
@@ -467,20 +470,144 @@ export async function POST(request: Request) {
     const content = fs.readFileSync(templatePath, 'binary');
     const zip = new PizZip(content);
     
-    // 3. Render document
+    // 3. Render document & QR Code jika pada Tanda Terima Registrasi
+    const modules: any[] = [];
+    const finalTemplateData = { ...templateData };
+
+    if (type === 'template_tanda_terima_registrasi' || (stage === 'registrasi' && type.includes('tanda_terima'))) {
+      try {
+        const host = request.headers.get('host') || 'bididlh.sragenkab.go.id';
+        const proto = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+        const trackingUrl = `${proto}://${host}/perizinan/arus/${doc.id}`;
+
+        const qrBuffer = await QRCode.toBuffer(trackingUrl, {
+          width: 150,
+          margin: 1,
+          color: { dark: '#000000', light: '#ffffff' }
+        });
+
+        // Pastikan XML template memiliki tabel catatan footer dan placeholder {%qr_code}
+        let docXml = zip.file('word/document.xml')?.asText() || '';
+        if (!docXml.includes('{%qr_code}')) {
+          const footerTableXml = `
+<w:tbl>
+  <w:tblPr>
+    <w:tblW w:w="9000" w:type="dxa"/>
+    <w:jc w:val="center"/>
+    <w:tblBorders>
+      <w:top w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
+      <w:left w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
+      <w:bottom w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
+      <w:right w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
+      <w:insideH w:val="none"/>
+      <w:insideV w:val="none"/>
+    </w:tblBorders>
+    <w:tblCellMar>
+      <w:top w:w="80" w:type="dxa"/>
+      <w:left w:w="120" w:type="dxa"/>
+      <w:bottom w:w="80" w:type="dxa"/>
+      <w:right w:w="120" w:type="dxa"/>
+    </w:tblCellMar>
+  </w:tblPr>
+  <w:tr>
+    <w:trPr>
+      <w:cantSplit/>
+    </w:trPr>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="1600" w:type="dxa"/>
+        <w:vAlign w:val="center"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="F8FAFC"/>
+      </w:tcPr>
+      <w:p>
+        <w:pPr>
+          <w:spacing w:after="0" w:before="0"/>
+          <w:jc w:val="center"/>
+        </w:pPr>
+        <w:r>
+          <w:t>{%qr_code}</w:t>
+        </w:r>
+      </w:p>
+    </w:tc>
+    <w:tc>
+      <w:tcPr>
+        <w:tcW w:w="7400" w:type="dxa"/>
+        <w:vAlign w:val="center"/>
+        <w:shd w:val="clear" w:color="auto" w:fill="F8FAFC"/>
+      </w:tcPr>
+      <w:p>
+        <w:pPr>
+          <w:spacing w:after="30" w:before="0"/>
+        </w:pPr>
+        <w:r>
+          <w:rPr>
+            <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+            <w:b/>
+            <w:sz w:val="17"/>
+            <w:color w:val="1E293B"/>
+          </w:rPr>
+          <w:t>Catatan:</w:t>
+        </w:r>
+      </w:p>
+      <w:p>
+        <w:pPr>
+          <w:spacing w:after="0" w:before="0"/>
+        </w:pPr>
+        <w:r>
+          <w:rPr>
+            <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+            <w:i/>
+            <w:sz w:val="16"/>
+            <w:color w:val="475569"/>
+          </w:rPr>
+          <w:t>Pindai QR Code untuk melihat status dan perkembangan proses dokumen perizinan secara elektronik.</w:t>
+        </w:r>
+      </w:p>
+    </w:tc>
+  </w:tr>
+</w:tbl>
+`;
+          if (docXml.includes('</w:tbl><w:p w14:paraId="2A32ED40"')) {
+            docXml = docXml.replace('</w:tbl><w:p w14:paraId="2A32ED40"', '</w:tbl>' + footerTableXml + '<w:p w14:paraId="2A32ED40"');
+          } else if (docXml.lastIndexOf('</w:tbl>') !== -1) {
+            const lastTblIdx = docXml.lastIndexOf('</w:tbl>') + 8;
+            docXml = docXml.substring(0, lastTblIdx) + footerTableXml + docXml.substring(lastTblIdx);
+          }
+          zip.file('word/document.xml', docXml);
+        }
+
+        const imageOptions = {
+          centered: false,
+          getImage: function(tagValue: string) {
+            const base64Data = tagValue.startsWith('data:image/') ? tagValue.split(',')[1] : tagValue;
+            return Buffer.from(base64Data, 'base64');
+          },
+          getSize: function() {
+            return [65, 65];
+          }
+        };
+        modules.push(new ImageModule(imageOptions));
+        finalTemplateData.qr_code = qrBuffer.toString('base64');
+      } catch (qrErr) {
+        console.error('Error generating QR Code for perizinan tanda terima:', qrErr);
+      }
+    }
+
     const docxtemplater = new Docxtemplater(zip, {
       paragraphLoop: true,
       linebreaks: true,
+      modules,
       nullGetter: (part: any) => {
         return part.module ? "" : "-";
       }
     });
 
     // Replace empty strings with a dash so they render as "-" instead of blank space
-    const finalTemplateData = { ...templateData };
     for (const key in finalTemplateData) {
-      if (finalTemplateData[key] === "" || finalTemplateData[key] === null || finalTemplateData[key] === undefined) {
-        finalTemplateData[key] = "-";
+      if (key !== 'qr_code') {
+        if (finalTemplateData[key] === "" || finalTemplateData[key] === null || finalTemplateData[key] === undefined) {
+          finalTemplateData[key] = "-";
+        }
       }
     }
 

@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Loader2, Eye, Calendar
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Loader2, Eye, Calendar, ExternalLink
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -461,6 +461,9 @@ export default function DaftarPerizinanPage() {
             <Zap size={18} className="text-emerald-500 fill-emerald-500" />
             Total {stats.total} Dokumen
           </div>
+          <Link href="/perizinan/arus" target="_blank" className="bg-sky-400 hover:bg-sky-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-md hover:shadow-sm border border-slate-200 transition-all flex items-center gap-2">
+            <Search size={18} /> Portal Lacak Arus
+          </Link>
           <Link href="/perizinan/nota-dinas" className="bg-amber-400 hover:bg-amber-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-md hover:shadow-sm border border-slate-200 transition-all flex items-center gap-2">
             <FileText size={18} /> Nota Dinas
           </Link>
@@ -1020,6 +1023,20 @@ export default function DaftarPerizinanPage() {
                   );
                 })}
               </div>
+            </div>
+            
+            <div className="p-4 bg-slate-100 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <span className="text-xs text-slate-500 font-bold">
+                Tautan publik lacak arus (untuk pemohon / masyarakat):
+              </span>
+              <a 
+                href={`/perizinan/arus/${selectedDoc.id}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-sm transition-all"
+              >
+                <ExternalLink size={14} /> Buka Halaman Arus Pemohon
+              </a>
             </div>
           </div>
         </div>
