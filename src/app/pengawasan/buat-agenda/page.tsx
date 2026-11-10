@@ -12,6 +12,7 @@ import {
   FileText, Archive, Plus, Trash2, Navigation, Layers
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
+import PengawasanSubNav from '@/components/PengawasanSubNav';
 
 interface LocationItem {
   id: string;
@@ -385,6 +386,9 @@ export default function BuatAgenda() {
     <div className="min-h-screen bg-slate-50/50 p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-6 font-sans pb-28">
         
+        {/* SUB NAV PENGAWASAN */}
+        <PengawasanSubNav />
+
         {/* HEADER CARD */}
         <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-sm relative overflow-hidden">
           <div className="absolute -top-10 -right-10 w-44 h-44 bg-indigo-50/70 rounded-full border border-indigo-100 opacity-60"></div>

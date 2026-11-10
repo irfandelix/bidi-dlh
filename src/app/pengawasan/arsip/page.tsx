@@ -10,6 +10,7 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
+import PengawasanSubNav from '@/components/PengawasanSubNav';
 
 export default function ArsipPengawasan() {
   const [arsip, setArsip] = useState<any[]>([]);
@@ -166,6 +167,9 @@ export default function ArsipPengawasan() {
     <div className="min-h-screen bg-white p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6 font-sans pb-24">
         
+        {/* SUB NAV PENGAWASAN */}
+        <PengawasanSubNav />
+
         {/* HEADER CARD - SAMA DENGAN DASHBOARD PENGAWASAN */}
         <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-lg relative overflow-hidden">
           {/* Decorative Circle */}

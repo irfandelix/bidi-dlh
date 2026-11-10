@@ -11,6 +11,7 @@ import {
   Building2, Users, FileText, Clock, ExternalLink, Check
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
+import PengawasanSubNav from '@/components/PengawasanSubNav';
 
 function TokenForm() {
   const router = useRouter();
@@ -365,19 +366,12 @@ function TokenForm() {
 
 export default function VerifikasiToken() {
   return (
-    <div className="flex flex-col items-center justify-center w-full relative py-2">
+    <div className="flex flex-col items-center w-full max-w-5xl mx-auto space-y-6 relative py-2">
+      {/* SUB NAV PENGAWASAN */}
+      <PengawasanSubNav />
+
       {/* Decorative Blur Background Element */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-indigo-50/70 rounded-full blur-3xl pointer-events-none -z-0"></div>
-
-      {/* Back Link to Hub */}
-      <div className="mb-3 z-10">
-        <Link 
-          href="/pengawasan" 
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-xl border border-slate-200 transition-colors shadow-sm"
-        >
-          <ArrowLeft size={15} /> Hub Pengawasan
-        </Link>
-      </div>
 
       <Suspense fallback={<LottieLoader size={120} text="MEMUAT FORM TOKEN..." />}>
         <TokenForm />

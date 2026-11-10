@@ -10,6 +10,7 @@ import {
 import { createClient } from '@/lib/supabase/client';
 const supabase = createClient();
 import LottieLoader from '@/components/LottieLoader';
+import PengawasanSubNav from '@/components/PengawasanSubNav';
 
 export default function NotaDinasPengawasanPage() {
   const [loading, setLoading] = useState(false);
@@ -238,6 +239,9 @@ export default function NotaDinasPengawasanPage() {
     <div className="min-h-screen bg-white p-4 md:p-8 font-sans">
       <div className="max-w-4xl mx-auto space-y-6 pb-20">
         
+        {/* SUB NAV PENGAWASAN */}
+        <PengawasanSubNav />
+
         {/* HEADER CARD - SAMA DENGAN GAYA DASHBOARD PENGAWASAN */}
         <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-lg relative overflow-hidden">
           {/* Decorative Circle */}

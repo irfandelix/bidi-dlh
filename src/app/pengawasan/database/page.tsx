@@ -8,6 +8,7 @@ import {
   ChevronDown, ChevronUp, Zap, Sparkles, Utensils, FileSpreadsheet
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
+import PengawasanSubNav from '@/components/PengawasanSubNav';
 
 interface GroupedFacility {
   key: string;
@@ -340,6 +341,9 @@ export default function DatabaseGabungan() {
     <div className="min-h-screen bg-white p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-6 font-sans pb-20">
         
+        {/* SUB NAV PENGAWASAN */}
+        <PengawasanSubNav />
+
         {/* HEADER CARD - SAMA DENGAN DASHBOARD PENGAWASAN */}
         <div className="bg-white border border-slate-200 rounded-[2rem] p-6 md:p-8 shadow-lg relative overflow-hidden">
           {/* Decorative Circle */}

@@ -29,6 +29,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
+import PengawasanSubNav from '@/components/PengawasanSubNav';
 
 export default function PengawasanHubPage() {
   const [data, setData] = useState<any[]>([]);
@@ -238,54 +239,8 @@ export default function PengawasanHubPage() {
   return (
     <div className="max-w-6xl mx-auto py-8 space-y-8 px-4 pb-24">
       
-      {/* Tombol Kembali ke Beranda */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link 
-          href="/" 
-          className="inline-flex items-center gap-2 text-sm text-slate-800 font-bold transition-all bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 uppercase tracking-wide"
-        >
-          <ArrowLeft size={16} /> Kembali ke Beranda
-        </Link>
-
-        {/* Quick Links Navigasi Sub-Modul Pengawasan */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          <Link
-            href="/pengawasan/agenda"
-            className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 whitespace-nowrap"
-          >
-            <Calendar size={13} className="text-amber-600" />
-            <span>Agenda Aktif</span>
-          </Link>
-          <Link
-            href="/pengawasan/database"
-            className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 whitespace-nowrap"
-          >
-            <Database size={13} className="text-teal-600" />
-            <span>Database Sasaran</span>
-          </Link>
-          <Link
-            href="/pengawasan/arsip"
-            className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 whitespace-nowrap"
-          >
-            <Archive size={13} className="text-indigo-600" />
-            <span>Arsip BAP</span>
-          </Link>
-          <Link
-            href="/pengawasan/nota-dinas"
-            className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 whitespace-nowrap"
-          >
-            <FileText size={13} className="text-fuchsia-600" />
-            <span>Nota Dinas</span>
-          </Link>
-          <Link
-            href="/pengawasan/token"
-            className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1.5 whitespace-nowrap"
-          >
-            <ShieldCheck size={13} className="text-rose-600" />
-            <span>Verifikasi Token</span>
-          </Link>
-        </div>
-      </div>
+      {/* Sub Navigasi Pengawasan & Kembali ke Beranda */}
+      <PengawasanSubNav />
 
       {/* Header Halaman (Seragam dengan Pengaduan & Perizinan) */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
