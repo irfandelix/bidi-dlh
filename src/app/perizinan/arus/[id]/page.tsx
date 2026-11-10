@@ -353,10 +353,20 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
             <p className="text-xs text-slate-300 mt-1">
               Jika terdapat kendala atau pertanyaan terkait berkas perizinan Anda, silakan hubungi layanan resmi kami.
             </p>
+            <p className="text-[11px] font-bold text-emerald-400 mt-1.5 flex items-center justify-center sm:justify-start gap-1.5">
+              <span>Hotline WhatsApp Resmi:</span>
+              <span className="font-mono tracking-wider font-black text-white">+62 822-5774-0385</span>
+            </p>
           </div>
 
           <a
-            href="https://wa.me/628112651136?text=Halo%20Admin%20DLH%20Sragen,%20saya%20ingin%20menanyakan%20progres%20dokumen%20perizinan"
+            href={`https://wa.me/6282257740385?text=${encodeURIComponent(
+              `Halo Admin DLH Sragen, saya ingin menanyakan perkembangan proses dokumen perizinan:\n` +
+              `• Kegiatan: ${doc.nama_kegiatan || '-'}\n` +
+              `• Pemrakarsa: ${doc.nama_pemrakarsa || '-'}\n` +
+              `• No. Registrasi: #${doc.no_urut || doc.id}\n\n` +
+              `Mohon informasinya. Terima kasih.`
+            )}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-md transition-all shrink-0 hover:-translate-y-0.5"

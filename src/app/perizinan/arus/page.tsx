@@ -105,10 +105,18 @@ export default function LacakArusPage() {
           </button>
         </form>
 
-        <div className="pt-4 border-t border-slate-100 text-center relative z-10">
+        <div className="pt-4 border-t border-slate-100 text-center relative z-10 space-y-1">
           <p className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
             Dinas Lingkungan Hidup Kabupaten Sragen
           </p>
+          <a
+            href="https://wa.me/6282257740385?text=Halo%20Admin%20DLH%20Sragen,%20saya%20ingin%20konsultasi%20perizinan"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block text-[11px] font-black text-emerald-600 hover:text-emerald-700"
+          >
+            Hotline WhatsApp: +62 822-5774-0385
+          </a>
         </div>
       </div>
     </div>
