@@ -2,10 +2,10 @@ import { google } from 'googleapis';
 import stream from 'stream';
 
 const getAuthClient = () => {
-  const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID_PENGAWASAN;
-  const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET_PENGAWASAN;
+  const clientId = process.env.GOOGLE_DRIVE_CLIENT_ID_PENGAWASAN || process.env.GOOGLE_DRIVE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_DRIVE_CLIENT_SECRET_PENGAWASAN || process.env.GOOGLE_DRIVE_CLIENT_SECRET;
   const redirectUri = process.env.GOOGLE_DRIVE_REDIRECT_URI || 'https://developers.google.com/oauthplayground';
-  const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN_PENGAWASAN;
+  const refreshToken = process.env.GOOGLE_DRIVE_REFRESH_TOKEN_PENGAWASAN || process.env.GOOGLE_DRIVE_REFRESH_TOKEN;
 
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error('Google Drive credentials for Pengawasan are not fully configured in environment variables.');
