@@ -474,106 +474,133 @@ export async function POST(request: Request) {
     const modules: any[] = [];
     const finalTemplateData = { ...templateData };
 
-    if (type === 'template_tanda_terima_registrasi' || (stage === 'registrasi' && type.includes('tanda_terima'))) {
+    if (type === 'template_tanda_terima_registrasi' || type === 'tanda_terima_registrasi' || (stage === 'registrasi' && (type.includes('tanda_terima') || type.includes('Registrasi')))) {
       try {
         const host = request.headers.get('host') || 'bididlh.sragenkab.go.id';
         const proto = request.headers.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
         const trackingUrl = `${proto}://${host}/perizinan/arus/${doc.id}`;
 
         const qrBuffer = await QRCode.toBuffer(trackingUrl, {
-          width: 150,
+          width: 250,
           margin: 1,
           color: { dark: '#000000', light: '#ffffff' }
         });
 
-        // Pastikan XML template memiliki tabel catatan footer dan placeholder {%qr_code}
+        // 1. Bersihkan {%qr_code} dari document.xml jika ada agar TIDAK menempel di bawah tabel tanda tangan
         let docXml = zip.file('word/document.xml')?.asText() || '';
-        if (!docXml.includes('{%qr_code}')) {
-          const footerTableXml = `
-<w:tbl>
-  <w:tblPr>
-    <w:tblW w:w="9000" w:type="dxa"/>
-    <w:jc w:val="center"/>
-    <w:tblBorders>
-      <w:top w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
-      <w:left w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
-      <w:bottom w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
-      <w:right w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
-      <w:insideH w:val="none"/>
-      <w:insideV w:val="none"/>
-    </w:tblBorders>
-    <w:tblCellMar>
-      <w:top w:w="80" w:type="dxa"/>
-      <w:left w:w="120" w:type="dxa"/>
-      <w:bottom w:w="80" w:type="dxa"/>
-      <w:right w:w="120" w:type="dxa"/>
-    </w:tblCellMar>
-  </w:tblPr>
-  <w:tr>
-    <w:trPr>
-      <w:cantSplit/>
-    </w:trPr>
-    <w:tc>
-      <w:tcPr>
-        <w:tcW w:w="1600" w:type="dxa"/>
-        <w:vAlign w:val="center"/>
-        <w:shd w:val="clear" w:color="auto" w:fill="F8FAFC"/>
-      </w:tcPr>
-      <w:p>
-        <w:pPr>
-          <w:spacing w:after="0" w:before="0"/>
-          <w:jc w:val="center"/>
-        </w:pPr>
-        <w:r>
-          <w:t>{%qr_code}</w:t>
-        </w:r>
-      </w:p>
-    </w:tc>
-    <w:tc>
-      <w:tcPr>
-        <w:tcW w:w="7400" w:type="dxa"/>
-        <w:vAlign w:val="center"/>
-        <w:shd w:val="clear" w:color="auto" w:fill="F8FAFC"/>
-      </w:tcPr>
-      <w:p>
-        <w:pPr>
-          <w:spacing w:after="30" w:before="0"/>
-        </w:pPr>
-        <w:r>
-          <w:rPr>
-            <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
-            <w:b/>
-            <w:sz w:val="17"/>
-            <w:color w:val="1E293B"/>
-          </w:rPr>
-          <w:t>Catatan:</w:t>
-        </w:r>
-      </w:p>
-      <w:p>
-        <w:pPr>
-          <w:spacing w:after="0" w:before="0"/>
-        </w:pPr>
-        <w:r>
-          <w:rPr>
-            <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
-            <w:i/>
-            <w:sz w:val="16"/>
-            <w:color w:val="475569"/>
-          </w:rPr>
-          <w:t>Pindai QR Code untuk melihat status dan perkembangan proses dokumen perizinan secara elektronik.</w:t>
-        </w:r>
-      </w:p>
-    </w:tc>
-  </w:tr>
-</w:tbl>
-`;
-          if (docXml.includes('</w:tbl><w:p w14:paraId="2A32ED40"')) {
-            docXml = docXml.replace('</w:tbl><w:p w14:paraId="2A32ED40"', '</w:tbl>' + footerTableXml + '<w:p w14:paraId="2A32ED40"');
-          } else if (docXml.lastIndexOf('</w:tbl>') !== -1) {
-            const lastTblIdx = docXml.lastIndexOf('</w:tbl>') + 8;
-            docXml = docXml.substring(0, lastTblIdx) + footerTableXml + docXml.substring(lastTblIdx);
-          }
-          zip.file('word/document.xml', docXml);
+        if (docXml.includes('{%qr_code}')) {
+          docXml = docXml.replace(/<w:tbl>[\s\S]*?\{%qr_code\}[\s\S]*?<\/w:tbl>/g, '');
+        }
+
+        // Pastikan footerReference rIdFooter1 ada di sectPr dan margin bawah cukup (1440 dxa)
+        if (!docXml.includes('rIdFooter1')) {
+          docXml = docXml.replace('<w:sectPr', '<w:sectPr><w:footerReference w:type="default" r:id="rIdFooter1"/>');
+        }
+        docXml = docXml.replace(/w:bottom="\d+"/, 'w:bottom="1440"');
+        zip.file('word/document.xml', docXml);
+
+        // 2. Pastikan [Content_Types].xml mencantumkan footer1.xml
+        let contentTypes = zip.file('[Content_Types].xml')?.asText() || '';
+        if (!contentTypes.includes('footer1.xml')) {
+          contentTypes = contentTypes.replace('</Types>', '<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/></Types>');
+          zip.file('[Content_Types].xml', contentTypes);
+        }
+
+        // 3. Pastikan word/_rels/document.xml.rels mencantumkan rIdFooter1
+        let rels = zip.file('word/_rels/document.xml.rels')?.asText() || '';
+        if (!rels.includes('rIdFooter1')) {
+          rels = rels.replace('</Relationships>', '<Relationship Id="rIdFooter1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/></Relationships>');
+          zip.file('word/_rels/document.xml.rels', rels);
+        }
+
+        // 4. Pastikan file word/footer1.xml terpasang rapi di catatan kaki halaman resmi
+        let footerXml = zip.file('word/footer1.xml')?.asText();
+        if (!footerXml || !footerXml.includes('{%qr_code}')) {
+          footerXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml">
+  <w:tbl>
+    <w:tblPr>
+      <w:tblW w:w="9026" w:type="dxa"/>
+      <w:jc w:val="center"/>
+      <w:tblBorders>
+        <w:top w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
+        <w:left w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
+        <w:bottom w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
+        <w:right w:val="single" w:sz="6" w:space="0" w:color="CBD5E1"/>
+        <w:insideH w:val="none"/>
+        <w:insideV w:val="single" w:sz="6" w:space="0" w:color="E2E8F0"/>
+      </w:tblBorders>
+      <w:tblCellMar>
+        <w:top w:w="60" w:type="dxa"/>
+        <w:left w:w="120" w:type="dxa"/>
+        <w:bottom w:w="60" w:type="dxa"/>
+        <w:right w:w="120" w:type="dxa"/>
+      </w:tblCellMar>
+    </w:tblPr>
+    <w:tr>
+      <w:trPr>
+        <w:cantSplit/>
+      </w:trPr>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="1500" w:type="dxa"/>
+          <w:vAlign w:val="center"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="F8FAFC"/>
+        </w:tcPr>
+        <w:p>
+          <w:pPr>
+            <w:spacing w:after="0" w:before="0"/>
+            <w:jc w:val="center"/>
+          </w:pPr>
+          <w:r>
+            <w:t>{%qr_code}</w:t>
+          </w:r>
+        </w:p>
+      </w:tc>
+      <w:tc>
+        <w:tcPr>
+          <w:tcW w:w="7526" w:type="dxa"/>
+          <w:vAlign w:val="center"/>
+          <w:shd w:val="clear" w:color="auto" w:fill="F8FAFC"/>
+        </w:tcPr>
+        <w:p>
+          <w:pPr>
+            <w:spacing w:after="20" w:before="0"/>
+          </w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+              <w:b/>
+              <w:sz w:val="17"/>
+              <w:color w:val="1E293B"/>
+            </w:rPr>
+            <w:t>Catatan:</w:t>
+          </w:r>
+        </w:p>
+        <w:p>
+          <w:pPr>
+            <w:spacing w:after="0" w:before="0"/>
+          </w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Arial" w:hAnsi="Arial"/>
+              <w:i/>
+              <w:sz w:val="16"/>
+              <w:color w:val="475569"/>
+            </w:rPr>
+            <w:t>Pindai QR Code untuk melihat status dan perkembangan proses dokumen perizinan secara elektronik.</w:t>
+          </w:r>
+        </w:p>
+      </w:tc>
+    </w:tr>
+  </w:tbl>
+  <w:p>
+    <w:pPr>
+      <w:spacing w:after="0" w:before="0"/>
+    </w:pPr>
+  </w:p>
+</w:ftr>`;
+          zip.file('word/footer1.xml', footerXml);
         }
 
         const imageOptions = {
@@ -583,13 +610,13 @@ export async function POST(request: Request) {
             return Buffer.from(base64Data, 'base64');
           },
           getSize: function() {
-            return [65, 65];
+            return [60, 60];
           }
         };
         modules.push(new ImageModule(imageOptions));
         finalTemplateData.qr_code = qrBuffer.toString('base64');
       } catch (qrErr) {
-        console.error('Error generating QR Code for perizinan tanda terima:', qrErr);
+        console.error('Error generating QR Code for perizinan tanda terima footer:', qrErr);
       }
     }
 
