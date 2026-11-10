@@ -17,16 +17,23 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
       bap_pengawasans ( data_matriks_c )
     `)
     .eq('token', token)
-    .single();
+    .order('id', { ascending: true });
     
-  if (error || !data) {
+  if (error || !data || data.length === 0) {
     // If not found, redirect to home
     return NextResponse.redirect(new URL('/pengawasan', request.url));
   }
+
+  // Jika memuat lebih dari 1 lokasi, arahkan ke dashboard pemilih lokasi token
+  if (data.length > 1) {
+    return NextResponse.redirect(new URL(`/pengawasan/token?token=${token}`, request.url));
+  }
+
+  const singleAgenda = data[0];
   
   // Try to redirect directly to Google Drive docx if it was already generated
-  if (data.bap_pengawasans && data.bap_pengawasans.length > 0) {
-    let bapData = (data.bap_pengawasans[0] as any).data_matriks_c;
+  if (singleAgenda.bap_pengawasans && singleAgenda.bap_pengawasans.length > 0) {
+    let bapData = (singleAgenda.bap_pengawasans[0] as any).data_matriks_c;
     if (typeof bapData === 'string') {
       try { bapData = JSON.parse(bapData); } catch (e) {}
     }
@@ -36,5 +43,5 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   }
   
   // Fallback to web form if docx not generated yet
-  return NextResponse.redirect(new URL(`/pengawasan/ba/isi/${data.id}`, request.url));
+  return NextResponse.redirect(new URL(`/pengawasan/ba/isi/${singleAgenda.id}`, request.url));
 }

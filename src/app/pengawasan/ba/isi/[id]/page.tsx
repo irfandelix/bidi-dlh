@@ -1395,9 +1395,9 @@ export default function BAPFormPage({ params }: { params: Promise<{ id: string }
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <Link 
-              href="/pengawasan/agenda" 
+              href={agenda?.token ? `/pengawasan/token?token=${agenda.token}` : "/pengawasan/agenda"} 
               className="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 flex items-center justify-center transition-all shrink-0"
-              title="Kembali ke Agenda"
+              title={agenda?.token ? "Kembali ke Daftar Lokasi Token" : "Kembali ke Agenda"}
             >
               <ArrowLeft size={18} />
             </Link>

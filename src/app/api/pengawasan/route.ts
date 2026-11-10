@@ -93,28 +93,44 @@ export async function POST(request: Request) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
     const body = await request.json();
+
+    // Cek apakah request berupa multi-lokasi (body.items) atau single agenda
+    const items = Array.isArray(body.items) && body.items.length > 0 
+      ? body.items 
+      : [{
+          nama_kegiatan: body.nama_kegiatan,
+          nama_pemrakarsa: body.nama_pemrakarsa,
+          kategori: body.kategori,
+          alamat_lokasi: body.alamat_lokasi,
+          latitude: body.latitude,
+          longitude: body.longitude,
+          saksi: body.saksi
+        }];
     
-    // Generate Token (e.g. FYK-A8B9C2)
-    let prefix = 'DLH';
-    if (body.kategori === 'Industri') prefix = 'IND';
-    else if (body.kategori === 'Fasyankes') prefix = 'FYK';
-    else if (body.kategori === 'Toko Modern') prefix = 'TOM';
-    else if (body.kategori === 'Perumahan') prefix = 'RMH';
-    else if (body.kategori === 'SPPG') prefix = 'MBG';
+    // Generate 1 Token Bersama (Shared Token)
+    let prefix = 'PGW';
+    if (items.length === 1) {
+      const kat = items[0].kategori;
+      if (kat === 'Industri') prefix = 'IND';
+      else if (kat === 'Fasyankes') prefix = 'FYK';
+      else if (kat === 'Toko Modern') prefix = 'TOM';
+      else if (kat === 'Perumahan') prefix = 'RMH';
+      else if (kat === 'SPPG') prefix = 'MBG';
+    }
     
     const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
-    body.token = `${prefix}-${randomStr}`;
+    const sharedToken = `${prefix}-${randomStr}`;
 
     // Integrasi dengan Nota Dinas pada Bagian Arsip
     let notaDinasId = body.nota_dinas_id || null;
     let nomorNotaDinas = body.nomor_nota_dinas || null;
 
+    const tanggalNota = body.tanggal_kunjungan || new Date().toISOString().split('T')[0];
+    const tahun = new Date(tanggalNota).getFullYear().toString();
+    const bulan = new Date(tanggalNota).getMonth() + 1;
+
     if (!nomorNotaDinas) {
       // Auto-generate nomor urut nota dinas baru di arsip_nota_dinas
-      const tanggalNota = body.tanggal_kunjungan || new Date().toISOString().split('T')[0];
-      const tahun = new Date(tanggalNota).getFullYear().toString();
-      const bulan = new Date(tanggalNota).getMonth() + 1;
-
       const { data: lastDoc } = await supabaseAdmin
         .from('arsip_nota_dinas')
         .select('no_urut')
@@ -131,18 +147,22 @@ export async function POST(request: Request) {
       const urutStr = String(nextUrut).padStart(3, '0');
       nomorNotaDinas = `600.4.6/${urutStr}.${bulan}/17/PW/${tahun}`;
 
+      // Ringkasan nama objek yang dikunjungi untuk judul nota dinas
+      const ringkasanObjek = items.map((it: any) => it.nama_kegiatan || '-').join(', ');
+      const namaNota = `Nota Dinas Pengawasan Lapangan - ${ringkasanObjek}`.substring(0, 240);
+
       // Simpan langsung ke arsip_nota_dinas agar tercatat di modul arsip
       const { data: insertedNota, error: notaErr } = await supabaseAdmin
         .from('arsip_nota_dinas')
         .insert([{
           no_urut: nextUrut,
-          nama_nota: `Nota Dinas Pengawasan Lingkungan Hidup - ${body.nama_kegiatan || 'Pengawasan Lapangan'} (${body.nama_pemrakarsa || '-'})`,
+          nama_nota: namaNota,
           tanggal_nota: tanggalNota,
           dari_bagian: 'Pengawasan',
           nomor_otomatis: nomorNotaDinas,
           file_url: null,
           pemohon_id: null,
-          keterangan: `Terintegrasi otomatis dari Jadwal Pengawasan #${body.token}: ${body.nama_kegiatan || '-'}`
+          keterangan: `Terintegrasi otomatis dari Jadwal Pengawasan #${sharedToken} (${items.length} lokasi)`
         }])
         .select()
         .single();
@@ -155,18 +175,35 @@ export async function POST(request: Request) {
       }
     }
 
-    body.nota_dinas_id = notaDinasId;
-    body.nomor_nota_dinas = nomorNotaDinas;
+    // Susun baris record pengawasan_lapangans (1 s.d. 5 lokasi)
+    const recordsToInsert = items.map((it: any) => ({
+      tanggal_kunjungan: tanggalNota,
+      tim_tugas: body.tim_tugas,
+      token: sharedToken,
+      nomor_nota_dinas: nomorNotaDinas,
+      nota_dinas_id: notaDinasId,
+      kategori: it.kategori || 'Lainnya',
+      nama_kegiatan: (it.nama_kegiatan || '').trim(),
+      nama_pemrakarsa: (it.nama_pemrakarsa || '-').trim(),
+      alamat_lokasi: (it.alamat_lokasi || '').trim(),
+      latitude: it.latitude || null,
+      longitude: it.longitude || null,
+      saksi: it.saksi || body.saksi || null
+    }));
 
     const { data, error } = await supabaseAdmin
       .from('pengawasan_lapangans')
-      // @ts-ignore
-      .insert([body])
+      .insert(recordsToInsert)
       .select();
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ 
+      success: true, 
+      token: sharedToken,
+      nomor_nota_dinas: nomorNotaDinas,
+      data 
+    });
   } catch (error: any) {
     console.error('Error creating agenda:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

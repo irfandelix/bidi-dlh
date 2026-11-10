@@ -7,7 +7,8 @@ const supabase = createClient();
 import Link from 'next/link';
 import { 
   ShieldCheck, ArrowRight, AlertTriangle, ArrowLeft, 
-  ClipboardPaste, Calendar, MapPin, CheckCircle2
+  ClipboardPaste, Calendar, MapPin, CheckCircle2,
+  Building2, Users, FileText, Clock, ExternalLink, Check
 } from 'lucide-react';
 import LottieLoader from '@/components/LottieLoader';
 
@@ -18,7 +19,8 @@ function TokenForm() {
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [previewAgenda, setPreviewAgenda] = useState<any | null>(null);
+  const [agendas, setAgendas] = useState<any[]>([]);
+  const [copiedToken, setCopiedToken] = useState(false);
 
   const verifyToken = async (tokenToVerify: string, autoRedirect = false) => {
     const cleanToken = tokenToVerify.trim().toUpperCase();
@@ -26,29 +28,40 @@ function TokenForm() {
 
     setLoading(true);
     setError('');
-    setPreviewAgenda(null);
+    setAgendas([]);
 
     try {
       const { data, error: sbError } = await supabase
         .from('pengawasan_lapangans')
-        .select('id, nama_kegiatan, nama_pemrakarsa, kategori, alamat_lokasi, tim_tugas, tanggal_kunjungan, token')
+        .select(`
+          id, 
+          nama_kegiatan, 
+          nama_pemrakarsa, 
+          kategori, 
+          alamat_lokasi, 
+          tim_tugas, 
+          tanggal_kunjungan, 
+          token,
+          status_ketaatan,
+          file_bap,
+          nomor_nota_dinas,
+          bap_pengawasans ( id, data_matriks_c, created_at )
+        `)
         .eq('token', cleanToken)
-        .single();
+        .order('id', { ascending: true });
 
-      if (sbError || !data) {
+      if (sbError || !data || data.length === 0) {
         throw new Error('Token tidak ditemukan! Periksa kembali kode token atau tautan yang diberikan.');
       }
-      
-      const agenda = data as any;
 
-      if (autoRedirect) {
-        // Auto-redirect directly if token came from URL param
-        router.push(`/pengawasan/ba/isi/${agenda.id}`);
-      } else {
-        // Show preview confirmation card
-        setPreviewAgenda(agenda);
-        setLoading(false);
+      // Jika hanya ada 1 lokasi dan dibuka via URL param, langsung buka BAP
+      if (data.length === 1 && autoRedirect) {
+        router.push(`/pengawasan/ba/isi/${data[0].id}`);
+        return;
       }
+
+      setAgendas(data);
+      setLoading(false);
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan saat memverifikasi token.');
       setLoading(false);
@@ -83,14 +96,17 @@ function TokenForm() {
     }
   };
 
-  const handleProceedToBAP = () => {
-    if (previewAgenda) {
-      router.push(`/pengawasan/ba/isi/${previewAgenda.id}`);
-    }
+  const copyTokenToClipboard = (tok: string) => {
+    navigator.clipboard.writeText(tok);
+    setCopiedToken(true);
+    setTimeout(() => setCopiedToken(false), 2000);
   };
 
+  const isMulti = agendas.length > 1;
+  const singleAgenda = agendas.length === 1 ? agendas[0] : null;
+
   return (
-    <div className="w-full max-w-sm md:max-w-md bg-white border border-slate-200 rounded-[2rem] p-5 md:p-6 shadow-xl text-center relative overflow-hidden z-10 space-y-4">
+    <div className={`w-full ${isMulti ? 'max-w-2xl' : 'max-w-sm md:max-w-md'} bg-white border border-slate-200 rounded-[2rem] p-5 md:p-6 shadow-xl text-center relative overflow-hidden z-10 space-y-4 transition-all duration-300`}>
       
       {/* Icon Perisai khas Menu Verifikasi Token */}
       <div className="w-14 h-14 md:w-16 md:h-16 bg-rose-100 text-rose-700 border-[3px] border-slate-200 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
@@ -99,10 +115,12 @@ function TokenForm() {
 
       <div>
         <h2 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase">
-          Verifikasi Token
+          {isMulti ? 'Rombongan Pengawasan' : 'Verifikasi Token'}
         </h2>
         <p className="text-[11px] md:text-xs font-bold text-slate-500 mt-1 px-1 leading-relaxed">
-          Masukkan kode unik agenda untuk membuka formulir BAP inspeksi lapangan.
+          {isMulti
+            ? `Token ini memuat ${agendas.length} titik lokasi pengawasan lapangan.`
+            : 'Masukkan kode unik agenda untuk membuka formulir BAP inspeksi lapangan.'}
         </p>
       </div>
 
@@ -113,15 +131,142 @@ function TokenForm() {
         </div>
       )}
 
-      {/* CONFIRMATION PREVIEW JIKA TOKEN VALID */}
-      {previewAgenda ? (
+      {/* TAMPILAN 1: MULTI-LOKASI (2 - 5 TITIK LOKASI DALAM 1 TOKEN) */}
+      {isMulti ? (
+        <div className="space-y-4 text-left animate-in zoom-in-95 duration-200">
+          {/* Header Ringkasan Rombongan */}
+          <div className="bg-slate-900 text-white p-4 rounded-2xl shadow-sm space-y-2.5">
+            <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+              <span className="font-mono text-xs font-black text-emerald-400 bg-slate-800 px-2.5 py-1 rounded-md border border-slate-700 tracking-wider">
+                #{agendas[0]?.token}
+              </span>
+              <button
+                type="button"
+                onClick={() => copyTokenToClipboard(agendas[0]?.token)}
+                className="text-[11px] font-bold text-slate-300 hover:text-white flex items-center gap-1 transition-colors"
+              >
+                {copiedToken ? <Check size={13} className="text-emerald-400" /> : <ClipboardPaste size={13} />}
+                <span>{copiedToken ? 'Tersalin' : 'Salin Token'}</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <div className="flex items-center gap-1.5 text-slate-300">
+                <Calendar size={13} className="text-indigo-400 shrink-0" />
+                <span className="font-bold text-white">
+                  {new Date(agendas[0]?.tanggal_kunjungan).toLocaleDateString('id-ID', { dateStyle: 'long' })}
+                </span>
+              </div>
+              {agendas[0]?.nomor_nota_dinas && (
+                <div className="flex items-center gap-1.5 text-slate-300 truncate">
+                  <FileText size={13} className="text-amber-400 shrink-0" />
+                  <span className="text-[11px] font-bold text-slate-300 truncate font-mono">
+                    {agendas[0]?.nomor_nota_dinas}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {agendas[0]?.tim_tugas && (
+              <div className="flex items-start gap-1.5 text-slate-300 border-t border-slate-800/80 pt-2">
+                <Users size={13} className="text-teal-400 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-slate-300 leading-snug">
+                  <span className="font-bold text-white">Tim Pengawas: </span>
+                  {agendas[0]?.tim_tugas.replace(/\|/g, ', ')}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* List Kartu Tiap Lokasi Kunjungan */}
+          <div className="space-y-3">
+            <p className="text-[11px] font-black uppercase tracking-wider text-slate-600 px-1">
+              Pilih Lokasi Usaha yang Diinspeksi:
+            </p>
+
+            <div className="space-y-2.5">
+              {agendas.map((loc, idx) => {
+                const hasBap = (loc.bap_pengawasans && loc.bap_pengawasans.length > 0) || loc.file_bap;
+                return (
+                  <div 
+                    key={loc.id}
+                    className="p-4 bg-slate-50 hover:bg-slate-100/90 border-2 border-slate-200 rounded-2xl transition-all shadow-xs space-y-2.5"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-lg bg-slate-900 text-white font-black text-xs flex items-center justify-center shrink-0">
+                          {idx + 1}
+                        </span>
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200">
+                          {loc.kategori || 'Sektor'}
+                        </span>
+                      </div>
+
+                      <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
+                        hasBap 
+                          ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+                          : 'bg-amber-100 text-amber-800 border-amber-300'
+                      }`}>
+                        {hasBap ? 'BAP Terisi' : 'Belum Diisi'}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h4 className="font-black text-slate-900 text-sm uppercase leading-tight">
+                        {loc.nama_kegiatan}
+                      </h4>
+                      <p className="text-xs font-bold text-slate-600 mt-0.5">
+                        Pemrakarsa: {loc.nama_pemrakarsa || '—'}
+                      </p>
+                    </div>
+
+                    {loc.alamat_lokasi && (
+                      <div className="flex items-start gap-1 text-[11px] font-medium text-slate-500">
+                        <MapPin size={12} className="text-rose-500 shrink-0 mt-0.5" />
+                        <span className="line-clamp-1">{loc.alamat_lokasi}</span>
+                      </div>
+                    )}
+
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/pengawasan/ba/isi/${loc.id}`)}
+                        className={`w-full py-2.5 rounded-xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all ${
+                          hasBap
+                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                            : 'bg-slate-900 hover:bg-slate-800 text-white'
+                        }`}
+                      >
+                        <span>{hasBap ? 'Lihat / Perbarui BAP' : 'Mulai Isi BAP Lokasi Ini'}</span>
+                        <ArrowRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Tombol Ganti Token */}
+          <div className="pt-2 text-center">
+            <button
+              type="button"
+              onClick={() => { setAgendas([]); setToken(''); }}
+              className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-wider"
+            >
+              &larr; Masukkan Token Lain
+            </button>
+          </div>
+        </div>
+      ) : singleAgenda ? (
+        /* TAMPILAN 2: SINGLE AGENDA PREVIEW (1 LOKASI) */
         <div className="bg-slate-50 border-2 border-emerald-200 rounded-2xl p-4 text-left space-y-3 animate-in zoom-in-95 duration-200 shadow-sm">
           <div className="flex items-center justify-between border-b border-slate-200 pb-2">
             <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
               <CheckCircle2 size={12} /> Agenda Terverifikasi
             </span>
             <span className="font-mono text-xs font-black text-slate-700">
-              {previewAgenda.token}
+              {singleAgenda.token}
             </span>
           </div>
 
@@ -130,10 +275,10 @@ function TokenForm() {
               Objek Pengawasan
             </span>
             <h4 className="font-black text-xs md:text-sm text-slate-900 uppercase leading-snug">
-              {previewAgenda.nama_kegiatan}
+              {singleAgenda.nama_kegiatan}
             </h4>
             <p className="text-[11px] font-bold text-slate-600 uppercase">
-              Pemrakarsa: {previewAgenda.nama_pemrakarsa || '—'}
+              Pemrakarsa: {singleAgenda.nama_pemrakarsa || '—'}
             </p>
           </div>
 
@@ -141,14 +286,14 @@ function TokenForm() {
             <div className="flex items-center gap-1.5">
               <Calendar size={13} className="text-indigo-600" />
               <span className="font-bold text-slate-700">
-                {new Date(previewAgenda.tanggal_kunjungan).toLocaleDateString('id-ID', { dateStyle: 'long' })}
+                {new Date(singleAgenda.tanggal_kunjungan).toLocaleDateString('id-ID', { dateStyle: 'long' })}
               </span>
             </div>
-            {previewAgenda.alamat_lokasi && (
+            {singleAgenda.alamat_lokasi && (
               <div className="flex items-start gap-1.5">
                 <MapPin size={13} className="text-rose-500 shrink-0 mt-0.5" />
                 <span className="text-[11px] font-medium text-slate-600 line-clamp-1">
-                  {previewAgenda.alamat_lokasi}
+                  {singleAgenda.alamat_lokasi}
                 </span>
               </div>
             )}
@@ -156,7 +301,7 @@ function TokenForm() {
 
           <button
             type="button"
-            onClick={handleProceedToBAP}
+            onClick={() => router.push(`/pengawasan/ba/isi/${singleAgenda.id}`)}
             className="w-full bg-slate-900 hover:bg-slate-800 text-white font-black text-xs uppercase tracking-widest py-3 rounded-xl shadow-md hover:-translate-y-0.5 hover:shadow-lg transition-all flex items-center justify-center gap-2"
           >
             <span>Buka Formulir BAP Lapangan</span>
@@ -164,13 +309,14 @@ function TokenForm() {
           </button>
         </div>
       ) : (
+        /* FORM INPUT TOKEN */
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="space-y-1.5">
             <div className="relative">
               <input 
                 type="text" 
                 required 
-                placeholder="CONTOH: FYK-A8B9C2" 
+                placeholder="CONTOH: PGW-A8B9C2" 
                 value={token}
                 onChange={(e) => {
                   setToken(e.target.value.toUpperCase());
