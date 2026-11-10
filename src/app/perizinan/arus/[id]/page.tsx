@@ -148,9 +148,11 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
             Dinas Lingkungan Hidup Kabupaten Sragen
           </p>
 
-          <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-center gap-2 text-xs font-bold text-slate-600 font-mono">
-            <span>No. Registrasi:</span>
-            <span className="px-2.5 py-1 bg-slate-100 text-slate-900 rounded-lg border border-slate-200 font-black">
+          <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2.5 text-xs font-mono">
+            <span className="text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider font-sans">
+              Nomor Registrasi:
+            </span>
+            <span className="px-3 py-1.5 bg-slate-100 text-slate-900 rounded-xl border border-slate-200 font-black tracking-wide text-xs sm:text-sm break-all text-center max-w-full shadow-xs">
               {doc.nomor_checklist || doc.nomor_registrasi_amdalnet || `REG-${doc.id}`}
             </span>
           </div>
