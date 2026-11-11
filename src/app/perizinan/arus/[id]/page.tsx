@@ -147,10 +147,10 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
     }
   ];
 
-  // Filter HANYA tahapan yang sudah selesai atau sedang berjalan
+  // Filter HANYA tahapan yang benar-benar SUDAH SELESAI divalidasi
   const steps = allSteps.filter(s => {
     if (s.isRelevant === false) return false;
-    return s.isDone || s.isActive;
+    return s.isDone;
   });
 
   return (
@@ -292,64 +292,32 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
                 Garis Waktu Arus Perizinan
               </h3>
             </div>
-            <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
+            <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 uppercase tracking-wider">
               {isSelesai 
                 ? 'Semua Tahap Selesai' 
-                : `${steps.length} Tahapan Tercapai`}
+                : `${steps.length} Tahapan Selesai Divalidasi`}
             </span>
           </div>
 
           <div className={`relative pl-6 space-y-8 ${steps.length > 1 ? 'before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-[3px] before:bg-slate-200' : ''}`}>
-            {steps.map((stItem, idx) => {
-              const done = stItem.isDone;
-              const active = stItem.isActive;
-
+            {steps.map((stItem) => {
               return (
                 <div key={stItem.id} className="relative flex items-start gap-4 group">
-                  {/* Icon Indicator */}
-                  <div className={`absolute -left-[27px] top-0 w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
-                    done && !active
-                      ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
-                      : active
-                      ? 'bg-indigo-600 text-white border-indigo-700 ring-4 ring-indigo-100 animate-pulse'
-                      : done
-                      ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
-                      : 'bg-white text-slate-500 border-slate-300'
-                  }`}>
-                    {done && !active ? (
-                      <Check size={14} className="stroke-[3]" />
-                    ) : active ? (
-                      <RefreshCw size={13} className="stroke-[2.5] animate-spin-slow" />
-                    ) : (
-                      <span className="text-xs font-black">{idx + 1}</span>
-                    )}
+                  {/* Icon Indicator Selesai */}
+                  <div className="absolute -left-[27px] top-0 w-8 h-8 rounded-full flex items-center justify-center border-2 bg-emerald-600 text-white border-emerald-700 shadow-xs transition-all">
+                    <Check size={14} className="stroke-[3]" />
                   </div>
 
                   {/* Step Content */}
-                  <div className={`flex-1 p-4 rounded-2xl border transition-all ${
-                    active
-                      ? 'bg-indigo-50/60 border-indigo-200 shadow-xs'
-                      : done
-                      ? 'bg-slate-50/60 border-slate-200'
-                      : 'bg-white border-slate-100 opacity-60'
-                  }`}>
+                  <div className="flex-1 p-4 rounded-2xl border bg-slate-50/70 border-slate-200 transition-all">
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <h4 className={`text-xs sm:text-sm font-black uppercase tracking-tight ${
-                        active ? 'text-indigo-900 font-black' : done ? 'text-slate-900' : 'text-slate-600'
-                      }`}>
+                      <h4 className="text-xs sm:text-sm font-black uppercase tracking-tight text-slate-900">
                         {stItem.title}
                       </h4>
 
-                      {active && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
-                          Tahap Aktif
-                        </span>
-                      )}
-                      {done && !active && (
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-wider">
-                          Selesai
-                        </span>
-                      )}
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-wider">
+                        Selesai
+                      </span>
                     </div>
 
                     <p className="text-xs font-semibold text-slate-600 mt-1 leading-relaxed">
@@ -381,7 +349,7 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
             <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3 text-xs text-slate-600 font-semibold shadow-2xs">
               <Sparkles size={16} className="text-emerald-600 shrink-0" />
               <p className="leading-relaxed">
-                Tahapan berikutnya akan otomatis muncul pada linimasa ini setelah diverifikasi dan disahkan oleh Tim Teknis DLH Kabupaten Sragen.
+                Tahapan berikutnya akan otomatis muncul pada linimasa ini setelah selesai diverifikasi dan diterbitkan dokumen resminya oleh Tim Teknis DLH Kabupaten Sragen.
               </p>
             </div>
           )}
