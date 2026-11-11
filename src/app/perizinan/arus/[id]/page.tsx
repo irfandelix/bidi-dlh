@@ -57,11 +57,28 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
   // Tentukan Status Terkini & Posisi Berkas (Bola di Siapa?)
   const st = (doc.status_tahapan || '').toLowerCase();
   
-  const isSelesai = st.includes('selesai') || st.includes('sk') || !!doc.nomor_sk;
-  const isBolaDiPemohon = st.includes('dikembalikan') || st.includes('pengembalian') || st.includes('perbaikan') || st.includes('revisi') && !st.includes('pemeriksaan revisi');
-  
-  // Tentukan Alur Gerbang Tahapan (1 s/d 7 Gerbang Utama untuk Pemohon)
-  const steps = [
+  const isSelesai = st.includes('selesai') || st.includes('sk') || st.includes('diarsipkan') || !!doc.nomor_sk;
+  const isBolaDiPemohon = st.includes('dikembalikan') || st.includes('pengembalian') || st.includes('perbaikan') || (st.includes('revisi') && !st.includes('pemeriksaan revisi') && !st.includes('revisi selesai'));
+
+  // Cek ketersediaan data tiap tahapan
+  const hasUjiData = !!doc.nomor_uji_berkas || !!doc.tanggal_uji_berkas;
+  const hasVerlapData = !!doc.nomor_ba_verlap || !!doc.tanggal_verlap;
+  const hasPemeriksaanData = !!doc.nomor_ba_pemeriksaan || !!doc.tanggal_pemeriksaan;
+  const hasPhpData = !!doc.nomor_php || !!doc.tanggal_php_1 || !!doc.tanggal_pengembalian;
+  const hasRevisiData = !!doc.nomor_revisi_1 || !!doc.tanggal_revisi_1 || doc.is_final_revisi;
+  const hasSkData = isSelesai || !!doc.nomor_sk || !!doc.tanggal_risalah || !!doc.nomor_risalah;
+
+  // Status aktif per tahapan
+  const isUjiActive = st.includes('uji administrasi') && !st.includes('selesai');
+  const isVerlapActive = st.includes('verlap') && !st.includes('selesai');
+  const isPemeriksaanActive = (st.includes('pemeriksaan-substansi') || st.includes('pemeriksaan substansi') || st.includes('sidang') || st === 'diperiksa');
+  const isRevisiPemohonActive = isBolaDiPemohon || st === 'revisi' || st === 'revisi lanjutan';
+  const isPemeriksaanRevisiActive = st.includes('pemeriksaan revisi') || (st.includes('revisi') && !isBolaDiPemohon && !st.includes('selesai'));
+  const isSkActive = st.includes('jilidan') || st.includes('finalisasi') || (isSelesai && !doc.nomor_sk);
+  const isRegistrasiActive = (st === 'registrasi' || st === 'proses') && !hasUjiData && !hasVerlapData && !hasPemeriksaanData && !hasSkData;
+
+  // Tentukan Alur Gerbang Tahapan
+  const allSteps = [
     {
       id: 1,
       title: 'Penerimaan & Registrasi Berkas',
@@ -69,7 +86,7 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
       tgl: doc.tanggal_masuk_dokumen || doc.created_at,
       nomor: doc.nomor_checklist || doc.nomor_registrasi_amdalnet,
       isDone: true,
-      isActive: st === 'registrasi' || st === 'proses',
+      isActive: isRegistrasiActive,
     },
     {
       id: 2,
@@ -77,8 +94,8 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
       deskripsi: 'Pemeriksaan kesesuaian dan kelengkapan dokumen persyaratan administrasi.',
       tgl: doc.tanggal_uji_berkas,
       nomor: doc.nomor_uji_berkas,
-      isDone: !!doc.nomor_uji_berkas || !!doc.tanggal_uji_berkas || isSelesai || st.includes('verlap') || st.includes('substansi') || st.includes('pemeriksaan'),
-      isActive: st === 'uji administrasi' || st === 'uji-administrasi',
+      isDone: hasUjiData || st.includes('uji administrasi selesai') || hasVerlapData || hasPemeriksaanData || hasPhpData || hasRevisiData || hasSkData,
+      isActive: isUjiActive,
     },
     {
       id: 3,
@@ -86,8 +103,9 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
       deskripsi: 'Inspeksi kesesuaian lokasi dan rona lingkungan hidup awal oleh Tim DLH.',
       tgl: doc.tanggal_verlap,
       nomor: doc.nomor_ba_verlap,
-      isDone: !!doc.nomor_ba_verlap || !!doc.tanggal_verlap || isSelesai || st.includes('substansi') || st.includes('pemeriksaan'),
-      isActive: st === 'verifikasi lapangan' || st === 'verlap',
+      isRelevant: hasVerlapData || isVerlapActive || st.includes('verlap'),
+      isDone: hasVerlapData || st.includes('verlap selesai'),
+      isActive: isVerlapActive,
     },
     {
       id: 4,
@@ -95,8 +113,8 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
       deskripsi: 'Pembahasan dokumen oleh Tim Penilai / Komisi Teknis Lingkungan Hidup.',
       tgl: doc.tanggal_pemeriksaan,
       nomor: doc.nomor_ba_pemeriksaan,
-      isDone: !!doc.nomor_ba_pemeriksaan || !!doc.tanggal_pemeriksaan || isSelesai || !!doc.nomor_php,
-      isActive: st.includes('pemeriksaan substansi') || st.includes('sidang') || st === 'diperiksa',
+      isDone: hasPemeriksaanData || hasPhpData || hasRevisiData || hasSkData,
+      isActive: isPemeriksaanActive,
     },
     {
       id: 5,
@@ -104,8 +122,9 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
       deskripsi: 'Penyempurnaan dokumen oleh pemohon sesuai Berita Acara catatan teknis.',
       tgl: doc.tanggal_php_1 || doc.tanggal_pengembalian,
       nomor: doc.nomor_php ? `Catatan BA: ${doc.nomor_php}` : null,
-      isDone: !!doc.nomor_revisi_1 || doc.is_final_revisi || isSelesai,
-      isActive: isBolaDiPemohon,
+      isRelevant: hasPhpData || isRevisiPemohonActive || hasRevisiData,
+      isDone: hasRevisiData || st.includes('penerimaan perbaikan') || st.includes('revisi selesai') || hasSkData,
+      isActive: isRevisiPemohonActive,
     },
     {
       id: 6,
@@ -113,8 +132,9 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
       deskripsi: 'Pemeriksaan kesesuaian revisi dokumen lingkungan hingga dinyatakan final.',
       tgl: doc.tanggal_revisi_1 || doc.tanggal_php_2,
       nomor: doc.nomor_revisi_1 ? `BA.P: ${doc.nomor_revisi_1}` : null,
-      isDone: !!doc.is_final_revisi || isSelesai,
-      isActive: st.includes('pemeriksaan revisi') || (st.includes('revisi') && !isBolaDiPemohon),
+      isRelevant: hasRevisiData || isPemeriksaanRevisiActive,
+      isDone: doc.is_final_revisi || st.includes('revisi selesai') || st.includes('jilidan') || hasSkData,
+      isActive: isPemeriksaanRevisiActive,
     },
     {
       id: 7,
@@ -122,10 +142,16 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
       deskripsi: 'Penerbitan Rekomendasi / Surat Keputusan (SK) Persetujuan Lingkungan Hidup.',
       tgl: doc.tanggal_risalah || doc.tanggal_penerimaan_jilidan,
       nomor: doc.nomor_sk || doc.nomor_risalah,
-      isDone: isSelesai,
-      isActive: isSelesai || st.includes('finalisasi'),
+      isDone: isSelesai || !!doc.nomor_sk,
+      isActive: isSkActive,
     }
   ];
+
+  // Filter HANYA tahapan yang sudah selesai atau sedang berjalan
+  const steps = allSteps.filter(s => {
+    if (s.isRelevant === false) return false;
+    return s.isDone || s.isActive;
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans p-4 sm:p-6 md:p-10 pb-20">
@@ -259,19 +285,21 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
 
         {/* TIMELINE ARUS TAHAPAN (STEPPER VISUAL) */}
         <div className="bg-white border-2 border-slate-200 rounded-3xl p-6 sm:p-7 shadow-sm space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <ShieldCheck size={18} className="text-emerald-700" />
               <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
                 Garis Waktu Arus Perizinan
               </h3>
             </div>
-            <span className="text-[11px] font-bold text-slate-600">
-              SOP 10 Tahapan
+            <span className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
+              {isSelesai 
+                ? 'Semua Tahap Selesai' 
+                : `${steps.length} Tahapan Tercapai`}
             </span>
           </div>
 
-          <div className="relative pl-6 space-y-8 before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-[3px] before:bg-slate-200">
+          <div className={`relative pl-6 space-y-8 ${steps.length > 1 ? 'before:absolute before:left-[17px] before:top-2 before:bottom-2 before:w-[3px] before:bg-slate-200' : ''}`}>
             {steps.map((stItem, idx) => {
               const done = stItem.isDone;
               const active = stItem.isActive;
@@ -280,14 +308,18 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
                 <div key={stItem.id} className="relative flex items-start gap-4 group">
                   {/* Icon Indicator */}
                   <div className={`absolute -left-[27px] top-0 w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${
-                    done
+                    done && !active
                       ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
                       : active
                       ? 'bg-indigo-600 text-white border-indigo-700 ring-4 ring-indigo-100 animate-pulse'
+                      : done
+                      ? 'bg-emerald-600 text-white border-emerald-700 shadow-xs'
                       : 'bg-white text-slate-500 border-slate-300'
                   }`}>
-                    {done ? (
+                    {done && !active ? (
                       <Check size={14} className="stroke-[3]" />
+                    ) : active ? (
+                      <RefreshCw size={13} className="stroke-[2.5] animate-spin-slow" />
                     ) : (
                       <span className="text-xs font-black">{idx + 1}</span>
                     )}
@@ -344,6 +376,15 @@ export default async function PelacakanArusPerizinanPage({ params }: { params: P
               );
             })}
           </div>
+
+          {!isSelesai && (
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3 text-xs text-slate-600 font-semibold shadow-2xs">
+              <Sparkles size={16} className="text-emerald-600 shrink-0" />
+              <p className="leading-relaxed">
+                Tahapan berikutnya akan otomatis muncul pada linimasa ini setelah diverifikasi dan disahkan oleh Tim Teknis DLH Kabupaten Sragen.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* FOOTER INFORMASI & PUSAT BANTUAN */}
