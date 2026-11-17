@@ -14,7 +14,8 @@ export async function updateSession(request: NextRequest) {
   const isPublicRoute = request.nextUrl.pathname.startsWith('/pengawasan/link/') || 
                         request.nextUrl.pathname.startsWith('/pengaduan/hasil/') || 
                         request.nextUrl.pathname.startsWith('/pengaduan/token') ||
-                        request.nextUrl.pathname.startsWith('/perizinan/arus')
+                        request.nextUrl.pathname.startsWith('/perizinan/arus') ||
+                        request.nextUrl.pathname.startsWith('/privacy')
 
   // Jika belum login dan mencoba mengakses halaman selain login, api, atau public route
   if (!bidiSession && !isLoginPage && !isApiRoute && !isPublicRoute) {
