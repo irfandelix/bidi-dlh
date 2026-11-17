@@ -14,10 +14,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Nama folder spesifik aduan tidak diberikan' }, { status: 400 });
     }
 
-    const PENGADUAN_ROOT_ID = process.env.GOOGLE_DRIVE_FOLDER_ID_PENGADUAN;
-    if (!PENGADUAN_ROOT_ID) {
-      throw new Error('GOOGLE_DRIVE_FOLDER_ID_PENGADUAN belum diatur di .env.local');
-    }
+    const PENGADUAN_ROOT_ID = process.env.GOOGLE_DRIVE_FOLDER_ID_PENGADUAN || 'Pengaduan';
 
     // 1. Dapatkan atau buat folder spesifik aduan di dalam Folder Pengaduan Utama
     // sanitize folder name to avoid invalid characters

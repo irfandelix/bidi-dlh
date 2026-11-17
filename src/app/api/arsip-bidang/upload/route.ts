@@ -15,10 +15,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Nama Kegiatan tidak boleh kosong' }, { status: 400 });
     }
 
-    const ARSIP_ROOT_ID = process.env.GOOGLE_DRIVE_FOLDER_ID_ARSIP;
-    if (!ARSIP_ROOT_ID) {
-      throw new Error('GOOGLE_DRIVE_FOLDER_ID_ARSIP belum diatur di .env.local');
-    }
+    const ARSIP_ROOT_ID = process.env.GOOGLE_DRIVE_FOLDER_ID_ARSIP || 'Arsip_Bidang';
 
     // 1. Dapatkan atau buat folder dengan Nama Kegiatan di dalam Folder Arsip
     // Karena ini arsip bidang, mungkin lebih rapi dimasukkan ke dalam subfolder "Arsip Bidang" dulu, tapi user minta langsung.

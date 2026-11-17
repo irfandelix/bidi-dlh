@@ -10,10 +10,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Tidak ada file yang diunggah' }, { status: 400 });
     }
 
-    const ARSIP_ROOT_ID = process.env.GOOGLE_DRIVE_FOLDER_ID_ARSIP;
-    if (!ARSIP_ROOT_ID) {
-      throw new Error('GOOGLE_DRIVE_FOLDER_ID_ARSIP belum diatur di .env.local');
-    }
+    const ARSIP_ROOT_ID = process.env.GOOGLE_DRIVE_FOLDER_ID_ARSIP || 'Arsip_Nota_Dinas';
 
     // 1. Dapatkan atau buat folder "Nota Dinas" di dalam Folder Arsip
     const notaDinasFolderId = await getOrCreateFolder('Nota Dinas', ARSIP_ROOT_ID);
