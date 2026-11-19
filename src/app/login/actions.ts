@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
 /**
@@ -60,7 +60,11 @@ export async function handleLogin(formData: FormData) {
       return { error: 'Nama pengguna atau kata sandi tidak valid.' };
     }
 
-    const supabase: any = await createClient();
+    // Use service role on the server so `users` can stay locked down behind RLS.
+    const supabase: any = createSupabaseAdmin(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
     // 3. Immune Parameterized Lookup:
     // We execute parameterized .eq() queries instead of raw string interpolation (.or(`...`))
