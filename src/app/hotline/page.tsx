@@ -2,9 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { PhoneCall, MessageSquare, Settings2, ShieldCheck, Users, Search, Clock, Save, Trash2, Edit2, Plus, ArrowRight, Paperclip, Loader2 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-
-const supabase = createClient();
 
 type Staff = { id: number; name: string; phone_number: string; role: string; department: string };
 type Chat = { phone_number: string; name: string; assigned_staff_id: number | null; last_message: string; last_message_time: string; category?: string; ticket_id?: string };
@@ -28,39 +25,38 @@ export default function HotlineDashboard() {
     fetchStaff();
     fetchChats();
 
-    // Realtime Subscriptions
-    const chatSub = supabase.channel('wa_chats_updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'wa_chats' }, () => {
-        fetchChats();
-      }).subscribe();
+    const interval = setInterval(() => {
+      fetchChats();
+      if (selectedChat) {
+        fetchMessages(selectedChat.phone_number);
+      }
+    }, 4000);
 
-    const msgSub = supabase.channel('wa_messages_updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'wa_messages' }, (payload) => {
-        // Only refresh messages if it belongs to the currently opened chat
-        if (selectedChat && payload.new && (payload.new as Message).wa_chat_id === selectedChat.phone_number) {
-           fetchMessages(selectedChat.phone_number);
-        }
-      }).subscribe();
-
-    return () => {
-      supabase.removeChannel(chatSub);
-      supabase.removeChannel(msgSub);
-    };
+    return () => clearInterval(interval);
   }, [selectedChat]);
 
   const fetchStaff = async () => {
-    const { data } = await supabase.from('wa_staff').select('*').order('id', { ascending: true });
-    if (data) setStaff(data);
+    const res = await fetch('/api/hotline?type=staff');
+    if (res.ok) {
+      const { data } = await res.json();
+      if (data) setStaff(data);
+    }
   };
 
   const fetchChats = async () => {
-    const { data } = await supabase.from('wa_chats').select('*').order('last_message_time', { ascending: false });
-    if (data) setChats(data);
+    const res = await fetch('/api/hotline?type=chats');
+    if (res.ok) {
+      const { data } = await res.json();
+      if (data) setChats(data);
+    }
   };
 
   const fetchMessages = async (chatId: string) => {
-    const { data } = await supabase.from('wa_messages').select('*').eq('wa_chat_id', chatId).neq('sender_type', 'system_transfer').order('created_at', { ascending: true });
-    if (data) setMessages(data);
+    const res = await fetch(`/api/hotline?type=messages&chatId=${encodeURIComponent(chatId)}`);
+    if (res.ok) {
+      const { data } = await res.json();
+      if (data) setMessages(data);
+    }
   };
 
   const handleSelectChat = (chat: Chat) => {
@@ -69,111 +65,37 @@ export default function HotlineDashboard() {
   };
 
   const handleCloseTicket = async (chatId: string, ticketId: string | undefined) => {
-    // 1. Kirim pesan penutup
-    const closingMessage = `Terima kasih, layanan untuk Tiket ${ticketId || ''} telah diselesaikan. Sesi obrolan ini ditutup.`;
-    await supabase.from('wa_messages').insert([{
-        wa_chat_id: chatId,
-        sender_type: 'staff',
-        message: closingMessage,
-        status: 'pending' // Bot will send this
-    }]);
-
-    // 2. Reset category and ticket
-    await supabase.from('wa_chats').update({ 
-        category: 'Umum', 
-        ticket_id: null, 
-        assigned_staff_id: null 
-    }).eq('phone_number', chatId);
+    await fetch('/api/hotline', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'close_ticket', chatId, ticketId }),
+    });
 
     setSuccessMessage('Tiket berhasil ditutup!');
     setSelectedChat(null);
+    fetchChats();
   };
 
   const handleTransfer = async (chatId: string, staffId: number) => {
-    await supabase.from('wa_chats').update({ assigned_staff_id: staffId }).eq('phone_number', chatId);
+    await fetch('/api/hotline', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'transfer_chat', chatId, staffId, sendNotification: true }),
+    });
+
     fetchChats();
     if (selectedChat?.phone_number === chatId) {
-        setSelectedChat({ ...selectedChat, assigned_staff_id: staffId });
+      setSelectedChat({ ...selectedChat, assigned_staff_id: staffId });
     }
-    
-    // Kirim pesan otomatis ke WA warga
-    const staffMember = staff.find(s => s.id === staffId);
-    if (staffMember) {
-        let roleText = staffMember.role;
-        if (staffMember.role.toLowerCase().includes('katim')) roleText = 'Ketua Tim';
-        
-        const transferMessage = `Sesi obrolan Anda telah dialihkan ke *${roleText} ${staffMember.department}*. Beliau akan segera merespons Anda.`;
-        
-        const selectedChatData = chats.find(c => c.phone_number === chatId);
-        const lastMsg = selectedChatData ? selectedChatData.last_message : '';
-        const citizenName = selectedChatData ? selectedChatData.name : 'Warga';
-        const chatCategory = selectedChatData ? selectedChatData.category : 'Umum';
-        const chatTicketId = selectedChatData?.ticket_id || `#ID-${Math.floor(1000 + Math.random() * 9000)}`;
-        
-        // Ambil riwayat percakapan 10 pesan terakhir
-        const { data: historyData } = await supabase
-            .from('wa_messages')
-            .select('*')
-            .eq('wa_chat_id', chatId)
-            .neq('sender_type', 'system_transfer')
-            .order('created_at', { ascending: true })
-            .limit(10);
-            
-        let historyText = '';
-        if (historyData && historyData.length > 0) {
-            historyText = historyData.map((msg: any) => {
-                const sender = msg.sender_type === 'public' ? 'Warga' : 'Admin';
-                return `*${sender}*:\n${msg.message}`;
-            }).join('\n\n');
-        } else {
-            historyText = `_Warga_:\n${lastMsg}`;
-        }
-        
-        const katimNotification = `⚠️ *PELIMPAHAN TIKET BARU (${chatCategory.toUpperCase()})*\nPengirim: *${citizenName}*\nTiket: ${chatTicketId}\n\n*Riwayat Percakapan (10 terakhir):*\n\n${historyText}\n\n---\n_(Abaikan tulisan ini, cukup Swipe Kanan pesan ini untuk membalas)_`;
-        
-        // Dapatkan nomor Katim dari database
-        const { data: staffData } = await supabase.from('wa_staff').select('name, phone_number').eq('id', staffId).single();
-        let katimPhoneTarget = chatId; // Default fallback
-        if (staffData && staffData.phone_number) {
-            let phone = staffData.phone_number.split('@')[0].replace(/\D/g, '');
-            if (phone.startsWith('0')) phone = '62' + phone.substring(1);
-            katimPhoneTarget = phone + '@s.whatsapp.net';
-            
-            // Mencegah Error 409 (Foreign Key Conflict):
-            // Pastikan Katim terdaftar di tabel wa_chats sebelum memasukkan pesan.
-            await supabase.from('wa_chats').upsert({
-                phone_number: katimPhoneTarget,
-                name: staffData.name || 'Ketua Tim',
-                last_message_time: new Date().toISOString(),
-                category: 'Umum'
-            }, { onConflict: 'phone_number' });
-        }
-        
-        await supabase.from('wa_messages').insert([
-            {
-                wa_chat_id: chatId,
-                sender_type: 'staff',
-                message: transferMessage,
-                status: 'pending'
-            },
-            {
-                wa_chat_id: katimPhoneTarget,
-                sender_type: 'staff',
-                message: katimNotification,
-                status: 'pending'
-            }
-        ]);
-    }
-    
     setSuccessMessage('Chat berhasil ditransfer!');
   };
 
   const handleSaveStaff = async () => {
-    if (isEditingStaff) {
-        await supabase.from('wa_staff').update(staffForm).eq('id', isEditingStaff.id);
-    } else {
-        await supabase.from('wa_staff').insert([staffForm]);
-    }
+    await fetch('/api/hotline', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'save_staff', id: isEditingStaff?.id, staffForm }),
+    });
     setIsEditingStaff(null);
     setStaffForm({ name: '', phone_number: '', role: 'katim', department: '' });
     fetchStaff();
@@ -181,8 +103,12 @@ export default function HotlineDashboard() {
 
   const handleDeleteStaff = async (id: number) => {
     if (confirm('Yakin ingin menghapus staff ini?')) {
-        await supabase.from('wa_staff').delete().eq('id', id);
-        fetchStaff();
+      await fetch('/api/hotline', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete_staff', id }),
+      });
+      fetchStaff();
     }
   };
 
@@ -375,26 +301,26 @@ export default function HotlineDashboard() {
                           // Set input to empty immediately for snappy feel
                           input.value = '';
                           
-                          // Insert to Supabase with status 'pending'
-                          const { error } = await supabase.from('wa_messages').insert([{
-                              wa_chat_id: selectedChat.phone_number,
-                              sender_type: 'staff',
+                          const res = await fetch('/api/hotline', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              action: 'send_message',
+                              chatId: selectedChat.phone_number,
+                              senderType: 'staff',
                               message: text,
-                              status: 'pending'
-                          }]);
-                          
-                          if (error) {
-                              console.error("Supabase Insert Error:", error);
-                              alert("Gagal mengirim pesan: " + error.message);
-                              input.value = text; // Kembalikan teks jika gagal
-                              return;
+                            }),
+                          });
+
+                          if (!res.ok) {
+                            const errJson = await res.json().catch(() => ({}));
+                            alert("Gagal mengirim pesan: " + (errJson.error || res.statusText));
+                            input.value = text;
+                            return;
                           }
-                          
-                          // Update chat last_message
-                          await supabase.from('wa_chats').update({
-                              last_message: text,
-                              last_message_time: new Date().toISOString()
-                          }).eq('phone_number', selectedChat.phone_number);
+
+                          fetchMessages(selectedChat.phone_number);
+                          fetchChats();
                           
                       }} className="flex gap-2 items-end">
                           <textarea 

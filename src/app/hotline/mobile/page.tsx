@@ -2,9 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { PhoneCall, MessageSquare, ShieldCheck, Search, ArrowLeft, ArrowRight } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
-
-const supabase = createClient();
 
 type Staff = { id: number; name: string; phone_number: string; role: string; department: string };
 type Chat = { phone_number: string; name: string; assigned_staff_id: number | null; last_message: string; last_message_time: string };
@@ -21,36 +18,38 @@ export default function MobileHotline() {
     fetchStaff();
     fetchChats();
 
-    const chatSub = supabase.channel('mobile_wa_chats')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'wa_chats' }, () => fetchChats())
-      .subscribe();
+    const interval = setInterval(() => {
+      fetchChats();
+      if (selectedChat) {
+        fetchMessages(selectedChat.phone_number);
+      }
+    }, 4000);
 
-    const msgSub = supabase.channel('mobile_wa_messages')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'wa_messages' }, (payload) => {
-        if (selectedChat && payload.new && (payload.new as Message).wa_chat_id === selectedChat.phone_number) {
-           fetchMessages(selectedChat.phone_number);
-        }
-      }).subscribe();
-
-    return () => {
-      supabase.removeChannel(chatSub);
-      supabase.removeChannel(msgSub);
-    };
+    return () => clearInterval(interval);
   }, [selectedChat]);
 
   const fetchStaff = async () => {
-    const { data } = await supabase.from('wa_staff').select('*').order('id', { ascending: true });
-    if (data) setStaff(data);
+    const res = await fetch('/api/hotline?type=staff');
+    if (res.ok) {
+      const { data } = await res.json();
+      if (data) setStaff(data);
+    }
   };
 
   const fetchChats = async () => {
-    const { data } = await supabase.from('wa_chats').select('*').order('last_message_time', { ascending: false });
-    if (data) setChats(data);
+    const res = await fetch('/api/hotline?type=chats');
+    if (res.ok) {
+      const { data } = await res.json();
+      if (data) setChats(data);
+    }
   };
 
   const fetchMessages = async (chatId: string) => {
-    const { data } = await supabase.from('wa_messages').select('*').eq('wa_chat_id', chatId).order('created_at', { ascending: true });
-    if (data) setMessages(data);
+    const res = await fetch(`/api/hotline?type=messages&includeTransfer=1&chatId=${encodeURIComponent(chatId)}`);
+    if (res.ok) {
+      const { data } = await res.json();
+      if (data) setMessages(data);
+    }
   };
 
   const handleSelectChat = (chat: Chat) => {
@@ -60,7 +59,16 @@ export default function MobileHotline() {
 
   const handleTransfer = async (staffId: number) => {
     if (!selectedChat) return;
-    await supabase.from('wa_chats').update({ assigned_staff_id: staffId }).eq('phone_number', selectedChat.phone_number);
+    await fetch('/api/hotline', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'transfer_chat',
+        chatId: selectedChat.phone_number,
+        staffId,
+        sendNotification: false,
+      }),
+    });
     setIsTransferring(false);
     fetchChats();
     setSelectedChat({ ...selectedChat, assigned_staff_id: staffId });
