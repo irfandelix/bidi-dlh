@@ -451,7 +451,7 @@ export default function DaftarPerizinanPage() {
       .replace(/[^a-z0-9]+/g, ' ')
       .trim() || 'tanpa-judul';
 
-  const paketGroups = React.useMemo(() => {
+  const paketGroups = (() => {
     const map = new Map<string, { key: string; title: string; pemrakarsa: string; isManual: boolean; docs: Dokumen[] }>();
     for (const d of activeDocs) {
       const manualName = typeof d.paket_nama === 'string' ? d.paket_nama.trim() : '';
@@ -470,7 +470,7 @@ export default function DaftarPerizinanPage() {
       }
     }
     return Array.from(map.values());
-  }, [activeDocs]);
+  })();
 
   const togglePaket = (key: string) => {
     setExpandedPakets(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
