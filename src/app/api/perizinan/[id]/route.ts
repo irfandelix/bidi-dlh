@@ -90,7 +90,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       const tahun = doc.tahun || tglObj.getFullYear().toString();
       
       let currentSeq = doc.seq_verlap;
-      if (!currentSeq) {
+      if (parseInt(String(tahun), 10) >= 2027) {
+        // Mulai 2027 semua tahapan mengikuti no_urut dokumen (001, 002, ...) tanpa offset 48.
+        currentSeq = doc.no_urut || doc.id;
+      } else if (!currentSeq) {
         // Find max seq_verlap for this year
         const { data: maxDocs } = await supabase
           .from('dokumens')
@@ -117,7 +120,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       const tahun = doc.tahun || tglObj.getFullYear().toString();
       
       let currentSeq = doc.seq_pemeriksaan;
-      if (!currentSeq) {
+      if (parseInt(String(tahun), 10) >= 2027) {
+        // Mulai 2027 semua tahapan mengikuti no_urut dokumen (001, 002, ...) tanpa offset 48.
+        currentSeq = doc.no_urut || doc.id;
+      } else if (!currentSeq) {
         // Find max seq_pemeriksaan for this year
         const { data: maxDocs } = await supabase
           .from('dokumens')
@@ -185,7 +191,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         const bulan = tglObj.getMonth() + 1;
         const tahun = doc.tahun || tglObj.getFullYear().toString();
         
-        const seqUntukRevisi = doc.seq_pemeriksaan ?? ((doc.no_urut || doc.id) + 48);
+        const seqUntukRevisi =
+          parseInt(String(tahun), 10) >= 2027
+            ? (doc.no_urut || doc.id)
+            : (doc.seq_pemeriksaan ?? ((doc.no_urut || doc.id) + 48));
         const seqPadded = String(seqUntukRevisi).padStart(3, '0');
         const generatedNomorStr = `600.4.5/${seqPadded}.${bulan}/17/${kodeTahapan}.${jenisAcronym}/${tahun}`;
 
