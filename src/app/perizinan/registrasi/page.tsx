@@ -457,7 +457,7 @@ export default function RegistrasiPage() {
               <>
                 {/* Step 1: Data Registrasi Utama */}
                 <div id="step-1" className={currentStep === 1 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden'}>
-                  <h3 className="text-indigo-600 font-black text-xl mb-6 flex items-center border-b border-slate-200 pb-4 uppercase">
+                  <h3 className="text-teal-700 font-black text-xl mb-6 flex items-center border-b border-slate-200 pb-4 uppercase">
                     Data Registrasi Utama
                   </h3>
                   
@@ -586,7 +586,7 @@ export default function RegistrasiPage() {
 
                 {/* Step 2: Checklist */}
                 <div id="step-2" className={currentStep === 2 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden'}>
-                  <h3 className="text-indigo-600 font-black text-xl mb-6 flex items-center border-b border-slate-200 pb-4 uppercase">
+                  <h3 className="text-teal-700 font-black text-xl mb-6 flex items-center border-b border-slate-200 pb-4 uppercase">
                     Checklist Kelengkapan
                   </h3>
                   <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
@@ -627,7 +627,7 @@ export default function RegistrasiPage() {
 
                 {/* Step 3: Kesimpulan */}
                 <div id="step-3" className={currentStep === 3 ? 'block animate-in fade-in slide-in-from-right-4 duration-300' : 'hidden'}>
-                  <h3 className="text-indigo-600 font-black text-xl mb-6 flex items-center border-b border-slate-200 pb-4 uppercase">
+                  <h3 className="text-teal-700 font-black text-xl mb-6 flex items-center border-b border-slate-200 pb-4 uppercase">
                     Kesimpulan Verifikasi
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start max-w-3xl">

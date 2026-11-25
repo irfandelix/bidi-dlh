@@ -249,11 +249,11 @@ export default function PengaduanListPage() {
         >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">Form Terisi</span>
-            <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center">
               <FileCheck size={16} />
             </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-black text-indigo-600 mt-2 font-mono">{metrics.terisi}</p>
+          <p className="text-2xl sm:text-3xl font-black text-teal-700 mt-2 font-mono">{metrics.terisi}</p>
           <p className="text-[11px] font-bold text-slate-500 mt-1">Siap verlap / tindak lanjut</p>
         </div>
 

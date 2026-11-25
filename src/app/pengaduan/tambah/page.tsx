@@ -258,19 +258,19 @@ export default function BuatAgendaPengaduanPage() {
             )}
 
             {/* Kotak Token Besar - Khusus BIDIDLH.apk */}
-            <div className="text-center p-6 bg-purple-50/70 border-2 border-purple-200 rounded-2xl space-y-3">
-              <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-purple-700">
+            <div className="text-center p-6 bg-emerald-50/70 border-2 border-emerald-200 rounded-2xl space-y-3">
+              <div className="flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest text-emerald-700">
                 <Key size={16} />
                 <span>Kode Token Integrasi BIDIDLH.apk</span>
               </div>
               <div className="flex items-center justify-center gap-3">
-                <span className="text-3xl sm:text-4xl font-black font-mono text-purple-950 tracking-wider bg-white px-6 py-3 rounded-2xl border-2 border-purple-300 shadow-inner">
+                <span className="text-3xl sm:text-4xl font-black font-mono text-emerald-950 tracking-wider bg-white px-6 py-3 rounded-2xl border-2 border-emerald-300 shadow-inner">
                   {successData.token}
                 </span>
                 <button
                   type="button"
                   onClick={handleCopyToken}
-                  className="p-3.5 bg-white hover:bg-purple-100 text-purple-800 border-2 border-purple-300 rounded-2xl shadow-sm hover:shadow transition-all"
+                  className="p-3.5 bg-white hover:bg-emerald-100 text-emerald-800 border-2 border-emerald-300 rounded-2xl shadow-sm hover:shadow transition-all"
                   title="Salin kode token"
                 >
                   {copiedToken ? <Check size={20} className="text-emerald-600" /> : <Copy size={20} />}

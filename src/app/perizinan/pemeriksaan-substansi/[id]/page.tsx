@@ -424,15 +424,15 @@ export default function PemeriksaanSubstansiPage({ params }: { params: Promise<{
         </div>
 
         {/* Upload Arsip Fisik BA Sidang (Isolated from main form) */}
-        <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-indigo-300 bg-indigo-50">
-          <h3 className="text-sm font-bold text-indigo-800 mb-4 uppercase flex items-center gap-2">
+        <div className="mb-8 p-6 rounded-2xl border-2 border-dashed border-teal-300 bg-teal-50/60">
+          <h3 className="text-sm font-bold text-teal-800 mb-4 uppercase flex items-center gap-2">
             <ClipboardCheck size={18} /> Upload Berkas Digital
           </h3>
           
           <div className="grid grid-cols-1 gap-4 mb-4">
             {/* BA Sidang */}
             <div className="space-y-2">
-              <label className="block text-xs font-bold text-indigo-900 uppercase">Berita Acara Sidang / Pemeriksaan Ter-Tanda Tangan</label>
+              <label className="block text-xs font-bold text-teal-900 uppercase">Berita Acara Sidang / Pemeriksaan Ter-Tanda Tangan</label>
               {(() => {
                 let url = '';
                 try { url = (doc?.arsip_fisik && typeof doc.arsip_fisik === 'string' ? JSON.parse(doc.arsip_fisik) : doc?.arsip_fisik)?.urlBaSidang; } catch(e) {}
