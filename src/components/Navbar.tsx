@@ -103,8 +103,10 @@ export default function Navbar() {
         <button
           type="button"
           onClick={() => setIsSettingsOpen((prev) => !prev)}
-          className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 shadow-sm transition-all"
+          className="flex items-center justify-center w-11 h-11 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 shadow-sm transition-all"
           title="Pengaturan"
+          aria-label="Pengaturan"
+          aria-expanded={isSettingsOpen}
         >
           <Settings size={18} className="text-slate-900" />
         </button>

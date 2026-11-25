@@ -738,7 +738,7 @@ export default function FormBAP({ agendaData, setScreen, supabase }: any) {
                   >
                     <span className="text-on-primary font-bold">X</span>
                   </button>
-                  <img src={photo.uri} className="w-full h-48 rounded-lg border border-outline-variant mb-4" />
+                  <img src={photo.uri} alt={photo.keterangan || `Foto dokumentasi ${idx + 1}`} className="w-full h-48 rounded-lg border border-outline-variant mb-4" />
                   <input
                     className="w-full bg-surface border border-outline-variant rounded-lg px-3 py-2 text-on-surface font-bold"
                     placeholder="Keterangan foto..."

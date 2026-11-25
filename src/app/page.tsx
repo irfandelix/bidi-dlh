@@ -591,35 +591,35 @@ export default function Home() {
         </div>
         
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-          <div onClick={() => openModal('Total Permohonan Izin', 'perizinan', () => true)} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Total Permohonan Izin', 'perizinan', () => true)} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Berkas</p>
             <h3 className="text-3xl md:text-4xl font-black text-slate-900">{loading ? '...' : stats.perizinan.total}</h3>
             <span className="text-[10px] font-bold text-slate-400 mt-1 block">Semua Dokumen</span>
-          </div>
+          </button>
 
-          <div onClick={() => openModal('Permohonan Sedang Diproses', 'perizinan', (d) => !['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan', 'DIKEMBALIKAN', 'Dikembalikan / Ditolak', 'Pengembalian BA', 'Pengembalian Revisi', 'DITOLAK', 'BATAL', 'Ditolak', 'Batal'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Permohonan Sedang Diproses', 'perizinan', (d) => !['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan', 'DIKEMBALIKAN', 'Dikembalikan / Ditolak', 'Pengembalian BA', 'Pengembalian Revisi', 'DITOLAK', 'BATAL', 'Ditolak', 'Batal'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-amber-700 uppercase tracking-widest mb-1">Diproses</p>
             <h3 className="text-3xl md:text-4xl font-black text-amber-600">{loading ? '...' : stats.perizinan.proses}</h3>
             <span className="text-[10px] font-bold text-amber-500 mt-1 block">Uji & Verlap</span>
-          </div>
+          </button>
 
-          <div onClick={() => openModal('Permohonan Selesai / SK', 'perizinan', (d) => ['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan', 'Selesai'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Permohonan Selesai / SK', 'perizinan', (d) => ['Selesai / SK', 'Menunggu Jilidan', 'Diarsipkan', 'Selesai'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-emerald-700 uppercase tracking-widest mb-1">Selesai</p>
             <h3 className="text-3xl md:text-4xl font-black text-emerald-600">{loading ? '...' : stats.perizinan.selesai}</h3>
             <span className="text-[10px] font-bold text-emerald-500 mt-1 block">SK Terbit</span>
-          </div>
+          </button>
 
-          <div onClick={() => openModal('Permohonan Dikembalikan', 'perizinan', (d) => ['DIKEMBALIKAN', 'Dikembalikan / Ditolak', 'Pengembalian BA', 'Pengembalian Revisi'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Permohonan Dikembalikan', 'perizinan', (d) => ['DIKEMBALIKAN', 'Dikembalikan / Ditolak', 'Pengembalian BA', 'Pengembalian Revisi'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-blue-700 uppercase tracking-widest mb-1">Dikembalikan</p>
             <h3 className="text-3xl md:text-4xl font-black text-blue-600">{loading ? '...' : stats.perizinan.dikembalikan}</h3>
             <span className="text-[10px] font-bold text-blue-500 mt-1 block">Perlu Revisi</span>
-          </div>
+          </button>
 
-          <div onClick={() => openModal('Permohonan Ditolak / Batal', 'perizinan', (d) => ['DITOLAK', 'BATAL', 'Ditolak', 'Batal'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Permohonan Ditolak / Batal', 'perizinan', (d) => ['DITOLAK', 'BATAL', 'Ditolak', 'Batal'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-rose-700 uppercase tracking-widest mb-1">Ditolak / Batal</p>
             <h3 className="text-3xl md:text-4xl font-black text-rose-600">{loading ? '...' : stats.perizinan.ditolak}</h3>
             <span className="text-[10px] font-bold text-rose-500 mt-1 block">Tidak Memenuhi</span>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -640,41 +640,41 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div onClick={() => openModal('Total Kegiatan Pengawasan', 'pengawasan', () => true)} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Total Kegiatan Pengawasan', 'pengawasan', () => true)} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Kegiatan</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl md:text-4xl font-black text-slate-900">{loading ? '...' : stats.pengawasan.total}</h3>
               <span className="text-slate-500 text-xs font-bold mb-1">Lokasi</span>
             </div>
             <span className="text-[10px] font-bold text-slate-400 mt-1 block">Target Pengawasan</span>
-          </div>
+          </button>
 
-          <div onClick={() => openModal('Pengawasan Kategori: Taat', 'pengawasan', (d) => getStatusKetaatan(d.status_ketaatan) === 'taat')} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Pengawasan Kategori: Taat', 'pengawasan', (d) => getStatusKetaatan(d.status_ketaatan) === 'taat')} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-emerald-700 uppercase tracking-widest mb-1">Ketaatan: Taat</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl md:text-4xl font-black text-emerald-600">{loading ? '...' : stats.pengawasan.taat}</h3>
               <span className="text-slate-500 text-xs font-bold mb-1">Lokasi</span>
             </div>
             <span className="text-[10px] font-bold text-emerald-500 mt-1 block">Memenuhi Baku Mutu</span>
-          </div>
+          </button>
 
-          <div onClick={() => openModal('Pengawasan Kategori: Kurang Taat / Bersyarat', 'pengawasan', (d) => getStatusKetaatan(d.status_ketaatan) === 'kurang')} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Pengawasan Kategori: Kurang Taat / Bersyarat', 'pengawasan', (d) => getStatusKetaatan(d.status_ketaatan) === 'kurang')} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-amber-700 uppercase tracking-widest mb-1">Kurang / Bersyarat</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl md:text-4xl font-black text-amber-600">{loading ? '...' : stats.pengawasan.kurang}</h3>
               <span className="text-slate-500 text-xs font-bold mb-1">Lokasi</span>
             </div>
             <span className="text-[10px] font-bold text-amber-500 mt-1 block">Perlu Perbaikan</span>
-          </div>
+          </button>
 
-          <div onClick={() => openModal('Pengawasan Kategori: Tidak Taat', 'pengawasan', (d) => getStatusKetaatan(d.status_ketaatan) === 'tidak')} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Pengawasan Kategori: Tidak Taat', 'pengawasan', (d) => getStatusKetaatan(d.status_ketaatan) === 'tidak')} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-rose-700 uppercase tracking-widest mb-1">Tidak Taat</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl md:text-4xl font-black text-rose-600">{loading ? '...' : stats.pengawasan.tidak}</h3>
               <span className="text-slate-500 text-xs font-bold mb-1">Lokasi</span>
             </div>
             <span className="text-[10px] font-bold text-rose-500 mt-1 block">Sanksi / Teguran</span>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -695,41 +695,41 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div onClick={() => openModal('Total Pengaduan Masyarakat', 'pengaduan', () => true)} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Total Pengaduan Masyarakat', 'pengaduan', () => true)} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Aduan</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl md:text-4xl font-black text-slate-900">{loading ? '...' : stats.pengaduan.total}</h3>
               <span className="text-slate-500 text-xs font-bold mb-1">Kasus</span>
             </div>
             <span className="text-[10px] font-bold text-slate-400 mt-1 block">Semua Tiket</span>
-          </div>
+          </button>
 
-          <div onClick={() => openModal('Aduan Belum Diproses', 'pengaduan', (d) => ['Menunggu Isian', 'Belum Diproses', 'Baru', 'Pending'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Aduan Belum Diproses', 'pengaduan', (d) => ['Menunggu Isian', 'Belum Diproses', 'Baru', 'Pending'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-rose-700 uppercase tracking-widest mb-1">Menunggu Pelapor</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl md:text-4xl font-black text-rose-600">{loading ? '...' : stats.pengaduan.belum}</h3>
               <span className="text-slate-500 text-xs font-bold mb-1">Kasus</span>
             </div>
             <span className="text-[10px] font-bold text-rose-500 mt-1 block">Belum Isi Form</span>
-          </div>
+          </button>
 
-          <div onClick={() => openModal('Aduan Sedang Diproses', 'pengaduan', (d) => !['Menunggu Isian', 'Belum Diproses', 'Baru', 'Pending', 'Selesai', 'Diarsipkan', 'Tuntas'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Aduan Sedang Diproses', 'pengaduan', (d) => !['Menunggu Isian', 'Belum Diproses', 'Baru', 'Pending', 'Selesai', 'Diarsipkan', 'Tuntas'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-amber-700 uppercase tracking-widest mb-1">Sedang Proses</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl md:text-4xl font-black text-amber-600">{loading ? '...' : stats.pengaduan.proses}</h3>
               <span className="text-slate-500 text-xs font-bold mb-1">Kasus</span>
             </div>
             <span className="text-[10px] font-bold text-amber-500 mt-1 block">Verlap / Mediasi</span>
-          </div>
+          </button>
 
-          <div onClick={() => openModal('Aduan Selesai Ditangani', 'pengaduan', (d) => ['Selesai', 'Diarsipkan', 'Tuntas'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block">
+          <button type="button" onClick={() => openModal('Aduan Selesai Ditangani', 'pengaduan', (d) => ['Selesai', 'Diarsipkan', 'Tuntas'].includes(d.status_tahapan))} className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm relative overflow-hidden group hover:-translate-y-0.5 hover:shadow-md transition-all cursor-pointer block w-full text-left">
             <p className="text-[11px] font-black text-emerald-700 uppercase tracking-widest mb-1">Selesai</p>
             <div className="flex items-end gap-2">
               <h3 className="text-3xl md:text-4xl font-black text-emerald-600">{loading ? '...' : stats.pengaduan.selesai}</h3>
               <span className="text-slate-500 text-xs font-bold mb-1">Kasus</span>
             </div>
             <span className="text-[10px] font-bold text-emerald-500 mt-1 block">Tindak Lanjut Tuntas</span>
-          </div>
+          </button>
         </div>
       </div>
 

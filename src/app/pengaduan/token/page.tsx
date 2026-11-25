@@ -78,7 +78,7 @@ function TokenForm() {
       </p>
 
       {error && (
-        <div className="animate-bounce bg-rose-200 text-rose-900 text-xs font-bold p-4 rounded-xl border border-rose-200 mb-6 flex items-center justify-center gap-2 shadow-sm uppercase tracking-widest">
+        <div role="alert" className="bg-rose-200 text-rose-900 text-xs font-bold p-4 rounded-xl border border-rose-200 mb-6 flex items-center justify-center gap-2 shadow-sm uppercase tracking-widest">
           <AlertTriangle size={16} /> {error}
         </div>
       )}

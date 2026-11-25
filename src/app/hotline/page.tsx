@@ -177,7 +177,7 @@ export default function HotlineDashboard() {
                                      chat.category === 'Sampah' ? 'bg-emerald-100 text-emerald-700' :
                                      'bg-slate-100 text-slate-600';
                     return (
-                        <div key={chat.phone_number} onClick={() => handleSelectChat(chat)} className={`p-4 border-b border-slate-100 cursor-pointer transition-all hover:bg-slate-50 ${selectedChat?.phone_number === chat.phone_number ? 'bg-emerald-50/50 border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent'}`}>
+                        <button type="button" key={chat.phone_number} onClick={() => handleSelectChat(chat)} className={`w-full text-left p-4 border-b border-slate-100 cursor-pointer transition-all hover:bg-slate-50 ${selectedChat?.phone_number === chat.phone_number ? 'bg-emerald-50/80 ring-1 ring-inset ring-emerald-200' : ''}`}>
                           <div className="flex justify-between items-start mb-1">
                              <h3 className="font-bold text-slate-800 text-sm truncate pr-2">{chat.name || chat.phone_number.split('@')[0]}</h3>
                              <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">{formatTime(chat.last_message_time)}</span>
@@ -202,7 +202,7 @@ export default function HotlineDashboard() {
                                </span>
                              )}
                           </div>
-                        </div>
+                        </button>
                     )
                  })
               )}
