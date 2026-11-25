@@ -16,10 +16,8 @@ import {
   ExternalLink,
   Clock
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 
 export default function ArsipHubPage() {
-  const supabase = createClient();
   const [counts, setCounts] = useState({
     suratMasuk: 0,
     suratKeluar: 0,
@@ -31,23 +29,15 @@ export default function ArsipHubPage() {
   useEffect(() => {
     async function loadStats() {
       try {
-        const [
-          { count: masukCount },
-          { count: keluarCount },
-          { count: notaCount },
-          { count: bidangCount }
-        ] = await Promise.all([
-          supabase.from('arsip_masuk').select('*', { count: 'exact', head: true }),
-          supabase.from('arsip_keluar').select('*', { count: 'exact', head: true }),
-          supabase.from('arsip_nota_dinas').select('*', { count: 'exact', head: true }),
-          supabase.from('arsip_bidang').select('*', { count: 'exact', head: true })
-        ]);
+        const res = await fetch('/api/arsip/stats');
+        if (!res.ok) throw new Error('Gagal memuat statistik arsip');
+        const data = await res.json();
 
         setCounts({
-          suratMasuk: masukCount || 0,
-          suratKeluar: keluarCount || 0,
-          notaDinas: notaCount || 0,
-          arsipBidang: bidangCount || 0
+          suratMasuk: data.suratMasuk || 0,
+          suratKeluar: data.suratKeluar || 0,
+          notaDinas: data.notaDinas || 0,
+          arsipBidang: data.arsipBidang || 0
         });
       } catch (err) {
         console.error('Gagal memuat statistik arsip:', err);

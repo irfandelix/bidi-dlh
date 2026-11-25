@@ -29,10 +29,11 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
       const { data: docData } = await supabase.from('dokumens').select('*').eq('id', unwrappedParams.id).single();
       setDoc(docData);
 
-      // Fetch petugas (urutan_hierarki 13)
-      const { data: petugasData } = await supabase.from('tim_penilais').select('*').eq('urutan_hierarki', 13);
-      if (petugasData) {
-        setPetugasList(petugasData);
+      // Fetch petugas (urutan_hierarki 13) via server API
+      const petugasRes = await fetch('/api/tim-penilai?hierarki=13');
+      if (petugasRes.ok) {
+        const { data: petugasData } = await petugasRes.json();
+        if (petugasData) setPetugasList(petugasData);
       }
 
       setLoading(false);
