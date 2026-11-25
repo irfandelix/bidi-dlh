@@ -752,7 +752,7 @@ export default function RegistrasiPage() {
                     <div>
                       <label className="block mb-2 text-sm font-black text-slate-900 uppercase">10. Besaran Luasan <span className="text-rose-500">*</span></label>
                       <div className="flex">
-                        <input type="number" name="besaran_luasan" required placeholder="Angka luasan..." className="w-2/3 bg-slate-50 border border-slate-200 rounded-l-xl px-4 py-3 text-sm font-bold text-slate-900 focus:bg-white focus:shadow-sm outline-none transition-all border-r-0" />
+                        <input type="text" inputMode="decimal" pattern="[0-9]+([.,][0-9]+)?" title="Masukkan angka luasan, boleh memakai koma (,) atau titik (.) untuk desimal" name="besaran_luasan" required placeholder="Contoh: 3071,5" className="w-2/3 bg-slate-50 border border-slate-200 rounded-l-xl px-4 py-3 text-sm font-bold text-slate-900 focus:bg-white focus:shadow-sm outline-none transition-all border-r-0" />
                         <select name="satuan_luasan" className="w-1/3 bg-slate-100 border border-slate-200 rounded-r-xl px-4 py-3 text-sm font-black text-slate-900 outline-none cursor-pointer">
                             <option value="m2">m²</option>
                             <option value="Ha">Ha</option>
