@@ -61,7 +61,7 @@ export async function generateChecklistQrWithLogo(
       drawRoundedRect(ctx, geom.padX, geom.padX, geom.padSize, geom.padRadius);
       ctx.fillStyle = '#ffffff';
       ctx.fill();
-      ctx.lineWidth = 4;
+      ctx.lineWidth = Math.max(4, Math.round(size * 0.007));
       ctx.strokeStyle = '#0f766e';
       ctx.stroke();
 
