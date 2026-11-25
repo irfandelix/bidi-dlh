@@ -23,7 +23,6 @@ export default function DaftarPerizinanPage() {
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [downloadingStageKey, setDownloadingStageKey] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'paket' | 'dokumen'>('paket');
   const [expandedPakets, setExpandedPakets] = useState<string[]>([]);
   const [isPaketModalOpen, setIsPaketModalOpen] = useState(false);
   const [paketNameInput, setPaketNameInput] = useState('');
@@ -185,11 +184,13 @@ export default function DaftarPerizinanPage() {
 
   const colorMap: Record<string, any> = {
     slate: { light: 'bg-slate-50', text: 'text-slate-700', solid: 'bg-slate-500', icon: 'text-slate-500', hover: 'hover:text-slate-600', cardBg: 'bg-slate-100', cardText: 'text-slate-600' },
+    teal: { light: 'bg-teal-50', text: 'text-teal-700', solid: 'bg-teal-500', icon: 'text-teal-500', hover: 'hover:text-teal-600', cardBg: 'bg-teal-100', cardText: 'text-teal-600' },
     emerald: { light: 'bg-emerald-50', text: 'text-emerald-700', solid: 'bg-emerald-500', icon: 'text-emerald-500', hover: 'hover:text-emerald-600', cardBg: 'bg-emerald-100', cardText: 'text-emerald-600' },
   };
 
   const groupTabs = [
     { id: 0, title: 'Semua Dokumen', shortTitle: 'Semua', color: 'slate', icon: LayoutDashboard, filterFn: (d: any) => true },
+    { id: 2, title: 'Paket Kegiatan', shortTitle: 'Paket', color: 'teal', icon: Layers, filterFn: (d: any) => true },
     { id: 1, title: 'Tabel Arsip Perizinan', shortTitle: 'Arsip', color: 'emerald', icon: Archive, filterFn: (d: any) => true },
   ];
 
@@ -503,7 +504,7 @@ export default function DaftarPerizinanPage() {
       setPaketNameInput('');
       setSelectedDocIdsForPaket([]);
       setPaketSearchQuery('');
-      setViewMode('paket');
+      setActiveGroup(groupTabs[1]);
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -521,7 +522,7 @@ export default function DaftarPerizinanPage() {
   };
 
   // Pagination
-  const isPaketView = activeGroup.id === 0 && viewMode === 'paket';
+  const isPaketView = activeGroup.id === 2;
   const totalPages = Math.ceil((isPaketView ? paketGroups.length : activeDocs.length) / itemsPerPage);
   const paginatedDocs = activeDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   const paginatedPakets = paketGroups.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -559,8 +560,8 @@ export default function DaftarPerizinanPage() {
         </div>
       </div>
 
-      {/* 2 Group Tabs (Minimalist) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* 3 Group Tabs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {groupTabs.map((group) => {
           const theme = colorMap[group.color];
           const Icon = group.icon;
@@ -612,37 +613,14 @@ export default function DaftarPerizinanPage() {
           </div>
           
           <div className="flex items-center flex-wrap gap-3 w-full xl:w-auto">
-            {activeGroup.id === 0 && (
-              <>
-                <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-                  <button
-                    type="button"
-                    onClick={() => { setViewMode('paket'); setCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all flex items-center gap-1.5 ${
-                      viewMode === 'paket' ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <Layers size={14} /> Paket Kegiatan
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { setViewMode('dokumen'); setCurrentPage(1); }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all flex items-center gap-1.5 ${
-                      viewMode === 'dokumen' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    <FileText size={14} /> Per Dokumen
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setIsPaketModalOpen(true)}
-                  className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm border border-teal-700"
-                >
-                  <Plus size={18} /> Buat / Gabung Paket
-                </button>
-              </>
+            {isPaketView && (
+              <button
+                type="button"
+                onClick={() => setIsPaketModalOpen(true)}
+                className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm border border-teal-700"
+              >
+                <Plus size={18} /> Buat / Gabung Paket
+              </button>
             )}
             <select 
               value={filterTahun}
@@ -692,7 +670,7 @@ export default function DaftarPerizinanPage() {
         </div>
         
         <div className="overflow-x-auto">
-          {activeGroup.id === 0 && viewMode === 'paket' ? (
+          {isPaketView ? (
             // MODE PAKET KEGIATAN (1 baris per nama kegiatan)
             <table className="w-full text-left">
               <thead className="bg-white border-b-4 border-slate-200">
