@@ -45,3 +45,29 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Terjadi kesalahan pada server' }, { status: 500 });
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const { ids, paket_nama } = await request.json();
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json({ error: 'Pilih minimal satu dokumen' }, { status: 400 });
+    }
+
+    const supabase: any = await createClient();
+    const cleanName = typeof paket_nama === 'string' && paket_nama.trim() ? paket_nama.trim() : null;
+
+    const { error } = await supabase
+      .from('dokumens')
+      .update({ paket_nama: cleanName })
+      .in('id', ids);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ success: true, paket_nama: cleanName });
+  } catch (error: any) {
+    console.error('PATCH /api/perizinan error:', error);
+    return NextResponse.json({ error: 'Terjadi kesalahan pada server' }, { status: 500 });
+  }
+}

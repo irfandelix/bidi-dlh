@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 import { 
   LayoutDashboard, Zap, Plus, FileText, MapPin, 
   ClipboardCheck, FileEdit, CheckCircle, History, 
-  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Loader2, Eye, Calendar, ExternalLink
+  Printer, Kanban, CircleDashed, Archive, RotateCcw, Clock, Search, Info, ChevronDown, ChevronUp, Download, Filter, Copy, Check, Loader2, Eye, Calendar, ExternalLink, Layers, X
 } from 'lucide-react';
 
 type Dokumen = any; // Will use proper types later
@@ -23,6 +23,13 @@ export default function DaftarPerizinanPage() {
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [downloadingStageKey, setDownloadingStageKey] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'paket' | 'dokumen'>('paket');
+  const [expandedPakets, setExpandedPakets] = useState<string[]>([]);
+  const [isPaketModalOpen, setIsPaketModalOpen] = useState(false);
+  const [paketNameInput, setPaketNameInput] = useState('');
+  const [selectedDocIdsForPaket, setSelectedDocIdsForPaket] = useState<number[]>([]);
+  const [paketSearchQuery, setPaketSearchQuery] = useState('');
+  const [savingPaket, setSavingPaket] = useState(false);
 
   const handleCopyText = (text: string, key: string, e?: React.MouseEvent) => {
     if (e) {
@@ -436,9 +443,88 @@ export default function DaftarPerizinanPage() {
     const fileName = `Laporan_Arsip_Perizinan_${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
+  // Normalisasi nama kegiatan agar perbedaan spasi, tanda baca, dan embel-embel jenis dokumen otomatis tergabung.
+  const normalizePaketKey = (name?: string) =>
+    (name || '')
+      .toLowerCase()
+      .replace(/\((pertek|rintek|ukl-upl|amdal|sppl)[^)]*\)/gi, ' ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim() || 'tanpa-judul';
+
+  const paketGroups = React.useMemo(() => {
+    const map = new Map<string, { key: string; title: string; pemrakarsa: string; isManual: boolean; docs: Dokumen[] }>();
+    for (const d of activeDocs) {
+      const manualName = typeof d.paket_nama === 'string' ? d.paket_nama.trim() : '';
+      const key = manualName ? `manual:${manualName.toLowerCase()}` : `auto:${normalizePaketKey(d.nama_kegiatan)}`;
+      const existing = map.get(key);
+      if (existing) {
+        existing.docs.push(d);
+      } else {
+        map.set(key, {
+          key,
+          title: manualName || d.nama_kegiatan || 'Kegiatan Tanpa Judul',
+          pemrakarsa: d.nama_pemrakarsa || '-',
+          isManual: Boolean(manualName),
+          docs: [d],
+        });
+      }
+    }
+    return Array.from(map.values());
+  }, [activeDocs]);
+
+  const togglePaket = (key: string) => {
+    setExpandedPakets(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+  };
+
+  const refreshDocs = async () => {
+    const res = await fetch('/api/perizinan');
+    if (res.ok) {
+      const json = await res.json();
+      setDocs(json.data || []);
+    }
+  };
+
+  const handleSavePaket = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!paketNameInput.trim() || selectedDocIdsForPaket.length === 0) return;
+    setSavingPaket(true);
+    try {
+      const res = await fetch('/api/perizinan', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedDocIdsForPaket, paket_nama: paketNameInput.trim() }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Gagal menyimpan paket');
+      }
+      await refreshDocs();
+      setIsPaketModalOpen(false);
+      setPaketNameInput('');
+      setSelectedDocIdsForPaket([]);
+      setPaketSearchQuery('');
+      setViewMode('paket');
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setSavingPaket(false);
+    }
+  };
+
+  const handleDetachFromPaket = async (docId: number) => {
+    const res = await fetch('/api/perizinan', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids: [docId], paket_nama: null }),
+    });
+    if (res.ok) refreshDocs();
+  };
+
   // Pagination
-  const totalPages = Math.ceil(activeDocs.length / itemsPerPage);
+  const isPaketView = activeGroup.id === 0 && viewMode === 'paket';
+  const totalPages = Math.ceil((isPaketView ? paketGroups.length : activeDocs.length) / itemsPerPage);
   const paginatedDocs = activeDocs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedPakets = paketGroups.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="max-w-7xl mx-auto py-8 space-y-8 pb-20 px-4">
@@ -514,12 +600,50 @@ export default function DaftarPerizinanPage() {
               })()}
             </div>
             <div>
-              <h3 className="text-xl font-black text-slate-900 uppercase">{activeGroup.id === 1 ? 'Daftar Arsip Perizinan' : 'Daftar Semua Dokumen'}</h3>
-              <p className="text-sm font-bold text-slate-500">{activeDocs.length} dokumen {activeGroup.id === 0 && !searchQuery ? 'keseluruhan' : 'ditemukan'}</p>
+              <h3 className="text-xl font-black text-slate-900 uppercase">
+                {activeGroup.id === 1 ? 'Daftar Arsip Perizinan' : isPaketView ? 'Paket Kegiatan Perizinan' : 'Daftar Semua Dokumen'}
+              </h3>
+              <p className="text-sm font-bold text-slate-500">
+                {isPaketView
+                  ? `${paketGroups.length} paket kegiatan (${activeDocs.length} dokumen)`
+                  : `${activeDocs.length} dokumen ${activeGroup.id === 0 && !searchQuery ? 'keseluruhan' : 'ditemukan'}`}
+              </p>
             </div>
           </div>
           
           <div className="flex items-center flex-wrap gap-3 w-full xl:w-auto">
+            {activeGroup.id === 0 && (
+              <>
+                <div className="inline-flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => { setViewMode('paket'); setCurrentPage(1); }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all flex items-center gap-1.5 ${
+                      viewMode === 'paket' ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Layers size={14} /> Paket Kegiatan
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setViewMode('dokumen'); setCurrentPage(1); }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase transition-all flex items-center gap-1.5 ${
+                      viewMode === 'dokumen' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <FileText size={14} /> Per Dokumen
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsPaketModalOpen(true)}
+                  className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all shadow-sm border border-teal-700"
+                >
+                  <Plus size={18} /> Buat / Gabung Paket
+                </button>
+              </>
+            )}
             <select 
               value={filterTahun}
               onChange={(e) => { setFilterTahun(e.target.value); setCurrentPage(1); }}
@@ -568,7 +692,139 @@ export default function DaftarPerizinanPage() {
         </div>
         
         <div className="overflow-x-auto">
-          {activeGroup.id === 0 ? (
+          {activeGroup.id === 0 && viewMode === 'paket' ? (
+            // MODE PAKET KEGIATAN (1 baris per nama kegiatan)
+            <table className="w-full text-left">
+              <thead className="bg-white border-b-4 border-slate-200">
+                <tr>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200 w-36">Jumlah Berkas</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Nama Kegiatan &amp; Jenis Izin</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs border-r-2 border-slate-200">Pemrakarsa</th>
+                  <th className="px-6 py-4 font-black text-slate-900 uppercase text-xs text-center w-28">Detail</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y-2 divide-slate-900">
+                {paginatedPakets.length > 0 ? (
+                  paginatedPakets.map((paket) => {
+                    const isOpen = expandedPakets.includes(paket.key);
+                    const jenisList = Array.from(new Set(paket.docs.map((d: any) => d.jenis_dokumen).filter(Boolean)));
+                    const tahunList = Array.from(new Set(paket.docs.map((d: any) => d.tahun).filter(Boolean)));
+                    return (
+                      <React.Fragment key={paket.key}>
+                        <tr onClick={() => togglePaket(paket.key)} className="hover:bg-slate-50 transition-colors cursor-pointer group">
+                          <td className="px-6 py-4 border-r-2 border-slate-200">
+                            <div className="flex items-center gap-2">
+                              <span className="bg-teal-100 text-teal-800 font-black px-2.5 py-1 rounded-lg border border-teal-200 text-xs">
+                                {paket.docs.length} Berkas
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 border-r-2 border-slate-200">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <p className="font-black text-slate-900 text-sm uppercase">{paket.title}</p>
+                              {paket.isManual && (
+                                <span className="text-[10px] font-black uppercase bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded">
+                                  Paket Manual
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
+                              {jenisList.map((j: any) => (
+                                <span key={String(j)} className="text-[10px] font-black uppercase bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.5 rounded">
+                                  {String(j)}
+                                </span>
+                              ))}
+                              {tahunList.length > 0 && (
+                                <span className="text-[10px] font-bold text-slate-500 ml-1">
+                                  ({tahunList.join(', ')})
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 border-r-2 border-slate-200 font-bold text-slate-700 text-sm uppercase">
+                            {paket.pemrakarsa}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <button
+                              type="button"
+                              aria-label="Buka paket kegiatan"
+                              onClick={(e) => { e.stopPropagation(); togglePaket(paket.key); }}
+                              className="w-11 h-11 mx-auto rounded-lg bg-slate-100 hover:bg-teal-100 hover:text-teal-800 flex items-center justify-center border border-slate-200 transition-colors"
+                            >
+                              {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                            </button>
+                          </td>
+                        </tr>
+                        {isOpen && (
+                          <tr className="bg-slate-50 border-b-2 border-slate-200">
+                            <td colSpan={4} className="p-5">
+                              <div className="space-y-2.5">
+                                {paket.docs.map((d: any) => (
+                                  <div key={d.id} className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
+                                    <div className="space-y-1">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="bg-emerald-100 text-emerald-800 font-black px-2 py-0.5 rounded border border-emerald-200 text-xs">
+                                          #{String(d.no_urut || d.id).padStart(3, '0')} / {d.tahun || '2026'}
+                                        </span>
+                                        <span className="bg-slate-100 text-slate-800 font-black px-2 py-0.5 rounded border border-slate-200 text-[11px] uppercase">
+                                          {d.jenis_dokumen || '-'}
+                                        </span>
+                                        <span className="text-xs font-black text-teal-700 uppercase">
+                                          {d.status_tahapan || 'Registrasi'}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs font-bold text-slate-700 uppercase">{d.nama_kegiatan}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <button
+                                        type="button"
+                                        onClick={() => { setSelectedDoc(d); setIsActionModalOpen(true); }}
+                                        className="bg-teal-600 hover:bg-teal-700 text-white text-xs font-black px-3 py-2 rounded-lg transition-colors uppercase"
+                                      >
+                                        Kelola Tahap
+                                      </button>
+                                      <Link
+                                        href={`/perizinan/cetak/${d.id}`}
+                                        className="bg-amber-400 hover:bg-amber-300 text-slate-900 text-xs font-black px-3 py-2 rounded-lg border border-amber-500/30 flex items-center gap-1 uppercase"
+                                      >
+                                        <Printer size={13} /> Cetak
+                                      </Link>
+                                      <Link
+                                        href={`/perizinan/arsip/${d.id}`}
+                                        className="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-black px-3 py-2 rounded-lg border border-slate-200 uppercase"
+                                      >
+                                        Arsip
+                                      </Link>
+                                      {d.paket_nama && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDetachFromPaket(d.id)}
+                                          className="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-2.5 py-2 rounded-lg border border-rose-200"
+                                          title="Keluarkan dari paket manual"
+                                        >
+                                          Pisahkan
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500 font-bold bg-slate-50">
+                      Tidak ada paket kegiatan ditemukan.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          ) : activeGroup.id === 0 ? (
             // TABEL SEMUA DOKUMEN
             <table className="w-full text-left">
               <thead className="bg-white border-b-4 border-slate-200">
@@ -1039,6 +1295,137 @@ export default function DaftarPerizinanPage() {
               </a>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Modal Buat / Gabung Paket Kegiatan (Multi-Select) */}
+      {isPaketModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <form onSubmit={handleSavePaket} className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div className="p-6 border-b border-slate-200 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-black text-slate-900 uppercase">Buat / Gabung Paket Kegiatan</h3>
+                <p className="text-xs font-bold text-slate-500 mt-0.5">Pilih beberapa berkas yang maksud kegiatannya sama untuk disatukan.</p>
+              </div>
+              <button
+                type="button"
+                aria-label="Tutup modal paket"
+                onClick={() => setIsPaketModalOpen(false)}
+                className="w-11 h-11 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4 overflow-y-auto flex-1">
+              <div>
+                <label htmlFor="paket-nama-input" className="block text-xs font-black text-slate-800 uppercase mb-1.5">
+                  Nama Paket Kegiatan
+                </label>
+                <input
+                  id="paket-nama-input"
+                  type="text"
+                  required
+                  value={paketNameInput}
+                  onChange={(e) => setPaketNameInput(e.target.value)}
+                  placeholder="Contoh: Pembangunan RS Sehat Sentosa"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-slate-900 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label htmlFor="paket-search-input" className="text-xs font-black text-slate-800 uppercase">
+                    Pilih Dokumen ({selectedDocIdsForPaket.length} dipilih)
+                  </label>
+                  {selectedDocIdsForPaket.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDocIdsForPaket([])}
+                      className="text-xs font-bold text-rose-600 hover:underline"
+                    >
+                      Reset pilihan
+                    </button>
+                  )}
+                </div>
+                <input
+                  id="paket-search-input"
+                  type="text"
+                  value={paketSearchQuery}
+                  onChange={(e) => setPaketSearchQuery(e.target.value)}
+                  placeholder="Cari nama kegiatan, pemrakarsa, atau nomor urut..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm font-bold text-slate-900 mb-3 focus:bg-white"
+                />
+
+                <div className="border border-slate-200 rounded-2xl divide-y divide-slate-100 max-h-72 overflow-y-auto">
+                  {docs
+                    .filter((d) => {
+                      if (!paketSearchQuery.trim()) return true;
+                      const q = paketSearchQuery.toLowerCase();
+                      return (
+                        (d.nama_kegiatan || '').toLowerCase().includes(q) ||
+                        (d.nama_pemrakarsa || '').toLowerCase().includes(q) ||
+                        String(d.no_urut || d.id).includes(q)
+                      );
+                    })
+                    .map((d) => {
+                      const checked = selectedDocIdsForPaket.includes(d.id);
+                      return (
+                        <label
+                          key={d.id}
+                          className={`flex items-start gap-3 p-3 cursor-pointer hover:bg-slate-50 transition-colors ${checked ? 'bg-teal-50/60' : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() =>
+                              setSelectedDocIdsForPaket((prev) =>
+                                prev.includes(d.id) ? prev.filter((id) => id !== d.id) : [...prev, d.id]
+                              )
+                            }
+                            className="mt-1 w-4 h-4 accent-teal-600 cursor-pointer"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-black text-emerald-700">
+                                #{String(d.no_urut || d.id).padStart(3, '0')} / {d.tahun || '2026'}
+                              </span>
+                              <span className="text-[10px] font-black uppercase bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded">
+                                {d.jenis_dokumen || '-'}
+                              </span>
+                              {d.paket_nama && (
+                                <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
+                                  Paket: {d.paket_nama}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs font-bold text-slate-900 uppercase truncate mt-0.5">{d.nama_kegiatan}</p>
+                            <p className="text-[11px] font-semibold text-slate-500 truncate">{d.nama_pemrakarsa || '-'}</p>
+                          </div>
+                        </label>
+                      );
+                    })}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsPaketModalOpen(false)}
+                className="px-4 py-2.5 rounded-xl text-xs font-black uppercase text-slate-700 bg-white border border-slate-200 hover:bg-slate-100"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                disabled={savingPaket || !paketNameInput.trim() || selectedDocIdsForPaket.length === 0}
+                className="px-5 py-2.5 rounded-xl text-xs font-black uppercase text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 transition-colors"
+              >
+                {savingPaket ? 'Menyimpan...' : 'Simpan Paket'}
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>
