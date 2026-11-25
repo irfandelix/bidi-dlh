@@ -15,6 +15,7 @@ export async function updateSession(request: NextRequest) {
                         request.nextUrl.pathname.startsWith('/pengaduan/hasil/') || 
                         request.nextUrl.pathname.startsWith('/pengaduan/token') ||
                         request.nextUrl.pathname.startsWith('/perizinan/arus') ||
+                        request.nextUrl.pathname.startsWith('/checklist-perizinan') ||
                         request.nextUrl.pathname.startsWith('/privacy')
 
   // Jika belum login dan mencoba mengakses halaman selain login, api, atau public route

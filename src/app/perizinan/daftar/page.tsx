@@ -551,6 +551,9 @@ export default function DaftarPerizinanPage() {
           <Link href="/perizinan/arus" target="_blank" className="bg-sky-400 hover:bg-sky-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-md hover:shadow-sm border border-slate-200 transition-all flex items-center gap-2">
             <Search size={18} /> Portal Lacak Arus
           </Link>
+          <Link href="/perizinan/checklist-mandiri" className="bg-teal-700 hover:bg-teal-800 hover:-translate-y-1 text-white px-5 py-3 rounded-xl text-sm font-black shadow-md hover:shadow-sm border border-teal-800 transition-all flex items-center gap-2">
+            <ClipboardCheck size={18} /> Checklist Mandiri
+          </Link>
           <Link href="/perizinan/nota-dinas" className="bg-amber-400 hover:bg-amber-300 hover:-translate-y-1 text-slate-900 px-5 py-3 rounded-xl text-sm font-black shadow-md hover:shadow-sm border border-slate-200 transition-all flex items-center gap-2">
             <FileText size={18} /> Nota Dinas
           </Link>

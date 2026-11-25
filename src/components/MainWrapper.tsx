@@ -11,12 +11,13 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
   const isToken = pathname === '/pengawasan/token';
   const isBapIsi = pathname.startsWith('/pengawasan/ba/isi');
   const isArus = pathname?.startsWith('/perizinan/arus');
+  const isChecklistPublik = pathname === '/checklist-perizinan' || pathname?.startsWith('/checklist-perizinan/');
 
   let mainClass = "flex-1 pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full";
   if (isLogin) {
     mainClass = "flex-1 flex w-full";
-  } else if (isArus) {
-    mainClass = "flex-1 flex flex-col w-full min-h-screen p-0 m-0";
+  } else if (isArus || isChecklistPublik) {
+    mainClass = "flex-1 flex flex-col w-full min-h-dvh p-0 m-0";
   } else if (isPeta) {
     mainClass = "flex flex-col w-full h-[100dvh] pt-[76px] overflow-hidden"; // Full width & locked height for map
   } else if (isMobileApp) {
@@ -29,7 +30,7 @@ export default function MainWrapper({ children }: { children: React.ReactNode })
 
   return (
     <>
-      {(!isLogin && !isMobileApp && !isArus) && <Navbar />}
+      {(!isLogin && !isMobileApp && !isArus && !isChecklistPublik) && <Navbar />}
       <main className={mainClass}>
         {children}
       </main>
