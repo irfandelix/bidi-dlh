@@ -58,7 +58,7 @@ const NAV_ITEMS = [
     sub: 'Piket MPP',
     icon: Store,
     color: 'purple',
-    activeClass: 'bg-purple-600 text-white shadow-md shadow-purple-200 border-purple-600'
+    activeClass: 'bg-teal-600 text-white shadow-md shadow-teal-200 border-teal-600'
   }
 ];
 

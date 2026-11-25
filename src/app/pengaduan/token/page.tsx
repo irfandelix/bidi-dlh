@@ -68,7 +68,7 @@ function TokenForm() {
   return (
     <div className="w-full max-w-sm bg-surface p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow border border-outline-variant text-center relative overflow-hidden">
       
-      <div className="w-20 h-20 bg-purple-400 text-on-surface border border-outline-variant rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm hover:shadow-md transition-shadow">
+      <div className="w-20 h-20 bg-teal-100 text-teal-800 border border-teal-300 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm hover:shadow-md transition-shadow">
         <ShieldCheck size={40} />
       </div>
 
@@ -91,14 +91,14 @@ function TokenForm() {
             placeholder="CONTOH: ADN-A8B9C2" 
             value={token}
             onChange={(e) => setToken(e.target.value.toUpperCase())}
-            className="w-full text-center px-6 py-6 rounded-2xl border border-outline-variant bg-purple-50 font-mono font-bold text-xl md:text-2xl uppercase tracking-widest text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-400 focus:bg-surface transition-all shadow-inner"
+            className="w-full text-center px-6 py-6 rounded-2xl border border-outline-variant bg-teal-50 font-mono font-bold text-xl md:text-2xl uppercase tracking-widest text-on-surface focus:outline-none focus:ring-4 focus:ring-teal-500 focus:bg-surface transition-all shadow-inner"
           />
         </div>
         
         <button 
           type="submit" 
           disabled={loading || !token}
-          className="w-full bg-purple-400 hover:bg-purple-500 disabled:bg-slate-300 disabled:translate-y-0 disabled:shadow-sm hover:shadow-md transition-shadow text-on-surface font-bold py-4 rounded-2xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow hover:shadow-sm hover:shadow-md transition-shadow hover:translate-y-1 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
+          className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 disabled:translate-y-0 disabled:shadow-sm hover:shadow-md text-white font-bold py-4 rounded-2xl border border-teal-700 shadow-sm hover:translate-y-0.5 transition-all flex items-center justify-center gap-2 uppercase tracking-widest"
         >
           {loading ? (
             <><LottieLoader size={24} /> Memverifikasi...</>

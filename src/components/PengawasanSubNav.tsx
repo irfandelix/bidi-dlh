@@ -45,8 +45,8 @@ export default function PengawasanSubNav() {
       label: 'Arsip BAP',
       icon: Archive,
       isActive: isArsip,
-      iconColor: 'text-indigo-600',
-      activeStyle: 'bg-indigo-50 text-indigo-900 border-indigo-300 shadow-sm font-black ring-1 ring-indigo-200'
+      iconColor: 'text-teal-600',
+      activeStyle: 'bg-teal-50 text-teal-900 border-teal-300 shadow-sm font-black ring-1 ring-teal-200'
     },
     {
       href: '/pengawasan/nota-dinas',

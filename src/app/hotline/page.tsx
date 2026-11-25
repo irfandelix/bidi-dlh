@@ -376,7 +376,7 @@ export default function HotlineDashboard() {
                              <div>
                                  <h3 className="font-bold text-slate-800 flex items-center gap-2">
                                      {s.name} 
-                                     <span className={`text-[10px] uppercase px-2 py-0.5 rounded-md font-bold tracking-wider ${s.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}`}>{s.role}</span>
+                                     <span className={`text-[10px] uppercase px-2 py-0.5 rounded-md font-bold tracking-wider ${s.role === 'admin' ? 'bg-teal-100 text-teal-800' : 'bg-blue-100 text-blue-700'}`}>{s.role}</span>
                                  </h3>
                                  <p className="text-xs text-slate-500 mt-0.5">{s.department} • +{s.phone_number.split('@')[0]}</p>
                              </div>

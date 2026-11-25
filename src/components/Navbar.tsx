@@ -131,8 +131,8 @@ export default function Navbar() {
               <Users size={15} className="text-amber-600 shrink-0" />
               <span>Anggota Bidang</span>
             </Link>
-            <Link href="/pengaturan/petugas-mpp" onClick={() => setIsSettingsOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:text-purple-700 hover:bg-purple-50 rounded-xl transition-colors">
-              <Store size={15} className="text-purple-600 shrink-0" />
+            <Link href="/pengaturan/petugas-mpp" onClick={() => setIsSettingsOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-slate-700 hover:text-teal-700 hover:bg-teal-50 rounded-xl transition-colors">
+              <Store size={15} className="text-teal-600 shrink-0" />
               <span>Petugas MPP</span>
             </Link>
           </div>
