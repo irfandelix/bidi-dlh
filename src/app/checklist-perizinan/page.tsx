@@ -3,11 +3,8 @@
 import React, { useState, useRef } from 'react';
 import {
   Check,
-  Plus,
-  Trash2,
   Send,
   AlertCircle,
-  CheckCircle2,
   Loader2,
   RotateCcw,
   Building2,
@@ -19,12 +16,6 @@ import {
   type ValidatedChecklistSubmission,
 } from '@/lib/checklist-perizinan';
 
-interface ManualPermitRow {
-  uid: string;
-  nama_izin: string;
-  tahun: string;
-}
-
 export default function ChecklistPerizinanMandiriPage() {
   const currentYear = new Date().getFullYear();
 
@@ -35,8 +26,6 @@ export default function ChecklistPerizinanMandiriPage() {
   const [honeypot, setHoneypot] = useState('');
 
   const [checkedYears, setCheckedYears] = useState<Record<string, string>>({});
-  const [manualRows, setManualRows] = useState<ManualPermitRow[]>([]);
-  const [belumAdaIzin, setBelumAdaIzin] = useState(false);
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -44,7 +33,6 @@ export default function ChecklistPerizinanMandiriPage() {
 
   const errorBannerRef = useRef<HTMLDivElement>(null);
   const yearInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const manualNameRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const toggleDefaultPermit = (permitName: string) => {
     setErrorMsg('');
@@ -54,7 +42,6 @@ export default function ChecklistPerizinanMandiriPage() {
         delete next[permitName];
       } else {
         next[permitName] = '';
-        setBelumAdaIzin(false);
         setTimeout(() => {
           yearInputRefs.current[permitName]?.focus();
         }, 30);
@@ -72,45 +59,6 @@ export default function ChecklistPerizinanMandiriPage() {
     }));
   };
 
-  const handleAddManualRow = () => {
-    setErrorMsg('');
-    setBelumAdaIzin(false);
-    const uid = `manual-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    setManualRows((prev) => [...prev, { uid, nama_izin: '', tahun: '' }]);
-    setTimeout(() => {
-      const input = manualNameRefs.current[uid];
-      input?.focus();
-      input?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 40);
-  };
-
-  const handleManualChange = (uid: string, field: 'nama_izin' | 'tahun', val: string) => {
-    setErrorMsg('');
-    setManualRows((prev) =>
-      prev.map((row) => {
-        if (row.uid !== uid) return row;
-        if (field === 'tahun') {
-          return { ...row, tahun: val.replace(/\D/g, '').slice(0, 4) };
-        }
-        return { ...row, nama_izin: val };
-      })
-    );
-  };
-
-  const handleRemoveManualRow = (uid: string) => {
-    setErrorMsg('');
-    setManualRows((prev) => prev.filter((row) => row.uid !== uid));
-  };
-
-  const handleToggleBelumAdaIzin = (checked: boolean) => {
-    setErrorMsg('');
-    setBelumAdaIzin(checked);
-    if (checked) {
-      setCheckedYears({});
-      setManualRows([]);
-    }
-  };
-
   const handleResetForm = () => {
     setNama('');
     setJabatan('');
@@ -118,41 +66,32 @@ export default function ChecklistPerizinanMandiriPage() {
     setPerusahaan('');
     setHoneypot('');
     setCheckedYears({});
-    setManualRows([]);
-    setBelumAdaIzin(false);
     setErrorMsg('');
     setSubmittedResult(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const activeDefaultCount = Object.keys(checkedYears).length;
-  const activeManualCount = manualRows.filter((r) => r.nama_izin.trim() !== '' || r.tahun.trim() !== '').length;
-  const totalSelectedCount = activeDefaultCount + activeManualCount;
+  const totalSelectedCount = Object.keys(checkedYears).length;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
 
-    const combinedPermits = [
-      ...DEFAULT_PERMIT_OPTIONS.filter((p) => Object.prototype.hasOwnProperty.call(checkedYears, p)).map((p) => ({
-        nama_izin: p,
-        tahun: checkedYears[p],
-        is_manual: false,
-      })),
-      ...manualRows.map((r) => ({
-        nama_izin: r.nama_izin,
-        tahun: r.tahun,
-        is_manual: true,
-      })),
-    ];
+    const selectedPermits = DEFAULT_PERMIT_OPTIONS.filter((p) =>
+      Object.prototype.hasOwnProperty.call(checkedYears, p)
+    ).map((p) => ({
+      nama_izin: p,
+      tahun: checkedYears[p],
+      is_manual: false,
+    }));
 
     const payload = {
       nama,
       jabatan,
       nomor_whatsapp: nomorWhatsapp,
       perusahaan_fasyankes: perusahaan,
-      daftar_perizinan: combinedPermits,
-      belum_ada_izin: belumAdaIzin,
+      daftar_perizinan: selectedPermits,
+      belum_ada_izin: false,
       website_honeypot: honeypot,
     };
 
@@ -196,16 +135,51 @@ export default function ChecklistPerizinanMandiriPage() {
   if (submittedResult) {
     return (
       <div className="w-full max-w-[460px] mx-auto px-3.5 py-6 sm:py-10">
-        <section className="bg-white border-2 border-slate-300 rounded-2xl p-5 shadow-md space-y-5">
-          <div className="flex items-start gap-3.5 border-b border-slate-200 pb-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-600 flex items-center justify-center shrink-0 text-emerald-800">
-              <CheckCircle2 size={26} aria-hidden="true" />
+        <section
+          role="status"
+          aria-live="polite"
+          className="checklist-success-card bg-white border-2 border-slate-300 rounded-2xl p-5 shadow-md space-y-5"
+        >
+          <div className="text-center border-b border-slate-200 pb-5 pt-1 space-y-3">
+            <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+              <span
+                aria-hidden="true"
+                className="checklist-success-ring absolute inset-0 rounded-full border-2 border-emerald-600 pointer-events-none opacity-0"
+              />
+              <div className="checklist-success-badge w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center">
+                <svg
+                  viewBox="0 0 80 80"
+                  width="80"
+                  height="80"
+                  fill="none"
+                  aria-hidden="true"
+                  className="w-20 h-20"
+                >
+                  <circle
+                    cx="40"
+                    cy="40"
+                    r="36"
+                    stroke="#047857"
+                    strokeWidth="4"
+                    className="checklist-success-circle"
+                  />
+                  <path
+                    d="M25 41.5L35.5 52L56 29.5"
+                    stroke="#047857"
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="checklist-success-check"
+                  />
+                </svg>
+              </div>
             </div>
+
             <div>
-              <h1 className="text-lg font-black text-slate-900 leading-snug">
+              <h1 className="text-xl font-black text-slate-900 leading-snug">
                 Data Perizinan Berhasil Tersimpan
               </h1>
-              <p className="text-sm text-slate-700 mt-1 leading-relaxed">
+              <p className="text-sm text-slate-700 mt-1.5 leading-relaxed">
                 Terima kasih. Isian checklist perizinan dari{' '}
                 <span className="font-bold text-slate-900">{submittedResult.perusahaan_fasyankes}</span> telah masuk ke basis data Dinas Lingkungan Hidup Kabupaten Sragen.
               </p>
@@ -231,32 +205,20 @@ export default function ChecklistPerizinanMandiriPage() {
             <h2 className="text-sm font-black text-slate-900">
               Ringkasan Perizinan Tercatat
             </h2>
-            {submittedResult.belum_ada_izin ? (
-              <p className="text-sm font-semibold text-slate-700 bg-amber-50 border border-amber-500 rounded-xl px-3.5 py-2.5">
-                Tercatat belum memiliki dokumen perizinan.
-              </p>
-            ) : (
-              <ul className="divide-y divide-slate-200 border border-slate-300 rounded-xl bg-white overflow-hidden">
-                {submittedResult.daftar_perizinan.map((item) => (
-                  <li
-                    key={`${item.nama_izin}-${item.tahun}`}
-                    className="px-3.5 py-2.5 flex items-center justify-between gap-3 text-sm"
-                  >
-                    <span className="font-bold text-slate-900">
-                      {item.nama_izin}
-                      {item.is_manual ? (
-                        <span className="ml-2 text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-600 rounded-md px-1.5 py-0.5">
-                          Manual
-                        </span>
-                      ) : null}
-                    </span>
-                    <span className="font-black text-emerald-800 bg-emerald-50 border border-emerald-600 rounded-lg px-2.5 py-0.5 shrink-0">
-                      Tahun {item.tahun}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <ul className="divide-y divide-slate-200 border border-slate-300 rounded-xl bg-white overflow-hidden">
+              {submittedResult.daftar_perizinan.map((item, idx) => (
+                <li
+                  key={`${item.nama_izin}-${item.tahun}`}
+                  style={{ animationDelay: `${Math.min(380 + idx * 55, 680)}ms` }}
+                  className="checklist-success-item px-3.5 py-2.5 flex items-center justify-between gap-3 text-sm"
+                >
+                  <span className="font-bold text-slate-900">{item.nama_izin}</span>
+                  <span className="font-black text-emerald-800 bg-emerald-50 border border-emerald-600 rounded-lg px-2.5 py-0.5 shrink-0">
+                    Tahun {item.tahun}
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <button
@@ -417,7 +379,7 @@ export default function ChecklistPerizinanMandiriPage() {
               aria-live="polite"
               className="text-xs font-bold px-2.5 py-1 rounded-lg bg-teal-50 text-teal-800 border border-teal-700 shrink-0"
             >
-              {belumAdaIzin ? 'Belum ada izin' : `${totalSelectedCount} dipilih`}
+              {totalSelectedCount} dipilih
             </span>
           </div>
 
@@ -490,117 +452,6 @@ export default function ChecklistPerizinanMandiriPage() {
                 </div>
               );
             })}
-          </div>
-        </section>
-
-        <section className="bg-white border-2 border-slate-300 rounded-2xl p-4 shadow-sm space-y-3.5">
-          <div className="border-b border-slate-200 pb-2.5">
-            <h2 className="text-base font-black text-slate-900">
-              3. Tambah Perizinan Lain (Manual)
-            </h2>
-            <p className="text-xs font-semibold text-slate-700 mt-0.5">
-              Punya izin lain yang belum ada di daftar di atas? Tekan tombol tambah di bawah ini.
-            </p>
-          </div>
-
-          {manualRows.length > 0 ? (
-            <div className="space-y-3">
-              {manualRows.map((row, idx) => {
-                const nameId = `${row.uid}-name`;
-                const yearId = `${row.uid}-year`;
-                return (
-                  <div
-                    key={row.uid}
-                    className="p-3 rounded-xl bg-slate-50 border-2 border-slate-400 space-y-2.5"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-black text-teal-800">
-                        Izin Tambahan #{idx + 1}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveManualRow(row.uid)}
-                        aria-label={`Hapus izin tambahan nomor ${idx + 1}`}
-                        className="w-11 h-11 rounded-xl bg-white hover:bg-red-50 active:bg-red-100 border-2 border-slate-400 hover:border-red-600 text-red-800 flex items-center justify-center transition-colors shrink-0"
-                      >
-                        <Trash2 size={18} aria-hidden="true" />
-                      </button>
-                    </div>
-
-                    <div>
-                      <label htmlFor={nameId} className="block text-xs font-bold text-slate-800 mb-1">
-                        Nama Perizinan :
-                      </label>
-                      <input
-                        ref={(el) => {
-                          manualNameRefs.current[row.uid] = el;
-                        }}
-                        id={nameId}
-                        type="text"
-                        placeholder="Ketik nama dokumen izin"
-                        value={row.nama_izin}
-                        onChange={(e) => handleManualChange(row.uid, 'nama_izin', e.target.value)}
-                        className="w-full min-h-11 px-3 py-2 text-base font-semibold text-slate-900 placeholder:text-slate-500 placeholder:font-normal bg-white border-2 border-slate-500 rounded-xl focus:border-teal-700"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor={yearId} className="block text-xs font-bold text-slate-800 mb-1">
-                        Tahun Terbit :
-                      </label>
-                      <input
-                        id={yearId}
-                        type="text"
-                        inputMode="numeric"
-                        pattern="[0-9]{4}"
-                        maxLength={4}
-                        placeholder={`Contoh: ${currentYear - 2}`}
-                        value={row.tahun}
-                        onChange={(e) => handleManualChange(row.uid, 'tahun', e.target.value)}
-                        className="w-full min-h-11 px-3 py-2 text-base font-semibold text-slate-900 placeholder:text-slate-500 placeholder:font-normal bg-white border-2 border-slate-500 rounded-xl focus:border-teal-700"
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={handleAddManualRow}
-            className="w-full min-h-12 px-4 py-3 rounded-xl border-2 border-dashed border-teal-700 bg-teal-50/60 hover:bg-teal-100 active:bg-teal-200/70 text-teal-900 font-bold text-sm flex items-center justify-center gap-2 transition-colors"
-          >
-            <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
-            <span>Tambah Perizinan Manual</span>
-          </button>
-
-          <div className="pt-2 border-t border-slate-200">
-            <label
-              htmlFor="chk-belum-ada-izin"
-              className="flex items-center gap-3 px-3 py-2.5 min-h-11 rounded-xl border-2 border-slate-300 hover:border-slate-500 bg-slate-50 cursor-pointer select-none"
-            >
-              <input
-                id="chk-belum-ada-izin"
-                type="checkbox"
-                checked={belumAdaIzin}
-                onChange={(e) => handleToggleBelumAdaIzin(e.target.checked)}
-                className="sr-only peer"
-              />
-              <span
-                aria-hidden="true"
-                className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-teal-700 peer-focus-visible:ring-offset-2 ${
-                  belumAdaIzin
-                    ? 'bg-slate-900 border-slate-900 text-white'
-                    : 'bg-white border-slate-500 text-transparent'
-                }`}
-              >
-                <Check size={16} strokeWidth={3} />
-              </span>
-              <span className="text-xs font-bold text-slate-800 leading-snug">
-                Belum memiliki dokumen perizinan sama sekali
-              </span>
-            </label>
           </div>
         </section>
 

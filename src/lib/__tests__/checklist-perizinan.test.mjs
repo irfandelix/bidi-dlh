@@ -27,19 +27,17 @@ test('normalizeWhatsappNumber cleans spaces and dashes and rejects invalid strin
   assert.equal(normalizeWhatsappNumber('0812abc7890'), null);
 });
 
-test('validateChecklistSubmission accepts valid checked and manual permits with years', () => {
+test('validateChecklistSubmission accepts valid official permits with years', () => {
   const result = validateChecklistSubmission({
     nama: '  Budi Santoso ',
     jabatan: ' Penanggung Jawab Lingkungan ',
     nomor_whatsapp: '0812-3456-7890',
     perusahaan_fasyankes: ' RS Sehat Sejahtera ',
-    belum_ada_izin: false,
     website_honeypot: '',
     daftar_perizinan: [
-      { nama_izin: 'NIB', tahun: '2021', is_manual: false },
-      { nama_izin: 'UKL-UPL', tahun: 2023, is_manual: false },
-      { nama_izin: ' Izin Radiologi BAPETEN ', tahun: '2024', is_manual: true },
-      { nama_izin: '   ', tahun: '', is_manual: true }, // blank manual row ignored
+      { nama_izin: 'Persetujuan SPPL', tahun: '2021' },
+      { nama_izin: 'PKPLH', tahun: 2023 },
+      { nama_izin: 'MoU Pengangkutan Limbah B3', tahun: '2024' },
     ],
   }, 2026);
 
@@ -48,13 +46,26 @@ test('validateChecklistSubmission accepts valid checked and manual permits with 
     assert.equal(result.data.nama, 'Budi Santoso');
     assert.equal(result.data.perusahaan_fasyankes, 'RS Sehat Sejahtera');
     assert.equal(result.data.nomor_whatsapp, '081234567890');
+    assert.equal(result.data.belum_ada_izin, false);
     assert.equal(result.data.daftar_perizinan.length, 3);
     assert.deepEqual(result.data.daftar_perizinan[2], {
-      nama_izin: 'Izin Radiologi BAPETEN',
+      nama_izin: 'MoU Pengangkutan Limbah B3',
       tahun: 2024,
-      is_manual: true,
+      is_manual: false,
     });
   }
+});
+
+test('validateChecklistSubmission rejects permits outside the 8 official items', () => {
+  const unknownPermit = validateChecklistSubmission({
+    nama: 'Andi Wijaya',
+    jabatan: 'HRD',
+    nomor_whatsapp: '081398765432',
+    perusahaan_fasyankes: 'PT Maju Jaya',
+    daftar_perizinan: [{ nama_izin: 'Izin Tambahan Manual', tahun: '2022', is_manual: true }],
+  }, 2026);
+
+  assert.equal(unknownPermit.ok, false);
 });
 
 test('validateChecklistSubmission rejects checked permit with missing or invalid year', () => {
@@ -63,13 +74,12 @@ test('validateChecklistSubmission rejects checked permit with missing or invalid
     jabatan: 'Direktur',
     nomor_whatsapp: '081234567890',
     perusahaan_fasyankes: 'Klinik Pratama Melati',
-    belum_ada_izin: false,
-    daftar_perizinan: [{ nama_izin: 'SPPL', tahun: '', is_manual: false }],
+    daftar_perizinan: [{ nama_izin: 'Persetujuan SPPL', tahun: '' }],
   }, 2026);
 
   assert.equal(missingYear.ok, false);
   if (!missingYear.ok) {
-    assert.match(missingYear.error, /SPPL/);
+    assert.match(missingYear.error, /Persetujuan SPPL/);
   }
 
   const futureYear = validateChecklistSubmission({
@@ -77,49 +87,27 @@ test('validateChecklistSubmission rejects checked permit with missing or invalid
     jabatan: 'Direktur',
     nomor_whatsapp: '081234567890',
     perusahaan_fasyankes: 'Klinik Pratama Melati',
-    belum_ada_izin: false,
-    daftar_perizinan: [{ nama_izin: 'SPPL', tahun: '2099', is_manual: false }],
+    daftar_perizinan: [{ nama_izin: 'PKPLH', tahun: '2099' }],
   }, 2026);
 
   assert.equal(futureYear.ok, false);
 });
 
-test('validateChecklistSubmission rejects half-filled manual permit row', () => {
-  const missingName = validateChecklistSubmission({
-    nama: 'Andi Wijaya',
-    jabatan: 'HRD',
-    nomor_whatsapp: '081398765432',
-    perusahaan_fasyankes: 'PT Maju Jaya',
-    belum_ada_izin: false,
-    daftar_perizinan: [{ nama_izin: '  ', tahun: '2022', is_manual: true }],
-  }, 2026);
-
-  assert.equal(missingName.ok, false);
-});
-
-test('validateChecklistSubmission requires at least one permit unless belum_ada_izin is true', () => {
+test('validateChecklistSubmission requires at least one selected permit without mentioning removed checkbox', () => {
   const emptyUnchecked = validateChecklistSubmission({
     nama: 'Andi Wijaya',
     jabatan: 'HRD',
     nomor_whatsapp: '081398765432',
     perusahaan_fasyankes: 'PT Maju Jaya',
-    belum_ada_izin: false,
     daftar_perizinan: [],
   }, 2026);
-  assert.equal(emptyUnchecked.ok, false);
 
-  const explicitNone = validateChecklistSubmission({
-    nama: 'Andi Wijaya',
-    jabatan: 'HRD',
-    nomor_whatsapp: '081398765432',
-    perusahaan_fasyankes: 'PT Maju Jaya',
-    belum_ada_izin: true,
-    daftar_perizinan: [{ nama_izin: 'NIB', tahun: '2022', is_manual: false }],
-  }, 2026);
-  assert.equal(explicitNone.ok, true);
-  if (explicitNone.ok) {
-    assert.deepEqual(explicitNone.data.daftar_perizinan, []);
-    assert.equal(explicitNone.data.belum_ada_izin, true);
+  assert.equal(emptyUnchecked.ok, false);
+  if (!emptyUnchecked.ok) {
+    assert.equal(
+      emptyUnchecked.error,
+      'Pilih minimal satu perizinan yang dimiliki beserta tahun terbitnya.'
+    );
   }
 });
 

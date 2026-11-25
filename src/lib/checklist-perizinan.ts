@@ -9,6 +9,8 @@ export const DEFAULT_PERMIT_OPTIONS = [
   'MoU Pengangkutan Limbah B3',
 ] as const;
 
+const ALLOWED_PERMIT_SET = new Set<string>(DEFAULT_PERMIT_OPTIONS);
+
 export interface PermitEntry {
   nama_izin: string;
   tahun: number;
@@ -82,27 +84,12 @@ export function validateChecklistSubmission(
     return { ok: false, error: 'Nama Perusahaan atau Fasyankes wajib diisi (2 sampai 200 karakter).' };
   }
 
-  const belumAdaIzin = body.belum_ada_izin === true;
-  if (belumAdaIzin) {
-    return {
-      ok: true,
-      data: {
-        nama,
-        jabatan,
-        nomor_whatsapp: nomorWhatsapp,
-        perusahaan_fasyankes: perusahaan,
-        daftar_perizinan: [],
-        belum_ada_izin: true,
-      },
-    };
-  }
-
   if (!Array.isArray(body.daftar_perizinan)) {
     return { ok: false, error: 'Daftar perizinan tidak valid.' };
   }
 
-  if (body.daftar_perizinan.length > 40) {
-    return { ok: false, error: 'Jumlah item perizinan melebihi batas maksimal (40 item).' };
+  if (body.daftar_perizinan.length > DEFAULT_PERMIT_OPTIONS.length) {
+    return { ok: false, error: 'Jumlah item perizinan melebihi daftar yang tersedia.' };
   }
 
   const maxYear = currentYear + 1;
@@ -112,20 +99,11 @@ export function validateChecklistSubmission(
   for (const rawItem of body.daftar_perizinan as RawPermitInput[]) {
     if (!rawItem || typeof rawItem !== 'object') continue;
 
-    const isManual = rawItem.is_manual === true;
     const namaIzin = typeof rawItem.nama_izin === 'string' ? rawItem.nama_izin.trim() : '';
     const rawTahunStr = rawItem.tahun === undefined || rawItem.tahun === null ? '' : String(rawItem.tahun).trim();
 
-    if (isManual && namaIzin === '' && rawTahunStr === '') {
-      continue;
-    }
-
-    if (namaIzin === '') {
-      return { ok: false, error: 'Nama perizinan tambahan wajib diisi jika tahun terbit diisi.' };
-    }
-
-    if (namaIzin.length > 150) {
-      return { ok: false, error: 'Nama perizinan maksimal 150 karakter.' };
+    if (!ALLOWED_PERMIT_SET.has(namaIzin)) {
+      return { ok: false, error: 'Jenis perizinan tidak sesuai dengan daftar resmi.' };
     }
 
     if (!/^\d{4}$/.test(rawTahunStr)) {
@@ -155,14 +133,14 @@ export function validateChecklistSubmission(
     cleanedPermits.push({
       nama_izin: namaIzin,
       tahun: tahunNum,
-      is_manual: isManual,
+      is_manual: false,
     });
   }
 
   if (cleanedPermits.length === 0) {
     return {
       ok: false,
-      error: 'Pilih minimal satu perizinan yang dimiliki beserta tahun terbitnya, atau centang keterangan belum memiliki perizinan.',
+      error: 'Pilih minimal satu perizinan yang dimiliki beserta tahun terbitnya.',
     };
   }
 
