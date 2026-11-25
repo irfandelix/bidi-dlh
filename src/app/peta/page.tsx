@@ -66,10 +66,10 @@ export default function PetaSebaranPage() {
         // Fetch Dokumens (Perizinan Terbit) via server API
         let dokumensData: any[] = [];
         try {
-          const res = await fetch('/api/perizinan');
+          const res = await fetch('/api/perizinan?mode=map');
           if (res.ok) {
             const { data } = await res.json();
-            dokumensData = (data || []).filter((d: any) => d.latitude && d.longitude);
+            dokumensData = data || [];
           }
         } catch (e) {
           console.warn('Dokumens coords not ready:', e);

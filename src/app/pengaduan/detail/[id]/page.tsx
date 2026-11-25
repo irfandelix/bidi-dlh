@@ -425,6 +425,8 @@ export default function DetailPengaduanPage({ params }: { params: Promise<{ id: 
                           <img 
                             src={directImg} 
                             alt={foto.keterangan || `Foto ${fIdx + 1}`}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-44 object-cover" 
                           />
                           <div className="p-3 bg-white space-y-2">

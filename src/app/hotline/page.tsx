@@ -26,6 +26,7 @@ export default function HotlineDashboard() {
     fetchChats();
 
     const interval = setInterval(() => {
+      if (document.hidden) return;
       fetchChats();
       if (selectedChat) {
         fetchMessages(selectedChat.phone_number);
