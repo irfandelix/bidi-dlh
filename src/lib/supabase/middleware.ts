@@ -27,5 +27,16 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
+  // Perpanjang masa aktif sesi 6 jam hanya saat ada navigasi halaman (bukan polling API).
+  if (bidiSession && !isApiRoute) {
+    response.cookies.set('bidi_session', bidiSession, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 6,
+      path: '/',
+    })
+  }
+
   return response
 }
