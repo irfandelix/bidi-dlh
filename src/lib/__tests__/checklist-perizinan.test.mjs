@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DEFAULT_PERMIT_OPTIONS,
+  CHECKLIST_PUBLIC_URL,
+  getQrLogoGeometry,
   validateChecklistSubmission,
   normalizeWhatsappNumber,
   isChecklistPublicPath,
@@ -117,4 +119,14 @@ test('isChecklistPublicPath isolates only /checklist-perizinan and blocks intern
   assert.equal(isChecklistPublicPath('/perizinan/checklist-mandiri'), false);
   assert.equal(isChecklistPublicPath('/perizinan/daftar'), false);
   assert.equal(isChecklistPublicPath('/'), false);
+});
+
+test('CHECKLIST_PUBLIC_URL and getQrLogoGeometry keep center logo safely under QR level H limit', () => {
+  assert.equal(CHECKLIST_PUBLIC_URL, 'https://bididlh.vercel.app/checklist-perizinan');
+  const geom = getQrLogoGeometry(560);
+  assert.ok(geom.padSize > geom.logoSize);
+  assert.equal(geom.padX, (560 - geom.padSize) / 2);
+  assert.equal(geom.logoX, (560 - geom.logoSize) / 2);
+  const occludedRatio = (geom.padSize * geom.padSize) / (560 * 560);
+  assert.ok(occludedRatio < 0.06, `Expected <6% area occluded for reliable scan, got ${occludedRatio}`);
 });

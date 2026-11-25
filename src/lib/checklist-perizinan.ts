@@ -36,6 +36,32 @@ export type ValidationResult =
   | { ok: true; data: ValidatedChecklistSubmission }
   | { ok: false; error: string };
 
+export const CHECKLIST_PUBLIC_URL = 'https://bididlh.vercel.app/checklist-perizinan';
+
+export interface QrLogoGeometry {
+  padSize: number;
+  padX: number;
+  padRadius: number;
+  logoSize: number;
+  logoX: number;
+}
+
+export function getQrLogoGeometry(canvasSize: number): QrLogoGeometry {
+  const evenSize = canvasSize % 2 === 0 ? canvasSize : canvasSize + 1;
+  const rawPad = Math.round(evenSize * 0.22);
+  const padSize = rawPad % 2 === 0 ? rawPad : rawPad + 1;
+  const rawLogo = Math.round(evenSize * 0.165);
+  const logoSize = rawLogo % 2 === 0 ? rawLogo : rawLogo + 1;
+
+  return {
+    padSize,
+    padX: (evenSize - padSize) / 2,
+    padRadius: Math.round(padSize * 0.2),
+    logoSize,
+    logoX: (evenSize - logoSize) / 2,
+  };
+}
+
 export function isChecklistPublicPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   return pathname === '/checklist-perizinan' || pathname.startsWith('/checklist-perizinan/');

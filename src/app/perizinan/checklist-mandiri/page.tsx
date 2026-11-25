@@ -14,9 +14,11 @@ import {
   AlertCircle,
   ArrowLeft,
   Loader2,
+  QrCode,
   X,
 } from 'lucide-react';
-import type { PermitEntry } from '@/lib/checklist-perizinan';
+import { CHECKLIST_PUBLIC_URL, type PermitEntry } from '@/lib/checklist-perizinan';
+import { generateChecklistQrWithLogo, downloadQrPng } from '@/lib/checklist-qr-client';
 
 interface ChecklistRecord {
   id: number;
@@ -37,6 +39,9 @@ export default function RekapChecklistMandiriPage() {
   const [copiedLink, setCopiedLink] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<ChecklistRecord | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [qrLoading, setQrLoading] = useState(false);
 
   const loadRecords = useCallback(async () => {
     setLoading(true);
@@ -62,17 +67,29 @@ export default function RekapChecklistMandiriPage() {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && deleteTarget && !deleting) {
-        setDeleteTarget(null);
+      if (e.key === 'Escape') {
+        if (deleteTarget && !deleting) setDeleteTarget(null);
+        if (qrModalOpen) setQrModalOpen(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [deleteTarget, deleting]);
+  }, [deleteTarget, deleting, qrModalOpen]);
+
+  const handleOpenQrModal = async () => {
+    setQrModalOpen(true);
+    if (qrDataUrl) return;
+    setQrLoading(true);
+    try {
+      const generated = await generateChecklistQrWithLogo(CHECKLIST_PUBLIC_URL, 640);
+      setQrDataUrl(generated);
+    } finally {
+      setQrLoading(false);
+    }
+  };
 
   const handleCopyPublicLink = async () => {
-    const url = `${window.location.origin}/checklist-perizinan`;
-    await navigator.clipboard.writeText(url);
+    await navigator.clipboard.writeText(CHECKLIST_PUBLIC_URL);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2500);
   };
@@ -145,6 +162,15 @@ export default function RekapChecklistMandiriPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={handleOpenQrModal}
+            className="min-h-11 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold flex items-center gap-2 shadow-xs transition-colors"
+          >
+            <QrCode size={17} aria-hidden="true" />
+            <span>Tampilkan &amp; Unduh QR</span>
+          </button>
+
           <button
             type="button"
             onClick={handleCopyPublicLink}
@@ -336,6 +362,78 @@ export default function RekapChecklistMandiriPage() {
           </div>
         )}
       </div>
+
+      {qrModalOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="dialog-qr-judul"
+          className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4"
+        >
+          <div className="bg-white border-2 border-slate-300 rounded-2xl max-w-sm w-full p-5 shadow-xl space-y-4 text-center">
+            <div className="flex items-start justify-between gap-3 text-left">
+              <div>
+                <h2 id="dialog-qr-judul" className="text-base font-black text-slate-900">
+                  Kode QR Checklist Perizinan
+                </h2>
+                <p className="text-xs font-semibold text-slate-600 mt-0.5">
+                  Scan menggunakan kamera HP untuk membuka formulir.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQrModalOpen(false)}
+                aria-label="Tutup dialog QR"
+                className="w-11 h-11 -mt-2 -mr-2 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-700 shrink-0"
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="flex flex-col items-center justify-center py-1">
+              {qrLoading || !qrDataUrl ? (
+                <div className="w-60 h-60 rounded-2xl border-2 border-slate-300 bg-slate-50 flex flex-col items-center justify-center gap-2.5 text-slate-700">
+                  <Loader2 size={26} className="animate-spin text-teal-700" aria-hidden="true" />
+                  <span className="text-xs font-bold">Membuat kode QR...</span>
+                </div>
+              ) : (
+                <div className="p-2.5 rounded-2xl border-2 border-teal-700 bg-white inline-block">
+                  <img
+                    src={qrDataUrl}
+                    alt="Kode QR Checklist Perizinan dengan logo BIDI DLH di tengah"
+                    width={240}
+                    height={240}
+                    className="w-60 h-60 object-contain block"
+                  />
+                </div>
+              )}
+              <p className="mt-2.5 text-xs font-black text-slate-800 bg-slate-100 border border-slate-300 rounded-lg px-3 py-1.5 break-all">
+                bididlh.vercel.app/checklist-perizinan
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 pt-1">
+              <button
+                type="button"
+                disabled={!qrDataUrl}
+                onClick={() => downloadQrPng(qrDataUrl)}
+                className="w-full min-h-11 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 disabled:bg-slate-400 text-white text-sm font-bold flex items-center justify-center gap-2"
+              >
+                <Download size={16} aria-hidden="true" />
+                <span>Unduh Gambar QR (PNG)</span>
+              </button>
+              <Link
+                href="/checklist-perizinan/qr"
+                target="_blank"
+                className="w-full min-h-11 px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-400 text-slate-900 text-sm font-bold flex items-center justify-center gap-2"
+              >
+                <ExternalLink size={16} aria-hidden="true" />
+                <span>Buka Layar Penuh / Cetak QR</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {deleteTarget ? (
         <div
