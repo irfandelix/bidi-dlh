@@ -23,11 +23,12 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
 
   useEffect(() => {
     const fetchData = async () => {
-      const supabase = createClient();
-      
-      // Fetch doc
-      const { data: docData } = await supabase.from('dokumens').select('*').eq('id', unwrappedParams.id).single();
-      setDoc(docData);
+      // Fetch doc via server API
+      const docRes = await fetch(`/api/perizinan/${unwrappedParams.id}`);
+      if (docRes.ok) {
+        const { data: docData } = await docRes.json();
+        setDoc(docData);
+      }
 
       // Fetch petugas (urutan_hierarki 13) via server API
       const petugasRes = await fetch('/api/tim-penilai?hierarki=13');
@@ -103,9 +104,11 @@ export default function JilidanPage({ params }: { params: Promise<{ id: string }
         alert('Dokumen berhasil di-upload dan tersimpan di Arsip Perizinan!');
         setFileDokumenCetak(null);
         // Refresh doc
-        const supabase = createClient();
-        const { data: newDoc } = await supabase.from('dokumens').select('*').eq('id', unwrappedParams.id).single();
-        setDoc(newDoc);
+        const refreshRes = await fetch(`/api/perizinan/${unwrappedParams.id}`);
+        if (refreshRes.ok) {
+          const { data: newDoc } = await refreshRes.json();
+          setDoc(newDoc);
+        }
       } else {
         throw new Error('Gagal menyimpan url ke database.');
       }

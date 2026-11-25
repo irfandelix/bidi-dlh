@@ -41,16 +41,11 @@ export default function ArsipIzinDetailPage({ params }: { params: Promise<{ id: 
   useEffect(() => {
     const fetchDoc = async () => {
       try {
-        const supabase = createClient();
-        const { data, error } = await supabase
-          .from('dokumens')
-          .select('*')
-          .eq('id', unwrappedParams.id)
-          .single();
-
-        if (error) {
-          console.error('Error fetching doc:', error);
+        const res = await fetch(`/api/perizinan/${unwrappedParams.id}`);
+        if (!res.ok) {
+          console.error('Error fetching doc:', res.statusText);
         } else {
+          const { data } = await res.json();
           setDoc(data);
         }
       } catch (err) {

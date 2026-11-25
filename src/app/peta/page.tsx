@@ -63,17 +63,14 @@ export default function PetaSebaranPage() {
           console.warn('Pengawasan fetch error:', pengawasanError);
         }
 
-        // Fetch Dokumens (Perizinan Terbit)
+        // Fetch Dokumens (Perizinan Terbit) via server API
         let dokumensData: any[] = [];
         try {
-          const { data, error } = await supabase
-            .from('dokumens')
-            .select('*')
-            .not('latitude', 'is', null)
-            .not('longitude', 'is', null)
-            .neq('latitude', '')
-            .neq('longitude', '');
-          if (!error && data) dokumensData = data;
+          const res = await fetch('/api/perizinan');
+          if (res.ok) {
+            const { data } = await res.json();
+            dokumensData = (data || []).filter((d: any) => d.latitude && d.longitude);
+          }
         } catch (e) {
           console.warn('Dokumens coords not ready:', e);
         }

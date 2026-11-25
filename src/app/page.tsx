@@ -63,7 +63,7 @@ export default function Home() {
         const supabase = createClient();
         
         const [perizinanRes, pengawasanRes, pengaduanRes] = await Promise.all([
-          supabase.from('dokumens').select('*').order('created_at', { ascending: false }),
+          fetch('/api/perizinan').then(r => r.json()),
           supabase.from('pengawasan_lapangans').select('*').order('tanggal_kunjungan', { ascending: false }),
           supabase.from('pengaduans').select('*').order('created_at', { ascending: false })
         ]);

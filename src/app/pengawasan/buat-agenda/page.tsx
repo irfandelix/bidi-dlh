@@ -126,12 +126,11 @@ export default function BuatAgenda() {
   }, [notaMode]);
 
   useEffect(() => {
-    // Fetch documents for picker
-    supabase
-      .from('dokumens')
-      .select('id, nama_pemrakarsa, nama_kegiatan, lokasi_kegiatan, jenis_dokumen, tahun, jenis_kegiatan, latitude, longitude')
-      .order('id', { ascending: false })
-      .then(({ data }) => setDokumens(data || []));
+    // Fetch documents for picker via server API
+    fetch('/api/perizinan')
+      .then(r => r.json())
+      .then(({ data }) => setDokumens(data || []))
+      .catch(() => setDokumens([]));
 
     // Fetch team members with complete official titles & hierarchy
     supabase

@@ -44,9 +44,11 @@ export default function ArsipPage({ params }: { params: Promise<{ id: string }> 
 
   useEffect(() => {
     const fetchDoc = async () => {
-      const supabase = createClient();
-      const { data } = await supabase.from('dokumens').select('*').eq('id', unwrappedParams.id).single();
-      setDoc(data);
+      const res = await fetch(`/api/perizinan/${unwrappedParams.id}`);
+      if (res.ok) {
+        const { data } = await res.json();
+        setDoc(data);
+      }
       setLoading(false);
     };
     fetchDoc();
